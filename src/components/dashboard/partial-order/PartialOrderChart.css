@@ -1,0 +1,13 @@
+.sankey-wrapper {
+  display: flex;
+  gap: 1rem;
+  /* place-content: center; */
+}
+.sankey-wrapper .legend {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  gap: 1rem;
+  place-content: center;
+  align-items: center;
+}

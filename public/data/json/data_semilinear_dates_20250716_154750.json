@@ -1,0 +1,177 @@
+[
+  {
+    "FINNGENID": "MOCKID_0",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [12, 26, 42, 59, 71],
+    "years": [1957, 1983, 2013, 2046, 2075],
+    "diseaseDuration": 118
+  },
+  {
+    "FINNGENID": "MOCKID_1",
+    "trajectory": ["a", "e", "c", "d", "e"],
+    "SwitchEventAge": [17, 31, 54, 65, 90],
+    "years": [1977, 2008, 2045, 2079, 2115],
+    "diseaseDuration": 138
+  },
+  {
+    "FINNGENID": "MOCKID_2",
+    "trajectory": [],
+    "SwitchEventAge": [],
+    "years": [],
+    "diseaseDuration": 0
+  },
+  {
+    "FINNGENID": "MOCKID_3",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [17, 28, 28, 73, 86],
+    "years": [1962, 1990, 1990, 2074, 2104],
+    "diseaseDuration": 142
+  },
+  {
+    "FINNGENID": "MOCKID_4",
+    "trajectory": ["e", "b", "d", "e", "c"],
+    "SwitchEventAge": [10, 28, 49, 86, 86],
+    "years": [1955, 1983, 2022, 2095, 2095],
+    "diseaseDuration": 140
+  },
+  {
+    "FINNGENID": "MOCKID_5",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [24, 37, 49, 62, 88],
+    "years": [1984, 2021, 2046, 2071, 2110],
+    "diseaseDuration": 126
+  },
+  {
+    "FINNGENID": "MOCKID_6",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [20, 36, 56, 80, 93],
+    "years": [1950, 1986, 2022, 2066, 2103],
+    "diseaseDuration": 153
+  },
+  {
+    "FINNGENID": "MOCKID_7",
+    "trajectory": ["a", "b", "a", "d", "e"],
+    "SwitchEventAge": [23, 35, 64, 78, 98],
+    "years": [1968, 2003, 2044, 2087, 2121],
+    "diseaseDuration": 153
+  },
+  {
+    "FINNGENID": "MOCKID_8",
+    "trajectory": ["a", "b", "d", "a", "e"],
+    "SwitchEventAge": [13, 24, 41, 57, 80],
+    "years": [1973, 1997, 2025, 2058, 2097],
+    "diseaseDuration": 124
+  },
+  {
+    "FINNGENID": "MOCKID_9",
+    "trajectory": ["a", "b", "d", "a", "e"],
+    "SwitchEventAge": [25, 38, 57, 76, 101],
+    "years": [1955, 1993, 2025, 2063, 2107],
+    "diseaseDuration": 152
+  },
+  {
+    "FINNGENID": "MOCKID_10",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [29, 40, 51, 81, 98],
+    "years": [1974, 2014, 2036, 2077, 2124],
+    "diseaseDuration": 150
+  },
+  {
+    "FINNGENID": "MOCKID_11",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [18, 42, 72, 94, 113],
+    "years": [1963, 2005, 2059, 2111, 2152],
+    "diseaseDuration": 189
+  },
+  {
+    "FINNGENID": "MOCKID_12",
+    "trajectory": ["a", "c", "a", "d", "e"],
+    "SwitchEventAge": [16, 26, 43, 67, 82],
+    "years": [1946, 1972, 1999, 2040, 2079],
+    "diseaseDuration": 133
+  },
+  {
+    "FINNGENID": "MOCKID_13",
+    "trajectory": [],
+    "SwitchEventAge": [],
+    "years": [],
+    "diseaseDuration": 0
+  },
+  {
+    "FINNGENID": "MOCKID_14",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [22, 42, 53, 71, 98],
+    "years": [1967, 2009, 2040, 2069, 2114],
+    "diseaseDuration": 147
+  },
+  {
+    "FINNGENID": "MOCKID_15",
+    "trajectory": ["a", "b", "e", "d", "e"],
+    "SwitchEventAge": [16, 46, 56, 66, 92],
+    "years": [1946, 1992, 2032, 2052, 2088],
+    "diseaseDuration": 142
+  },
+  {
+    "FINNGENID": "MOCKID_16",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [27, 43, 67, 78, 88],
+    "years": [1957, 2000, 2040, 2075, 2096],
+    "diseaseDuration": 139
+  },
+  {
+    "FINNGENID": "MOCKID_17",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [21, 34, 62, 81, 104],
+    "years": [1951, 1985, 2026, 2073, 2115],
+    "diseaseDuration": 164
+  },
+  {
+    "FINNGENID": "MOCKID_18",
+    "trajectory": ["a", "b", "c", "d", "c"],
+    "SwitchEventAge": [24, 42, 59, 79, 94],
+    "years": [1954, 1996, 2031, 2068, 2103],
+    "diseaseDuration": 149
+  },
+  {
+    "FINNGENID": "MOCKID_19",
+    "trajectory": [],
+    "SwitchEventAge": [],
+    "years": [],
+    "diseaseDuration": 0
+  },
+  {
+    "FINNGENID": "MOCKID_20",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [22, 38, 48, 71, 100],
+    "years": [1952, 1990, 2016, 2049, 2101],
+    "diseaseDuration": 149
+  },
+  {
+    "FINNGENID": "MOCKID_21",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [19, 38, 53, 82, 107],
+    "years": [1964, 2002, 2036, 2080, 2134],
+    "diseaseDuration": 170
+  },
+  {
+    "FINNGENID": "MOCKID_22",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [16, 37, 48, 70, 82],
+    "years": [1946, 1983, 2015, 2048, 2082],
+    "diseaseDuration": 136
+  },
+  {
+    "FINNGENID": "MOCKID_23",
+    "trajectory": ["a", "b", "c", "d", "e"],
+    "SwitchEventAge": [18, 28, 51, 68, 96],
+    "years": [1963, 1991, 2024, 2064, 2109],
+    "diseaseDuration": 146
+  },
+  {
+    "FINNGENID": "MOCKID_24",
+    "trajectory": [],
+    "SwitchEventAge": [],
+    "years": [],
+    "diseaseDuration": 0
+  }
+]

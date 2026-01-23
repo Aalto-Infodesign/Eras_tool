@@ -1,0 +1,11 @@
+.export-panel {
+  /* background-color: var(--surface-accent); */
+  display: flex;
+  gap: 0.2rem;
+  border-radius: var(--radius-md);
+}
+
+.wrapper {
+  display: flex;
+  gap: 0.2rem;
+}

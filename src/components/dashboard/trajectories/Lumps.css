@@ -1,0 +1,40 @@
+.lump-line-extreme.hovered,
+.lump-line-extreme:hover,
+.lump.hovered,
+.lump:hover {
+  /* fill: #ff0000; */
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.lump-line-extreme.selected,
+.lump.selected {
+  /* stroke: rgb(4, 8, 255);
+  stroke-width: 1px; */
+  opacity: 0.5;
+}
+
+.lump-line-extreme.selected.hovered,
+.lump.selected.hovered {
+  opacity: 1;
+}
+
+.lump-chip:hover {
+  box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -2px rgba(255, 255, 255, 0.1);
+  /* background-color: white; */
+  border-radius: 0.75rem;
+}
+
+.lump-controls {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.lump-labels text {
+  fill: white;
+  text-anchor: middle;
+}
+
+.median-line {
+  fill: var(--surface-primary);
+}

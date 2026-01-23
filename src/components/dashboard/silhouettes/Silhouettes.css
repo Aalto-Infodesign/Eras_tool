@@ -1,0 +1,179 @@
+.header-section {
+  display: flex;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-xs);
+}
+
+.silhouette-card {
+  display: flex;
+  border-radius: var(--radius-md);
+  padding-right: 1rem;
+  /* gap: var(--spacing-sm); */
+}
+
+.card-btn-wrapper {
+  display: flex;
+  position: absolute;
+  gap: var(--spacing-xs);
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  z-index: 5;
+  border: 0px;
+  opacity: 0;
+}
+
+.typology {
+  max-width: 4rem;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  background-color: var(--surface-contrast);
+  border-radius: var(--radius-md);
+  outline: 1px solid rgba(182, 148, 255, 0);
+  padding: var(--spacing-xs);
+}
+
+.silhouette-chip,
+.subset-chip,
+.typology {
+  cursor: pointer;
+  transition:
+    outline 300ms ease-out,
+    background-color 300ms ease-out;
+}
+
+.action-button {
+  font-size: var(--text-xs);
+}
+
+.action-button.download {
+  opacity: 1;
+}
+.action-button.expand {
+  position: absolute;
+  opacity: 1;
+  width: 4rem;
+  bottom: var(--spacing-xs);
+  left: var(--spacing-xs);
+}
+.action-button.expand .btn {
+  opacity: 1;
+  width: 4rem;
+}
+
+.progress-bar {
+  border-radius: var(--radius-md);
+  height: 100%;
+  max-width: 4rem;
+  pointer-events: none;
+}
+
+.typology:hover .card-btn-wrapper {
+  opacity: 1;
+}
+
+.typology-perc-text {
+  font-size: var(--text-xs);
+  color: var(--text-light);
+  font-weight: 500;
+}
+.top-banner {
+  position: absolute;
+  right: 0.2rem;
+
+  text-align: center;
+
+  font-size: var(--text-xs);
+  color: var(--text-light);
+  background-color: none;
+  border-radius: 999px;
+  overflow: hidden;
+  font-weight: 500;
+}
+/* silhouettes */
+.silhouetteCanvas {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transition: width 800ms ease-in-out height 800ms ease-in-out;
+  /* margin-bottom: 30px; */
+}
+#silhouettesHeader {
+  padding: 0rem 2rem;
+}
+
+#silhouettes {
+  display: flex;
+  gap: 0.3rem;
+  padding-bottom: 2rem;
+}
+
+.filter-container.silhouettes {
+  overflow-y: hidden;
+  height: 150px;
+}
+/* [data-testid="virtuoso-item-list"] {
+  display: flex;
+  gap: 1rem;
+} */
+
+.silhouette-wrapper {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  max-height: 6rem;
+  min-height: 4rem;
+  cursor: pointer;
+}
+
+/* .silhouette-chip{
+  width: 2rem;
+} */
+
+.silhouette-chip:hover {
+  background-color: var(--surface-primary);
+}
+.subset-chip:hover,
+.subset-chip.selected,
+.typology:hover,
+.typology.selected {
+  background-color: var(--surface-primary);
+  outline: 1px solid var(--surface-accent);
+}
+
+.subset-chip,
+.silhouette-chip {
+  display: flex;
+  place-content: center;
+  outline: 0px;
+  max-height: 1.8rem;
+  min-width: 1.8rem;
+  background-color: var(--surface-contrast);
+}
+
+.subset-chip {
+  max-width: 1.8rem;
+}
+
+.chip-svg-wrapper {
+  aspect-ratio: 1 / 1;
+  max-height: 2rem;
+  cursor: pointer;
+  /* background-color: var(--bg); */
+}
+
+.silhouette-chip span {
+  font-size: 10px;
+  align-self: center;
+}
+
+.subset-selection {
+  /* padding: 0.1rem; */
+  /* min-width: 2rem; */
+  /* height: clamp(4rem, 100%, 6rem); */
+  max-height: 6.9rem;
+  min-height: 4rem;
+  /* overflow-x: auto; */
+  overflow-y: scroll;
+}

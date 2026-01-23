@@ -1,0 +1,29 @@
+.pie-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  gap: var(--spacing-sm);
+  margin: auto;
+}
+
+.pie-background {
+  stroke: var(--surface-tertiary);
+}
+.pie-chart-wrapper {
+  width: clamp(100px, 60%, 400px);
+  margin: 0 auto;
+}
+
+.pie-text {
+  height: 30px;
+  width: 50px;
+  text-align: center;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  place-content: center;
+  color: var(--text-lighter);
+  fill: var(--text-lighter);
+}

@@ -1,0 +1,2 @@
+groupId	groupName	covariateIds	conceptCodes	covariateNames	covariatesDistribution
+g1	g1	4112343141, 4134304141	195662009, 263102004	condition_occurrence: Acute viral pharyngitis, condition_occurrence: Fracture subluxation of wrist	c(3, 4, 2, 5, 1, 6, 7, 0, 8, 9, 10, 12, 11, 14), c(352, 300, 283, 256, 191, 152, 102, 54, 49, 31, 22, 5, 2, 1)

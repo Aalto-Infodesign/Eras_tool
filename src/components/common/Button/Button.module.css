@@ -1,0 +1,62 @@
+/* Stile di base del bottone */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
+  font-family: inherit; /* Eredita il font dal body */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Varianti */
+.primary {
+  background-color: var(--surface-primary);
+  color: white;
+}
+.primary:hover:not(:disabled) {
+  background-color: var(--surface-secondary);
+}
+
+.secondary {
+  background-color: var(--surface-tertiary);
+  color: white;
+}
+.secondary:hover:not(:disabled) {
+  background-color: var(--surface-tertiary);
+}
+
+.tertiary {
+  background-color: transparent;
+  color: #6c757d;
+  border-color: transparent;
+}
+.tertiary:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+/* Dimensioni */
+.small {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.medium {
+  font-size: 14px;
+  padding: 10px 20px;
+}
+
+.large {
+  font-size: 16px;
+  padding: 12px 24px;
+}
+
+/* Stato disabilitato */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

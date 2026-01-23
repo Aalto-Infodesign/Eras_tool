@@ -1,0 +1,336 @@
+import { useState, useEffect, useMemo } from "react"
+import { includes, union } from "lodash"
+import { TrajectoriesExplorerChart } from "./dashboard/ExplorerChart"
+import { SilhouettesMorph } from "./dashboard/silhouettes/SilhouettesMorph"
+import { CarouselWrapper } from "./common/Carousel/Carousel"
+import { SilhouettesPie } from "./dashboard/silhouettes/SilhouettesPie"
+import { DebugPanel } from "./dashboard/debug/DebugPanel"
+import {
+  motion,
+  useAnimate,
+  stagger,
+  usePresence,
+  LayoutGroup,
+  AnimatePresence,
+} from "motion/react"
+import { useModifierKey } from "./hooks/useModifierKey"
+import { ExportIDs } from "./dashboard/export/ExportIDs"
+
+// import Umap from "./dashboard/umap"
+const Dashboard = (props) => {
+  const w = 170
+  const marginTop = 10
+
+  const { data } = props
+  const { statesData } = props
+  const { analytics } = props
+  const { palette } = props
+  const { scales } = props
+  const { silhouettes } = props
+  const { filters } = props
+  const { statesOrder } = props
+  const { setStatesOrder } = props
+  const { statesOrderOriginal } = props
+  const { idealSilhouettes } = props
+
+  //For File Loader
+  const minHeight = 100
+  let stateIncrement = 0
+
+  if (statesOrder.length > 0 && statesOrder.length < 5) {
+    stateIncrement = minHeight / statesOrder.length
+  } else if (statesOrder.length >= 5 && statesOrder.length <= 10) {
+    stateIncrement = 20
+  } else if (statesOrder.length > 10) {
+    stateIncrement = 15
+  }
+
+  // const h = document.querySelector(".chart-container").
+  const h = statesOrder.length * stateIncrement
+
+  // ?? Auto-select silhouettes based on initial FLow?
+  const [selectedSilhouettes, setSelectedSilhouettes] = useState(idealSilhouettes) // Main filter
+  const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
+
+  const [dateRange, setDateRange] = useState(filters?.date?.extent || [0, 200])
+  const [durationRange, setDurationRange] = useState(filters?.diseaseDuration?.extent || [0, 100])
+  const [ageRange, setAgeRange] = useState(filters?.age?.extent || [0, 100])
+
+  const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
+
+  const [chartType, setChartType] = useState(1) // 1: trajectories, 2: partial order
+
+  const toggleSilhouetteFilter = (silhouette) => {
+    const silhouettesToToggle = Array.isArray(silhouette) ? silhouette : [silhouette]
+
+    let newFilter
+
+    // 2. Handle single-item toggles (the original behavior)
+    if (silhouettesToToggle.length === 1) {
+      const item = silhouettesToToggle[0]
+      // If the item is already selected, remove it. Otherwise, add it.
+      if (selectedSilhouettes.includes(item)) {
+        newFilter = selectedSilhouettes.filter((s) => s !== item)
+      } else {
+        newFilter = [...selectedSilhouettes, item]
+      }
+    } else {
+      // 3. Handle arrays: add all or remove all
+      const allAreSelected = silhouettesToToggle.every((s) => selectedSilhouettes.includes(s))
+
+      if (allAreSelected) {
+        // If every item is already in the filter, remove them all.
+        newFilter = selectedSilhouettes.filter((s) => !silhouettesToToggle.includes(s))
+      } else {
+        // If one or more items are missing, add all of them (uniquely).
+        newFilter = [...new Set([...selectedSilhouettes, ...silhouettesToToggle])]
+      }
+    }
+
+    setSelectedSilhouettes(newFilter)
+  }
+
+  const [isPresent, safeToRemove] = usePresence()
+  const [scope, animate] = useAnimate()
+
+  useEffect(() => {
+    if (isPresent) {
+      const enterAnimation = async () => {
+        await animate(scope.current, { opacity: 1 })
+        await animate(
+          ".bento-item",
+          { opacity: 1, y: 0 },
+          { duration: 0.8, delay: stagger(0.15), ease: "easeOut" },
+        )
+      }
+      enterAnimation()
+    } else {
+      const exitAnimation = async () => {
+        await animate(
+          ".bento-item",
+          { opacity: 0, y: 16 },
+          { duration: 0.5, delay: stagger(0.15), ease: "easeOut" },
+        )
+        await animate(scope.current, { opacity: 0 })
+        safeToRemove()
+      }
+
+      exitAnimation()
+    }
+  }, [data, isPresent, animate, safeToRemove, scope])
+
+  const isCmdPressed = useModifierKey("Meta")
+
+  const selectedSilhouettesData = silhouettes.filter((s) => includes(selectedSilhouettes, s.name))
+
+  // TODO: come creo logica inclusiva o esclusiva tra silhouettes e trajectories?
+  const selectedIDs = useMemo(() => {
+    // 1. Clean up the Silhouette IDs (Ensure we have a flat array of unique IDs)
+    const IDsFromSilhouettes = selectedSilhouettesData
+      .flatMap((s) => s.trajectories) // Modern alternative to .map().flat()
+      .map((t) => t[0]?.id) // Use optional chaining to prevent crashes
+      .filter(Boolean) // Remove any undefined/null values
+
+    const IDsFromTrajectories = selectedTrajectoriesIDs || []
+    const type = Number(chartType)
+
+    // If chartType is 1 (trajectories), combine both silhouette and trajectory selections
+    // If chartType is 2 (partial order), use only trajectory selections
+
+    if (type === 1) {
+      /** * INCLUSIVE (OR / UNION)
+       * Returns everything selected in BOTH silhouettes and trajectories.
+       */
+      return union(IDsFromSilhouettes, IDsFromTrajectories)
+    }
+
+    if (type === 2 && IDsFromTrajectories.length > 0) {
+      /** * EXCLUSIVE (AND / INTERSECTION)
+       * Returns only IDs that appear in BOTH categories.
+       */
+      return [...IDsFromTrajectories]
+    }
+
+    // Default fallback (e.g., just Silhouettes)
+    return [...IDsFromSilhouettes]
+  }, [selectedSilhouettesData, selectedTrajectoriesIDs, chartType])
+  // console.log("Rendering Ids:", selectedIDs)
+
+  const boxVariants = {
+    visible: {
+      opacity: 1,
+      // scale: 1,
+      // filter: "blur(0px)",
+      x: 0,
+      transition: { ease: "easeInOut", when: "beforeChildren", delay: 0.5 },
+    },
+    hidden: {
+      opacity: 0,
+      // scale: 0.8,
+      // filter: "blur(4px)",
+      x: -10,
+
+      // transition: { ease: "easeInOut", when: "beforeChildren" },
+    },
+  }
+
+  const MOTION_TREHSHOLD = 25000
+
+  const reduceMotion = useMemo(() => data.length > MOTION_TREHSHOLD, [data.length])
+
+  //debug function that prints count of all the elements containd in svgs
+  const countSvgElements = () => {
+    const svgs = document.querySelectorAll("svg")
+    let count = 0
+    svgs.forEach((svg) => {
+      count += svg.querySelectorAll("*").length
+    })
+    // console.log("Total SVG elements:", count)
+  }
+  useEffect(() => {
+    countSvgElements()
+  }, [silhouettes, isCmdPressed])
+
+  return (
+    <motion.main
+      ref={scope}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      layout
+      className="bento-container"
+    >
+      <LayoutGroup>
+        <AnimatePresence>
+          {isCmdPressed && <motion.div className="key-pop-up">fn</motion.div>}
+        </AnimatePresence>
+
+        <motion.div layout className="top-row">
+          <AnimatePresence mode="popLayout">
+            {selectedSilhouettesData && !isHasse && (
+              <motion.section
+                key={"carousel"}
+                layout
+                layoutId={"carousel"}
+                variants={boxVariants}
+                initial={"hidden"}
+                animate={"visible"}
+                exit={"hidden"}
+                className="bento-item carousel"
+              >
+                <CarouselWrapper>
+                  <div className="carousel-slides-content" data-title="Silhouettes selected">
+                    <SilhouettesPie selectedSilhouettesData={selectedSilhouettesData} />
+                  </div>
+                  <div className="carousel-slides-content" data-title="Analytics">
+                    <h4>Datapoints</h4>
+                    <p>{analytics.datapoints}</p>
+                    <h4>Silhouettes</h4>
+                    <p>
+                      {selectedSilhouettesData.length > 0 && (
+                        <span>{selectedSilhouettesData.length}/</span>
+                      )}
+                      {silhouettes.length}
+                    </p>
+                    <h4>Age Range</h4>
+                    <p>
+                      {Math.round(analytics.ageRange[0])} - {Math.round(analytics.ageRange[1])}
+                    </p>
+                    <h4>Date Range</h4>
+                    <p>
+                      {Math.round(analytics.dateRange[0])} - {Math.round(analytics.dateRange[1])}
+                    </p>
+                  </div>
+                  <div className="carousel-slides-content" data-title="Debug Tools">
+                    <DebugPanel />
+                  </div>
+                  <div className="carousel-slides-content" data-title="Export">
+                    <ExportIDs selectedIDs={selectedIDs} />
+                  </div>
+                </CarouselWrapper>
+              </motion.section>
+            )}
+            {silhouettes && (
+              <SilhouettesMorph
+                silhouettes={silhouettes}
+                toggleSilhouetteFilter={toggleSilhouetteFilter}
+                setSelectedSilhouettes={setSelectedSilhouettes}
+                selectedSilhouettes={selectedSilhouettes}
+                // analytics={analytics}
+                statesNames={statesData.statesNames}
+                palette={palette}
+                statesOrder={statesOrder}
+                setStatesOrder={setStatesOrder}
+                isHasse={isHasse}
+                setIsHasse={setIsHasse}
+              />
+            )}
+            {/* {silhouettes && (
+              <SilhouettesThree
+                silhouettes={silhouettes}
+                toggleSilhouetteFilter={toggleSilhouetteFilter}
+                setSelectedSilhouettes={setSelectedSilhouettes}
+                selectedSilhouettes={selectedSilhouettes}
+                // analytics={analytics}
+                statesNames={statesData.statesNames}
+                palette={palette}
+                statesOrder={statesOrder}
+                isHasse={isHasse}
+                setIsHasse={setIsHasse}
+              />
+            )} */}
+          </AnimatePresence>
+        </motion.div>
+
+        <TrajectoriesExplorerChart
+          silhouettes={silhouettes}
+          w={w}
+          h={h}
+          marginTop={marginTop}
+          palette={palette}
+          selectedSilhouettes={selectedSilhouettes}
+          toggleSilhouetteFilter={toggleSilhouetteFilter}
+          analytics={analytics}
+          statesData={statesData}
+          setStatesOrder={setStatesOrder}
+          statesOrder={statesOrder}
+          indexToName={scales.indexToName}
+          selectedTrajectoriesIDs={selectedTrajectoriesIDs}
+          setSelectedTrajectoriesIDs={setSelectedTrajectoriesIDs}
+          chartType={chartType}
+          setChartType={setChartType}
+          // Filters
+          data={data}
+          filters={filters}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          durationRange={durationRange}
+          setDurationRange={setDurationRange}
+          ageRange={ageRange}
+          setAgeRange={setAgeRange}
+          statesOrderOriginal={statesOrderOriginal}
+          reduceMotion={reduceMotion}
+          idealSilhouettes={idealSilhouettes}
+        />
+
+        {/* <StatesDendrogram
+            marginTop={marginTop}
+            palette={palette}
+            silhouettes={silhouettes}
+            toggleSilhouetteFilter={toggleSilhouetteFilter}
+            selectedSilhouettes={selectedSilhouettes}
+          /> */}
+      </LayoutGroup>
+      {/* 
+      <aside className="side-panels-warpper">
+
+
+        <button className="panel-label">Filters</button>
+        <button className="panel-label">Panel 2</button>
+        <button className="panel-label">Panel 3</button>
+      </aside> */}
+    </motion.main>
+  )
+}
+
+export default Dashboard
