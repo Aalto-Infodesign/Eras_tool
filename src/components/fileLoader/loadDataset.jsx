@@ -4,11 +4,18 @@ import { UploadIcon } from "../common/icons/Icons"
 import { isNil, groupBy } from "lodash"
 import Button from "../common/Button/Button.jsx"
 
+import { useRawData } from "../../contexts/RawDataContext.jsx"
+
 // import { max, min } from "d3"
 
 const FILE_TYPES = ["json", "tsv", "csv"]
 
 const LoadDataset = (props) => {
+  // Pull only the trigger function and current metadata from context
+  // const { loadData, fileName, fileExtention, status } = useRawData();
+
+  // const isUploading = status === 'loading';
+
   const { setLoadedData = () => {} } = props
   const { setWorkingData = () => {} } = props
   const { clusterStates } = props

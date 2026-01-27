@@ -18,19 +18,19 @@ import { useReactFlow } from "@xyflow/react"
 
 import { jch } from "d3-cam02"
 
+import { useViz } from "../../contexts/VizContext"
+
 export function StateSelection({
   loadedData,
   data,
-  statesOrder,
-  setStatesOrder,
+
   conversionScales,
   setConversionScales,
   setWorkingData,
-  palette,
-  setPalette,
-  isLegend,
-  setStatesOrderOriginal,
 }) {
+  const { palette, setPalette, statesOrder, setStatesOrder, setStatesOrderOriginal, isLegend } =
+    useViz()
+
   const [removedStates, setRemovedStates] = useState([])
   const { screenToFlowPosition, setNodes } = useReactFlow()
 
@@ -38,8 +38,6 @@ export function StateSelection({
     const newRemovedStates = xor(removedStates, [state])
     setRemovedStates(newRemovedStates)
   }
-
-  console.log("Data:", data)
 
   // const onDragStart = (event, info, nodeType, label, color = "white") => {
   //   console.log(event)
@@ -151,7 +149,7 @@ export function StateSelection({
       }))
     const statesNames = states.map((state) => state.name)
 
-    console.log("States Names", statesNames)
+    // console.log("States Names", statesNames)
 
     // TODO FUnc che chiude con φ
 

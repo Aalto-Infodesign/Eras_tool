@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import LoadDataset from "./loadDataset"
 import { StateSelection } from "./StateSelection"
 import { ProcessButton } from "./ProcessButton"
@@ -16,34 +16,22 @@ import { StatesMatrix } from "./statesMatrix/StatesMatrix"
 import { ReactFlowProvider } from "@xyflow/react"
 import { AnimatePresence, motion } from "motion/react"
 
-export function FileLoader({
-  newDataset,
-  statesOrder,
-  setStatesOrder,
-  statesOrderOriginal,
-  setStatesOrderOriginal,
-  isLegend,
-  setIsLegend,
-  silhouettes,
-  idealSilhouettes,
-  setIdealSilhouettes,
-}) {
+import { useData } from "../../contexts/DataContext"
+import { useViz } from "../../contexts/VizContext"
+
+export function FileLoader({}) {
+  const { data, newDataset, silhouettes, idealSilhouettes } = useData()
+  const { newVizParameters, setIsLegend, statesOrder, isLegend } = useViz()
+
   const [loadedData, setLoadedData] = useState([])
   const [workingData, setWorkingData] = useState([])
   const [conversionScales, setConversionScales] = useState()
-  const [palette, setPalette] = useState({})
+  // const [palette, setPalette] = useState({})
   const [isOpen, setIsOpen] = useState(true)
 
   const [sankeyData, setSankeyData] = useState({ nodes: [], links: [] })
 
   const [clusterStates, setClusterStates] = useState(false)
-
-  // const [idealSilhouettes, setIdealSilhouettes] = useState(null)
-
-  console.log("sankeyData:", sankeyData)
-
-  const idealSilhouettesData = silhouettes.filter((s) => idealSilhouettes.includes(s.name))
-  console.log("Filtered ideal silhouettes data in FileLoader:", idealSilhouettesData)
 
   // Reset isLegend when new data is loaded
   useEffect(() => {
@@ -65,7 +53,6 @@ export function FileLoader({
   }, [isLegend])
 
   // useEffect(() => {
-  //   console.log("Current ideal silhouettes in FileLoader:", idealSilhouettes)
   // }, [idealSilhouettes])
 
   useEffect(() => {
@@ -73,12 +60,13 @@ export function FileLoader({
     console.log("Data Processing Triggered")
     workingData.length > 0 &&
       !isNil(conversionScales) &&
+      !isLegend &&
       dataProcessing(
         workingData,
         statesOrder,
         newDataset,
+        newVizParameters,
         conversionScales,
-        palette,
         idealSilhouettes,
       )
     const f = performance.now()
@@ -90,8 +78,8 @@ export function FileLoader({
       workingData,
       statesOrder,
       newDataset,
+      newVizParameters,
       conversionScales,
-      palette,
       idealSilhouettes,
     )
   }
@@ -100,6 +88,14 @@ export function FileLoader({
   const openClass = isOpen ? "open" : "closed"
 
   const filterSection = document.querySelector("section.filter")
+
+  // const [idealSilhouettes, setIdealSilhouettes] = useState(null)
+
+  const idealSilhouettesData = useMemo(
+    () =>
+      silhouettes.length > 0 ? silhouettes.filter((s) => idealSilhouettes.includes(s.name)) : [],
+    [silhouettes, idealSilhouettes],
+  )
 
   return (
     <section
@@ -152,25 +148,11 @@ export function FileLoader({
                 loadedData={loadedData}
                 data={workingData}
                 setWorkingData={setWorkingData}
-                statesOrder={statesOrder}
-                setStatesOrder={setStatesOrder}
                 conversionScales={conversionScales}
                 setConversionScales={setConversionScales}
-                palette={palette}
-                setPalette={setPalette}
-                isLegend={isLegend}
-                statesOrderOriginal={statesOrderOriginal}
-                setStatesOrderOriginal={setStatesOrderOriginal}
               />
               <AnimatePresence>
                 {/* <ScatterPlot data={silhouettes} width={300} height={300} /> */}
-                <StatesMatrix
-                  silhouettes={silhouettes}
-                  statesOrder={statesOrder}
-                  palette={palette}
-                  width={300}
-                  height={300}
-                />
                 {sankeyData.nodes.length > 0 && isOpen && (
                   <motion.div
                     className="flow-data"
@@ -178,19 +160,17 @@ export function FileLoader({
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <Sankey
-                      width={300}
-                      height={100}
-                      data={sankeyData}
-                      setIdealSilhouettes={setIdealSilhouettes}
-                    />
-                    {idealSilhouettesData && idealSilhouettesData.length > 0 && (
+                    <StatesMatrix width={300} height={300} />
+                    {sankeyData.links.length > 0 && (
+                      <Sankey data={sankeyData} width={300} height={100} />
+                    )}
+                    {idealSilhouettesData.length > 0 && (
                       <div>
                         <h4>Silhouettes found in dataset</h4>
                         {idealSilhouettesData.map((s) => (
                           <p key={s.name} className="ideal-silhouette-info">
                             <strong>{s.name}</strong>
-                            <p>Quantity: {s.size}</p>
+                            <span> : {s.size}</span>
                           </p>
                         ))}
                       </div>
@@ -200,9 +180,7 @@ export function FileLoader({
                 )}
               </AnimatePresence>
             </div>
-            {!isLegend && (
-              <FlowChart setIdealSilhouettes={setIdealSilhouettes} setSankeyData={setSankeyData} />
-            )}
+            {!isLegend && <FlowChart setSankeyData={setSankeyData} />}
           </ReactFlowProvider>
         </div>
       )}

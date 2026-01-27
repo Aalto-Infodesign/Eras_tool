@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { Tooltip } from "../../common/Tooltip/Tooltip"
 import { motion } from "motion/react"
+import { useData } from "../../../contexts/DataContext"
 
 const MARGIN_Y = 15
 const MARGIN_X = 10
 
-export const Sankey = ({ width, height, data, setIdealSilhouettes = () => {} }) => {
+export const Sankey = ({ width, height, data }) => {
+  const { setIdealSilhouettes } = useData()
   const [hoveredNode, setHoveredNode] = useState(null)
   // Use useMemo to stabilize the 'nodes' and 'links' references
   const { nodes, links } = useMemo(() => {

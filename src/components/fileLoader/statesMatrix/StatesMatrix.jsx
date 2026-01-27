@@ -3,32 +3,79 @@
 // Per each couple,
 // - the speed / duration (time between the two states
 // - the number of times this couple appears in the silhouettes
-
+import { useState, useMemo } from "react"
+import { motion } from "motion/react"
 import { extent, scaleBand, scaleLinear } from "d3"
-import { groupBy } from "lodash"
+import { groupBy, map, countBy } from "lodash"
+import { useViz } from "../../../contexts/VizContext"
+import { useData } from "../../../contexts/DataContext"
+
+import { curveStep, line } from "d3"
+
 const PADDING = 25
 
-export function StatesMatrix({ silhouettes, statesOrder, width, height, palette }) {
-  console.log(silhouettes)
-  const silhouetteStates = silhouettes.map((s) => s.states)
+export function StatesMatrix({ width, height }) {
+  const { statesData } = useData()
+  const { palette, statesOrder } = useViz()
+  const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
+  // console.log(silhouettes)
+  // const silhouetteStates = silhouettes.map((s) => s.states)
 
-  const allCouples = getCouplesFromAllStates(silhouetteStates)
-  const countedCouples = groupBy(allCouples, (i) => {
-    return [i[0], i[1]]
-  })
+  // const allCouples = getCouplesFromAllStates(silhouetteStates)
+  // const countedCouples = groupBy(allCouples, (i) => {
+  //   return [i[0], i[1]]
+  // })
 
-  const matrixCouples = Object.entries(countedCouples).map(([k, v]) => ({
-    id: k,
-    from: k.split(",")[0],
-    to: k.split(",")[1],
-    count: v.length,
-  }))
+  // const matrixCouples = Object.entries(countedCouples).map(([k, v]) => ({
+  //   id: k,
+  //   source: k.split(",")[0],
+  //   target: k.split(",")[1],
+  //   count: v.length,
+  //   segments: v,
+  // }))
+  // console.log(matrixCouples)
+
+  const matrixCouples = useMemo(
+    () =>
+      map(
+        groupBy(statesData.links, (l) => [l.source.state, l.target.state]),
+        (value, key) => ({
+          id: key,
+          source: key.split(",")[0],
+          target: key.split(",")[1],
+          segments: value,
+          // durations: map(value, (v) => v.target.date - v.source.date),
+          countedDurations: map(
+            countBy(
+              map(value, (v) => v.target.date - v.source.date),
+              Math.floor,
+            ),
+            (v, k) => ({ x: Number(k), y: v }),
+          ),
+          // sourceDates: map(value, (v) => v.source.date),
+          countedSourceDates: map(
+            countBy(
+              map(value, (v) => v.source.date),
+              Math.floor,
+            ),
+            (v, k) => ({ x: Number(k), y: v }),
+          ),
+          // targetDates: map(value, (v) => v.target.date),
+          countedTargetDates: map(
+            countBy(
+              map(value, (v) => v.target.date),
+              Math.floor,
+            ),
+            (v, k) => ({ x: Number(k), y: v }),
+          ),
+          count: value.length,
+        }),
+      ),
+    [statesData],
+  )
 
   const valuesExtent = extent(matrixCouples.map((c) => c.count))
-
   const opacityScale = scaleLinear([0, valuesExtent[1]], [0, 1])
-
-  console.log(matrixCouples)
 
   const xScale = scaleBand()
     .domain(statesOrder)
@@ -42,7 +89,15 @@ export function StatesMatrix({ silhouettes, statesOrder, width, height, palette 
 
   return (
     <div>
-      <h4>StatesMatrix</h4>
+      {/* <h4>StatesMatrix</h4> */}
+      <div>
+        <span>show</span>
+        <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
+          <option value="duration">Duration</option>
+          <option value="source">Source</option>
+          <option value="target">Target</option>
+        </select>
+      </div>
 
       <svg className="matrix" width={width} height={height}>
         <g id="grid">
@@ -65,23 +120,74 @@ export function StatesMatrix({ silhouettes, statesOrder, width, height, palette 
           })}
         </g>
         <g id="cells">
-          {matrixCouples.map((s, i) => (
-            <g key={s.id}>
-              <rect
-                x={xScale(s.from)}
-                y={yScale(s.to)}
-                width={xScale.bandwidth()}
-                height={yScale.bandwidth()}
-                fill="white"
-                fillOpacity={opacityScale(s.count)}
-                stroke="none"
-              />
-              <title>{`${s.id} – ${s.count}`}</title>
-            </g>
-          ))}
+          {matrixCouples.map((s, i) => {
+            const dataMap = {
+              duration: s.countedDurations,
+              source: s.countedSourceDates,
+              target: s.countedTargetDates,
+            }
+
+            const activePoints = dataMap[lineChartMode]
+            return (
+              <motion.g
+                key={s.id}
+                initial={{
+                  x: xScale(s.source),
+                  y: yScale(s.target),
+                }}
+                animate={{
+                  x: xScale(s.source),
+                  y: yScale(s.target),
+                }}
+              >
+                <rect
+                  width={xScale.bandwidth()}
+                  height={yScale.bandwidth()}
+                  fill="white"
+                  fillOpacity={opacityScale(s.count)}
+                  stroke="none"
+                />
+                <LineChart
+                  width={xScale.bandwidth()}
+                  height={yScale.bandwidth()}
+                  points={activePoints}
+                />
+                <title>{`${s.id} – ${s.count}`}</title>
+              </motion.g>
+            )
+          })}
         </g>
       </svg>
     </div>
+  )
+}
+
+function LineChart({ width, height, points }) {
+  const xExtent = extent(points.map((p) => p.x))
+  const xScale = scaleLinear(xExtent, [0, width])
+
+  const yExtent = extent(points.map((p) => p.y))
+  const yScale = scaleLinear([0, yExtent[1]], [height, 0])
+
+  const lineBuilder = line()
+    .curve(curveStep)
+    .x((d) => xScale(d.x))
+    .y((d) => yScale(d.y))
+
+  const linePath = lineBuilder(points)
+
+  return (
+    <motion.path
+      initial={{ pathLength: 0 }}
+      animate={{ pathLength: 1 }}
+      exit={{ pathLength: 0 }}
+      opacity={0.5}
+      transition={{ duration: 0.8, delay: 0 }}
+      d={linePath}
+      stroke="red"
+      fill="none"
+      strokeWidth={1}
+    />
   )
 }
 

@@ -1,5 +1,6 @@
 import { max, range, quantile, groups, extent, descending, sort } from "d3"
 import { similarity } from "./levenshteinDistance"
+import { getMinMaxStateFromTrajectories } from "./getMinMax"
 
 // TODO: Usa ideal Silhouettes per determinare MATCH RATE di silhouettes
 
@@ -7,8 +8,8 @@ export function dataProcessing(
   dataSource,
   statesOrder,
   newDataset,
+  newVizParameters,
   conversionScales,
-  palette,
   idealSilhouettes,
 ) {
   const dataRAW = dataSource //.map(d=>(d.diseaseDuration=+d.diseaseDuration,d))
@@ -26,16 +27,10 @@ export function dataProcessing(
       // years: datum.SwitchEventAge.map((age) => age + startYear),
     }))
 
-  console.log("states order", statesOrder)
-
   const data = bluePrintData
-
-  console.log("Indexed Dataset", data)
 
   //Columns
   const columns = Object.keys(data[0])
-
-  console.log(columns)
 
   // Extracting States from Dataset
   const states = data
@@ -65,8 +60,6 @@ export function dataProcessing(
       quantiles: {},
     }))
 
-  console.log("States", states)
-
   const statesNames = states.map((state) => state.name)
 
   const maxTrajectoryLength = max(data.map((d) => d.trajectory.length))
@@ -94,7 +87,6 @@ export function dataProcessing(
     (state) =>
       (state.frequencies = linearCombinations.find((lc) => lc.state === state.name).frequencies),
   )
-  console.log("Linear Combinations", linearCombinations)
 
   const statesNamesSorted = dynamicSortLC(linearCombinations, trajectorySlots).map((lc) => lc.state)
 
@@ -171,7 +163,6 @@ export function dataProcessing(
     stayLenQuants: quantiles,
   }
 
-  console.log(analytics)
   const statesData = {
     statesNames: statesNamesSorted,
     states: statesSorted,
@@ -179,11 +170,8 @@ export function dataProcessing(
   }
 
   //SILHOUETTES
-  // console.log("trajectories", trajectories)
 
   const grupedTrajectories = groups(trajectories, (t) => t.typology)
-
-  console.log("grupedTrajectories", grupedTrajectories)
 
   const silhouettes = //t[0] = "name", t[1] = Array di Array (1 x trajectory)
     grupedTrajectories
@@ -192,9 +180,10 @@ export function dataProcessing(
         trajectories: t[1],
         states: t[1][0].states,
         // minMaxState: getPolygonCoordinates(t[1]),
-        levenshteinDistance: idealSilhouettes
-          ? max(idealSilhouettes.map((s) => similarity(s.split("-"), t[0].split("-"))))
-          : 0,
+        levenshteinDistance:
+          idealSilhouettes.length > 0
+            ? max(idealSilhouettes.map((s) => similarity(s.split("-"), t[0].split("-"))))
+            : 0,
         size: t[1].length,
         percentage: (t[1].length / data.length) * 100,
         trajectory: t[1][0].states.map((e, n) => ({
@@ -207,8 +196,6 @@ export function dataProcessing(
         // 'fs':{'y':10, 'x':11}
       }))
       .sort((a, b) => descending(a.size, b.size))
-
-  console.log("silhouettes", silhouettes)
 
   //SCALES
   const scales = {
@@ -261,7 +248,16 @@ export function dataProcessing(
     },
   }
 
-  newDataset(data, statesData, analytics, palette, scales, silhouettes, filters)
+  // LUMPS
+  const i = performance.now()
+  const globalLumpData = getMinMaxStateFromTrajectories(statesData.links)
+  const f = performance.now()
+  console.log(`Lump Processing Finished in ${f - i} ms`)
+  console.log("Lump data", globalLumpData)
+  const lumpAnalytics = {}
+
+  newDataset(data, statesData, analytics, silhouettes)
+  newVizParameters(scales, filters)
 }
 
 function dynamicSortLC(data, conditions) {

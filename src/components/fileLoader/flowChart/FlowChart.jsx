@@ -16,15 +16,17 @@ import "@xyflow/react/dist/style.css"
 import "./flowchart.css"
 
 import { resolveCollisions } from "./resolveCollisions"
+
 let id = 0
 // const getId = () => `dndnode_${id++}`
 
 const MIN_DISTANCE = 120
 const snapGrid = [25, 25]
 
-export const FlowChart = ({ setIdealSilhouettes = () => {}, setSankeyData = () => {} }) => {
+export const FlowChart = ({ setSankeyData = () => {} }) => {
   const store = useStoreApi()
   const reactFlowWrapper = useRef(null)
+
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const { screenToFlowPosition, getInternalNode } = useReactFlow()

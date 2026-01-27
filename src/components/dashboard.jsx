@@ -16,22 +16,18 @@ import {
 import { useModifierKey } from "./hooks/useModifierKey"
 import { ExportIDs } from "./dashboard/export/ExportIDs"
 
+import { useData } from "../contexts/DataContext"
+import { useViz } from "../contexts/VizContext"
+
 // import Umap from "./dashboard/umap"
 const Dashboard = (props) => {
   const w = 170
   const marginTop = 10
 
-  const { data } = props
-  const { statesData } = props
-  const { analytics } = props
-  const { palette } = props
-  const { scales } = props
-  const { silhouettes } = props
-  const { filters } = props
-  const { statesOrder } = props
-  const { setStatesOrder } = props
-  const { statesOrderOriginal } = props
-  const { idealSilhouettes } = props
+  // TODO ADD CONTEXT
+
+  const { data, statesData, analytics, silhouettes, idealSilhouettes } = useData()
+  const { palette, scales, filters, statesOrder, setStatesOrder, statesOrderOriginal } = useViz()
 
   //For File Loader
   const minHeight = 100
