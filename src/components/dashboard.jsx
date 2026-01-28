@@ -16,7 +16,7 @@ import {
 import { useModifierKey } from "./hooks/useModifierKey"
 import { ExportIDs } from "./dashboard/export/ExportIDs"
 
-import { useData } from "../contexts/DataContext"
+import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
 
 // import Umap from "./dashboard/umap"
@@ -26,8 +26,9 @@ const Dashboard = (props) => {
 
   // TODO ADD CONTEXT
 
-  const { data, statesData, analytics, silhouettes, idealSilhouettes } = useData()
-  const { palette, scales, filters, statesOrder, setStatesOrder, statesOrderOriginal } = useViz()
+  const { richData, statesData, analytics, silhouettes, idealSilhouettes, scales, filters } =
+    useData()
+  const { palette, statesOrder, setStatesOrder, statesOrderOriginal } = useViz()
 
   //For File Loader
   const minHeight = 100
@@ -113,7 +114,7 @@ const Dashboard = (props) => {
 
       exitAnimation()
     }
-  }, [data, isPresent, animate, safeToRemove, scope])
+  }, [richData, isPresent, animate, safeToRemove, scope])
 
   const isCmdPressed = useModifierKey("Meta")
 
@@ -172,7 +173,7 @@ const Dashboard = (props) => {
 
   const MOTION_TREHSHOLD = 25000
 
-  const reduceMotion = useMemo(() => data.length > MOTION_TREHSHOLD, [data.length])
+  const reduceMotion = useMemo(() => richData.length > MOTION_TREHSHOLD, [richData.length])
 
   //debug function that prints count of all the elements containd in svgs
   const countSvgElements = () => {
@@ -296,7 +297,7 @@ const Dashboard = (props) => {
           chartType={chartType}
           setChartType={setChartType}
           // Filters
-          data={data}
+          data={richData}
           filters={filters}
           dateRange={dateRange}
           setDateRange={setDateRange}

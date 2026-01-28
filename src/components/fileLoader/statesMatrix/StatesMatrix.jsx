@@ -8,7 +8,7 @@ import { motion } from "motion/react"
 import { extent, scaleBand, scaleLinear } from "d3"
 import { groupBy, map, countBy } from "lodash"
 import { useViz } from "../../../contexts/VizContext"
-import { useData } from "../../../contexts/DataContext"
+import { useData } from "../../../contexts/ProcessedDataContext"
 
 import { curveStep, line } from "d3"
 

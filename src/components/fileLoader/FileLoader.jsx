@@ -1,11 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
-import LoadDataset from "./loadDataset"
+import LoadDataset from "./LoadDataset"
 import { StateSelection } from "./StateSelection"
 import { ProcessButton } from "./ProcessButton"
-
-import { dataProcessing } from "../../utils/dataProcessing"
-
-import { isNil } from "lodash"
 
 import "./FileLoader.css"
 import { FlowChart } from "./flowChart/FlowChart"
@@ -16,34 +12,36 @@ import { StatesMatrix } from "./statesMatrix/StatesMatrix"
 import { ReactFlowProvider } from "@xyflow/react"
 import { AnimatePresence, motion } from "motion/react"
 
-import { useData } from "../../contexts/DataContext"
+import { useData } from "../../contexts/ProcessedDataContext"
 import { useViz } from "../../contexts/VizContext"
 
 export function FileLoader({}) {
-  const { data, newDataset, silhouettes, idealSilhouettes } = useData()
-  const { newVizParameters, setIsLegend, statesOrder, isLegend } = useViz()
+  const {
+    richData,
+    silhouettes,
+    idealSilhouettes,
+    setIdealSilhouettes,
+    clusterStates,
+    setClusterStates,
+  } = useData()
+  const { setIsLegend, statesOrder, isLegend } = useViz()
 
-  const [loadedData, setLoadedData] = useState([])
-  const [workingData, setWorkingData] = useState([])
-  const [conversionScales, setConversionScales] = useState()
-  // const [palette, setPalette] = useState({})
   const [isOpen, setIsOpen] = useState(true)
 
   const [sankeyData, setSankeyData] = useState({ nodes: [], links: [] })
 
-  const [clusterStates, setClusterStates] = useState(false)
+  // const [clusterStates, setClusterStates] = useState(false)
 
   // Reset isLegend when new data is loaded
   useEffect(() => {
-    if (loadedData.length > 0) {
-      setWorkingData(loadedData)
+    if (richData.length > 0) {
       // Reset isLegend when new data is loaded
       if (isLegend) {
         setIsLegend(false)
         setIsOpen(true) // Ensure the accordion is open when returning to data loading state
       }
     }
-  }, [loadedData])
+  }, [richData])
 
   // Ensure accordion is open when transitioning back from legend mode
   useEffect(() => {
@@ -53,35 +51,20 @@ export function FileLoader({}) {
   }, [isLegend])
 
   // useEffect(() => {
-  // }, [idealSilhouettes])
-
-  useEffect(() => {
-    const i = performance.now()
-    console.log("Data Processing Triggered")
-    workingData.length > 0 &&
-      !isNil(conversionScales) &&
-      !isLegend &&
-      dataProcessing(
-        workingData,
-        statesOrder,
-        newDataset,
-        newVizParameters,
-        conversionScales,
-        idealSilhouettes,
-      )
-    const f = performance.now()
-    console.log(`Data Processing Finished in ${f - i} ms`)
-  }, [workingData, conversionScales])
+  //   const i = performance.now()
+  //   console.log("Data Processing Triggered")
+  //   data.length > 0 &&
+  //     !isLegend &&
+  //     // dataProcessing(data, statesOrder, scales, newDataset, newVizParameters, idealSilhouettes)
+  //     useDataProcessing()
+  //   const f = performance.now()
+  //   console.log(`Data Processing Finished in ${f - i} ms`)
+  // }, [data])
 
   const handleClick = () => {
-    dataProcessing(
-      workingData,
-      statesOrder,
-      newDataset,
-      newVizParameters,
-      conversionScales,
-      idealSilhouettes,
-    )
+    // dataProcessing(data, statesOrder, scales, newDataset, newVizParameters, idealSilhouettes)
+
+    setIdealSilhouettes(idealSilhouettes)
   }
 
   const legendClass = isLegend ? "corner" : "center"
@@ -102,19 +85,15 @@ export function FileLoader({}) {
       className={`loader-wrapper ${legendClass} accordion ${openClass} 
     `}
       style={{
-        padding: workingData.length === 0 ? "1rem" : "",
+        padding: !richData.length ? "1rem" : "",
         width: filterSection ? filterSection.offsetWidth : "",
       }}
       // style={{width:isLegend && }}
     >
       <div className="accordion-header">
-        <LoadDataset
-          setLoadedData={setLoadedData}
-          setWorkingData={setWorkingData}
-          clusterStates={clusterStates}
-        />
+        <LoadDataset />
 
-        {loadedData.length === 0 && (
+        {richData.length === 0 && (
           <div className="cluster-toggle">
             <label>
               <input
@@ -140,17 +119,11 @@ export function FileLoader({}) {
         )}
       </div>
 
-      {loadedData.length > 0 && (
+      {richData.length > 0 && (
         <div className="loader-main">
           <ReactFlowProvider>
             <div>
-              <StateSelection
-                loadedData={loadedData}
-                data={workingData}
-                setWorkingData={setWorkingData}
-                conversionScales={conversionScales}
-                setConversionScales={setConversionScales}
-              />
+              <StateSelection />
               <AnimatePresence>
                 {/* <ScatterPlot data={silhouettes} width={300} height={300} /> */}
                 {sankeyData.nodes.length > 0 && isOpen && (
@@ -185,7 +158,7 @@ export function FileLoader({}) {
         </div>
       )}
 
-      {statesOrder.length > 0 && workingData.length > 0 && !isLegend && (
+      {statesOrder.length > 0 && richData.length > 0 && !isLegend && (
         <ProcessButton setIsLegend={setIsLegend} setIsOpen={setIsOpen} onClickEvent={handleClick} />
       )}
     </section>

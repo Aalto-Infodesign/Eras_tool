@@ -7,9 +7,9 @@ import { getMinMaxStateFromTrajectories } from "./getMinMax"
 export function dataProcessing(
   dataSource,
   statesOrder,
+  conversionScales,
   newDataset,
   newVizParameters,
-  conversionScales,
   idealSilhouettes,
 ) {
   const dataRAW = dataSource //.map(d=>(d.diseaseDuration=+d.diseaseDuration,d))
@@ -198,9 +198,9 @@ export function dataProcessing(
       .sort((a, b) => descending(a.size, b.size))
 
   //SCALES
-  const scales = {
-    indexToName: conversionScales.indexToName,
-  }
+  // const scales = {
+  //   indexToName: conversionScales.indexToName,
+  // }
 
   //FILTERS
 
@@ -257,7 +257,7 @@ export function dataProcessing(
   const lumpAnalytics = {}
 
   newDataset(data, statesData, analytics, silhouettes)
-  newVizParameters(scales, filters)
+  newVizParameters(filters)
 }
 
 function dynamicSortLC(data, conditions) {

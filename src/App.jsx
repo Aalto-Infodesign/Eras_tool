@@ -4,23 +4,25 @@ import { FileLoader } from "./components/fileLoader/FileLoader"
 import { AnimatePresence } from "motion/react"
 import { motion } from "motion/react"
 import { RawDataProvider } from "./contexts/RawDataContext"
-import { DataProvider, useData } from "./contexts/DataContext"
+import { ProcessedDataProvider, useData } from "./contexts/ProcessedDataContext"
 import { VizProvider, useViz } from "./contexts/VizContext"
 
 function App() {
   return (
-    <DataProvider>
-      <VizProvider>
-        <AppContent />
-      </VizProvider>
-    </DataProvider>
+    <RawDataProvider>
+      <ProcessedDataProvider>
+        <VizProvider>
+          <AppContent />
+        </VizProvider>
+      </ProcessedDataProvider>
+    </RawDataProvider>
   )
 }
 
 export default App
 
 function AppContent() {
-  const { data, silhouettes } = useData()
+  const { richData, silhouettes } = useData()
   const { isLegend } = useViz()
 
   return (
@@ -28,10 +30,10 @@ function AppContent() {
       className="App"
       // style={{ position: isLegend && "relative" }}
     >
-      <AnimatePresence>{data.length === 0 && <TitleAnimation />}</AnimatePresence>
+      <AnimatePresence>{!richData?.length && <TitleAnimation />}</AnimatePresence>
       <FileLoader />
       <AnimatePresence>
-        {data.length > 0 && silhouettes && isLegend && <Dashboard />}
+        {richData?.length && silhouettes && isLegend && <Dashboard />}
       </AnimatePresence>
     </main>
   )

@@ -1,37 +1,22 @@
-import { useEffect, useState } from "react"
-import { scaleOrdinal } from "d3"
-// import { moveElementInArray } from "../../utils/moveChar"
-import { xor, zip } from "lodash"
+import { xor } from "lodash"
 
 import { AnimatePresence, motion } from "motion/react"
 
 import { Reorder } from "motion/react"
 
-import { po } from "../../utils/po"
-// import { createCompletePO } from "../../utils/POHelperFunctions"
 import { resolveCollisions } from "./flowChart/resolveCollisions"
-import { getDominancePairsSelfUpper } from "../../utils/POHelperFunctions"
 
 import tinycolor from "tinycolor2"
 
 import { useReactFlow } from "@xyflow/react"
 
-import { jch } from "d3-cam02"
-
 import { useViz } from "../../contexts/VizContext"
+import { useData } from "../../contexts/ProcessedDataContext"
 
-export function StateSelection({
-  loadedData,
-  data,
+export function StateSelection() {
+  const { removedStates, setRemovedStates, scales } = useData()
+  const { palette, statesOrderOriginal, statesOrder, setStatesOrder, isLegend } = useViz()
 
-  conversionScales,
-  setConversionScales,
-  setWorkingData,
-}) {
-  const { palette, setPalette, statesOrder, setStatesOrder, setStatesOrderOriginal, isLegend } =
-    useViz()
-
-  const [removedStates, setRemovedStates] = useState([])
   const { screenToFlowPosition, setNodes } = useReactFlow()
 
   const toggleRemovedState = (state) => {
@@ -49,7 +34,7 @@ export function StateSelection({
   // }
 
   const onDragEnd = (event, nodeType, index, color) => {
-    if (!isLegend) return
+    if (isLegend) return
     // 1. Get the drop position from the event
     const { clientX, clientY } = event
 
@@ -78,7 +63,7 @@ export function StateSelection({
         className: "dnd-node",
         style: { backgroundColor: `${color}`, padding: 10, borderRadius: 5 },
         data: {
-          label: `${index} – ${conversionScales.indexToName(index)}`,
+          label: `${index} – ${scales.indexToName(index)}`,
           index: index,
           value: 100,
           category: "Disease || Drug",
@@ -106,7 +91,7 @@ export function StateSelection({
       className: "dnd-node",
       style: { backgroundColor: `${color}`, padding: 10, borderRadius: 5 },
       data: {
-        label: `${index} – ${conversionScales.indexToName(index)}`,
+        label: `${index} – ${scales.indexToName(index)}`,
         index: index,
         value: 100,
         category: "Disease || Drug",
@@ -125,117 +110,11 @@ export function StateSelection({
     )
   }
 
-  const spring = {
-    type: "spring",
-    damping: 20,
-    stiffness: 300,
-  }
-
   const transition = {
     duration: 0.2,
     delay: 0,
     ease: [0, 0.71, 0.2, 1.01],
   }
-
-  useEffect(() => {
-    //Only ONCE
-    // Get states names from Data
-    const states = data
-      .map((d) => d.trajectory)
-      .flat()
-      .filter((e, n, l) => l.indexOf(e) === n)
-      .map((state) => ({
-        name: state,
-      }))
-    const statesNames = states.map((state) => state.name)
-
-    // console.log("States Names", statesNames)
-
-    // TODO FUnc che chiude con φ
-
-    // Index them based on their order
-    const stateIndexes = statesNames.map((_t, i) => `${i}`)
-
-    // console.log("States Names Genetration")
-
-    // Using the array and indexes to create two ordinal scales
-    const scales = {
-      nameToIndex: scaleOrdinal(statesNames, stateIndexes),
-      indexToName: scaleOrdinal(stateIndexes, statesNames),
-    }
-
-    setConversionScales(scales)
-
-    // Sorting the indexes but this is USELESS
-    const stateNamesSorted = stateIndexes.toSorted()
-    // console.log("States Indexes Sorted", stateNamesSorted)
-    // setStateNamesOrder(stateNamesSorted)
-
-    setStatesOrder(stateIndexes)
-    setStatesOrderOriginal(stateIndexes)
-
-    const statesPO = getDominancePairsSelfUpper(statesNames)
-    console.log("States Interdipendncy Groups", statesPO)
-
-    const labels = statesPO.flat().filter((e, n, l) => l.indexOf(e) === n)
-
-    console.log("l", labels)
-    const { matrix, nodes } = po.domFromEdges(statesPO)
-    console.table("m", matrix)
-
-    const posetInterdipendency = po.createPoset(matrix, nodes)
-
-    posetInterdipendency
-      .enrich()
-      .feature("aFeature", 0)
-      .feature("upset", (node) => posetInterdipendency.getUpset(node))
-      .feature("above", (node) => posetInterdipendency.getCovering(node))
-      .feature("below", (node) => posetInterdipendency.getCovered(node))
-      .feature("downset", (node) => posetInterdipendency.getDownset(node))
-      .feature("upsetLength", (node, row) => row.upset.length)
-      .eachFeature("below", (nodeName, featureValue) => console.log(nodeName, featureValue))
-      .setLayers()
-      .color(0, 40, 80, false)
-      .feature("jchFill", (_node, d) => {
-        console.log(d)
-        const JCH = jch(d.pTheta, d.pAlpha * 100, d.pL)
-        return `hsl(${JCH.J},${JCH.C}%,${JCH.h}%)`
-      })
-      .print()
-
-    const posetFeatures = posetInterdipendency.features
-    const posetPalette = statesNames.map((s) => posetFeatures[scales.indexToName(s)].jchFill)
-
-    const palette = Object.fromEntries(zip(stateNamesSorted, posetPalette))
-    console.log("palette", palette)
-    setPalette(palette)
-  }, [data, removedStates])
-
-  useEffect(() => {
-    const handleRemoveStates = (statesToRemove) => {
-      // TODO: data should be the original data, stored in loadedData
-
-      const newData = loadedData.map((d) => {
-        // Find all indexes to remove
-        const indexesToRemove = d.trajectory
-          .map((state, idx) => (statesToRemove.includes(state) ? idx : -1))
-          .filter((idx) => idx !== -1)
-        if (indexesToRemove.length > 0) {
-          const newTrajectory = d.trajectory.filter((_, idx) => !indexesToRemove.includes(idx))
-          const newSWA = d.SwitchEventAge.filter((_, idx) => !indexesToRemove.includes(idx))
-          const newYears = d.years.filter((_, idx) => !indexesToRemove.includes(idx))
-          return { ...d, trajectory: newTrajectory, SwitchEventAge: newSWA, years: newYears }
-        } else {
-          return d
-        }
-      })
-
-      console.log("New Data", newData)
-      setWorkingData(newData)
-    }
-
-    handleRemoveStates(removedStates)
-  }, [removedStates])
 
   const gap = 4
   const itemHeight = 26
@@ -290,7 +169,7 @@ export function StateSelection({
               <p>
                 <span>{i} –</span>
                 <motion.span animate={{ color: palette[item], marginLeft: "5px" }}>
-                  {conversionScales.indexToName(item)}
+                  {scales.indexToName(item)}
                 </motion.span>
               </p>
               <div className="buttons-wrapper">
@@ -304,7 +183,7 @@ export function StateSelection({
                 {statesOrder.length > 1 && (
                   <button
                     onClick={() => {
-                      toggleRemovedState(conversionScales.indexToName(item))
+                      toggleRemovedState(scales.indexToName(item))
                     }}
                   >
                     X

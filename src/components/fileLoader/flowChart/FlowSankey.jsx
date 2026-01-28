@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { Tooltip } from "../../common/Tooltip/Tooltip"
 import { motion } from "motion/react"
-import { useData } from "../../../contexts/DataContext"
+import { useData } from "../../../contexts/ProcessedDataContext"
 
 const MARGIN_Y = 15
 const MARGIN_X = 10
 
 export const Sankey = ({ width, height, data }) => {
-  const { setIdealSilhouettes } = useData()
+  const { idealSilhouettes, setIdealSilhouettes } = useData()
   const [hoveredNode, setHoveredNode] = useState(null)
   // Use useMemo to stabilize the 'nodes' and 'links' references
   const { nodes, links } = useMemo(() => {
@@ -48,13 +48,15 @@ export const Sankey = ({ width, height, data }) => {
 
   //   console.log("Sankey nodes:", nodes)
   useEffect(() => {
-    if (nodes.length === 0) return
+    if (!nodes?.length || !links?.length) return
 
     const allCombinations = getSankeyPathArrays(nodes, links)
     const silhouettesStrings = allCombinations.map((c) => c.join("-"))
+    const currentHash = silhouettesStrings.join("|")
+    const prevHash = idealSilhouettes.join("|")
 
-    setIdealSilhouettes(silhouettesStrings)
-  }, [nodes, links, setIdealSilhouettes])
+    if (currentHash !== prevHash) setIdealSilhouettes(silhouettesStrings)
+  }, [nodes, links])
 
   const allNodes = nodes.map((node) => {
     const isHovered = hoveredNode && hoveredNode.id === node.id
