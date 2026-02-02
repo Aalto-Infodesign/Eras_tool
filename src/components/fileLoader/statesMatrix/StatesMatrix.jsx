@@ -18,22 +18,6 @@ export function StatesMatrix({ width, height }) {
   const { statesData } = useData()
   const { palette, statesOrder } = useViz()
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
-  // console.log(silhouettes)
-  // const silhouetteStates = silhouettes.map((s) => s.states)
-
-  // const allCouples = getCouplesFromAllStates(silhouetteStates)
-  // const countedCouples = groupBy(allCouples, (i) => {
-  //   return [i[0], i[1]]
-  // })
-
-  // const matrixCouples = Object.entries(countedCouples).map(([k, v]) => ({
-  //   id: k,
-  //   source: k.split(",")[0],
-  //   target: k.split(",")[1],
-  //   count: v.length,
-  //   segments: v,
-  // }))
-  // console.log(matrixCouples)
 
   const matrixCouples = useMemo(
     () =>
@@ -68,11 +52,27 @@ export function StatesMatrix({ width, height }) {
             ),
             (v, k) => ({ x: Number(k), y: v }),
           ),
+          countedSourceAges: map(
+            countBy(
+              map(value, (v) => v.source.age),
+              Math.floor,
+            ),
+            (v, k) => ({ x: Number(k), y: v }),
+          ),
+          countedTargetAges: map(
+            countBy(
+              map(value, (v) => v.target.age),
+              Math.floor,
+            ),
+            (v, k) => ({ x: Number(k), y: v }),
+          ),
           count: value.length,
         }),
       ),
     [statesData],
   )
+
+  console.log(matrixCouples)
 
   const valuesExtent = extent(matrixCouples.map((c) => c.count))
   const opacityScale = scaleLinear([0, valuesExtent[1]], [0, 1])
@@ -96,6 +96,8 @@ export function StatesMatrix({ width, height }) {
           <option value="duration">Duration</option>
           <option value="source">Source</option>
           <option value="target">Target</option>
+          <option value="sourceAge">Source Age</option>
+          <option value="targetAge">Target Age</option>
         </select>
       </div>
 
@@ -125,6 +127,8 @@ export function StatesMatrix({ width, height }) {
               duration: s.countedDurations,
               source: s.countedSourceDates,
               target: s.countedTargetDates,
+              sourceAge: s.countedSourceAges,
+              targetAge: s.countedTargetAges,
             }
 
             const activePoints = dataMap[lineChartMode]

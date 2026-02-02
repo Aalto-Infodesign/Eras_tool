@@ -127,16 +127,19 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
         link.source.state = state
         link.source.date = datum?.years[n] | []
         link.source.x = datum.SwitchEventAge[n]
+        link.source.age = datum.SwitchEventAge[n]
         link.initialState = n === 0
         link.firstDate = datum.years[0]
         if (n === datum.trajectory.length - 1) {
           link.target.state = state
           link.target.x = datum.SwitchEventAge[n]
+          link.target.age = datum.SwitchEventAge[n]
           link.target.date = datum.years[n]
           link.finalState = true
         } else {
           link.target.state = datum.trajectory[n + 1]
           link.target.x = datum.SwitchEventAge[n + 1]
+          link.target.age = datum.SwitchEventAge[n + 1]
           link.target.date = datum.years[n + 1]
           link.finalState = false
         }

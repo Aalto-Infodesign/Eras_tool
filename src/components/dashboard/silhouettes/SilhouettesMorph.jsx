@@ -27,14 +27,17 @@ import { Virtuoso } from "react-virtuoso"
 
 import { downloadIDs } from "../../../utils/exportFunctions"
 
+import { useData } from "../../../contexts/ProcessedDataContext"
+
 export const SilhouettesMorph = (props) => {
   const i = performance.now()
   const TEST = 10
 
+  const { silhouettes } = useData()
+
   const { statesNames } = props
 
   const {
-    silhouettes = [], // Default to an empty array
     toggleSilhouetteFilter = () => {},
     setSelectedSilhouettes = () => {},
     selectedSilhouettes = [],

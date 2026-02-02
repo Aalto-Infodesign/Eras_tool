@@ -14,9 +14,9 @@ export function ProcessedDataProvider({ children }) {
   const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
   const [idealSilhouettes, setIdealSilhouettes] = useState([])
 
-  useEffect(() => {
-    if (rawData.length > 0) console.log("Raw data", rawData)
-  }, [rawData])
+  // useEffect(() => {
+  //   if (rawData.length > 0) console.log("Raw data", rawData)
+  // }, [rawData])
 
   // Take Raw Data and parse it based on file format
   const parsedData = useMemo(() => {

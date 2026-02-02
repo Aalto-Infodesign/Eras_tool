@@ -50,17 +50,6 @@ export function FileLoader({}) {
     }
   }, [isLegend])
 
-  // useEffect(() => {
-  //   const i = performance.now()
-  //   console.log("Data Processing Triggered")
-  //   data.length > 0 &&
-  //     !isLegend &&
-  //     // dataProcessing(data, statesOrder, scales, newDataset, newVizParameters, idealSilhouettes)
-  //     useDataProcessing()
-  //   const f = performance.now()
-  //   console.log(`Data Processing Finished in ${f - i} ms`)
-  // }, [data])
-
   const handleClick = () => {
     // dataProcessing(data, statesOrder, scales, newDataset, newVizParameters, idealSilhouettes)
 

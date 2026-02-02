@@ -1,13 +1,11 @@
-import { useRef, useCallback, useMemo, useEffect } from "react"
+import { useRef, useCallback, useEffect } from "react"
 import {
   ReactFlow,
   addEdge,
   useNodesState,
   useEdgesState,
   Controls,
-  useReactFlow,
   Background,
-  useStoreApi,
   MiniMap,
 } from "@xyflow/react"
 
@@ -17,24 +15,31 @@ import "./flowchart.css"
 
 import { resolveCollisions } from "./resolveCollisions"
 
-let id = 0
-// const getId = () => `dndnode_${id++}`
+import { useData } from "../../../contexts/ProcessedDataContext"
+import { useRawData } from "../../../contexts/RawDataContext"
 
-const MIN_DISTANCE = 120
 const snapGrid = [25, 25]
 
 export const FlowChart = ({ setSankeyData = () => {} }) => {
-  const store = useStoreApi()
+  const { rawData } = useRawData()
   const reactFlowWrapper = useRef(null)
 
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
-  const { getInternalNode } = useReactFlow()
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges])
 
-  // const data = useMemo(() => ({ nodes, links: edges }), [nodes, edges])
+  function resetFlowChartState() {
+    setNodes([])
+    setEdges([])
+  }
 
+  // Resetting Flowchart when new data is loaded
+  useEffect(() => {
+    resetFlowChartState()
+  }, [rawData])
+
+  // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
     setSankeyData({ nodes, links: edges })
   }, [nodes, edges])

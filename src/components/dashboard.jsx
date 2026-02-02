@@ -20,11 +20,9 @@ import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
 
 // import Umap from "./dashboard/umap"
-const Dashboard = (props) => {
+const Dashboard = () => {
   const w = 170
   const marginTop = 10
-
-  // TODO ADD CONTEXT
 
   const { richData, statesData, analytics, silhouettes, idealSilhouettes, scales, filters } =
     useData()
@@ -249,7 +247,6 @@ const Dashboard = (props) => {
             )}
             {silhouettes && (
               <SilhouettesMorph
-                silhouettes={silhouettes}
                 toggleSilhouetteFilter={toggleSilhouetteFilter}
                 setSelectedSilhouettes={setSelectedSilhouettes}
                 selectedSilhouettes={selectedSilhouettes}
