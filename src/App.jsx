@@ -6,13 +6,16 @@ import { motion } from "motion/react"
 import { RawDataProvider } from "./contexts/RawDataContext"
 import { ProcessedDataProvider, useData } from "./contexts/ProcessedDataContext"
 import { VizProvider, useViz } from "./contexts/VizContext"
+import { FiltersProvider, useFilters } from "./contexts/FiltersContext"
 
 function App() {
   return (
     <RawDataProvider>
       <ProcessedDataProvider>
         <VizProvider>
-          <AppContent />
+          <FiltersProvider>
+            <AppContent />
+          </FiltersProvider>
         </VizProvider>
       </ProcessedDataProvider>
     </RawDataProvider>

@@ -11,21 +11,20 @@ import { AnimatePresence, motion } from "motion/react"
 
 import { useMouseMove } from "../../hooks/useMouseMove"
 
+import { useViz } from "../../../contexts/VizContext"
+import { useFilters } from "../../../contexts/FiltersContext"
 import "./Lumps.css"
 
 export const Lumps = (props) => {
-  const i = performance.now()
+  const { palette } = useViz()
+  const { filters } = useFilters()
+
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
     marginTop,
-    palette,
-    scales,
-    dateRange,
-    filters,
-    durationRange,
+    chartScales,
     selectedLumps,
     toggleSelectedLumps,
-    selectedTrajectoriesIDs,
     toggleSelectedTrajectory,
     hoveredTrajectoriesIDs,
     setHoveredTrajectoriesIDs,
@@ -37,14 +36,10 @@ export const Lumps = (props) => {
   const animationDuration = reduceMotion ? 0 : 0.2
 
   const { filteredSilhouettes } = props
-  const { setHoveredLump = () => {} } = props // Removed unused 'hoveredLump' and 'isSelectModeLines' from props
   const { isSelectModeLines } = props // Keeping isSelectModeLines for the render logic
   const { svgRef } = props
 
-  // TODO Perché non disegna??
-  // console.log(filteredSilhouettes)
-
-  const { x, y } = scales
+  const { x, y } = chartScales
 
   const lumpPadding = 2
   const lumpOffsetX = 2
@@ -81,6 +76,9 @@ export const Lumps = (props) => {
     }
   }
 
+  // console.log("fs", filteredSilhouettes)
+  // console.log("dr", filters.diseaseDuration.selection)
+
   const filteredTrajectories = useMemo(() => {
     if (!filteredSilhouettes || filteredSilhouettes.length === 0) return []
 
@@ -91,8 +89,14 @@ export const Lumps = (props) => {
           ? filters.diseaseDuration.extent[0]
           : t.diseaseDuration,
       }))
-      .filter((d) => d.diseaseDuration >= durationRange[0] && d.diseaseDuration < durationRange[1])
-  }, [filteredSilhouettes, durationRange])
+      .filter(
+        (d) =>
+          d.diseaseDuration >= filters.diseaseDuration.selection[0] &&
+          d.diseaseDuration < filters.diseaseDuration.selection[1],
+      )
+  }, [filteredSilhouettes, filters.diseaseDuration.selection])
+
+  // console.log("ft", filteredTrajectories)
 
   const highlightedTrajectories = useMemo(() => {
     if (filteredLinks.length === 0 || hoveredTrajectoriesIDs.length === 0 || selectedIndex === null)
@@ -119,18 +123,18 @@ export const Lumps = (props) => {
   //   console.log(globalLumpData)
   // }, [globalLumpData])
 
-  const dateExtent = trajectoriesContext.filters?.date.extent // Safely get dateExtent
+  const dateExtent = filters.date.extent // Safely get dateExtent
   const minDate = dateExtent ? dateExtent[0] : 0 // Fallback to 0 if not present
-  const midpointDate = (minDate + dateRange[0]) / 2
+  const midpointDate = (minDate + filters.date.selection[0]) / 2
 
   const [presentTrajectories, pastTrajectories, remoteTrajectories] = useMemo(() => {
-    const present = filteredTrajectories.filter((d) => d.source.date >= dateRange[0])
+    const present = filteredTrajectories.filter((d) => d.source.date >= filters.date.selection[0])
     const past = filteredTrajectories.filter(
-      (d) => d.source.date < dateRange[0] && d.source.date >= midpointDate
+      (d) => d.source.date < filters.date.selection[0] && d.source.date >= midpointDate,
     )
     const remote = filteredTrajectories.filter((d) => d.source.date < midpointDate)
     return [present, past, remote]
-  }, [filteredTrajectories, dateRange, midpointDate])
+  }, [filteredTrajectories, filters.date.selection, midpointDate])
 
   const allTypes = useMemo(() => {
     return getMinMaxFromTrajectoriesBetwenTwoStates(filteredTrajectories).map((t) => t.type)
@@ -145,7 +149,7 @@ export const Lumps = (props) => {
     const rLumps = processLumps(remoteTrajectories)
 
     const linesExtreme = getMinMaxFromTrajectoriesBetwenTwoStates(presentTrajectories).filter(
-      (d) => d.items.length === 1
+      (d) => d.items.length === 1,
     )
 
     return [pLumps, paLumps, rLumps, linesExtreme]
@@ -169,8 +173,8 @@ export const Lumps = (props) => {
 
   const lumpPolygonProps = useMemo(
     () => ({
-      x: scales.x,
-      y: scales.y,
+      x: chartScales.x,
+      y: chartScales.y,
       marginTop,
       lumpPadding,
       lumpOffsetX,
@@ -178,7 +182,7 @@ export const Lumps = (props) => {
       toggleSelectedLumps,
       setHoveredLump: props.setHoveredLump,
     }),
-    [scales, marginTop, palette, toggleSelectedLumps, props.setHoveredLump]
+    [chartScales, marginTop, palette, toggleSelectedLumps, props.setHoveredLump],
   )
 
   useEffect(() => {
@@ -232,8 +236,6 @@ export const Lumps = (props) => {
     hoveredTrajectoriesIDs,
     svgCursorPosition,
   ])
-  const f = performance.now()
-  // console.log(`Lumps Rendered in ${f - i} ms`)
 
   return (
     <g id="lumps">

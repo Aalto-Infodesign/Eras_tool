@@ -8,17 +8,24 @@ import { motion } from "motion/react"
 
 import { moveElementInArray } from "../../../utils/moveChar"
 
+import { useData } from "../../../contexts/ProcessedDataContext"
+import { useViz } from "../../../contexts/VizContext"
+
 export function Grid(props) {
+  const { scales, analytics } = useData()
+  const { palette, setStatesOrder } = useViz()
   const trajectoriesContext = useContext(TrajectoriesContext)
-  const { w, h, marginTop, palette, scales, indexToName, ageRange } = trajectoriesContext
+  const { w, h, marginTop, chartScales } = trajectoriesContext
 
   const { allTrajectories } = props
   const { statesNamesLoaded } = props
-  const { setStatesOrder = () => {} } = props
   const { setHoveredStateLabel = () => {} } = props
 
-  const xScale = scales.x
-  const yScale = scales.y
+  const { ageRange } = analytics
+  const { indexToName } = scales
+
+  const xScale = chartScales.x
+  const yScale = chartScales.y
 
   const minMaxStates = getMinMaxStateFromTrajectories(allTrajectories)
 

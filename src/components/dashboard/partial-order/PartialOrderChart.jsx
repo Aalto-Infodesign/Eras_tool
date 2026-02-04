@@ -4,6 +4,9 @@ import { po } from "../../../utils/po"
 import { flatten } from "lodash"
 import { getDominancePairs } from "../../../utils/POHelperFunctions"
 import { Sankey } from "./OptimizedSankey"
+
+import { useData } from "../../../contexts/ProcessedDataContext"
+
 import "./PartialOrderChart.css"
 
 // TODO Use idealSilhouettes to highlight nodes/links in the sankey diagram
@@ -122,12 +125,15 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
 }
 
 export function PartialOrderChart() {
-  const { filteredSilhouettes, filteredLinks, idealSilhouettes } = useContext(TrajectoriesContext)
+  const { idealSilhouettes } = useData()
+  const { filteredSilhouettes, filteredLinks } = useContext(TrajectoriesContext)
 
   console.log("Filtered Links in PO Chart:", filteredLinks)
 
   // Use the custom hook to get memoized, processed data
+  console.time("useSankeyData")
   const sankeyData = useSankeyData(filteredSilhouettes, filteredLinks, idealSilhouettes)
+  console.timeEnd("useSankeyData")
 
   return (
     <>

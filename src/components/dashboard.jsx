@@ -24,9 +24,8 @@ const Dashboard = () => {
   const w = 170
   const marginTop = 10
 
-  const { richData, statesData, analytics, silhouettes, idealSilhouettes, scales, filters } =
-    useData()
-  const { palette, statesOrder, setStatesOrder, statesOrderOriginal } = useViz()
+  const { richData, analytics, silhouettes, idealSilhouettes } = useData()
+  const { statesOrder } = useViz()
 
   //For File Loader
   const minHeight = 100
@@ -47,9 +46,9 @@ const Dashboard = () => {
   const [selectedSilhouettes, setSelectedSilhouettes] = useState(idealSilhouettes) // Main filter
   const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
 
-  const [dateRange, setDateRange] = useState(filters?.date?.extent || [0, 200])
-  const [durationRange, setDurationRange] = useState(filters?.diseaseDuration?.extent || [0, 100])
-  const [ageRange, setAgeRange] = useState(filters?.age?.extent || [0, 100])
+  // const [dateRange, setDateRange] = useState(filters?.date?.extent || [0, 200])
+  // const [durationRange, setDurationRange] = useState(filters?.diseaseDuration?.extent || [0, 100])
+  // const [ageRange, setAgeRange] = useState(filters?.age?.extent || [0, 100])
 
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
 
@@ -250,11 +249,6 @@ const Dashboard = () => {
                 toggleSilhouetteFilter={toggleSilhouetteFilter}
                 setSelectedSilhouettes={setSelectedSilhouettes}
                 selectedSilhouettes={selectedSilhouettes}
-                // analytics={analytics}
-                statesNames={statesData.statesNames}
-                palette={palette}
-                statesOrder={statesOrder}
-                setStatesOrder={setStatesOrder}
                 isHasse={isHasse}
                 setIsHasse={setIsHasse}
               />
@@ -277,34 +271,25 @@ const Dashboard = () => {
         </motion.div>
 
         <TrajectoriesExplorerChart
-          silhouettes={silhouettes}
           w={w}
           h={h}
           marginTop={marginTop}
-          palette={palette}
           selectedSilhouettes={selectedSilhouettes}
           toggleSilhouetteFilter={toggleSilhouetteFilter}
-          analytics={analytics}
-          statesData={statesData}
-          setStatesOrder={setStatesOrder}
-          statesOrder={statesOrder}
-          indexToName={scales.indexToName}
           selectedTrajectoriesIDs={selectedTrajectoriesIDs}
           setSelectedTrajectoriesIDs={setSelectedTrajectoriesIDs}
           chartType={chartType}
           setChartType={setChartType}
           // Filters
-          data={richData}
-          filters={filters}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          durationRange={durationRange}
-          setDurationRange={setDurationRange}
-          ageRange={ageRange}
-          setAgeRange={setAgeRange}
-          statesOrderOriginal={statesOrderOriginal}
+
+          // dateRange={dateRange}
+          // setDateRange={setDateRange}
+          // durationRange={durationRange}
+          // setDurationRange={setDurationRange}
+          // ageRange={ageRange}
+          // setAgeRange={setAgeRange}
+          // Other stuff
           reduceMotion={reduceMotion}
-          idealSilhouettes={idealSilhouettes}
         />
 
         {/* <StatesDendrogram

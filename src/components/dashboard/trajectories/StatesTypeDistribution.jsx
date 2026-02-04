@@ -2,12 +2,16 @@ import { useContext, useEffect } from "react"
 import { TrajectoriesContext } from "../TrajectoriesContext"
 
 import { select, scaleLinear, scaleRadial, extent } from "d3"
-import { mapValues, values, unionBy, sortBy, flatten, isNil } from "lodash"
+import { values, unionBy, flatten, isNil } from "lodash"
+
+import { useViz } from "../../../contexts/VizContext"
 
 export function StateTypeDistribution(props) {
+  const { palette } = useViz()
   const trajectoriesContext = useContext(TrajectoriesContext)
-  const { h, filteredLinks, marginTop, scales, palette, selectedSilhouettes } = trajectoriesContext
-  const { y } = scales
+  const { h, filteredLinks, marginTop, chartScales, selectedSilhouettes } = trajectoriesContext
+
+  const { y } = chartScales
 
   const { setHoveredDistribution = () => {} } = props
   const {
@@ -35,9 +39,9 @@ export function StateTypeDistribution(props) {
         unionBy(
           initialAndFinalCompletePerStateSource,
           initialAndFinalCompletePerStateTarget,
-          "state"
-        ).map((d) => [d.initialState.length, d.finalState.length])
-      )
+          "state",
+        ).map((d) => [d.initialState.length, d.finalState.length]),
+      ),
     )
 
     const statesExtent = extent(countedAllByState)
@@ -72,7 +76,7 @@ export function StateTypeDistribution(props) {
       .selectAll(".distribution-state")
       .data(
         selectedSilhouettes.length === 0 ? unitedObjectsOriginal : mergedObjectsByState,
-        (d) => `distribution-state-${d.state}`
+        (d) => `distribution-state-${d.state}`,
       )
       .join(
         (enter) => {
@@ -122,7 +126,7 @@ export function StateTypeDistribution(props) {
                 type: "IT",
                 text: "Total: " + d.initialStateOG.length,
                 state: d.state,
-              })
+              }),
             )
             .on("mouseleave", (_e) => setHoveredDistribution({ type: "", text: "", state: "" }))
 
@@ -149,7 +153,7 @@ export function StateTypeDistribution(props) {
                 type: "IS",
                 text: "Selected: " + d.initialState.length,
                 state: d.state,
-              })
+              }),
             )
             .on("mouseleave", (_e) => setHoveredDistribution({ type: "", text: "", state: "" }))
 
@@ -191,7 +195,7 @@ export function StateTypeDistribution(props) {
                 type: "FT",
                 text: "Total: " + d.finalStateOG.length,
                 state: d.state,
-              })
+              }),
             )
             .on("mouseleave", (_e) => setHoveredDistribution({ type: "", text: "", state: "" }))
 
@@ -216,7 +220,7 @@ export function StateTypeDistribution(props) {
                 type: "FS",
                 text: "Selected: " + d.finalState.length,
                 state: d.state,
-              })
+              }),
             )
             .on("mouseleave", (_e) => setHoveredDistribution({ type: "", text: "", state: "" }))
         },
@@ -236,7 +240,7 @@ export function StateTypeDistribution(props) {
                 type: "IT",
                 text: "Total: " + d.initialStateOG.length,
                 state: d.state,
-              })
+              }),
             )
 
           update
@@ -255,7 +259,7 @@ export function StateTypeDistribution(props) {
                 type: "IS",
                 text: "Selected: " + d.initialState.length,
                 state: d.state,
-              })
+              }),
             )
 
           // update.select(".circle-i").transition().duration(300)
@@ -300,7 +304,7 @@ export function StateTypeDistribution(props) {
                 type: "FT",
                 text: "Total: " + d.finalStateOG.length,
                 state: d.state,
-              })
+              }),
             )
 
           update
@@ -319,7 +323,7 @@ export function StateTypeDistribution(props) {
                 type: "FS",
                 text: "Selected: " + d.finalState.length,
                 state: d.state,
-              })
+              }),
             )
         },
         (exit) => {
@@ -327,7 +331,7 @@ export function StateTypeDistribution(props) {
           exit.select(".circle-final").attr("r", 0).attr("opacity", 0)
 
           exit.remove()
-        }
+        },
       )
   }, [filteredLinks, y, selectedSilhouettes, palette, unitedObjectsOriginal, mergedObjectsByState])
   return <g id="statesDistribution"></g>

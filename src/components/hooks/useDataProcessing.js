@@ -242,16 +242,19 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
         active: dateActive,
         range: dateRange,
         extent: dateExtent,
+        selection: dateExtent,
       },
       diseaseDuration: {
         active: durationsActive,
         range: durationRange,
         extent: durationExtent,
+        selection: durationExtent,
       },
       age: {
         active: ageActive,
         range: ageRange,
         extent: ageExtent,
+        selection: ageExtent,
       },
     }
 

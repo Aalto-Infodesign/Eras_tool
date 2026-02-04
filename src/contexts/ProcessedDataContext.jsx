@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect, useMemo } from "react"
+import { createContext, useState, useContext, useCallback, useMemo } from "react"
 import { useRawData } from "./RawDataContext"
 import { groupBy } from "lodash"
 
@@ -101,7 +101,7 @@ export function ProcessedDataProvider({ children }) {
       statesData,
       analytics,
       silhouettes,
-      filters,
+      filtersBlueprint: filters,
       // Setters
       setIdealSilhouettes,
       setClusterStates,

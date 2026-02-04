@@ -22,12 +22,12 @@ export function FilterSlider({
   // console.log(max)
   // console.log(value)
 
-  const [rangeMin, rangeMax] = value
+  const [selectionMin, selectionMax] = value
 
   // Calculate positions
   const sliderWidth = width - cursorWidth
-  const minCursorPosition = ((rangeMin - min) / (max - min)) * sliderWidth
-  const maxCursorPosition = ((rangeMax - min) / (max - min)) * sliderWidth
+  const minCursorPosition = ((selectionMin - min) / (max - min)) * sliderWidth
+  const maxCursorPosition = ((selectionMax - min) / (max - min)) * sliderWidth
 
   // Convert pixel position to value
   const pixelToValue = useCallback(
@@ -38,7 +38,7 @@ export function FilterSlider({
       const relativeX = Math.max(0, Math.min(pixelX - rect.left - cursorWidth / 2, sliderWidth))
       return min + (relativeX / sliderWidth) * (max - min)
     },
-    [min, max, sliderWidth, cursorWidth]
+    [min, max, sliderWidth, cursorWidth],
   )
 
   const handleMinPointerDown = useCallback(
@@ -46,10 +46,12 @@ export function FilterSlider({
       e.preventDefault()
       e.stopPropagation()
 
+      console.log(e)
+
       const handleMove = (moveEvent) => {
         const clientX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX
-        const newValue = Math.min(pixelToValue(clientX), rangeMax)
-        onChange?.([newValue, rangeMax])
+        const newValue = Math.min(pixelToValue(clientX), selectionMax)
+        onChange([newValue, selectionMax])
       }
 
       const handleEnd = () => {
@@ -64,7 +66,7 @@ export function FilterSlider({
       document.addEventListener("touchmove", handleMove, { passive: false })
       document.addEventListener("touchend", handleEnd)
     },
-    [pixelToValue, rangeMax, onChange]
+    [pixelToValue, selectionMax, onChange],
   )
 
   const handleMaxPointerDown = useCallback(
@@ -74,8 +76,8 @@ export function FilterSlider({
 
       const handleMove = (moveEvent) => {
         const clientX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX
-        const newValue = Math.max(pixelToValue(clientX), rangeMin)
-        onChange?.([rangeMin, newValue])
+        const newValue = Math.max(pixelToValue(clientX), selectionMin)
+        onChange([selectionMin, newValue])
       }
 
       const handleEnd = () => {
@@ -90,27 +92,27 @@ export function FilterSlider({
       document.addEventListener("touchmove", handleMove, { passive: false })
       document.addEventListener("touchend", handleEnd)
     },
-    [pixelToValue, rangeMin, onChange]
+    [pixelToValue, selectionMin, onChange],
   )
 
   const handleTrackClick = useCallback(
     (e) => {
       const clickValue = pixelToValue(e.clientX)
-      const distanceToMin = Math.abs(clickValue - rangeMin)
-      const distanceToMax = Math.abs(clickValue - rangeMax)
+      const distanceToMin = Math.abs(clickValue - selectionMin)
+      const distanceToMax = Math.abs(clickValue - selectionMax)
 
       if (!hasRange) {
-        onChange?.([Math.min(clickValue, rangeMax), rangeMax])
+        onChange?.([Math.min(clickValue, selectionMax), selectionMax])
         return
       }
 
       if (distanceToMin < distanceToMax) {
-        onChange?.([Math.min(clickValue, rangeMax), rangeMax])
+        onChange?.([Math.min(clickValue, selectionMax), selectionMax])
       } else {
-        onChange?.([rangeMin, Math.max(clickValue, rangeMin)])
+        onChange?.([selectionMin, Math.max(clickValue, selectionMin)])
       }
     },
-    [pixelToValue, rangeMin, rangeMax, onChange]
+    [pixelToValue, selectionMin, selectionMax, onChange],
   )
 
   return (
@@ -211,7 +213,7 @@ export function FilterSlider({
         )}
         {/* Value display */}
         <AnimatePresence>
-          {rangeMin > min && (
+          {selectionMin > min && (
             <motion.text
               key={"min-text"}
               initial={{ opacity: 0 }}
@@ -224,10 +226,10 @@ export function FilterSlider({
               textAnchor="middle"
               fontSize="12"
             >
-              {Math.floor(rangeMin)}
+              {Math.floor(selectionMin)}
             </motion.text>
           )}
-          {rangeMax < max && (
+          {selectionMax < max && (
             <motion.text
               key={"max-text"}
               initial={{ opacity: 0 }}
@@ -240,7 +242,7 @@ export function FilterSlider({
               textAnchor="middle"
               fontSize="12"
             >
-              {Math.floor(rangeMax)}
+              {Math.floor(selectionMax)}
             </motion.text>
           )}
         </AnimatePresence>

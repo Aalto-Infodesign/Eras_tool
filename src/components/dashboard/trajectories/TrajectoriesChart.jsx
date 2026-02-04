@@ -19,22 +19,25 @@ import { TextureDefs } from "../../common/Textures/TextureDefs"
 
 import { useModifierKey } from "../../hooks/useModifierKey"
 
-export function TrajectoriesChart({}) {
-  const i = performance.now()
+import { useData } from "../../../contexts/ProcessedDataContext"
+import { useViz } from "../../../contexts/VizContext"
+
+export function TrajectoriesChart() {
+  console.time("Trajectories")
+
+  const { silhouettes } = useData()
+  const { palette } = useViz()
+
   const trajectoriesContext = useContext(TrajectoriesContext)
 
   const {
     h,
     completeLinks,
     filteredLinks,
-    silhouettes,
     filteredSilhouettes,
-    setStatesOrder,
     statesNamesLoaded,
     hoveredTrajectoriesIDs,
     selectedIndex,
-    scales,
-    palette,
     selectedLumps,
     toggleSelectedTrajectory,
     selectedTrajectoriesIDs,
@@ -108,8 +111,7 @@ export function TrajectoriesChart({}) {
       toggleSelectedTrajectory(hoveredTrajectoriesIDs[selectedIndex])
   }, [isEnter])
 
-  const f = performance.now()
-  console.log("TrajectoriesChart render time:", f - i, "ms")
+  console.timeEnd("Trajectories")
 
   return (
     <>
@@ -199,7 +201,6 @@ export function TrajectoriesChart({}) {
               isSelectModeLines={isSelectModeLines}
               statesNamesLoaded={statesNamesLoaded}
               allTrajectories={allTrajectories}
-              setStatesOrder={setStatesOrder}
               setHoveredStateLabel={setHoveredStateLabel}
             />
 

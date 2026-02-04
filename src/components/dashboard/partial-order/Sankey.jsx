@@ -56,7 +56,12 @@ export function Sankey({ width, height, data }) {
         {nodeHeight > 0 && (
           <motion.rect
             key={"rect-" + node.id}
-            initial={{ x: node.x0, y: node.y0, height: nodeHeight }}
+            initial={{
+              x: node.x0,
+              y: node.y0,
+              height: nodeHeight,
+              width: sankeyGenerator.nodeWidth(),
+            }}
             animate={{
               fillOpacity: hoveredTrajectory ? 0.2 : 0.5,
               x: node.x0,
@@ -233,7 +238,7 @@ export function Sankey({ width, height, data }) {
               onClick={() => toggleSelectedTrajectory(segment.id)}
             />
           )}
-        </AnimatePresence>
+        </AnimatePresence>,
       )
 
       // TODO: Create segments to connect the trajectories between states
@@ -266,13 +271,13 @@ export function Sankey({ width, height, data }) {
           fill="none"
           stroke={`white`}
           strokeWidth={segmentHeight}
-        />
+        />,
       )
     })
   })
 
   const segmentsBySelectedIDs = flatten(
-    links.map((l) => l.segments.filter((s) => selectedTrajectoriesIDs.includes(s.id)))
+    links.map((l) => l.segments.filter((s) => selectedTrajectoriesIDs.includes(s.id))),
   )
 
   const allSilhouettes = []
@@ -370,7 +375,7 @@ export function Sankey({ width, height, data }) {
               onClick={() => toggleSilhouetteFilter(segment.id)}
             />
           )}
-        </AnimatePresence>
+        </AnimatePresence>,
       )
     })
   })

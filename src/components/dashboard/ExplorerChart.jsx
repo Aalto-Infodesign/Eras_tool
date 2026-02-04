@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react"
 import { scaleBand, scaleLinear, max } from "d3"
 import { isNil, xorBy, xor, includes, flattenDeep } from "lodash"
 
-import Filters from "./filters/filters"
+import Filters from "./filters/Filters"
 import { ClearButton } from "../common/Button/ClearButton"
 
 import { motion, AnimatePresence, scale } from "motion/react"
@@ -19,35 +19,31 @@ import { useModifierKey } from "../hooks/useModifierKey"
 import { SilhouetteToggleButton } from "./silhouettes/SilhouettesMorph"
 import { Legend } from "./legend/Legend"
 
-// const CHART_TYPES = [
-//   { type: 1, name: "trajectories" },
-//   { type: 2, name: "P.O." },
-// ]
+import { useData } from "../../contexts/ProcessedDataContext"
+import { useViz } from "../../contexts/VizContext"
+import { useFilters } from "../../contexts/FiltersContext"
 
 export function TrajectoriesExplorerChart(props) {
-  const i = performance.now()
+  console.time("Explorer Chart")
   // Props
-  const { data } = props
+
+  const { silhouettes, analytics, statesData } = useData()
+  const { palette, statesOrder } = useViz()
+  const { filters } = useFilters()
+
   const { w, h, marginTop } = props
-  const { silhouettes } = props
-  const { ageRange } = props.analytics
-  const analytics = props.analytics
-  const { links, statesNames } = props.statesData
-  const { palette, selectedSilhouettes } = props
+  const { ageRange } = analytics
+  const { links, statesNames } = statesData
+  const { selectedSilhouettes } = props
   const { toggleSilhouetteFilter } = props
   const { selectedTrajectoriesIDs, setSelectedTrajectoriesIDs } = props
-  const { statesOrder, setStatesOrder } = props
+  const { setStatesOrder } = props
 
-  const { filters } = props
-  const { indexToName } = props
-  const { statesOrderOriginal } = props
-
-  const { dateRange, setDateRange } = props
-  const { durationRange, setDurationRange } = props
+  // const { dateRange, setDateRange } = props
+  // const { durationRange, setDurationRange } = props
   const { reduceMotion } = props
 
   const { chartType, setChartType } = props
-  const { idealSilhouettes } = props
 
   const [selectedLumps, setSelectedLumps] = useState([])
   // const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
@@ -146,11 +142,14 @@ export function TrajectoriesExplorerChart(props) {
       if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
 
       if (!isNil(l.diseaseDuration)) {
-        return l.diseaseDuration >= durationRange[0] && l.diseaseDuration < durationRange[1]
+        return (
+          l.diseaseDuration >= filters.diseaseDuration.selection[0] &&
+          l.diseaseDuration < filters.diseaseDuration.selection[1]
+        )
       }
       return true
     })
-  }, [completeLinks, selectedIndividualsSet, selectedLumps, durationRange])
+  }, [completeLinks, selectedIndividualsSet, selectedLumps, filters])
 
   // 4. MAPPA PER RICERCA SILHOUETTE (Evita loop annidati)
   const idToSilhouetteMap = useMemo(() => {
@@ -172,7 +171,7 @@ export function TrajectoriesExplorerChart(props) {
     }))
   }, [selectedTrajectoriesIDs, idToSilhouetteMap])
 
-  const scales = useMemo(
+  const chartScales = useMemo(
     () => ({
       x: scaleLinear([0, ageRange[1]], [0, w]),
       y: scaleBand(statesNamesLoaded, [0, h]),
@@ -187,27 +186,28 @@ export function TrajectoriesExplorerChart(props) {
       w,
       h,
       marginTop,
-      data,
+
+      // data: richData, // is global
       completeLinks,
       filteredLinks,
-      silhouettes,
+      // silhouettes,
       filteredSilhouettes,
       selectedSilhouettes,
       toggleSilhouetteFilter,
       setStatesOrder,
-      indexToName,
-      filters,
-      dateRange,
-      ageRange,
-      durationRange,
-      statesOrder,
-      statesNames,
+      // indexToName, // is global
+      // filters,
+      // dateRange,
+      // durationRange,
+      // statesOrder, // is global
+      // statesNames, // is global
       statesNamesLoaded,
-      scales,
-      palette,
+      chartScales,
+      // scales, // is global
+      // palette, // is global
       selectedLumps,
       toggleSelectedLumps,
-      analytics,
+      // analytics, // is global
       selectedTrajectoriesIDs,
       setSelectedTrajectoriesIDs,
       toggleSelectedTrajectory,
@@ -215,32 +215,21 @@ export function TrajectoriesExplorerChart(props) {
       setHoveredTrajectoriesIDs,
       selectedIndex,
       reduceMotion,
-      idealSilhouettes,
+      // idealSilhouettes, // is global
     }),
     [
       w,
       h,
       filteredLinks,
       completeLinks,
-      data,
-      silhouettes,
       filteredSilhouettes,
       selectedSilhouettes,
       toggleSilhouetteFilter,
-      setStatesOrder,
-      indexToName,
-      filters,
-      dateRange,
-      ageRange,
-      durationRange,
-      statesOrder,
-      statesNames,
+      // dateRange,
+      // durationRange,
       statesNamesLoaded,
-      scales,
-      palette,
       selectedLumps,
       toggleSelectedLumps,
-      analytics,
       selectedTrajectoriesIDs,
       setSelectedTrajectoriesIDs,
       toggleSelectedTrajectory,
@@ -248,7 +237,6 @@ export function TrajectoriesExplorerChart(props) {
       setHoveredTrajectoriesIDs,
       selectedIndex,
       reduceMotion,
-      idealSilhouettes,
     ],
   )
 
@@ -287,8 +275,8 @@ export function TrajectoriesExplorerChart(props) {
   //   idsBySilhouette
   // )
 
-  const f = performance.now()
-  // console.log("ExplorerChart render time:", f - i, "ms")
+  console.timeEnd("Explorer Chart")
+
   return (
     <>
       <motion.section
@@ -330,7 +318,7 @@ export function TrajectoriesExplorerChart(props) {
             </motion.section>
           </TrajectoriesContext.Provider>
 
-          <Legend statesOrder={statesOrder} palette={palette} indexToName={indexToName} />
+          <Legend />
         </div>
       </motion.section>
 
@@ -341,19 +329,7 @@ export function TrajectoriesExplorerChart(props) {
           id="chart-filters"
           className="bento-item filters closed"
         >
-          {filters.date && (
-            <Filters
-              data={data}
-              filters={filters}
-              dateRange={dateRange}
-              setDateRange={setDateRange}
-              durationRange={durationRange}
-              setDurationRange={setDurationRange}
-              statesOrder={statesOrder}
-              setStatesOrder={setStatesOrder}
-              statesOrderOriginal={statesOrderOriginal}
-            />
-          )}
+          <Filters />
         </motion.section>
       )}
 

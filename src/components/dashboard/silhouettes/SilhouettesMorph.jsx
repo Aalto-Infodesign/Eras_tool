@@ -28,34 +28,31 @@ import { Virtuoso } from "react-virtuoso"
 import { downloadIDs } from "../../../utils/exportFunctions"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
+import { useViz } from "../../../contexts/VizContext"
 
 export const SilhouettesMorph = (props) => {
   const i = performance.now()
   const TEST = 10
 
-  const { silhouettes } = useData()
+  const { silhouettes, idealSilhouettes, statesData } = useData()
+  const { palette, statesOrder, setStatesOrder } = useViz()
 
-  const { statesNames } = props
+  const statesNames = statesData.statesNames
 
   const {
     toggleSilhouetteFilter = () => {},
     setSelectedSilhouettes = () => {},
     selectedSilhouettes = [],
-    palette = [], // Default palette to empty array
     isHasse,
     setIsHasse,
   } = props
 
-  const { statesOrder, setStatesOrder } = props
-
   const isCmdPressed = useModifierKey("Meta")
 
   const [hoveredIndex, setHoveredIndex] = useState(null)
-
   const [derivedSilhouettes, setDerivedSilhouettes] = useState(null)
   const [expandSides, setExpandSides] = useState(false)
-
-  const [orderMode, setOrderMode] = useState("size")
+  const [orderMode, setOrderMode] = useState(idealSilhouettes.length ? "distance" : "size")
 
   const containerRef = useRef()
 
@@ -181,12 +178,14 @@ export const SilhouettesMorph = (props) => {
         <h3>Silhouettes filters</h3>
         <div className="header-section">
           <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" />
-          <div className="order-dropdown">
-            <select value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
-              <option value="size">Size</option>
-              <option value="distance">Distance</option>
-            </select>
-          </div>
+          {idealSilhouettes.length > 0 && (
+            <div className="order-dropdown">
+              <select value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
+                <option value="size">Size</option>
+                <option value="distance">Distance</option>
+              </select>
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -352,6 +351,7 @@ export const SilhouettesMorph = (props) => {
                         handleLongPress={handleLongPress}
                         isHasse={isHasse}
                         handleOrderClick={handleOrderClick}
+                        idealSilhouettes={idealSilhouettes}
                       />
 
                       <AnimatePresence>
@@ -397,6 +397,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
     isHasse,
     animationDuration,
     handleOrderClick,
+    idealSilhouettes,
   } = props
 
   const isTouchDevice = useIsTouchDevice()
@@ -475,7 +476,9 @@ function SilhouetteCardMain({ s, i, ...props }) {
       )}
 
       {isInView && <span className="typology-perc-text">{s.size}</span>}
-      {isInView && <span className="typology-perc-text">{s.levenshteinDistance.toFixed(2)}</span>}
+      {isInView && idealSilhouettes.length > 0 && (
+        <span className="typology-perc-text">{s.levenshteinDistance.toFixed(2)}</span>
+      )}
 
       {/* TODO Capire QUAL'é LA BEST MATCH */}
       {isInView && s.levenshteinDistance > 0.9 && <span className="top-banner">★</span>}
@@ -1127,6 +1130,7 @@ function MorphHasse({
 
   return (
     <motion.svg
+      initial={{ height: height, width: width }}
       animate={{ height: height, width: width }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
       ref={scope}
@@ -1289,6 +1293,7 @@ function MorphHasse({
                   {(isInFirstLayers || isSelected) && (
                     <motion.g
                       initial={{
+                        y: isHasse ? 0 : -10,
                         scale: 0,
                       }}
                       animate={{ y: isHasse ? 0 : -10, scale: 1 }}
@@ -1297,6 +1302,10 @@ function MorphHasse({
                       }}
                     >
                       <motion.rect
+                        initial={{
+                          width: rectWidth,
+                          height: rectHeight,
+                        }}
                         animate={{
                           width: rectWidth,
                           height: rectHeight,

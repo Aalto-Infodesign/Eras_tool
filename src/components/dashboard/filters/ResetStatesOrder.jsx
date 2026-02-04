@@ -1,16 +1,14 @@
 import { isNil } from "lodash"
 import { ClearButton } from "../../common/Button/ClearButton"
 import { areArraysEqual } from "../../../utils/areArraysEqual"
+import { useViz } from "../../../contexts/VizContext"
 
-export const ResetStatesOrder = (props) => {
-  const { statesOrder, setStatesOrder } = props
-  const { statesOrderOriginal } = props
+export const ResetStatesOrder = () => {
+  const { statesOrder, setStatesOrder, statesOrderOriginal } = useViz()
 
-  // const sortedOrder = !isNil(statesOrder) && [...statesOrder].sort()
   const isActive = !isNil(statesOrder) && !areArraysEqual(statesOrder, statesOrderOriginal)
 
   function resetState() {
-    console.log(statesOrderOriginal)
     setStatesOrder(statesOrderOriginal)
   }
   return (

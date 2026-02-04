@@ -1,34 +1,25 @@
-import Dates from "./dates"
 // import Dates from "./DatesSlider"
-import DiseaseDuration from "./diseaseDuration"
 import { ResetStatesOrder } from "./ResetStatesOrder"
 
 import { flattenDeep, isNil } from "lodash"
 
+import { FilterWrapper } from "./UI/FilterWrapper"
+
+import { useData } from "../../../contexts/ProcessedDataContext"
+import { useFilters } from "../../../contexts/FiltersContext"
+
 import "./Filters.css"
 
-const Filters = ({
-  data,
-  filters,
-  statesOrder,
-  setStatesOrder,
-  statesOrderOriginal,
-  dateRange,
-  setDateRange,
-  durationRange,
-  setDurationRange,
-}) => {
+const Filters = () => {
+  const { richData } = useData()
+  const { filters } = useFilters()
   const sliderDimensions = { x: 150, y: 30 }
 
-  const allYears = flattenDeep(data.map((d) => d.years))
-  const allDurations = data
+  const allYears = flattenDeep(richData.map((d) => d.years))
+  const allDurations = richData
     .map((d) => d.diseaseDuration)
     .filter((duration) => !isNil(duration))
     .filter((duration) => duration !== 0)
-  // const allAges = data.map((d) => d.SwitchEventAge).filter((age) => !isNil(age))
-
-  // console.log(allYears)
-  // console.log(allDurations)
 
   return (
     <>
@@ -36,39 +27,29 @@ const Filters = ({
       <section id="filters">
         <div className="filter-wrapper">
           {filters.date.active && (
-            <Dates
+            <FilterWrapper
+              name={"date"}
+              title={"Date"}
               sliderDimensions={sliderDimensions}
-              date={filters.date}
-              allYears={allYears}
-              dateRange={dateRange}
-              setDateRange={setDateRange}
+              filter={filters.date}
+              allPoints={allYears}
+              hasPattern={true}
             />
           )}
           {filters.diseaseDuration.active && (
-            <DiseaseDuration
+            <FilterWrapper
+              name={"diseaseDuration"}
+              title={"Disease Duration"}
               sliderDimensions={sliderDimensions}
-              diseaseDuration={filters.diseaseDuration}
-              allDurations={allDurations}
-              durationRange={durationRange}
-              setDurationRange={setDurationRange}
+              filter={filters.diseaseDuration}
+              allPoints={allDurations}
+              hasPattern={false}
+              hasDoubleHandle={false}
             />
           )}
-          {/* {filters.age.active && (
-            <Age
-              sliderDimensions={sliderDimensions}
-              age={filters.age}
-              allDurations={allDurations}
-              durationRange={durationRange}
-              setDurationRange={setDurationRange}
-            />
-          )} */}
         </div>
 
-        <ResetStatesOrder
-          statesOrder={statesOrder}
-          setStatesOrder={setStatesOrder}
-          statesOrderOriginal={statesOrderOriginal}
-        />
+        <ResetStatesOrder />
       </section>
     </>
   )

@@ -1,22 +1,24 @@
 import { useState, useContext } from "react"
 import { TrajectoriesContext } from "../TrajectoriesContext"
 import { motion, AnimatePresence } from "motion/react"
-import "./Trajectories.css"
 import { isColorDark } from "../../../utils/colorHelpers"
+
+import { useViz } from "../../../contexts/VizContext"
+import { useFilters } from "../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
 import { union } from "lodash"
 export function TrajectoriesMotion(props) {
+  const { filters } = useFilters()
+  const { palette } = useViz()
+
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
     marginTop,
-    palette,
-    dateRange,
-    scales,
+    chartScales,
     selectedTrajectoriesIDs,
     selectedLumps,
     toggleSelectedTrajectory,
-    filters,
     filteredLinks,
     hoveredTrajectoriesIDs,
     selectedIndex,
@@ -28,7 +30,7 @@ export function TrajectoriesMotion(props) {
   const [markerHoveredId, setMarkerHoveredId] = useState(null)
   // Da poi sposare un livello più in alto
 
-  const { x, y } = scales
+  const { x, y } = chartScales
 
   const rectDimensions = { width: 2, height: 4 }
 
@@ -110,11 +112,14 @@ export function TrajectoriesMotion(props) {
             const isHovered = hoveredTrajectoriesIDs.includes(d.id)
             const isSelected = selectedTrajectoriesIDs.includes(d.id)
             {
-              /* const isFilteredDate = d.source.date >= dateRange[0] && d.source.date <= dateRange[1] */
+              /* const isFilteredDate = d.source.date >= filters.date.selection[0] && d.source.date <= filters.date.selection[1] */
             }
 
             let offset = 0
-            if (d.source.date >= dateRange[0] && d.source.date <= dateRange[1]) {
+            if (
+              d.source.date >= filters.date.selection[0] &&
+              d.source.date <= filters.date.selection[1]
+            ) {
               const length = Math.hypot(
                 Math.abs(x(d.target.x) - x(d.source.x)),
                 Math.abs(y(d.target.state) - y(d.source.state)),
@@ -127,7 +132,10 @@ export function TrajectoriesMotion(props) {
 
               offset = `${visibleLength} ${totalGap} `
             } else {
-              if (dateRange[0] - d.source.date < (dateRange[0] - filters.date.extent[0]) / 2)
+              if (
+                filters.date.selection[0] - d.source.date <
+                (filters.date.selection[0] - filters.date.extent[0]) / 2
+              )
                 offset = "1.1 1.1"
               else offset = " .75 1.5"
             }
@@ -156,7 +164,7 @@ export function TrajectoriesMotion(props) {
 
                   // opacity: isFilteredDate ? 0.5 : 1,
                   strokeDasharray: offset,
-                  // strokeDashoffset: d.source.date > dateRange[0] ? -1 : 0,
+                  // strokeDashoffset: d.source.date > filters.date.selection[0] ? -1 : 0,
                   strokeWidth: isSelected ? 1.5 : 0.25,
                   stroke: palette[d.source.state],
 

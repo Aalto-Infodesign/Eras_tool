@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react"
 import { Tooltip } from "../../common/Tooltip/Tooltip"
 import { groupBy, keys } from "lodash"
 import { romanize } from "../../../utils/numberHelpers"
+import { useViz } from "../../../contexts/VizContext"
 
 // --- Constants for better maintainability ---
 const MARGIN_Y = 25
@@ -200,7 +201,7 @@ function SankeyNode({
   return (
     <motion.g key={node.id}>
       <motion.rect
-        initial={{ x: node.x0, y: node.y0 }}
+        initial={{ x: node.x0, y: node.y0, height: nodeHeight, width: NODE_WIDTH }}
         animate={{
           // fillOpacity: hoveredTrajectory ? 0.2 : 0.5,
           fillOpacity: isSelected ? 1 : 0.5,
@@ -415,9 +416,8 @@ function SilhouetteGroup({
 
 // --- Main Sankey Component ---
 export function Sankey({ width, height, data }) {
-  // const i = performance.now()
-  //console.log("Sankey Data", data)
-  const { palette, setSelectedTrajectoriesIDs } = useContext(TrajectoriesContext)
+  const { palette } = useViz()
+  const { setSelectedTrajectoriesIDs } = useContext(TrajectoriesContext)
 
   const [hoveredLink, setHoveredLink] = useState(null)
   const [selectedLinks, setSelectedLinks] = useState([])
