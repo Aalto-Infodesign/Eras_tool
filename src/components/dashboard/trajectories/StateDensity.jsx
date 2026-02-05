@@ -4,13 +4,16 @@ import { TrajectoriesContext } from "../TrajectoriesContext"
 import { select, scaleLinear, curveStep, mean, line } from "d3"
 import { isNil } from "lodash"
 
+import { useViz } from "../../../contexts/VizContext"
+
 export function StateDensity(props) {
+  const { palette } = useViz()
   const trajectoriesContext = useContext(TrajectoriesContext)
-  const { marginTop, palette, selectedSilhouettes, scales } = trajectoriesContext
+  const { marginTop, selectedSilhouettes, chartScales } = trajectoriesContext
 
   const { filteredLinks } = props
   // const { showStateDensity } = props
-  const { x, y } = scales
+  const { x, y } = chartScales
 
   const { unitedObjectsOriginal, mergedObjectsByState } = props
   const { hoveredDistribution } = props

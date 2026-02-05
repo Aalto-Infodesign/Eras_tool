@@ -56,7 +56,7 @@ function SankeyNode({
   const isSelected = selectedNode && selectedNode.id === node.id
 
   function handleClickLeft(node) {
-    //console.log("Node clicked:", node)
+    console.log("Node clicked:", node)
     // selectLeftIds(node)
 
     const upstreamData = traceUpstream(node)

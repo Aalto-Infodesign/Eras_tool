@@ -27,139 +27,187 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
     if (!richData?.length) return { statesData: [], analytics: [], trajectories: [] }
     console.time("States Data")
     // Extracting States from Dataset
-    const states = richData
-      .map((p) => p.trajectory)
-      .flat()
-      .filter((e, n, l) => l.indexOf(e) === n)
-      .map((state) => ({
-        name: state,
-        population: richData.filter((d) => d.trajectory.includes(state)),
-        population_size: richData.filter((d) => d.trajectory.includes(state)).length,
-        permanence_distribution: richData
-          .filter((d) => d.trajectory.includes(state))
-          .map((individual) =>
-            individual.trajectory
-              .reduce((a, e, i) => (e === state && a.push(i), a), [])
-              .map((index) =>
-                index + 1 !== individual.SwitchEventAge.length
-                  ? individual.SwitchEventAge[index + 1] - individual.SwitchEventAge[index]
-                  : "final_state",
-              ),
-          ),
-        wheel: richData
-          .filter((d) => d.trajectory.includes(state))
-          .map((d) => d.trajectory.filter((e) => e !== state))
-          .flat()
-          .filter((e, n, l) => l.indexOf(e) === n),
-        quantiles: {},
-      }))
 
-    const statesNames = states.map((state) => state.name)
+    console.time("States")
+    // Build a lookup map in one pass
+    const stateMap = new Map()
 
-    const maxTrajectoryLength = max(richData.map((d) => d.trajectory.length))
-    const trajectorySlots = range(0, maxTrajectoryLength + 1)
-    const linearCombinations = statesNames.map((state) => {
-      const lc = {
-        state: state,
-        frequencies: trajectorySlots.map((slot) => {
-          return richData.filter((individual) => {
-            return individual.trajectory
-              .reduce((a, e, i) => {
-                if (e === state) {
-                  a.push(i)
-                }
-                return a
-              }, [])
-              .includes(slot)
-          }).length
-        }),
-      }
-      return lc
+    richData.forEach((person) => {
+      person.trajectory.forEach((state, index) => {
+        if (!stateMap.has(state)) {
+          stateMap.set(state, {
+            population: [],
+            otherStates: new Set(),
+          })
+        }
+
+        const stateData = stateMap.get(state)
+        stateData.population.push(person)
+
+        // Track other states this person visited
+        person.trajectory.forEach((s) => {
+          if (s !== state) stateData.otherStates.add(s)
+        })
+      })
     })
 
-    states.forEach(
-      (state) =>
-        (state.frequencies = linearCombinations.find((lc) => lc.state === state.name).frequencies),
-    )
+    // Transform into your desired structure
+    const states = Array.from(stateMap.entries()).map(([stateName, data]) => ({
+      name: stateName,
+      population: data.population,
+      population_size: data.population.length,
+      permanence_distribution: data.population.map((individual) =>
+        individual.trajectory
+          .reduce((a, e, i) => (e === stateName && a.push(i), a), [])
+          .map((index) =>
+            index + 1 !== individual.SwitchEventAge.length
+              ? individual.SwitchEventAge[index + 1] - individual.SwitchEventAge[index]
+              : "final_state",
+          ),
+      ),
+      wheel: Array.from(data.otherStates),
+      quantiles: {},
+    }))
+    console.timeEnd("States")
+
+    console.time("Linear Combo Optimized")
+
+    // Pre-calculate once
+    const maxTrajectoryLength = Math.max(...richData.map((d) => d.trajectory.length))
+    const trajectorySlots = Array.from({ length: maxTrajectoryLength + 1 }, (_, i) => i)
+
+    // Build frequency matrix in ONE pass through data
+    const frequencyMap = new Map()
+
+    richData.forEach((individual) => {
+      individual.trajectory.forEach((state, slotIndex) => {
+        if (!frequencyMap.has(state)) {
+          frequencyMap.set(state, new Array(trajectorySlots.length).fill(0))
+        }
+        frequencyMap.get(state)[slotIndex]++
+      })
+    })
+
+    // Convert to your format
+    const linearCombinations = states.map((state) => ({
+      state: state.name,
+      frequencies: frequencyMap.get(state.name) || new Array(trajectorySlots.length).fill(0),
+    }))
+
+    // Attach frequencies directly
+    states.forEach((state) => {
+      state.frequencies = frequencyMap.get(state.name) || new Array(trajectorySlots.length).fill(0)
+    })
 
     const statesNamesSorted = dynamicSortLC(linearCombinations, trajectorySlots).map(
       (lc) => lc.state,
     )
-
     const statesSorted = dynamicSortLC(states, trajectorySlots)
 
+    console.timeEnd("Linear Combo Optimized")
+
+    console.time("Perm")
     const allPermanences = statesSorted
       .map((d) => d.permanence_distribution)
       .flat()
       .flat()
       .filter((e) => e !== "final_state")
+    console.timeEnd("Perm")
 
     //TODO :
     //  move to another component
     //  so that quants are editable
 
+    console.time("Quantiles Buckets")
+    /**
+ * 
     const quantilesNumber = 4
-    const quantiles = range(0, quantilesNumber).map((slice) => quantile(allPermanences, slice))
+    const quantiles = Array.from({ length: quantilesNumber }, (_, i) => quantile(allPermanences, i))
 
     statesSorted.forEach((state) => {
-      quantiles.forEach((q, n) => {
-        let result
-        if (n === 0) {
-          result = state.permanence_distribution.filter((pd) => pd <= q).length
-        } else {
-          result = state.permanence_distribution.filter(
-            (pd) => pd <= q && pd >= quantiles[n - 1],
-          ).length
+      const counts = new Array(quantilesNumber).fill(0)
+
+      state.permanence_distribution.flat().forEach((pd) => {
+        if (typeof pd !== "number") return
+
+        // Find which bucket (non-cumulative)
+        for (let i = 0; i < quantiles.length; i++) {
+          if (i === 0) {
+            if (pd <= quantiles[i]) {
+              counts[i]++
+              break
+            }
+          } else {
+            if (pd > quantiles[i - 1] && pd <= quantiles[i]) {
+              counts[i]++
+              break
+            }
+          }
         }
-        state.quantiles["quantile_" + n] = result
+      })
+
+      counts.forEach((count, n) => {
+        state.quantiles[`quantile_${n}`] = count
       })
     })
+
+ */
+
+    console.timeEnd("Quantiles Buckets")
 
     // const longestPath = max(richData, (d) => d.trajectory.length)
+    console.time("Trajectories Optimized v1")
 
-    const trajectories = richData.map((datum, i) => {
-      const trajectory = datum.trajectory.map((state, n) => {
-        const link = { source: { x: 0, state: "" }, target: { x: 0, state: "" } }
-        link.id = datum.FINNGENID
-        link.diseaseDuration = datum.diseaseDuration
-        link.firstDate = datum.firstDate
+    const trajectories = richData.map((datum) => {
+      const { FINNGENID, diseaseDuration, trajectory, years, SwitchEventAge } = datum
+      const firstDate = years?.[0]
+      const lastIndex = trajectory.length - 1
 
-        link.source.state = state
-        link.source.date = datum?.years[n] | []
-        link.source.x = datum.SwitchEventAge[n]
-        link.source.age = datum.SwitchEventAge[n]
-        link.initialState = n === 0
-        link.firstDate = datum.years[0]
-        if (n === datum.trajectory.length - 1) {
-          link.target.state = state
-          link.target.x = datum.SwitchEventAge[n]
-          link.target.age = datum.SwitchEventAge[n]
-          link.target.date = datum.years[n]
-          link.finalState = true
-        } else {
-          link.target.state = datum.trajectory[n + 1]
-          link.target.x = datum.SwitchEventAge[n + 1]
-          link.target.age = datum.SwitchEventAge[n + 1]
-          link.target.date = datum.years[n + 1]
-          link.finalState = false
+      const links = new Array(trajectory.length)
+
+      for (let n = 0; n < trajectory.length; n++) {
+        const isLast = n === lastIndex
+        const state = trajectory[n]
+
+        // Reuse variables to reduce lookups
+        const sourceAge = SwitchEventAge[n]
+        const targetAge = isLast ? sourceAge : SwitchEventAge[n + 1]
+
+        links[n] = {
+          id: FINNGENID,
+          diseaseDuration,
+          firstDate,
+          source: {
+            state,
+            date: years?.[n],
+            x: sourceAge,
+            age: sourceAge,
+          },
+          target: {
+            state: isLast ? state : trajectory[n + 1],
+            x: targetAge,
+            age: targetAge,
+            date: isLast ? years?.[n] : years?.[n + 1],
+          },
+          initialState: n === 0,
+          finalState: isLast,
         }
-        return link
-      })
-      trajectory.states = datum.trajectory
+      }
 
-      trajectory.typology =
-        datum.trajectory.length > 0
-          ? datum.trajectory.reduce((typology, state) => typology + "-" + state)
-          : ""
-      return trajectory
+      links.states = trajectory
+      links.typology = trajectory.join("-")
+
+      return links
     })
+
+    console.timeEnd("Trajectories Optimized v1")
 
     const analytics = {
       datapoints: richData.length,
       ageRange: extent(richData.map((datum) => datum.SwitchEventAge).flat()),
       dateRange: extent(richData.map((datum) => datum.years).flat()),
-      quantilesNumber: 4,
-      stayLenQuants: quantiles,
+      // quantilesNumber: 4,
+      // stayLenQuants: quantiles,
     }
 
     const statesData = {

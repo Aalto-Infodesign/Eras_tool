@@ -62,6 +62,8 @@ export function Grid(props) {
               initial={{
                 x1: 0,
                 x2: w,
+                y1: yScale(name) + marginTop,
+                y2: yScale(name) + marginTop,
                 strokeWidth: 0,
                 stroke: palette[name],
               }}
@@ -139,6 +141,8 @@ export function Grid(props) {
             initial={{
               x1: xScale(d.x[0]),
               x2: xScale(d.x[1]),
+              y1: yScale(d.state) + marginTop,
+              y2: yScale(d.state) + marginTop,
             }}
             animate={{ y1: yScale(d.state) + marginTop, y2: yScale(d.state) + marginTop }}
             transition={{ duration: 0.2 }}

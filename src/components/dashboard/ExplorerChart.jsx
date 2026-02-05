@@ -22,6 +22,7 @@ import { Legend } from "./legend/Legend"
 import { useData } from "../../contexts/ProcessedDataContext"
 import { useViz } from "../../contexts/VizContext"
 import { useFilters } from "../../contexts/FiltersContext"
+import { Virtuoso } from "react-virtuoso"
 
 export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
@@ -415,7 +416,72 @@ export function TrajectoriesExplorerChart(props) {
               </ClearButton>
               <div className="filter-bar padded">
                 <AnimatePresence>
-                  {selectedIDssWithSilhouette.map((id, i) => {
+                  <Virtuoso
+                    style={{
+                      height: "100px",
+                      width: "100%",
+                      paddingLeft: "10px",
+                      // paddingBottom: "10px",
+                      display: "flex",
+                      alignItems: "end",
+                      overflowX: "scroll",
+                      overflowY: "hidden",
+                    }}
+                    horizontalDirection
+                    data={selectedIDssWithSilhouette}
+                    itemContent={(i, id) => {
+                      const isSelected = includes(selectedSilhouettes, id.silhouette)
+                      console.log(id, i)
+                      return (
+                        <motion.div
+                          layout
+                          key={id.id}
+                          variants={childrenVariants}
+                          initial={"hidden"}
+                          animate={"visible"}
+                          exit={"hidden"}
+                          className="chip"
+                          onHoverStart={() => setChipHoveredId(id.id)}
+                          onHoverEnd={() => setChipHoveredId(null)}
+                        >
+                          {/* <AnimatePresence> */}
+                          {/* {chipHoveredId === id.id && ( */}
+                          <motion.div
+                            layout
+                            // initial={{ opacity: 0, width: 0, height: 0 }}
+                            // animate={{ opacity: 1, width: "auto", height: "auto" }}
+                            // exit={{ opacity: 0, width: 0, height: 0 }}
+                          >
+                            <SilhouetteToggleButton
+                              silhouetteName={id.silhouette}
+                              isSelected={isSelected}
+                              toggleSilhouetteFilter={toggleSilhouetteFilter}
+                              palette={palette}
+                              x={xScale}
+                              y={yScale}
+                            />
+                          </motion.div>
+                          {/* )} */}
+                          {/* </AnimatePresence> */}
+                          <motion.p layout>
+                            <span>{id.id}</span>
+                          </motion.p>
+                          {/* {chipHoveredId === id.id && ( */}
+                          <motion.button
+                            className="close-btn"
+                            variants={closeBtnVariants}
+                            initial={"hidden"}
+                            animate={chipHoveredId === id.id ? "visible" : "hidden"}
+                            layout
+                            onClick={() => toggleSelectedTrajectory(id.id)}
+                          >
+                            ×
+                          </motion.button>
+                        </motion.div>
+                      )
+                    }}
+                  />
+                  {/* {selectedIDssWithSilhouette.map((id, i) => {
                     const isSelected = includes(selectedSilhouettes, id.silhouette)
                     return (
                       <motion.div
@@ -429,13 +495,10 @@ export function TrajectoriesExplorerChart(props) {
                         onHoverStart={() => setChipHoveredId(id.id)}
                         onHoverEnd={() => setChipHoveredId(null)}
                       >
-                        {/* <AnimatePresence> */}
-                        {/* {chipHoveredId === id.id && ( */}
+                        
                         <motion.div
                           layout
-                          // initial={{ opacity: 0, width: 0, height: 0 }}
-                          // animate={{ opacity: 1, width: "auto", height: "auto" }}
-                          // exit={{ opacity: 0, width: 0, height: 0 }}
+             
                         >
                           <SilhouetteToggleButton
                             silhouetteName={id.silhouette}
@@ -446,12 +509,10 @@ export function TrajectoriesExplorerChart(props) {
                             y={yScale}
                           />
                         </motion.div>
-                        {/* )} */}
-                        {/* </AnimatePresence> */}
+            
                         <motion.p layout>
                           <span>{id.id}</span>
                         </motion.p>
-                        {/* {chipHoveredId === id.id && ( */}
                         <motion.button
                           className="close-btn"
                           variants={closeBtnVariants}
@@ -464,7 +525,7 @@ export function TrajectoriesExplorerChart(props) {
                         </motion.button>
                       </motion.div>
                     )
-                  })}
+                  })} */}
                 </AnimatePresence>
               </div>
             </motion.div>
