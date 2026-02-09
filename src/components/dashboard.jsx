@@ -5,6 +5,7 @@ import { SilhouettesMorph } from "./dashboard/silhouettes/SilhouettesMorph"
 import { CarouselWrapper } from "./common/Carousel/Carousel"
 import { SilhouettesPie } from "./dashboard/silhouettes/SilhouettesPie"
 import { DebugPanel } from "./dashboard/debug/DebugPanel"
+import { Filters } from "./dashboard/filters/Filters"
 import {
   motion,
   useAnimate,
@@ -18,6 +19,7 @@ import { ExportIDs } from "./dashboard/export/ExportIDs"
 
 import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
+import { useFilters } from "../contexts/FiltersContext"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
@@ -26,6 +28,7 @@ const Dashboard = () => {
 
   const { richData, analytics, silhouettes, idealSilhouettes } = useData()
   const { statesOrder } = useViz()
+  const { filters } = useFilters()
 
   //For File Loader
   const minHeight = 100
@@ -45,10 +48,6 @@ const Dashboard = () => {
   // ?? Auto-select silhouettes based on initial FLow?
   const [selectedSilhouettes, setSelectedSilhouettes] = useState(idealSilhouettes) // Main filter
   const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
-
-  // const [dateRange, setDateRange] = useState(filters?.date?.extent || [0, 200])
-  // const [durationRange, setDurationRange] = useState(filters?.diseaseDuration?.extent || [0, 100])
-  // const [ageRange, setAgeRange] = useState(filters?.age?.extent || [0, 100])
 
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
 
@@ -280,17 +279,20 @@ const Dashboard = () => {
           setSelectedTrajectoriesIDs={setSelectedTrajectoriesIDs}
           chartType={chartType}
           setChartType={setChartType}
-          // Filters
-
-          // dateRange={dateRange}
-          // setDateRange={setDateRange}
-          // durationRange={durationRange}
-          // setDurationRange={setDurationRange}
-          // ageRange={ageRange}
-          // setAgeRange={setAgeRange}
           // Other stuff
           reduceMotion={reduceMotion}
         />
+
+        {filters && (
+          <motion.section
+            layout
+            key={"filters"}
+            id="chart-filters"
+            className="bento-item filters closed"
+          >
+            <Filters />
+          </motion.section>
+        )}
 
         {/* <StatesDendrogram
             marginTop={marginTop}

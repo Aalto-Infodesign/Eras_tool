@@ -10,7 +10,7 @@ import { useFilters } from "../../../contexts/FiltersContext"
 
 import "./Filters.css"
 
-const Filters = () => {
+export const Filters = () => {
   const { richData } = useData()
   const { filters } = useFilters()
   const sliderDimensions = { x: 150, y: 30 }
@@ -54,5 +54,3 @@ const Filters = () => {
     </>
   )
 }
-
-export default Filters

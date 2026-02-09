@@ -2,10 +2,9 @@ import { useState, useEffect, useMemo } from "react"
 import { scaleBand, scaleLinear, max } from "d3"
 import { isNil, xorBy, xor, includes, flattenDeep } from "lodash"
 
-import Filters from "./filters/Filters"
 import { ClearButton } from "../common/Button/ClearButton"
 
-import { motion, AnimatePresence, scale } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
 
 import "./ExplorerChart.css"
 
@@ -323,17 +322,6 @@ export function TrajectoriesExplorerChart(props) {
         </div>
       </motion.section>
 
-      {filters && (
-        <motion.section
-          layout
-          key={"filters"}
-          id="chart-filters"
-          className="bento-item filters closed"
-        >
-          <Filters />
-        </motion.section>
-      )}
-
       <motion.section
         layout
         key={"filtered-items"}
@@ -417,40 +405,37 @@ export function TrajectoriesExplorerChart(props) {
               <div className="filter-bar padded">
                 <AnimatePresence>
                   <Virtuoso
+                    className="virtuoso-scroller-wrapper"
                     style={{
                       height: "100px",
                       width: "100%",
                       paddingLeft: "10px",
-                      // paddingBottom: "10px",
-                      display: "flex",
-                      alignItems: "end",
-                      overflowX: "scroll",
-                      overflowY: "hidden",
                     }}
                     horizontalDirection
                     data={selectedIDssWithSilhouette}
                     itemContent={(i, id) => {
                       const isSelected = includes(selectedSilhouettes, id.silhouette)
-                      console.log(id, i)
+
                       return (
-                        <motion.div
-                          layout
-                          key={id.id}
-                          variants={childrenVariants}
-                          initial={"hidden"}
-                          animate={"visible"}
-                          exit={"hidden"}
-                          className="chip"
-                          onHoverStart={() => setChipHoveredId(id.id)}
-                          onHoverEnd={() => setChipHoveredId(null)}
+                        <div
+                          className="virtuoso-scroller"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            height: "100%",
+                            marginRight: "8px", // spacing between items
+                          }}
                         >
-                          {/* <AnimatePresence> */}
-                          {/* {chipHoveredId === id.id && ( */}
                           <motion.div
-                            layout
-                            // initial={{ opacity: 0, width: 0, height: 0 }}
-                            // animate={{ opacity: 1, width: "auto", height: "auto" }}
-                            // exit={{ opacity: 0, width: 0, height: 0 }}
+                            key={id.id}
+                            variants={childrenVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            className="chip"
+                            onHoverStart={() => setChipHoveredId(id.id)}
+                            onHoverEnd={() => setChipHoveredId(null)}
+                            style={{ display: "flex", alignItems: "center", gap: "8px" }}
                           >
                             <SilhouetteToggleButton
                               silhouetteName={id.silhouette}
@@ -460,24 +445,20 @@ export function TrajectoriesExplorerChart(props) {
                               x={xScale}
                               y={yScale}
                             />
-                          </motion.div>
-                          {/* )} */}
-                          {/* </AnimatePresence> */}
-                          <motion.p layout>
+
                             <span>{id.id}</span>
-                          </motion.p>
-                          {/* {chipHoveredId === id.id && ( */}
-                          <motion.button
-                            className="close-btn"
-                            variants={closeBtnVariants}
-                            initial={"hidden"}
-                            animate={chipHoveredId === id.id ? "visible" : "hidden"}
-                            layout
-                            onClick={() => toggleSelectedTrajectory(id.id)}
-                          >
-                            ×
-                          </motion.button>
-                        </motion.div>
+
+                            <motion.button
+                              className="close-btn"
+                              variants={closeBtnVariants}
+                              initial="hidden"
+                              animate={chipHoveredId === id.id ? "visible" : "hidden"}
+                              onClick={() => toggleSelectedTrajectory(id.id)}
+                            >
+                              ×
+                            </motion.button>
+                          </motion.div>
+                        </div>
                       )
                     }}
                   />

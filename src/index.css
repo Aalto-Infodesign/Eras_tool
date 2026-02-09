@@ -229,27 +229,27 @@ h1 {
   /* grid-row: span 1; */
 }
 .bento-item.filters {
-  position: absolute;
+  /* position: absolute;
   width: 200px;
   top: 50vh;
-  right: var(--spacing-4);
+  right: var(--spacing-4); */
 
-  /* grid-column: span 3;
+  grid-column: span 3;
   grid-row: span 1;
-  order: 5; */
+  order: 6;
 }
 .bento-item.filters.closed {
-  position: absolute;
+  /* position: absolute;
   width: 200px;
   height: 400px;
   top: calc(50vh - 200px);
   right: -205px;
   transition: right 300ms ease-in-out;
-  filter: drop-shadow(3px 5px 5px rgba(0, 0, 0, 0.682));
+  filter: drop-shadow(3px 5px 5px rgba(0, 0, 0, 0.682)); */
 
-  /* grid-column: span 3;
+  grid-column: span 3;
   grid-row: span 1;
-  order: 5; */
+  order: 6;
 }
 .bento-item.filters.closed:hover {
   /* right: var(--spacing-md); */
