@@ -13,9 +13,11 @@ import { useReactFlow } from "@xyflow/react"
 import { useViz } from "../../contexts/VizContext"
 import { useData } from "../../contexts/ProcessedDataContext"
 
+import { ResetStatesOrder } from "./ResetStatesOrder"
+
 export function StateSelection() {
   const { removedStates, setRemovedStates, scales } = useData()
-  const { palette, statesOrderOriginal, statesOrder, setStatesOrder, isLegend } = useViz()
+  const { palette, statesOrder, setStatesOrder, isLegend } = useViz()
 
   const { screenToFlowPosition, setNodes } = useReactFlow()
 
@@ -173,13 +175,15 @@ export function StateSelection() {
                 </motion.span>
               </p>
               <div className="buttons-wrapper">
-                <button
-                  onClick={() => {
-                    addNodetoFlow("default", item, palette[item])
-                  }}
-                >
-                  add
-                </button>
+                {!isLegend && (
+                  <button
+                    onClick={() => {
+                      addNodetoFlow("default", item, palette[item])
+                    }}
+                  >
+                    add
+                  </button>
+                )}
                 {statesOrder.length > 1 && (
                   <button
                     onClick={() => {
@@ -227,6 +231,8 @@ export function StateSelection() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {isLegend && <ResetStatesOrder />}
     </motion.section>
   )
 }

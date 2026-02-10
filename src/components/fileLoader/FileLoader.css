@@ -61,10 +61,11 @@
   cursor: pointer;
   font-size: 0.8rem;
   background-color: var(--surface-primary);
+  transition: all 100ms ease-out;
 }
 .file-input-label:hover {
   background-color: var(--surface-secondary);
-  scale: 1.05;
+  scale: 1.02;
 }
 .file-input-label:focus {
   outline: 0.5px solid var(--violet-700);

@@ -36,7 +36,7 @@ export const Trajectories = (props) => {
           showLinesOfSelectedLumps &&
           filteredLinks) ||
           (isSelectModeLines && filteredLinks),
-        (d) => `switch-${d.id}-${d.lump}-${d.source.x}`
+        (d) => `switch-${d.id}-${d.lump}-${d.source.x}`,
       )
       .join(
         (enter) =>
@@ -62,7 +62,7 @@ export const Trajectories = (props) => {
             .attr("stroke-dasharray", (d) => {
               const length = Math.hypot(
                 Math.abs(x(d.target.x) - x(d.source.x)),
-                Math.abs(y(d.target.state) - y(d.source.state))
+                Math.abs(y(d.target.state) - y(d.source.state)),
               )
               const startGap = 1
               const endGap = 1.2
@@ -93,7 +93,7 @@ export const Trajectories = (props) => {
               if (d.source.date >= dateRange[0]) {
                 const length = Math.hypot(
                   Math.abs(x(d.target.x) - x(d.source.x)),
-                  Math.abs(y(d.target.state) - y(d.source.state))
+                  Math.abs(y(d.target.state) - y(d.source.state)),
                 )
                 const startGap = 1
                 const endGap = 1.2
@@ -131,16 +131,16 @@ export const Trajectories = (props) => {
                 ? selectedTrajectoriesIDs.includes(d.id)
                   ? `color-mix(in srgb,  ${palette[d.source.state]}, var(--surface-contrast) 0%)`
                   : `color-mix(in srgb,  ${palette[d.source.state]}, var(--surface-contrast) 40%)`
-                : `color-mix(in srgb,  ${palette[d.source.state]}, var(--surface-contrast) 0%)`
+                : `color-mix(in srgb,  ${palette[d.source.state]}, var(--surface-contrast) 0%)`,
             )
           // .attr("opacity", (d) => (selectedTrajectoriesIDs.includes(d.id) ? 1 : 1))
         },
 
-        (exit) => exit.transition().duration(300).attr("opacity", 0).remove()
+        (exit) => exit.transition().duration(300).attr("opacity", 0).remove(),
       )
 
     const highlightedTrajectories = filteredLinks.filter((d) =>
-      selectedTrajectoriesIDs.includes(d.id)
+      selectedTrajectoriesIDs.includes(d.id),
     )
     // console.log("highlightedTrajectories", highlightedTrajectories)
 
@@ -228,11 +228,11 @@ export const Trajectories = (props) => {
           exit.select("circle").transition().duration(300).attr("r", 0).remove()
 
           exit.transition().duration(300).remove()
-        }
+        },
       )
 
     const singleStateSwitches = filteredLinks.filter(
-      (l) => l.source.state === l.target.state && l.initialState === true && l.finalState === true
+      (l) => l.source.state === l.target.state && l.initialState === true && l.finalState === true,
     )
 
     // console.log("singleStateSwitches", singleStateSwitches)
@@ -246,7 +246,7 @@ export const Trajectories = (props) => {
           showLinesOfSelectedLumps &&
           singleStateSwitches) ||
           (isSelectModeLines && singleStateSwitches),
-        (d) => `singleStateSwitch-${d.id}-${d.lump}-${d.source.x}`
+        (d) => `singleStateSwitch-${d.id}-${d.lump}-${d.source.x}`,
       )
       .join(
         (enter) => {
@@ -274,7 +274,7 @@ export const Trajectories = (props) => {
         },
         (exit) => {
           exit.transition().duration(300).attr("width", 0).attr("height", 0).remove()
-        }
+        },
       )
 
     // DEBUG DOM Elements

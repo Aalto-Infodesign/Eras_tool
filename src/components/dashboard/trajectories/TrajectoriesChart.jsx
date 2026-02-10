@@ -23,7 +23,7 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 
 export function TrajectoriesChart() {
-  console.time("Trajectories")
+  // console.time("Trajectories")
 
   const { silhouettes } = useData()
   const { palette } = useViz()
@@ -48,10 +48,10 @@ export function TrajectoriesChart() {
   const [hoveredStateLabel, setHoveredStateLabel] = useState()
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
   const [showStateDensity, setShowStateDensity] = useState(false)
+  const [hoveredLump, setHoveredLump] = useState(null)
   // const [showDistributions, setShowDistributions] = useState(true)
 
   const showDistributions = true
-  const [hoveredLump, setHoveredLump] = useState({})
 
   const svgRef = useRef(null)
 
@@ -111,7 +111,7 @@ export function TrajectoriesChart() {
       toggleSelectedTrajectory(hoveredTrajectoriesIDs[selectedIndex])
   }, [isEnter])
 
-  console.timeEnd("Trajectories")
+  // console.timeEnd("Trajectories")
 
   return (
     <>

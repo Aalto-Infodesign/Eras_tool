@@ -4,7 +4,7 @@ import { TrajectoriesContext } from "../TrajectoriesContext"
 import { includes, flattenDeep, values, map, isNil } from "lodash"
 import {
   getMinMaxStateFromTrajectories,
-  getMinMaxFromTrajectoriesBetwenTwoStates,
+  getMinMaxFromTrajectoriesBetweenTwoStates,
 } from "../../../utils/getMinMax"
 
 import { AnimatePresence, motion } from "motion/react"
@@ -14,6 +14,8 @@ import { useMouseMove } from "../../hooks/useMouseMove"
 import { useViz } from "../../../contexts/VizContext"
 import { useFilters } from "../../../contexts/FiltersContext"
 import "./Lumps.css"
+
+import { scaleLinear, extent } from "d3"
 
 export const Lumps = (props) => {
   const { palette } = useViz()
@@ -38,6 +40,7 @@ export const Lumps = (props) => {
   const { filteredSilhouettes } = props
   const { isSelectModeLines } = props // Keeping isSelectModeLines for the render logic
   const { svgRef } = props
+  const { hoveredLump, setHoveredLump } = props
 
   const { x, y } = chartScales
 
@@ -47,10 +50,9 @@ export const Lumps = (props) => {
   const flashlightRadius = 2
 
   const [hoveredLine, setHoveredLine] = useState(null)
-
   const mousePosition = useMouseMove()
-  // console.log(mousePosition)
   const [svgCursorPosition, setSvgCursorPosition] = useState({ x: 0, y: 0 })
+  // console.log(mousePosition)
 
   useEffect(() => {
     if (!svgRef.current || !mousePosition.x || !mousePosition.y || hoveredLine === null) return
@@ -94,7 +96,7 @@ export const Lumps = (props) => {
           d.diseaseDuration >= filters.diseaseDuration.selection[0] &&
           d.diseaseDuration < filters.diseaseDuration.selection[1],
       )
-  }, [filteredSilhouettes, filters.diseaseDuration.selection])
+  }, [filteredSilhouettes, filters.diseaseDuration])
 
   // console.log("ft", filteredTrajectories)
 
@@ -110,18 +112,10 @@ export const Lumps = (props) => {
     return getMinMaxStateFromTrajectories(filteredTrajectories)
   }, [filteredTrajectories])
 
-  const subsetlLumpData = useMemo(() => {
+  const subsetLumpData = useMemo(() => {
     if (highlightedTrajectories.length === 0) return []
     return getMinMaxStateFromTrajectories(highlightedTrajectories)
   }, [highlightedTrajectories])
-
-  // useEffect(() => {
-  //   console.log(subsetlLumpData)
-  // }, [subsetlLumpData])
-
-  // useEffect(() => {
-  //   console.log(globalLumpData)
-  // }, [globalLumpData])
 
   const dateExtent = filters.date.extent // Safely get dateExtent
   const minDate = dateExtent ? dateExtent[0] : 0 // Fallback to 0 if not present
@@ -137,18 +131,18 @@ export const Lumps = (props) => {
   }, [filteredTrajectories, filters.date.selection, midpointDate])
 
   const allTypes = useMemo(() => {
-    return getMinMaxFromTrajectoriesBetwenTwoStates(filteredTrajectories).map((t) => t.type)
+    return getMinMaxFromTrajectoriesBetweenTwoStates(filteredTrajectories).map((t) => t.type)
   }, [filteredTrajectories])
 
   const [presentLumps, pastLumps, remoteLumps, lumpLinesExtreme] = useMemo(() => {
     const processLumps = (trajectories) =>
-      getMinMaxFromTrajectoriesBetwenTwoStates(trajectories).filter((d) => d.items.length > 1)
+      getMinMaxFromTrajectoriesBetweenTwoStates(trajectories).filter((d) => d.items.length > 1)
 
     const pLumps = processLumps(presentTrajectories)
     const paLumps = processLumps(pastTrajectories)
     const rLumps = processLumps(remoteTrajectories)
 
-    const linesExtreme = getMinMaxFromTrajectoriesBetwenTwoStates(presentTrajectories).filter(
+    const linesExtreme = getMinMaxFromTrajectoriesBetweenTwoStates(presentTrajectories).filter(
       (d) => d.items.length === 1,
     )
 
@@ -180,9 +174,10 @@ export const Lumps = (props) => {
       lumpOffsetX,
       palette,
       toggleSelectedLumps,
-      setHoveredLump: props.setHoveredLump,
+      hoveredLump,
+      setHoveredLump,
     }),
-    [chartScales, marginTop, palette, toggleSelectedLumps, props.setHoveredLump],
+    [chartScales, marginTop, palette, toggleSelectedLumps, setHoveredLump, hoveredLump],
   )
 
   useEffect(() => {
@@ -235,7 +230,16 @@ export const Lumps = (props) => {
     marginTop,
     hoveredTrajectoriesIDs,
     svgCursorPosition,
+    setHoveredTrajectoriesIDs,
   ])
+
+  const opacityScale = useMemo(() => {
+    const allLumpItemsLengths = extent(presentLumps.map((l) => l.items.length))
+
+    const scale = scaleLinear(allLumpItemsLengths, [0.5, 0.8])
+
+    return scale
+  }, [presentLumps])
 
   return (
     <g id="lumps">
@@ -253,6 +257,7 @@ export const Lumps = (props) => {
                     timePlacement={"present"}
                     selectedLumps={selectedLumps}
                     animationDuration={animationDuration}
+                    opacityScale={opacityScale}
                   />
                 )}
 
@@ -264,6 +269,7 @@ export const Lumps = (props) => {
                     timePlacement={"past"}
                     selectedLumps={selectedLumps}
                     animationDuration={animationDuration}
+                    opacityScale={opacityScale}
                   />
                 )}
 
@@ -275,6 +281,7 @@ export const Lumps = (props) => {
                     timePlacement={"remote"}
                     selectedLumps={selectedLumps}
                     animationDuration={animationDuration}
+                    opacityScale={opacityScale}
                   />
                 )}
               </motion.g>
@@ -429,7 +436,7 @@ export const Lumps = (props) => {
           )
         })}
 
-        {subsetlLumpData.map((d) => {
+        {subsetLumpData.map((d) => {
           return (
             <motion.g
               key={`$subset-lump-line-group-${d.state}`}
@@ -501,7 +508,7 @@ export const Lumps = (props) => {
               // strokeOpacity={0.1}
               strokeWidth={0}
               rx={1}
-              onMouseLeave={() => (console.log("exit"), setHoveredLine(null))}
+              onMouseLeave={() => setHoveredLine(null)}
             />
           </motion.g>
         )}
@@ -515,6 +522,7 @@ const LumpPolygon = ({
   timePlacement,
   selectedLumps,
   toggleSelectedLumps,
+  hoveredLump,
   setHoveredLump,
   x,
   y,
@@ -523,16 +531,15 @@ const LumpPolygon = ({
   lumpOffsetX,
   palette,
   animationDuration,
+  opacityScale,
 }) => {
-  // --- Optimization: Memoize createPolygonFromLump and createOriginPolygonFromLump results ---
+  // --- Memoize polygon calculations ---
   const [polygonPoints, originPolygonPoints] = useMemo(() => {
     function createPolygonFromLump(data) {
       const sourceY = y(data.source.state) + marginTop
       const targetY = y(data.target.state) + marginTop
-
       const sourcePadding = targetY > sourceY ? lumpPadding : -lumpPadding
       const targetPadding = targetY > sourceY ? -lumpPadding : lumpPadding
-
       const offsetX = targetY > sourceY ? -lumpOffsetX : lumpOffsetX
 
       return `${x(data.source.x[0]) - offsetX},${sourceY + sourcePadding} ${
@@ -547,7 +554,6 @@ const LumpPolygon = ({
       const targetY = y(data.target.state) + marginTop
       const sourcePadding = targetY > sourceY ? lumpPadding : -lumpPadding
       const targetPadding = targetY > sourceY ? -lumpPadding : lumpPadding
-
       const offsetX = targetY > sourceY ? -lumpOffsetX : lumpOffsetX
 
       return `${x(data.source.x[0]) - offsetX},${sourceY + sourcePadding} ${
@@ -560,45 +566,70 @@ const LumpPolygon = ({
     return [createPolygonFromLump(data), createOriginPolygonFromLump(data)]
   }, [data, x, y, marginTop, lumpPadding, lumpOffsetX])
 
+  // --- Calculate fill based on time placement ---
+  const fill = useMemo(() => {
+    if (timePlacement === "present") {
+      if (data.source.state === data.target.state) {
+        return palette[data.source.state]
+      } else {
+        return `url(#gradient-${data.source.state}-${data.target.state})`
+      }
+    } else if (timePlacement === "past") {
+      return "url(#patternLines)"
+    } else if (timePlacement === "remote") {
+      return "url(#patternCircles)"
+    }
+    return ""
+  }, [timePlacement, data.source.state, data.target.state, palette])
+
+  // --- Calculate selection and hover states ---
+  const isSelected = includes(map(selectedLumps, "type"), data.type)
+  const isHovered = hoveredLump && hoveredLump.type === data.type
+
+  // --- Calculate opacity based on hover and selection state ---
+  const opacity = useMemo(() => {
+    const baseOpacity = opacityScale(data.items.length)
+
+    if (isSelected) {
+      // This lump is selected but not hovered: use base opacity
+      return 1
+    }
+    if (!hoveredLump) {
+      // Nothing is hovered: use scale-based opacity
+      return baseOpacity
+    }
+
+    if (isHovered) {
+      // This lump is hovered: boost opacity further if selected
+      return isSelected ? 1 : opacityScale(data.items.length)
+    }
+
+    // Something else is hovered: decrease opacity
+    return 0.1
+  }, [hoveredLump, isHovered, isSelected, opacityScale, data.items.length])
+
+  // console.log(opacity)
+
   const id = `lump-${timePlacement}-${data.type}`
   const className = `lump-${timePlacement}`
-
-  const texturePastUrl = "url(#patternLines)"
-  const textureRemoteUrl = "url(#patternCircles)"
-
-  let fill = ""
-
-  if (timePlacement === "present")
-    if (data.source.state === data.target.state) {
-      fill = palette[data.source.state]
-    } else {
-      fill = `url(#gradient-${data.source.state}-${data.target.state})`
-    }
-  else if (timePlacement === "past") {
-    fill = texturePastUrl
-  } else if (timePlacement === "remote") {
-    fill = textureRemoteUrl
-  }
-
-  const isSelected = includes(map(selectedLumps, "type"), data.type)
 
   return (
     <motion.polygon
       key={id}
       id={id}
       className={className}
-      initial={{ opacity: 0.3, points: originPolygonPoints }}
+      initial={{ opacity: 0.1, points: originPolygonPoints }}
       animate={{
-        opacity: isSelected ? 1 : 0.3,
+        opacity: opacity,
         points: polygonPoints,
       }}
       exit={{ points: originPolygonPoints }}
       transition={{ duration: animationDuration }}
       fill={fill}
-      whileHover={{ opacity: isSelected ? 1 : 0.7 }}
+      style={{ cursor: "pointer" }}
       onClick={() => toggleSelectedLumps(data)}
       onMouseEnter={() => setHoveredLump(data)}
-      onMouseLeave={() => setHoveredLump()}
+      onMouseLeave={() => setHoveredLump(null)}
     />
   )
 }

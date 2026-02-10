@@ -19,6 +19,7 @@ export function VizProvider({ children }) {
   // UI STATE
   const [isLegend, setIsLegend] = useState(false)
 
+  // TODO Coloring based on Flowchart data
   const { palette, statesOrderOriginal } = useMemo(() => {
     if (!richData?.length || !scales) return { palette: {}, statesOrderOriginal: [] }
     console.time("Palette Poset")
@@ -36,7 +37,7 @@ export function VizProvider({ children }) {
     const statesPO = getDominancePairsSelfUpper(statesNames)
     // console.log("States Interdipendncy Groups", statesPO)
 
-    const labels = statesPO.flat().filter((e, n, l) => l.indexOf(e) === n)
+    // const labels = statesPO.flat().filter((e, n, l) => l.indexOf(e) === n)
 
     // console.log("l", labels)
     const { matrix, nodes } = po.domFromEdges(statesPO)

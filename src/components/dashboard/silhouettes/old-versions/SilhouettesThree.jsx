@@ -4,16 +4,16 @@ import { useState, useEffect, useMemo, useRef } from "react"
 import { includes, isNil } from "lodash"
 import { scaleLinear, scaleBand, max } from "d3"
 
-import { ClearButton } from "../../common/Button/ClearButton"
-import { DownloadIcon } from "../../common/icons/Icons"
+import { ClearButton } from "../../../common/Button/ClearButton"
+import { DownloadIcon } from "../../../common/icons/Icons"
 
 import { AnimatePresence, motion, scale, useInView } from "motion/react"
 
-import { useModifierKey } from "../../hooks/useModifierKey"
-import { useLongPressWithProgress } from "../../hooks/useLongPress"
-import { useIsTouchDevice } from "../../hooks/useIsTouchDevice"
+import { useModifierKey } from "../../../hooks/useModifierKey"
+import { useLongPressWithProgress } from "../../../hooks/useLongPress"
+import { useIsTouchDevice } from "../../../hooks/useIsTouchDevice"
 
-import Switch from "../../common/Switch/Switch"
+import Switch from "../../../common/Switch/Switch"
 
 import "./Silhouettes.css"
 
@@ -60,7 +60,7 @@ export const SilhouettesThree = (props) => {
   const svgY = scaleBand(statesNamesLoaded, [svgPadding, 100 - svgPadding]).padding(0)
   const svgX = scaleLinear(
     [0, max(silhouettes.map((d) => d.states.length - 1))],
-    [svgPadding, 100 - svgPadding]
+    [svgPadding, 100 - svgPadding],
   )
   const animationDuration = 0.2
 
@@ -659,7 +659,7 @@ function LineSegment({ start, end, color, strokeWidth }) {
   const curve = useMemo(() => {
     return new THREE.LineCurve3(
       new THREE.Vector3(start[0], start[1], 0),
-      new THREE.Vector3(end[0], end[1], 0)
+      new THREE.Vector3(end[0], end[1], 0),
     )
   }, [start, end])
 

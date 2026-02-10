@@ -1,9 +1,9 @@
 import { useState, useContext } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { TrajectoriesContext } from "../../TrajectoriesContext"
 import { linkHorizontal } from "d3"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { motion, AnimatePresence, stagger } from "motion/react"
-import { Tooltip } from "../../common/Tooltip/Tooltip"
+import { Tooltip } from "../../../common/Tooltip/Tooltip"
 import { flatten, groupBy } from "lodash"
 const MARGIN_Y = 25
 const MARGIN_X = 5

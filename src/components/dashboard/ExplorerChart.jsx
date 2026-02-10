@@ -23,6 +23,8 @@ import { useViz } from "../../contexts/VizContext"
 import { useFilters } from "../../contexts/FiltersContext"
 import { Virtuoso } from "react-virtuoso"
 
+import { Filters } from "./filters/Filters"
+
 export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
   // Props
@@ -95,20 +97,6 @@ export function TrajectoriesExplorerChart(props) {
   const xScale = scaleLinear([0, max(silhouettes.map((d) => d.states.length - 1))], [10, 100 - 10])
 
   // FILTERING SILHOUETTES and TRAJECTORIES
-
-  // If there are no selected silhouettes, use all silhouettes
-  // If there are selected silhouettes, filter the silhouettes based on the selected ones
-  // const filteredSilhouettes =
-  //   selectedSilhouettes.length === 0
-  //     ? silhouettes
-  //     : silhouettes.filter((d) => includes(selectedSilhouettes, d.name))
-
-  // // USING THE SILHOUETTES TO EXTRACT THE IDs
-  // const selectedIndividuals = flattenDeep(filteredSilhouettes.map((s) => s.trajectories)).map(
-  //   (s) => s.id
-  // )
-  // // Types of Selected LUMPS
-  // const selectedLumpsTypes = flattenDeep(selectedLumps.map((l) => l.type))
 
   // 1. MEMOIZZA I LINK COMPLETI (Evita ricreazione continua)
   const completeLinks = useMemo(() => {
@@ -513,6 +501,17 @@ export function TrajectoriesExplorerChart(props) {
           )}
         </AnimatePresence>
       </motion.section>
+
+      {filters && (
+        <motion.section
+          layout
+          key={"filters"}
+          id="chart-filters"
+          className="bento-item filters closed"
+        >
+          <Filters />
+        </motion.section>
+      )}
     </>
   )
 }

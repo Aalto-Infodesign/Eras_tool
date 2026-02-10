@@ -28,17 +28,20 @@ export function TrajectoriesMotion(props) {
   const { isSelectModeLines } = props
 
   const [markerHoveredId, setMarkerHoveredId] = useState(null)
-  // Da poi sposare un livello più in alto
+  // Da poi spostare un livello più in alto
 
   const { x, y } = chartScales
 
   const rectDimensions = { width: 2, height: 4 }
 
-  const selectedTrajectories = filteredLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
-  const highlightedTrajectories = filteredLinks.filter(
-    (d) => d.id === hoveredTrajectoriesIDs[selectedIndex],
-  )
-
+  const selectedTrajectories =
+    filteredLinks.length < 20
+      ? filteredLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
+      : []
+  const highlightedTrajectories =
+    filteredLinks.length < 20
+      ? filteredLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
+      : []
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
   const lines =
     (!isSelectModeLines && selectedLumps.length > 0 && showLinesOfSelectedLumps && filteredLinks) ||

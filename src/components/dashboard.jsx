@@ -5,7 +5,6 @@ import { SilhouettesMorph } from "./dashboard/silhouettes/SilhouettesMorph"
 import { CarouselWrapper } from "./common/Carousel/Carousel"
 import { SilhouettesPie } from "./dashboard/silhouettes/SilhouettesPie"
 import { DebugPanel } from "./dashboard/debug/DebugPanel"
-import { Filters } from "./dashboard/filters/Filters"
 import {
   motion,
   useAnimate,
@@ -19,7 +18,6 @@ import { ExportIDs } from "./dashboard/export/ExportIDs"
 
 import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
-import { useFilters } from "../contexts/FiltersContext"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
@@ -28,7 +26,6 @@ const Dashboard = () => {
 
   const { richData, analytics, silhouettes, idealSilhouettes } = useData()
   const { statesOrder } = useViz()
-  const { filters } = useFilters()
 
   //For File Loader
   const minHeight = 100
@@ -252,20 +249,6 @@ const Dashboard = () => {
                 setIsHasse={setIsHasse}
               />
             )}
-            {/* {silhouettes && (
-              <SilhouettesThree
-                silhouettes={silhouettes}
-                toggleSilhouetteFilter={toggleSilhouetteFilter}
-                setSelectedSilhouettes={setSelectedSilhouettes}
-                selectedSilhouettes={selectedSilhouettes}
-                // analytics={analytics}
-                statesNames={statesData.statesNames}
-                palette={palette}
-                statesOrder={statesOrder}
-                isHasse={isHasse}
-                setIsHasse={setIsHasse}
-              />
-            )} */}
           </AnimatePresence>
         </motion.div>
 
@@ -283,17 +266,6 @@ const Dashboard = () => {
           reduceMotion={reduceMotion}
         />
 
-        {filters && (
-          <motion.section
-            layout
-            key={"filters"}
-            id="chart-filters"
-            className="bento-item filters closed"
-          >
-            <Filters />
-          </motion.section>
-        )}
-
         {/* <StatesDendrogram
             marginTop={marginTop}
             palette={palette}
@@ -302,14 +274,6 @@ const Dashboard = () => {
             selectedSilhouettes={selectedSilhouettes}
           /> */}
       </LayoutGroup>
-      {/* 
-      <aside className="side-panels-warpper">
-
-
-        <button className="panel-label">Filters</button>
-        <button className="panel-label">Panel 2</button>
-        <button className="panel-label">Panel 3</button>
-      </aside> */}
     </motion.main>
   )
 }

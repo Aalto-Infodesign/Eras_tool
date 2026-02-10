@@ -1,7 +1,7 @@
 import { isNil } from "lodash"
-import { ClearButton } from "../../common/Button/ClearButton"
-import { areArraysEqual } from "../../../utils/areArraysEqual"
-import { useViz } from "../../../contexts/VizContext"
+import { ClearButton } from "../common/Button/ClearButton"
+import { areArraysEqual } from "../../utils/areArraysEqual"
+import { useViz } from "../../contexts/VizContext"
 
 export const ResetStatesOrder = () => {
   const { statesOrder, setStatesOrder, statesOrderOriginal } = useViz()

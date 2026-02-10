@@ -15,6 +15,8 @@ import { AnimatePresence, motion } from "motion/react"
 import { useData } from "../../contexts/ProcessedDataContext"
 import { useViz } from "../../contexts/VizContext"
 
+import { ChevronDown, Maximize2 } from "lucide-react"
+
 export function FileLoader({}) {
   const {
     richData,
@@ -30,18 +32,17 @@ export function FileLoader({}) {
 
   const [sankeyData, setSankeyData] = useState({ nodes: [], links: [] })
 
-  // const [clusterStates, setClusterStates] = useState(false)
-
+  // TODO Refresh ONLY if FILE CHANGES, not STATES
   // Reset isLegend when new data is loaded
-  useEffect(() => {
-    if (richData.length > 0) {
-      // Reset isLegend when new data is loaded
-      if (isLegend) {
-        setIsLegend(false)
-        setIsOpen(true) // Ensure the accordion is open when returning to data loading state
-      }
-    }
-  }, [richData])
+  // useEffect(() => {
+  //   if (richData.length > 0) {
+  //     // Reset isLegend when new data is loaded
+  //     if (isLegend) {
+  //       setIsLegend(false)
+  //       setIsOpen(true) // Ensure the accordion is open when returning to data loading state
+  //     }
+  //   }
+  // }, [richData])
 
   // Ensure accordion is open when transitioning back from legend mode
   useEffect(() => {
@@ -49,6 +50,8 @@ export function FileLoader({}) {
       setIsOpen(true)
     }
   }, [isLegend])
+
+  //TODO When sankey data changes, update useViz state and recreate palette using poset
 
   const handleClick = () => {
     // dataProcessing(data, statesOrder, scales, newDataset, newVizParameters, idealSilhouettes)
@@ -94,8 +97,7 @@ export function FileLoader({}) {
             </label>
           </div>
         )}
-        {isLegend && (
-          <span className="material-icons" onClick={() => setIsOpen(!isOpen)}>
+        {/* <span className="material-icons" onClick={() => setIsOpen(!isOpen)}>
             <svg width={10} height={10} viewBox="-2 -2 4 4">
               <path
                 d="M-2,-1 L2,-1 L0,2 Z"
@@ -104,7 +106,17 @@ export function FileLoader({}) {
                 fill="white"
               />
             </svg>
-          </span>
+          </span> */}
+        {isLegend && (
+          <>
+            <ChevronDown
+              size={16}
+              className="animated"
+              onClick={() => setIsOpen(!isOpen)}
+              transform={isOpen ? "rotate(180)" : "rotate(0)"}
+            />
+            <Maximize2 size={16} onClick={() => setIsLegend(false)} />
+          </>
         )}
       </div>
 

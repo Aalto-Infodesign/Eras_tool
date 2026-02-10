@@ -260,9 +260,9 @@ h1 {
   order: 5; */
 }
 .bento-item.filtered-items {
-  grid-column: span 12;
+  grid-column: span 9;
   /* grid-row: span 5; */
-  order: 6;
+  order: 5;
   background-color: rgba(255, 255, 255, 0.02);
 
   height: auto;

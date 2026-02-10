@@ -1,7 +1,6 @@
-import { UploadIcon } from "../common/icons/Icons.jsx"
 import Button from "../common/Button/Button.jsx"
-
 import { useRawData } from "../../contexts/RawDataContext.jsx"
+import { Upload } from "lucide-react"
 
 const LoadDataset = () => {
   const { loadData, fileName, fileExtention, status } = useRawData()
@@ -11,7 +10,7 @@ const LoadDataset = () => {
   return (
     <section id="upload">
       <label htmlFor="fileInput" className={`file-input-label ${isUploading ? "loading" : ""}`}>
-        <UploadIcon size={12} />
+        <Upload size={12} />
         <span>{fileName ? `${fileName.slice(0, 10)}...` : "Upload"}</span>
         {fileExtention && <span className="filetype badge">{fileExtention.toUpperCase()}</span>}
       </label>

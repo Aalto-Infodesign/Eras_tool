@@ -180,14 +180,14 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
           source: {
             state,
             date: years?.[n],
-            x: sourceAge,
             age: sourceAge,
+            x: sourceAge,
           },
           target: {
             state: isLast ? state : trajectory[n + 1],
-            x: targetAge,
-            age: targetAge,
             date: isLast ? years?.[n] : years?.[n + 1],
+            age: targetAge,
+            x: targetAge,
           },
           initialState: n === 0,
           finalState: isLast,

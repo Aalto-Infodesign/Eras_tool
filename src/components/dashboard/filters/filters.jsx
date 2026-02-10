@@ -1,6 +1,3 @@
-// import Dates from "./DatesSlider"
-import { ResetStatesOrder } from "./ResetStatesOrder"
-
 import { flattenDeep, isNil } from "lodash"
 
 import { FilterWrapper } from "./UI/FilterWrapper"
@@ -48,8 +45,6 @@ export const Filters = () => {
             />
           )}
         </div>
-
-        <ResetStatesOrder />
       </section>
     </>
   )

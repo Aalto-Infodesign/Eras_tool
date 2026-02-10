@@ -15,12 +15,12 @@ export function getMinMaxStateFromTrajectories(trajectories) {
       x: extent(map(stateItems, "x")),
       median: median(flatMap(stateItems, "x")),
       items: stateItems,
-    }))
+    })),
   ).sort((a, b) => a - b)
 
   return minMax
 }
-export function getMinMaxFromTrajectoriesBetwenTwoStates(trajectories) {
+export function getMinMaxFromTrajectoriesBetweenTwoStates(trajectories) {
   //   console.log("passedTrajectories", trajectories)
 
   //To every trajectory add a new parameter: type, which is the pairing of source state and target state
@@ -83,7 +83,7 @@ function getMinMax(data) {
       x: extent(map(stateItems, "x")),
       median: median(flatMap(stateItems, "x")),
       items: stateItems,
-    }))
+    })),
   )
 
   return minMax
