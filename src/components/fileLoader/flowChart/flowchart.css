@@ -77,6 +77,12 @@
   padding: 0 1rem;
 }
 
+.dnd-node {
+  transition: background-color 200ms ease-out;
+  padding: 10px;
+  border-radius: 5px;
+}
+
 .dnd-node.disease {
   border: 2px dashed red;
 }

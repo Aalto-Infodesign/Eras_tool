@@ -42,6 +42,7 @@ const Dashboard = () => {
   // const h = document.querySelector(".chart-container").
   const h = statesOrder.length * stateIncrement
 
+  // TODO Seleziona soloe Silh esistenti davvero
   // ?? Auto-select silhouettes based on initial FLow?
   const [selectedSilhouettes, setSelectedSilhouettes] = useState(idealSilhouettes) // Main filter
   const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])

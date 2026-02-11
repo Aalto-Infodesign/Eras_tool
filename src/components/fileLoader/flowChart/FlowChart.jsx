@@ -15,13 +15,18 @@ import "./flowchart.css"
 
 import { resolveCollisions } from "./resolveCollisions"
 
+import { calculateDominanceArray } from "../../../utils/POHelperFunctions"
+
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useRawData } from "../../../contexts/RawDataContext"
+import { useViz } from "../../../contexts/VizContext"
 
 const snapGrid = [25, 25]
 
 export const FlowChart = ({ setSankeyData = () => {} }) => {
   const { rawData } = useRawData()
+  const { scales } = useData()
+  const { updatePosetColoring, palette, statesOrder } = useViz()
   const reactFlowWrapper = useRef(null)
 
   const [nodes, setNodes, onNodesChange] = useNodesState([])
@@ -36,103 +41,40 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
 
   // Resetting Flowchart when new data is loaded
   useEffect(() => {
+    console.log("Raw data changed, resetting Flow Chart state")
     resetFlowChartState()
   }, [rawData])
 
   // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
     setSankeyData({ nodes, links: edges })
-  }, [nodes, edges])
 
-  // const getClosestEdge = useCallback((node) => {
-  //   const { nodeLookup } = store.getState()
-  //   const internalNode = getInternalNode(node.id)
+    console.log("Flow Chart Updated - Nodes:", nodes)
+    console.log("Flow Chart Updated - Edges:", edges)
 
-  //   const closestNode = Array.from(nodeLookup.values()).reduce(
-  //     (res, n) => {
-  //       if (n.id !== internalNode.id) {
-  //         const dx = n.internals.positionAbsolute.x - internalNode.internals.positionAbsolute.x
-  //         const dy = n.internals.positionAbsolute.y - internalNode.internals.positionAbsolute.y
-  //         const d = Math.sqrt(dx * dx + dy * dy)
+    const dominanceArray = calculateDominanceArray(nodes, edges)
+    console.log("Calculated Dominance Array:", dominanceArray)
 
-  //         if (d < res.distance && d < MIN_DISTANCE) {
-  //           res.distance = d
-  //           res.node = n
-  //         }
-  //       }
+    const nodesInexes = nodes.map((node) => node.data.index)
 
-  //       return res
-  //     },
-  //     {
-  //       distance: Number.MAX_VALUE,
-  //       node: null,
-  //     },
-  //   )
+    updatePosetColoring(dominanceArray, nodesInexes)
+    // updatePosetColoring(dominanceArray, statesData.statesNames)
+  }, [edges])
 
-  //   if (!closestNode.node) {
-  //     return null
-  //   }
-
-  //   const closeNodeIsSource =
-  //     closestNode.node.internals.positionAbsolute.x < internalNode.internals.positionAbsolute.x
-
-  //   return {
-  //     id: closeNodeIsSource
-  //       ? `${closestNode.node.id}-${node.id}`
-  //       : `${node.id}-${closestNode.node.id}`,
-  //     source: closeNodeIsSource ? closestNode.node.id : node.id,
-  //     target: closeNodeIsSource ? node.id : closestNode.node.id,
-  //   }
-  // }, [])
-
-  // const onDragOver = useCallback((event) => {
-  //   event.preventDefault()
-  //   event.dataTransfer.dropEffect = "move"
-  // }, [])
-
-  //   const onDrop = useCallback(
-  //     (event) => {
-  //       event.preventDefault()
-
-  //       // check if the dropped element is valid
-  //       if (!type) {
-  //         return
-  //       }
-  //       if (!color) {
-  //         return
-  //       }
-
-  //       console.log("Dropped type:", type)
-  //       console.log("Dropped color:", color)
-
-  //       // project was renamed to screenToFlowPosition
-  //       // and you don't need to subtract the reactFlowBounds.left/top anymore
-  //       // details: https://reactflow.dev/whats-new/2023-11-10
-  //       const position = screenToFlowPosition({
-  //         x: event.clientX,
-  //         y: event.clientY,
-  //       })
-  //       const newNode = {
-  //         id: getId(),
-  //         type,
-  //         position,
-  //         className: "dnd-node",
-  //         style: { backgroundColor: `${color}`, padding: 10, borderRadius: 5 },
-  //         data: { label: `${label}`, value: 100, category: "Disease || Drug", color: color },
-  //       }
-
-  //       setNodes((nds) => nds.concat(newNode))
-  //     },
-  //     [screenToFlowPosition, type, label, color],
-  //   )
-
-  //   const onDragStart = (event, nodeType, color = "#000000") => {
-  //     // setType(nodeType)
-  //     // setColor(color)
-  //     event.dataTransfer.setData("text/plain", nodeType)
-  //     event.dataTransfer.setData("text/plain", color)
-  //     event.dataTransfer.effectAllowed = "move"
-  //   }
+  useEffect(() => {
+    setNodes((currentNodes) =>
+      currentNodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          label: `${node.data.index} – ${scales.indexToName(node.data.index)}`,
+          index: node.data.index,
+          color: palette[node.data.index],
+        },
+        style: { ...node.style, backgroundColor: `${palette[node.data.index]}` },
+      })),
+    )
+  }, [palette, setNodes, statesOrder])
 
   const onNodeDragStop = useCallback(() => {
     setNodes((nds) =>
@@ -144,51 +86,7 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
     )
   }, [setNodes])
 
-  //   const onNodeDrag = useCallback(
-  //     (_, node) => {
-  //       const closeEdge = getClosestEdge(node)
-
-  //       setEdges((es) => {
-  //         const nextEdges = es.filter((e) => e.className !== "temp")
-
-  //         if (
-  //           closeEdge &&
-  //           !nextEdges.find((ne) => ne.source === closeEdge.source && ne.target === closeEdge.target)
-  //         ) {
-  //           closeEdge.className = "temp"
-  //           nextEdges.push(closeEdge)
-  //         }
-
-  //         return nextEdges
-  //       })
-  //     },
-  //     [getClosestEdge, setEdges],
-  //   )
-
-  //   const onNodeDragStop = useCallback(
-  //     (_, node) => {
-  //       const closeEdge = getClosestEdge(node)
-
-  //       setEdges((es) => {
-  //         const nextEdges = es.filter((e) => e.className !== "temp")
-
-  //         if (
-  //           closeEdge &&
-  //           !nextEdges.find((ne) => ne.source === closeEdge.source && ne.target === closeEdge.target)
-  //         ) {
-  //           nextEdges.push(closeEdge)
-  //         }
-
-  //         return nextEdges
-  //       })
-  //     },
-  //     [getClosestEdge],
-  //   )
-
-  //   useEffect(() => {
-  //     console.log("Nodes:", nodes)
-  //     console.log("Edges:", edges)
-  //   }, [nodes, edges])
+  console.log("Rendering Flow Chart with nodes:", nodes, "and edges:", edges)
 
   return (
     <div className="dndflow">

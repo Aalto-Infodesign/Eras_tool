@@ -3,12 +3,14 @@ import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { Tooltip } from "../../common/Tooltip/Tooltip"
 import { motion } from "motion/react"
 import { useData } from "../../../contexts/ProcessedDataContext"
+import { useViz } from "../../../contexts/VizContext"
 
 const MARGIN_Y = 15
 const MARGIN_X = 10
 
 export const Sankey = ({ width, height, data }) => {
   const { idealSilhouettes, setIdealSilhouettes } = useData()
+  const { palette } = useViz()
   const [hoveredNode, setHoveredNode] = useState(null)
 
   console.log("Sankey data", data)
@@ -18,8 +20,9 @@ export const Sankey = ({ width, height, data }) => {
       nodes: data.nodes.map((node) => ({
         id: node.id,
         name: node.data.label,
+        index: node.data.index,
         trueIndex: Number(node.data.index),
-        color: node.data.color,
+        color: palette[node.data.index] || node.data.color,
         category: node.data.category,
       })),
       links: data.links.map((link) => ({

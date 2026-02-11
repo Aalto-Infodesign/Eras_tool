@@ -389,6 +389,11 @@ button[data-selected="true"] {
   background-color: var(--surface-light);
 }
 
+button.center {
+  display: flex;
+  align-items: center;
+}
+
 /* .chip button {
   background-color: rgba(255, 255, 255, 0);
   color: var(--text-light);
