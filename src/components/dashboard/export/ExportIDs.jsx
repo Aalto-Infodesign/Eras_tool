@@ -2,6 +2,7 @@ import { Virtuoso } from "react-virtuoso"
 import Button from "../../common/Button/Button.jsx"
 import { downloadIDs } from "../../../utils/exportFunctions.js"
 import { motion } from "motion/react"
+import { Download } from "lucide-react"
 
 export function ExportIDs({ selectedIDs }) {
   return (
@@ -24,11 +25,13 @@ export function ExportIDs({ selectedIDs }) {
             className="btn"
             size="small"
             variant="secondary"
+            style={{ gap: 10 }}
             onClick={(e) => {
               downloadIDs(e, selectedIDs)
             }}
           >
-            EXPORT {selectedIDs.length} IDs
+            <Download size={12} />
+            <span>{selectedIDs.length} IDs</span>
           </Button>
         </>
       )}

@@ -5,6 +5,7 @@
 
 import { AnimatePresence, motion, usePresenceData, wrap } from "motion/react"
 import { forwardRef, useState } from "react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import "./Carousel.css"
 export function CarouselWrapper({ children, hasPagination = true }) {
@@ -126,7 +127,7 @@ function ArrowNavigation({ direction, setSlide }) {
         setSlide(isPrevious ? -1 : 1)
       }}
     >
-      {isPrevious ? <ArrowLeft /> : <ArrowRight />}
+      {isPrevious ? <ArrowLeft size={20} /> : <ArrowRight size={20} />}
     </motion.button>
   )
 }
@@ -143,20 +144,20 @@ const iconsProps = {
   strokeLinejoin: "round",
 }
 
-function ArrowLeft() {
-  return (
-    <svg {...iconsProps}>
-      <path d="m12 19-7-7 7-7" />
-      <path d="M19 12H5" />
-    </svg>
-  )
-}
+// function ArrowLeft() {
+//   return (
+//     <svg {...iconsProps}>
+//       <path d="m12 19-7-7 7-7" />
+//       <path d="M19 12H5" />
+//     </svg>
+//   )
+// }
 
-function ArrowRight() {
-  return (
-    <svg {...iconsProps}>
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  )
-}
+// function ArrowRight() {
+//   return (
+//     <svg {...iconsProps}>
+//       <path d="M5 12h14" />
+//       <path d="m12 5 7 7-7 7" />
+//     </svg>
+//   )
+// }

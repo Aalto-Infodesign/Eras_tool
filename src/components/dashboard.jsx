@@ -18,6 +18,7 @@ import { ExportIDs } from "./dashboard/export/ExportIDs"
 
 import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
+import { Command } from "lucide-react"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
@@ -193,7 +194,11 @@ const Dashboard = () => {
     >
       <LayoutGroup>
         <AnimatePresence>
-          {isCmdPressed && <motion.div className="key-pop-up">fn</motion.div>}
+          {isCmdPressed && (
+            <motion.div className="key-pop-up">
+              <Command size={16} />
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <motion.div layout className="top-row">
@@ -241,6 +246,8 @@ const Dashboard = () => {
                 </CarouselWrapper>
               </motion.section>
             )}
+          </AnimatePresence>
+          <AnimatePresence>
             {silhouettes && (
               <SilhouettesMorph
                 toggleSilhouetteFilter={toggleSilhouetteFilter}

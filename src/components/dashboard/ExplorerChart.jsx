@@ -24,6 +24,7 @@ import { useFilters } from "../../contexts/FiltersContext"
 import { Virtuoso } from "react-virtuoso"
 
 import { Filters } from "./filters/Filters"
+import { X } from "lucide-react"
 
 export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
@@ -364,7 +365,7 @@ export function TrajectoriesExplorerChart(props) {
                           layout
                           onClick={() => toggleSelectedLumps(l)}
                         >
-                          ×
+                          <X size={20} />
                         </motion.button>
                       </motion.div>
                     )
@@ -443,7 +444,7 @@ export function TrajectoriesExplorerChart(props) {
                               animate={chipHoveredId === id.id ? "visible" : "hidden"}
                               onClick={() => toggleSelectedTrajectory(id.id)}
                             >
-                              ×
+                              <X size={20} />
                             </motion.button>
                           </motion.div>
                         </div>

@@ -19,7 +19,7 @@ import { scaleLinear, extent } from "d3"
 
 export const Lumps = (props) => {
   const { palette } = useViz()
-  const { filters } = useFilters()
+  const { filters, isDragging } = useFilters()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
@@ -533,6 +533,7 @@ const LumpPolygon = ({
   animationDuration,
   opacityScale,
 }) => {
+  const { isDragging } = useFilters()
   // --- Memoize polygon calculations ---
   const [polygonPoints, originPolygonPoints] = useMemo(() => {
     function createPolygonFromLump(data) {
@@ -622,6 +623,7 @@ const LumpPolygon = ({
       animate={{
         opacity: opacity,
         points: polygonPoints,
+        scaleY: isDragging ? 0.9 : 1,
       }}
       exit={{ points: originPolygonPoints }}
       transition={{ duration: animationDuration }}

@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef, useCallback } from "react"
 import { TextureDefs } from "../../../common/Textures/TextureDefs"
+import { useFilters } from "../../../../contexts/FiltersContext"
+import { set } from "lodash"
 
 export function FilterSlider({
   min = 0,
@@ -14,6 +16,7 @@ export function FilterSlider({
   hasPattern = false,
   hasRange = false,
 }) {
+  const { setIsDragging } = useFilters()
   const sliderRef = useRef(null)
   const minCursorRef = useRef(null)
   const maxCursorRef = useRef(null)
@@ -47,6 +50,7 @@ export function FilterSlider({
       e.stopPropagation()
 
       console.log(e)
+      setIsDragging(true)
 
       const handleMove = (moveEvent) => {
         const clientX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX
@@ -55,6 +59,8 @@ export function FilterSlider({
       }
 
       const handleEnd = () => {
+        setIsDragging(false)
+
         document.removeEventListener("mousemove", handleMove)
         document.removeEventListener("mouseup", handleEnd)
         document.removeEventListener("touchmove", handleMove)
@@ -74,6 +80,8 @@ export function FilterSlider({
       e.preventDefault()
       e.stopPropagation()
 
+      setIsDragging(true)
+
       const handleMove = (moveEvent) => {
         const clientX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX
         const newValue = Math.max(pixelToValue(clientX), selectionMin)
@@ -81,6 +89,7 @@ export function FilterSlider({
       }
 
       const handleEnd = () => {
+        setIsDragging(false)
         document.removeEventListener("mousemove", handleMove)
         document.removeEventListener("mouseup", handleEnd)
         document.removeEventListener("touchmove", handleMove)

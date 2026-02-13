@@ -6,6 +6,7 @@ const FiltersContext = createContext(null)
 export function FiltersProvider({ children }) {
   const { filtersBlueprint } = useData()
   const [filters, setFilters] = useState(filtersBlueprint)
+  const [isDragging, setIsDragging] = useState(false)
 
   // Sync internal state when the source data changes
   useEffect(() => {
@@ -26,7 +27,10 @@ export function FiltersProvider({ children }) {
     })
   }, [])
 
-  const value = useMemo(() => ({ filters, updateSelection }), [filters, updateSelection])
+  const value = useMemo(
+    () => ({ filters, updateSelection, isDragging, setIsDragging }),
+    [filters, updateSelection, isDragging, setIsDragging],
+  )
 
   // Prevent rendering consumers until we actually have filter data
   if (!filters) return null

@@ -3,7 +3,7 @@ import { includes, isNil, xor, uniq, flatten } from "lodash"
 import { scaleLinear, scaleBand, max } from "d3"
 
 import { ClearButton } from "../../common/Button/ClearButton"
-import { DownloadIcon } from "../../common/icons/Icons"
+import { Download, Shuffle, X } from "lucide-react"
 
 import { AnimatePresence, motion } from "motion/react"
 
@@ -16,7 +16,6 @@ import Switch from "../../common/Switch/Switch"
 import "./Silhouettes.css"
 
 import { po } from "../../../utils/po"
-import { useAnimate } from "framer-motion"
 import { scalePoint } from "d3"
 
 import { getDominancePairsSelf } from "../../../utils/POHelperFunctions"
@@ -31,9 +30,6 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 
 export const SilhouettesMorph = (props) => {
-  const i = performance.now()
-  const TEST = 10
-
   const { silhouettes, idealSilhouettes, statesData } = useData()
   const { palette, statesOrder, setStatesOrder } = useViz()
 
@@ -237,7 +233,6 @@ export const SilhouettesMorph = (props) => {
                   x={x}
                   y={y}
                   statesNamesLoaded={statesNamesLoaded}
-                  test={TEST}
                 />
               )}
             </motion.section>
@@ -433,7 +428,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
     tapped: { scale: 0.95, transition: { duration: 0.2 } },
   }
 
-  const inViewRef = useRef(null)
+  // const inViewRef = useRef(null)
   const isInView = true
   // const isInView = useInView(inViewRef, { margin: "0px 200px 0px 200px" })
 
@@ -452,19 +447,19 @@ function SilhouetteCardMain({ s, i, ...props }) {
       whileTap={"tapped"}
       onClick={handleCardClick}
       {...longPressProps}
-      ref={inViewRef}
+      // ref={inViewRef}
     >
       {isInView && (
         <div className="card-btn-wrapper">
           {/* TODO In hover su typology mostra DW btn */}
           {s.trajectories[0].length !== 0 && isInView && (
-            <button className="action-button download" onClick={(e) => downloadIDs(e, s)}>
-              <DownloadIcon size={10} />
+            <button className="action-button download" onClick={(e) => downloadIDs(e, ids)}>
+              <Download size={9} />
             </button>
           )}
           {/* TODO In hover su typology mostra DW btn */}
           <button className="action-button order" onClick={(e) => handleOrderClick(e, s)}>
-            O
+            <Shuffle size={9} />
           </button>
         </div>
       )}
@@ -503,7 +498,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
         {isHovered && isSelected && !isCmdPressed && isExpandible && isInView && (
           <div className="action-button expand">
             <AnimatePresence>
-              {isTouchDevice && longPressProps.isPressed && (
+              {isTouchDevice && longPressProps?.isPressed && (
                 <motion.div
                   className="progress-bar"
                   initial={{ width: 0 }}
@@ -522,13 +517,13 @@ function SilhouetteCardMain({ s, i, ...props }) {
                 />
               )}
             </AnimatePresence>
-            <motion.button
+            {/* <motion.button
               className="btn"
               onClick={(e) => handleExpandClick(e, s.name)}
               whileTap={{ scale: 0.9, transition: { duration: 0.2, delay: 0 } }}
             >
               {expandSides ? "Hide" : "Expand"}
-            </motion.button>
+            </motion.button> */}
           </div>
         )}
       </AnimatePresence>
@@ -546,7 +541,6 @@ export function SubsetSelection({
 }) {
   const subsetNames = subset.map((s) => s.name)
 
-  // useEffect(() => {}, [subset])
   return (
     <motion.div
       initial={{ opacity: 0, width: 0 }}
@@ -572,24 +566,6 @@ export function SubsetSelection({
           )
         })}
       </div>
-      {/* <Virtuoso
-        style={{ height: "100%", width: "100%" }}
-        data={subsetNames}
-        increaseViewportBy={100}
-        itemContent={(i, s) => {
-          const isSelected = includes(selectedSilhouettes, s)
-          return (
-            <SilhouetteToggleButton
-              silhouetteName={s}
-              isSelected={isSelected}
-              toggleSilhouetteFilter={toggleSilhouetteFilter}
-              x={x}
-              y={y}
-              palette={palette}
-            />
-          )
-        }}
-      /> */}
     </motion.div>
   )
 }
@@ -602,13 +578,13 @@ export function SilhouetteToggleButton({
   y,
   palette,
 }) {
-  const viewRef = useRef(null)
+  // const viewRef = useRef(null)
   const isInView = true
   // const isInView = useInView(viewRef, { margin: "50px 0px 50px 0px" })
   return (
     <motion.div
       key={`toggle-${silhouetteName}`}
-      ref={viewRef}
+      // ref={viewRef}
       className={`chip subset-chip ${isSelected ? "selected" : ""}`}
       whileTap={{ scale: 0.9 }}
       onClick={() => toggleSilhouetteFilter(silhouetteName)}
@@ -772,7 +748,7 @@ function SilhouetteChip({ s, palette, x, y, animationDuration, toggleSilhouetteF
         layout
         onClick={() => toggleSilhouetteFilter(s)}
       >
-        ×
+        <X size={16} />
       </motion.button>
       <SmallSilhouette
         silhouetteName={s}
@@ -1072,11 +1048,6 @@ function MorphHasse({
     console.log("Select ALL children of", nodeName)
   }
 
-  // console.log("State Names Loaded", statesNamesLoaded)
-  // console.log("Test Value", test)
-
-  const [scope] = useAnimate() // 'animate' function removed as it was unused
-
   const rectWidth = isHasse ? 36 : 72
   const padding = isHasse ? 20 : 20
   const height = isHasse ? 500 : 100
@@ -1133,7 +1104,6 @@ function MorphHasse({
       initial={{ height: height, width: width }}
       animate={{ height: height, width: width }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      ref={scope}
     >
       {/* GRID */}
       {isHasse &&

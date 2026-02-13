@@ -1,7 +1,7 @@
-import { DownloadIcon } from "../icons/Icons"
-import { motion, AnimatePresence, stagger } from "framer-motion"
+import { motion } from "framer-motion"
 import { useState } from "react"
 import "./ExportPanel.css"
+import { Download } from "lucide-react"
 
 export function ExportPanel() {
   const [isHover, setIsHover] = useState(false)
@@ -118,7 +118,7 @@ export function ExportPanel() {
                 else reject(new Error("Canvas toBlob produced null"))
               },
               "image/png",
-              1
+              1,
             )
           } catch (err) {
             reject(err)
@@ -178,7 +178,7 @@ export function ExportPanel() {
 
       {/* Bottone principale sempre visibile */}
       <button>
-        <DownloadIcon size={12} />
+        <Download size={12} />
       </button>
     </motion.div>
   )
