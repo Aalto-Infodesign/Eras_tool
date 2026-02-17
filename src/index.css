@@ -238,27 +238,7 @@ h1 {
   grid-row: span 1;
   order: 6;
 }
-.bento-item.filters.closed {
-  /* position: absolute;
-  width: 200px;
-  height: 400px;
-  top: calc(50vh - 200px);
-  right: -205px;
-  transition: right 300ms ease-in-out;
-  filter: drop-shadow(3px 5px 5px rgba(0, 0, 0, 0.682)); */
 
-  /* grid-column: span 3;
-  grid-row: span 1;
-  order: 6; */
-}
-.bento-item.filters.closed:hover {
-  /* right: var(--spacing-md); */
-  /* right: 0; */
-
-  /* grid-column: span 3;
-  grid-row: span 1;
-  order: 5; */
-}
 .bento-item.filtered-items {
   grid-column: span 9;
   /* grid-row: span 5; */
@@ -542,6 +522,6 @@ select {
     grid-column: span 12;
   }
   .bento-item.filters {
-    grid-column: span 2;
+    grid-column: span 3;
   }
 }

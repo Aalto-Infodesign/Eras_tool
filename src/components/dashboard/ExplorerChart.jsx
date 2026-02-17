@@ -479,12 +479,7 @@ export function TrajectoriesExplorerChart(props) {
       </motion.section>
 
       {filters && (
-        <motion.section
-          layout
-          key={"filters"}
-          id="chart-filters"
-          className="bento-item filters closed"
-        >
+        <motion.section layout key={"filters"} id="chart-filters" className="bento-item filters">
           <Filters />
         </motion.section>
       )}
