@@ -4,7 +4,7 @@ import { ticks } from "d3"
 
 import { getMinMaxStateFromTrajectories } from "../../../utils/getMinMax"
 
-import { motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 
 import { moveElementInArray } from "../../../utils/moveChar"
 
@@ -133,6 +133,7 @@ export function Grid(props) {
       })}
 
       {minMaxStates.map((d) => {
+        const y = yScale(d.state) + marginTop
         return (
           <motion.line
             key={d.state}
@@ -141,10 +142,10 @@ export function Grid(props) {
             initial={{
               x1: xScale(d.x[0]),
               x2: xScale(d.x[1]),
-              y1: yScale(d.state) + marginTop,
-              y2: yScale(d.state) + marginTop,
+              y1: y,
+              y2: y,
             }}
-            animate={{ y1: yScale(d.state) + marginTop, y2: yScale(d.state) + marginTop }}
+            animate={{ y1: y, y2: y }}
             transition={{ duration: 0.2 }}
             strokeWidth={0.5}
             strokeLinecap="round"

@@ -6,6 +6,8 @@ import { Tooltip } from "../../common/Tooltip/Tooltip"
 import { groupBy, keys } from "lodash"
 import { romanize } from "../../../utils/numberHelpers"
 import { useViz } from "../../../contexts/VizContext"
+import { useData } from "../../../contexts/ProcessedDataContext"
+import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
 
 // --- Constants for better maintainability ---
 const MARGIN_Y = 25
@@ -282,6 +284,7 @@ function SankeyLink({
   selectedLinks,
   selectionDirection,
 }) {
+  const { scales } = useData()
   const linkGenerator = sankeyLinkHorizontal()
   const path = linkGenerator(link)
   const [index_S] = link.source.id.split("_")
@@ -291,6 +294,12 @@ function SankeyLink({
   const isSelectedRight = selectedLinks.map((s) => s.source.id).includes(link.source.id)
 
   const isSelected = selectionDirection === "left" ? isSelectedLeft : isSelectedRight
+
+  const fullLink = {
+    ...link,
+    source: { ...link.source, name: scales.indexToName(index_S) },
+    target: { ...link.target, name: scales.indexToName(index_F) },
+  }
 
   return (
     <>
@@ -319,7 +328,7 @@ function SankeyLink({
         transition={DEFAULT_TRANSITION}
         stroke={`url(#grad-${index_S}-${index_F})`}
         fill="none"
-        onMouseEnter={() => setHoveredLink(link)}
+        onMouseEnter={() => setHoveredLink(fullLink)}
       />
     </>
   )
@@ -555,10 +564,21 @@ export function Sankey({ width, height, data }) {
           {hoveredLink && !hoveredSilhouette && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <p>
-                Link {hoveredLink.source.id} to {hoveredLink.target.id}
+                <ArrowUpFromDot size={10} style={{ transform: "rotate(90deg)" }} />{" "}
+                <span style={{ color: palette[hoveredLink.source.depth] }}>
+                  {hoveredLink.source.name}
+                </span>{" "}
+                at <span>{hoveredLink.source.depth + 1}</span>
               </p>
               <p>
-                N. Segments: <span>{hoveredLink.value}</span>
+                <ArrowDownToDot size={10} style={{ transform: "rotate(-90deg)" }} />{" "}
+                <span style={{ color: palette[hoveredLink.target.depth] }}>
+                  {hoveredLink.target.name}
+                </span>{" "}
+                at <span>{hoveredLink.target.depth + 1}</span>
+              </p>
+              <p>
+                <span className="bold">{hoveredLink.value}</span> IDs
               </p>
             </motion.div>
           )}

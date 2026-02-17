@@ -220,11 +220,14 @@ const Dashboard = () => {
                   </div>
                   <div className="carousel-slides-content" data-title="Analytics">
                     <h4>Datapoints</h4>
-                    <p>{analytics.datapoints}</p>
+                    <p>
+                      {selectedIDs.length > 0 && <span>{selectedIDs.length} / </span>}
+                      {analytics.datapoints}
+                    </p>
                     <h4>Silhouettes</h4>
                     <p>
                       {selectedSilhouettesData.length > 0 && (
-                        <span>{selectedSilhouettesData.length}/</span>
+                        <span>{selectedSilhouettesData.length} / </span>
                       )}
                       {silhouettes.length}
                     </p>
@@ -237,9 +240,9 @@ const Dashboard = () => {
                       {Math.round(analytics.dateRange[0])} - {Math.round(analytics.dateRange[1])}
                     </p>
                   </div>
-                  <div className="carousel-slides-content" data-title="Debug Tools">
+                  {/* <div className="carousel-slides-content" data-title="Debug Tools">
                     <DebugPanel />
-                  </div>
+                  </div> */}
                   <div className="carousel-slides-content" data-title="Export">
                     <ExportIDs selectedIDs={selectedIDs} />
                   </div>

@@ -12,7 +12,7 @@ import { useEffect, useCallback, useRef } from "react"
 
 export function StateSelection() {
   const { removedStates, setRemovedStates, scales } = useData()
-  const { palette, statesOrder, setStatesOrder, isLegend } = useViz()
+  const { palette, statesOrder, setStatesOrder, isLegend, hasFlowChart } = useViz()
   const { screenToFlowPosition, setNodes, getNodes, updateNodeData, deleteElements } =
     useReactFlow()
 
@@ -222,7 +222,7 @@ export function StateSelection() {
                 <EraLabel index={i} text={scales.indexToName(item)} color={palette[item]} />
 
                 <div className="buttons-wrapper">
-                  {!isLegend && (
+                  {!isLegend && hasFlowChart && (
                     <button
                       className="center"
                       onClick={() => addNodetoFlow("default", item, palette[item])}

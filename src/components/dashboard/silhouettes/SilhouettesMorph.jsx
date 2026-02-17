@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react"
-import { includes, isNil, xor, uniq, flatten } from "lodash"
+import { includes, isNil, xor, uniq, flatten, set } from "lodash"
 import { scaleLinear, scaleBand, max } from "d3"
 
 import { ClearButton } from "../../common/Button/ClearButton"
@@ -28,6 +28,8 @@ import { downloadIDs } from "../../../utils/exportFunctions"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
+
+// ! TODO Refactor completo
 
 export const SilhouettesMorph = (props) => {
   const { silhouettes, idealSilhouettes, statesData } = useData()
@@ -238,6 +240,7 @@ export const SilhouettesMorph = (props) => {
             </motion.section>
           )}
         </AnimatePresence>
+
         <AnimatePresence>
           {!isHasse && (
             <motion.div
@@ -781,29 +784,24 @@ const usePosetLayout = (
   hoveredNode,
   isHasse,
 ) => {
-  console.log(height)
   const paddingX = 80
 
-  // Step 1: Memoize the expensive poset creation.
-  // This only re-runs if the underlying silhouette data changes.ù
-  const startTime = performance.now()
+  // Step 1: Memoize the expensive poset creation
   const basePosetData = useMemo(() => {
+    // Signal that computation is starting
+
     if (!silhouettes || silhouettes.length === 0 || !statesNamesLoaded) {
       return { poset: null, covers: [], leaves: [], orderedLeaves: [] }
     }
 
     const silhouetteNames = silhouettes.map((s) => s.name)
-    // console.log("Silhouette Names:", silhouetteNames)
     const dominancePairs = getDominancePairsSelf(silhouetteNames)
-    // console.log("Dominance Pairs:", dominancePairs)
-    // const labels = [...new Set(dominancePairs.flat())]
     const pi = performance.now()
 
     const { matrix, nodes } = po.domFromEdges(dominancePairs)
     const poset = po.createPoset(matrix, nodes)
     poset.setLayers()
     poset.setDepth()
-    // poset.color()
     poset
       .enrich()
       .feature("parents", (name) => poset.getCovered(name).map((parent) => poset.features[parent]))
@@ -812,19 +810,17 @@ const usePosetLayout = (
       .feature("statesArray", (name) => name.split("-"))
       .feature("orderedName", (name) => {
         const states = name.split("-")
-        // Ensure statesNamesLoaded is available before mapping
         if (statesNamesLoaded?.length > 0) {
           return states.map((s) => statesNamesLoaded.indexOf(s).toString()).join("-")
         }
-        return name // Fallback
+        return name
       })
+
     const pf = performance.now()
     console.log(`Poset Initialization took ${pf - pi} milliseconds`)
 
     const leaves = poset.layers[poset.layers.length - 1] || []
-
     const orderedLeaves = [...leaves].sort((a, b) => {
-      // Use the 'orderedName' feature for sorting
       return poset.features[a].orderedName.localeCompare(poset.features[b].orderedName, "en", {
         numeric: true,
       })
@@ -834,34 +830,30 @@ const usePosetLayout = (
     return { poset, covers, leaves, orderedLeaves, silhouetteNames }
   }, [silhouettes, statesNamesLoaded])
 
-  const endTime = performance.now()
-
-  console.log(`Call to create POSET took ${endTime - startTime} milliseconds`)
-
-  // Step 2: Memoize the layout calculations.
-  // This re-runs if the base poset, dimensions, or hoveredNode change.
-  return useMemo(() => {
+  // Step 2: Memoize the layout calculations
+  const layoutData = useMemo(() => {
     const { poset, covers, leaves, orderedLeaves, silhouetteNames } = basePosetData
-    if (!poset) return { poset: null, covers: [] }
+    if (!poset) {
+      return { poset: null, covers: [] }
+    }
 
     const layersByLength = Object.entries(
       groupBy(flattenDeep(poset.layers), (l) => l.split("-").length),
     )
 
     const namesForScale = isHasse ? orderedLeaves : silhouetteNames
-
     const xRange = isHasse
       ? [paddingX, width - padding]
       : [rectWidth / 2 + 1, width - rectWidth / 2 - 1]
     const yRange = isHasse ? [padding, height - padding] : [rectHeight / 2 + 1, rectHeight / 2 - 1]
-    // --- Scales ---
+
     const xPointScale = scalePoint(namesForScale, xRange)
     const yScale = scaleLinear([1, layersByLength[layersByLength.length - 1][0]], yRange)
 
     poset.feature("yPositionScaled", (_name, d) => yScale(d.statesArray.length))
     !isHasse && poset.feature("xPosition", (name) => xPointScale(name))
 
-    // --- Fisheye/Magnification Logic ---
+    // Fisheye/Magnification Logic
     let siblingScale = null
     let leftScale = null
     let rightScale = null
@@ -889,7 +881,6 @@ const usePosetLayout = (
         const magnifiedGroupWidth = siblingNames.length * rectWidth
         const groupStart =
           focusX - magnifiedGroupWidth / 2 < padding ? padding : focusX - magnifiedGroupWidth / 2
-
         const groupEnd = groupStart + magnifiedGroupWidth
 
         siblingScale = scalePoint().domain(orderedSiblingNames).range([groupStart, groupEnd])
@@ -902,7 +893,6 @@ const usePosetLayout = (
       }
     }
 
-    // --- X-Position Function ---
     const setXPosition = (name) => {
       if (siblingScale && leftScale && rightScale) {
         if (siblingNames.includes(name)) {
@@ -914,7 +904,6 @@ const usePosetLayout = (
       return xPointScale(name)
     }
 
-    // --- Apply Positions ---
     isHasse &&
       poset.climber(function (layer, h) {
         layer.forEach((name) => {
@@ -924,9 +913,10 @@ const usePosetLayout = (
       })
 
     return { poset, covers, yScale, layersByLength }
-  }, [basePosetData, width, height, rectWidth, padding, hoveredNode, statesNamesLoaded, isHasse])
-}
+  }, [basePosetData, width, height, rectWidth, padding, hoveredNode, isHasse])
 
+  return layoutData
+}
 /**
  * Calculates node styles and labels based on the hovered node.
  * This is derived state, so useMemo is preferred over useEffect+useState.
@@ -998,7 +988,7 @@ function MorphHasse({
   y,
   statesNamesLoaded,
 }) {
-  const i = performance.now()
+  console.time("Morph Hasse Render")
   const [hoveredNode, setHoveredNode] = useState(null)
   const hoverTimeoutRef = useRef(null) // Add this line
 
@@ -1057,7 +1047,6 @@ function MorphHasse({
 
   const rectHeight = isHasse ? rectWidth : 91.5
 
-  const startTime = performance.now()
   const { covers, poset, yScale, layersByLength } = usePosetLayout(
     silhouettes,
     width,
@@ -1071,10 +1060,6 @@ function MorphHasse({
 
     // hoverState // Unused
   )
-
-  const endTime = performance.now()
-
-  console.log(`Call to usePosetLayout took ${endTime - startTime} milliseconds`)
 
   // Calculate styles and labels using the custom hook
   const { styles, labels: nodeLabels } = useNodeStyling(poset, hoveredNode)
@@ -1093,11 +1078,7 @@ function MorphHasse({
     return elementNames
   }, [poset, hoveredNode])
 
-  // Don't render anything until the poset is calculated
-  if (!poset?.elements.length) return null
-
-  const f = performance.now()
-  console.log(`Morph Hasse rendered in ${f - i} ms`)
+  console.timeEnd("Morph Hasse Render")
 
   return (
     <motion.svg
@@ -1106,249 +1087,249 @@ function MorphHasse({
       transition={{ duration: 0.5, ease: "easeInOut" }}
     >
       {/* GRID */}
-      {isHasse &&
-        layersByLength.map(([key, value], i) => {
-          const statesNumber = Number(key)
-          const silhouettePerLayer = value.length
+      {layersByLength.map(([key, value], i) => {
+        const statesNumber = Number(key)
+        const silhouettePerLayer = value.length
 
-          return (
-            <motion.g
-              key={`grid-line-${key}`}
-              initial={{
-                y: yScale(statesNumber),
-              }}
-              animate={{
-                y: yScale(statesNumber),
-              }}
-              transition={{ duration: 0.5, delay: 0.3 + 0.1 * i, ease: "easeInOut" }}
-            >
-              <motion.line
-                initial={{ pathLength: 0 }}
-                animate={{
-                  pathLength: 1,
-                  transition: { duration: 0.5, delay: 0.3 + 0.1 * i, ease: "easeInOut" },
-                }}
-                x1={0}
-                x2={width}
-                strokeWidth={0.5}
-                stroke={"#717171aa"}
-              />
-              <motion.text
-                initial={{ opacity: 0, y: 0 }}
-                animate={{
-                  opacity: 1,
-                  y: -6,
-                  transition: { duration: 0.3, delay: 0.3 + 0.1 * i, ease: "easeInOut" },
-                }}
-                fontSize={12}
-                fill="var(--text-light)"
-              >
-                L{statesNumber}
-              </motion.text>
-              <motion.text
-                initial={{ opacity: 0, y: 0 }}
-                animate={{
-                  opacity: 1,
-                  y: 15,
-                  transition: { duration: 0.3, delay: 0.3 + 0.1 * i, ease: "easeInOut" },
-                }}
-                fontSize={12}
-                fill="var(--text-light)"
-              >
-                {silhouettePerLayer} lines
-              </motion.text>
-            </motion.g>
-          )
-        })}
-
-      {/* Draw cover relations */}
-      {isHasse &&
-        covers.map((cover, i) => {
-          const src = poset.features[cover.source]
-          const tgt = poset.features[cover.target]
-
-          if (!src || !tgt) return null
-
-          const isSelected =
-            selectedSilhouettes.includes(cover.source) && selectedSilhouettes.includes(cover.target)
-
-          return (
-            <motion.path
-              key={`cover-${cover.source}-${cover.target}`}
-              id={`cover-${cover.source}-${cover.target}`}
-              initial={{
-                pathLength: 0,
-                d: `M${src.xPosition},${src.yPositionScaled} L${tgt.xPosition},${tgt.yPositionScaled}`,
-              }} // Prevent initial animation
+        return (
+          <motion.g
+            key={`grid-line-${key}`}
+            initial={{
+              y: yScale(statesNumber),
+            }}
+            animate={{
+              y: yScale(statesNumber),
+            }}
+            transition={{ duration: 0.5, delay: 0.3 + 0.1 * i, ease: "easeInOut" }}
+          >
+            <motion.line
+              initial={{ pathLength: 0 }}
               animate={{
                 pathLength: 1,
-                d: `M${src.xPosition},${src.yPositionScaled} L${tgt.xPosition},${tgt.yPositionScaled}`,
-                stroke: isSelected ? "#ccc" : palette[cover.source[cover.source.length - 1]],
-                // stroke: isSelected ? "#ccc" : "#717171ff",
+                transition: { duration: 0.5, delay: 0.3 + 0.1 * i, ease: "easeInOut" },
               }}
-              exit={{ pathLength: 0 }}
-              transition={{
-                default: { duration: 0.2, ease: "easeInOut" },
-                d: { duration: 0.8, ease: "easeInOut" },
-                pathLength: { duration: isHasse ? 0.5 : 0, delay: 0.7 },
-              }}
-              strokeWidth={2}
-              whileHover={{ strokeWidth: 6, cursor: "pointer" }}
-              onClick={() => toggleSilhouetteFilter([cover.source, cover.target])}
+              x1={0}
+              x2={width}
+              strokeWidth={0.5}
+              stroke={"#717171aa"}
             />
-          )
-        })}
-
-      <g className="nodes">
-        {nodesForRender.map((name) => {
-          const node = poset.features[name]
-
-          if (!node) return null // Safety check
-          const isSelected = selectedSilhouettes.includes(name)
-          const nodeStyle = styles[name] || { opacity: 1, scale: 1 }
-
-          const isInFirstLayers = flatten(
-            poset.layers.filter((l, i) => i < poset.layers.length - 1),
-          ).includes(name)
-
-          return (
-            <motion.g
-              key={`node-wrapper-${name}`}
-              id={`node-wrapper-${name}`}
-              initial={false}
+            <motion.text
+              initial={{ opacity: 0, y: 0 }}
               animate={{
-                x: node.xPosition,
-                y: isHasse ? node.yPositionScaled : rectHeight / 2 - 10,
-                opacity: isHasse ? nodeStyle.opacity : 0,
-                scale: nodeStyle.scale,
+                opacity: 1,
+                y: -6,
+                transition: { duration: 0.3, delay: 0.3 + 0.1 * i, ease: "easeInOut" },
               }}
-              transition={{
-                default: { duration: 0.2, ease: "easeInOut" },
-                x: { duration: 0.8, ease: "easeInOut" },
-                y: { duration: 0.8, ease: "easeInOut" },
-                opacity: { delay: isHasse ? 0 : 1.5 },
-              }}
+              fontSize={12}
+              fill="var(--text-light)"
             >
+              L{statesNumber}
+            </motion.text>
+            <motion.text
+              initial={{ opacity: 0, y: 0 }}
+              animate={{
+                opacity: 1,
+                y: 15,
+                transition: { duration: 0.3, delay: 0.3 + 0.1 * i, ease: "easeInOut" },
+              }}
+              fontSize={12}
+              fill="var(--text-light)"
+            >
+              {silhouettePerLayer} lines
+            </motion.text>
+          </motion.g>
+        )
+      })}
+
+      {/* Draw cover relations */}
+      {covers.map((cover, i) => {
+        const src = poset.features[cover.source]
+        const tgt = poset.features[cover.target]
+
+        if (!src || !tgt) return null
+
+        const isSelected =
+          selectedSilhouettes.includes(cover.source) && selectedSilhouettes.includes(cover.target)
+
+        return (
+          <motion.path
+            key={`cover-${cover.source}-${cover.target}`}
+            id={`cover-${cover.source}-${cover.target}`}
+            initial={{
+              pathLength: 0,
+              d: `M${src.xPosition},${src.yPositionScaled} L${tgt.xPosition},${tgt.yPositionScaled}`,
+            }} // Prevent initial animation
+            animate={{
+              pathLength: 1,
+              d: `M${src.xPosition},${src.yPositionScaled} L${tgt.xPosition},${tgt.yPositionScaled}`,
+              stroke: isSelected ? "#ccc" : palette[cover.source[cover.source.length - 1]],
+              // stroke: isSelected ? "#ccc" : "#717171ff",
+            }}
+            exit={{ pathLength: 0 }}
+            transition={{
+              default: { duration: 0.2, ease: "easeInOut" },
+              d: { duration: 0.8, ease: "easeInOut" },
+              pathLength: { duration: isHasse ? 0.5 : 0, delay: 0.7 },
+            }}
+            strokeWidth={2}
+            whileHover={{ strokeWidth: 6, cursor: "pointer" }}
+            onClick={() => toggleSilhouetteFilter([cover.source, cover.target])}
+          />
+        )
+      })}
+
+      {
+        <g className="nodes">
+          {nodesForRender.map((name) => {
+            const node = poset.features[name]
+
+            if (!node) return null // Safety check
+            const isSelected = selectedSilhouettes.includes(name)
+            const nodeStyle = styles[name] || { opacity: 1, scale: 1 }
+
+            const isInFirstLayers = flatten(
+              poset.layers.filter((l, i) => i < poset.layers.length - 1),
+            ).includes(name)
+
+            return (
               <motion.g
-                onMouseEnter={() => handleMouseEnter(node)}
-                onMouseLeave={handleMouseLeave}
-                onClick={() => toggleSilhouetteFilter(name)}
-                style={{ cursor: "pointer", zIndex: name === hoveredNode?.name ? 10 : 2 }}
-                whileHover={{ scale: 1.1, opacity: 1 }}
+                key={`node-wrapper-${name}`}
+                id={`node-wrapper-${name}`}
+                initial={false}
+                animate={{
+                  x: node.xPosition,
+                  y: isHasse ? node.yPositionScaled : rectHeight / 2 - 10,
+                  opacity: isHasse ? nodeStyle.opacity : 0,
+                  scale: nodeStyle.scale,
+                }}
+                transition={{
+                  default: { duration: 0.2, ease: "easeInOut" },
+                  x: { duration: 0.8, ease: "easeInOut" },
+                  y: { duration: 0.8, ease: "easeInOut" },
+                  opacity: { delay: isHasse ? 0 : 1.5 },
+                }}
               >
-                {!isInFirstLayers && (
-                  <motion.circle
-                    initial={{
-                      r: 0,
-                      height: 10,
-                    }}
-                    animate={{
-                      r: 5,
-                      height: 10,
-                    }}
-                    transition={{
-                      default: { duration: 0.2, ease: "easeInOut" },
-                      r: { duration: 1 },
-                      height: { duration: 1 },
-                    }}
-                    fill={palette[name[name.length - 1]] || "var(--surface-contrast)"}
-                    // fill={"var(--surface-contrast)"}
-                    // stroke={isSelected ? "var(--surface-accent)" : palette[name[0]] || "#ccc"}
-                    // stroke={isSelected ? "var(--surface-accent)" : node.fill || "#ccc"}
-                    // strokeWidth={isHasse ? (isSelected ? 2 : 0.5) : 0}
-                    whileTap={{ scale: 0.95 }}
-                  />
-                )}
-                <AnimatePresence>
-                  {(isInFirstLayers || isSelected) && (
-                    <motion.g
+                <motion.g
+                  onMouseEnter={() => handleMouseEnter(node)}
+                  onMouseLeave={handleMouseLeave}
+                  onClick={() => toggleSilhouetteFilter(name)}
+                  style={{ cursor: "pointer", zIndex: name === hoveredNode?.name ? 10 : 2 }}
+                  whileHover={{ scale: 1.1, opacity: 1 }}
+                >
+                  {!isInFirstLayers && (
+                    <motion.circle
                       initial={{
-                        y: isHasse ? 0 : -10,
-                        scale: 0,
+                        r: 0,
+                        height: 10,
                       }}
-                      animate={{ y: isHasse ? 0 : -10, scale: 1 }}
-                      exit={{
-                        scale: 0,
+                      animate={{
+                        r: 5,
+                        height: 10,
                       }}
-                    >
-                      <motion.rect
+                      transition={{
+                        default: { duration: 0.2, ease: "easeInOut" },
+                        r: { duration: 1 },
+                        height: { duration: 1 },
+                      }}
+                      fill={palette[name[name.length - 1]] || "var(--surface-contrast)"}
+                      // fill={"var(--surface-contrast)"}
+                      // stroke={isSelected ? "var(--surface-accent)" : palette[name[0]] || "#ccc"}
+                      // stroke={isSelected ? "var(--surface-accent)" : node.fill || "#ccc"}
+                      // strokeWidth={isHasse ? (isSelected ? 2 : 0.5) : 0}
+                      whileTap={{ scale: 0.95 }}
+                    />
+                  )}
+                  <AnimatePresence>
+                    {(isInFirstLayers || isSelected) && (
+                      <motion.g
                         initial={{
-                          width: rectWidth,
-                          height: rectHeight,
+                          y: isHasse ? 0 : -10,
+                          scale: 0,
                         }}
-                        animate={{
-                          width: rectWidth,
-                          height: rectHeight,
+                        animate={{ y: isHasse ? 0 : -10, scale: 1 }}
+                        exit={{
+                          scale: 0,
                         }}
-                        transition={{
-                          default: { duration: 0.2, ease: "easeInOut" },
-                          width: { duration: 1 },
-                          height: { duration: 1 },
-                        }}
-                        x={-rectWidth / 2}
-                        y={-rectWidth / 2}
-                        fill={"var(--surface-contrast)"}
-                        stroke={isSelected ? "var(--surface-accent)" : palette[name[0]] || "#ccc"}
-                        // stroke={isSelected ? "var(--surface-accent)" : node.fill || "#ccc"}
-                        strokeWidth={isHasse ? (isSelected ? 2 : 0.5) : 0}
-                        rx={4}
-                        ry={4}
-                        whileTap={{ scale: 0.95 }}
-                      />
-                      <SilhouettePathSvg
-                        keyName="hasse"
-                        silhouetteName={name}
-                        palette={palette}
-                        animationDuration={0.2}
-                        xScale={x}
-                        yScale={y}
-                        useAsSize={true}
-                        isHasse={isHasse}
-                      />
-                      {/* <text fill="white" dominant-baseline="middle" text-anchor="middle">
+                      >
+                        <motion.rect
+                          initial={{
+                            width: rectWidth,
+                            height: rectHeight,
+                          }}
+                          animate={{
+                            width: rectWidth,
+                            height: rectHeight,
+                          }}
+                          transition={{
+                            default: { duration: 0.2, ease: "easeInOut" },
+                            width: { duration: 1 },
+                            height: { duration: 1 },
+                          }}
+                          x={-rectWidth / 2}
+                          y={-rectWidth / 2}
+                          fill={"var(--surface-contrast)"}
+                          stroke={isSelected ? "var(--surface-accent)" : palette[name[0]] || "#ccc"}
+                          // stroke={isSelected ? "var(--surface-accent)" : node.fill || "#ccc"}
+                          strokeWidth={isHasse ? (isSelected ? 2 : 0.5) : 0}
+                          rx={4}
+                          ry={4}
+                          whileTap={{ scale: 0.95 }}
+                        />
+                        <SilhouettePathSvg
+                          keyName="hasse"
+                          silhouetteName={name}
+                          palette={palette}
+                          animationDuration={0.2}
+                          xScale={x}
+                          yScale={y}
+                          useAsSize={true}
+                          isHasse={isHasse}
+                        />
+                        {/* <text fill="white" dominant-baseline="middle" text-anchor="middle">
                     {name}
                   </text> */}
-                    </motion.g>
-                  )}
-                </AnimatePresence>
-                <motion.text
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  x={0}
-                  y={-rectWidth / 2 - 5}
-                  textAnchor="middle"
-                  fill="var(--surface-accent)"
-                  fontSize={10}
-                  style={{ pointerEvents: "none" }}
-                >
-                  {nodeLabels[name] || ""}
-                </motion.text>
-              </motion.g>
-              {isSelected && ( // TODO && has children
-                <motion.g
-                  transform={`translate(${-rectWidth}, ${-5})`}
-                  onDoubleClick={() => selectAllChildren(name)}
-                  onClick={() => selectChildren(name)}
-                >
-                  <rect width={10} height={10} rx={2} fill="white"></rect>
-                  <text
+                      </motion.g>
+                    )}
+                  </AnimatePresence>
+                  <motion.text
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    x={0}
+                    y={-rectWidth / 2 - 5}
                     textAnchor="middle"
-                    dominantBaseline="middle"
-                    x={5}
-                    y={5}
+                    fill="var(--surface-accent)"
                     fontSize={10}
-                    fill="black"
+                    style={{ pointerEvents: "none" }}
                   >
-                    v
-                  </text>
+                    {nodeLabels[name] || ""}
+                  </motion.text>
                 </motion.g>
-              )}
-              <title>{name}</title>
-            </motion.g>
-          )
-        })}
-      </g>
+                {isSelected && ( // TODO && has children
+                  <motion.g
+                    transform={`translate(${-rectWidth}, ${-5})`}
+                    onDoubleClick={() => selectAllChildren(name)}
+                    onClick={() => selectChildren(name)}
+                  >
+                    <rect width={10} height={10} rx={2} fill="white"></rect>
+                    <text
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      x={5}
+                      y={5}
+                      fontSize={10}
+                      fill="black"
+                    >
+                      v
+                    </text>
+                  </motion.g>
+                )}
+                <title>{name}</title>
+              </motion.g>
+            )
+          })}
+        </g>
+      }
     </motion.svg>
   )
 }

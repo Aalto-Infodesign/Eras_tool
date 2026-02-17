@@ -11,7 +11,7 @@ export function StateDensity(props) {
   const trajectoriesContext = useContext(TrajectoriesContext)
   const { marginTop, selectedSilhouettes, chartScales } = trajectoriesContext
 
-  const { filteredLinks } = props
+  // const { filteredLinks } = props
   // const { showStateDensity } = props
   const { x, y } = chartScales
 

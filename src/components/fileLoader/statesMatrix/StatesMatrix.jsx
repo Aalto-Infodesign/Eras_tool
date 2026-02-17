@@ -9,6 +9,7 @@ import { extent, scaleBand, scaleLinear } from "d3"
 import { groupBy, map, countBy } from "lodash"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
+import { ListFilter } from "lucide-react"
 
 import { curveStep, line } from "d3"
 
@@ -18,6 +19,7 @@ export function StatesMatrix({ width, height }) {
   const { statesData } = useData()
   const { palette, statesOrder } = useViz()
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
+  const [selectedCell, setSelectedCell] = useState(null)
 
   const matrixCouples = useMemo(
     () =>
@@ -90,8 +92,8 @@ export function StatesMatrix({ width, height }) {
   return (
     <div>
       {/* <h4>StatesMatrix</h4> */}
-      <div>
-        <span>show</span>
+      <div className="matrix-controls">
+        <ListFilter size={16} />
         <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
           <option value="duration">Duration</option>
           <option value="source">Source</option>
@@ -132,17 +134,22 @@ export function StatesMatrix({ width, height }) {
             }
 
             const activePoints = dataMap[lineChartMode]
+
+            const isSelected = selectedCell === s.id
             return (
               <motion.g
                 key={s.id}
                 initial={{
                   x: xScale(s.source),
                   y: yScale(s.target),
+                  scale: 1,
                 }}
                 animate={{
                   x: xScale(s.source),
                   y: yScale(s.target),
+                  scale: isSelected ? 1.1 : 1,
                 }}
+                onClick={() => setSelectedCell(isSelected ? null : s.id)}
               >
                 <rect
                   width={xScale.bandwidth()}
@@ -171,7 +178,7 @@ function LineChart({ width, height, points }) {
   const xScale = scaleLinear(xExtent, [0, width])
 
   const yExtent = extent(points.map((p) => p.y))
-  const yScale = scaleLinear([0, yExtent[1]], [height, 0])
+  const yScale = scaleLinear([0, yExtent[1]], [height, 2])
 
   const lineBuilder = line()
     .curve(curveStep)

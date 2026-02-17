@@ -1,12 +1,10 @@
-import { createContext, useState, useContext, useMemo, useEffect } from "react"
+import { createContext, useState, useContext, useMemo, useEffect, useCallback } from "react"
 import { useRawData } from "./RawDataContext"
 import { useData } from "./ProcessedDataContext"
 import { zip } from "lodash"
 
 import { po } from "../utils/po"
 import { getDominancePairsSelfUpper } from "../utils/POHelperFunctions"
-
-import { jch } from "d3-cam02"
 
 const VizContext = createContext(null)
 
@@ -16,9 +14,21 @@ export function VizProvider({ children }) {
   const [statesOrder, setStatesOrder] = useState([])
   const [dominanceArrayFromFlow, setDominanceArrayFromFlow] = useState(null)
   const [nodesFromFlow, setNodesFromFlow] = useState(null)
+  const [hasFlowChart, setHasFlowChart] = useState(false)
 
   // UI STATE
+  const [theme, setTheme] = useState("dark")
   const [isLegend, setIsLegend] = useState(false)
+  const [loadingCount, setLoadingCount] = useState(0)
+
+  const startLoading = useCallback(() => setLoadingCount((c) => c + 1), [])
+  const stopLoading = useCallback(() => setLoadingCount((c) => Math.max(0, c - 1)), [])
+
+  useEffect(() => {
+    if (fileName) {
+      setIsLegend(false)
+    }
+  }, [fileName])
 
   // Function to generate palette from dominance array
   const generatePaletteFromDominance = (dominanceArray, dominanceNodes) => {
@@ -108,8 +118,23 @@ export function VizProvider({ children }) {
       setStatesOrder,
       setIsLegend,
       updatePosetColoring, // Expose this to child components
+      hasFlowChart,
+      setHasFlowChart,
+      startLoading,
+      stopLoading,
+      isLoading: loadingCount > 0,
     }),
-    [palette, statesOrder, statesOrderOriginal, isLegend],
+    [
+      palette,
+      statesOrder,
+      statesOrderOriginal,
+      isLegend,
+      hasFlowChart,
+      loadingCount,
+      updatePosetColoring,
+      startLoading,
+      stopLoading,
+    ],
   )
 
   return <VizContext.Provider value={value}>{children}</VizContext.Provider>

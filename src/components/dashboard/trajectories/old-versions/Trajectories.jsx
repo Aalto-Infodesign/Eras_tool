@@ -1,5 +1,5 @@
 import { useEffect, useContext } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { TrajectoriesContext } from "../../TrajectoriesContext"
 
 import { select, selectAll } from "d3"
 

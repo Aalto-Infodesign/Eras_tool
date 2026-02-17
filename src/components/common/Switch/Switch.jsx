@@ -4,10 +4,17 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import "./Switch.css"
 
-export default function Switch({ toggleFunction, labelOn = "Label On", labelOff = "Label Off" }) {
+export default function Switch({
+  toggleFunction,
+  loadingLayout,
+  labelOn = "Label On",
+  labelOff = "Label Off",
+}) {
   const [isOn, setIsOn] = useState(false)
 
   const toggleSwitch = () => {
+    if (loadingLayout) return
+
     setIsOn(!isOn)
     toggleFunction(!isOn)
   }

@@ -41,6 +41,7 @@ export function TrajectoriesChart() {
     selectedLumps,
     toggleSelectedTrajectory,
     selectedTrajectoriesIDs,
+    enableScrub,
   } = trajectoriesContext
 
   const [isSelectModeLines, setIsSelectModeLines] = useState(false)
@@ -139,7 +140,7 @@ export function TrajectoriesChart() {
         </div>
 
         <AnimatePresence>
-          {hoveredTrajectoriesIDs.length > 0 && (
+          {enableScrub && hoveredTrajectoriesIDs.length > 0 && (
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <span>
                 {selectedIndex + 1}/{hoveredTrajectoriesIDs.length}
@@ -232,7 +233,7 @@ export function TrajectoriesChart() {
               />
             )}
           </svg>
-          <Tooltip isVisible={hoveredTrajectoriesIDs.length > 0}>
+          <Tooltip isVisible={enableScrub && hoveredTrajectoriesIDs.length > 0}>
             <HoveredTrajectoryPopUp
               selectedIndex={selectedIndex}
               isArrowLeft={isArrowLeft}

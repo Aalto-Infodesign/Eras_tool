@@ -170,41 +170,36 @@ export function TrajectoriesExplorerChart(props) {
 
   const chartRowSpan = Math.floor(statesNamesLoaded.length / 6) + 1
 
+  const enableScrub = filteredLinks.length < 2000
+
   const contextValue = useMemo(
     () => ({
+      // COORDS
       w,
       h,
       marginTop,
 
-      // data: richData, // is global
+      //DATA
       completeLinks,
       filteredLinks,
-      // silhouettes,
       filteredSilhouettes,
       selectedSilhouettes,
       toggleSilhouetteFilter,
       setStatesOrder,
-      // indexToName, // is global
-      // filters,
-      // dateRange,
-      // durationRange,
-      // statesOrder, // is global
-      // statesNames, // is global
       statesNamesLoaded,
       chartScales,
-      // scales, // is global
-      // palette, // is global
       selectedLumps,
       toggleSelectedLumps,
-      // analytics, // is global
       selectedTrajectoriesIDs,
       setSelectedTrajectoriesIDs,
       toggleSelectedTrajectory,
       hoveredTrajectoriesIDs,
       setHoveredTrajectoriesIDs,
       selectedIndex,
+
+      //UI
       reduceMotion,
-      // idealSilhouettes, // is global
+      enableScrub,
     }),
     [
       w,
@@ -243,26 +238,6 @@ export function TrajectoriesExplorerChart(props) {
     hidden: { scale: 0 },
     visible: { scale: 1, transition: { ease: "easeInOut" } },
   }
-
-  // const idsBySilhouette = useMemo(() => {
-  //   return silhouettes.map((s) => ({
-  //     name: s.name,
-  //     ids: s.trajectories.map((t) => t[0].id),
-  //   }))
-  // }, [silhouettes])
-
-  // const selectedIDssWithSilhouette = useMemo(
-  //   () => {
-  //     const union = selectedTrajectoriesIDs.map((id) => ({
-  //       id: id,
-  //       silhouette: idsBySilhouette.filter((s) => s.ids.includes(id))[0].name,
-  //     }))
-
-  //     return union
-  //   },
-  //   [selectedTrajectoriesIDs],
-  //   idsBySilhouette
-  // )
 
   console.timeEnd("Explorer Chart")
 

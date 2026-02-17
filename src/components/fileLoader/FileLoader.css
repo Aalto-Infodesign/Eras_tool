@@ -248,3 +248,10 @@ hr {
   display: flex;
   gap: var(--spacing-xs);
 }
+
+.matrix-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  padding-top: var(--spacing-sm);
+}

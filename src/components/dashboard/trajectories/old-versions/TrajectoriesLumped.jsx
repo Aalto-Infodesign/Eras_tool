@@ -1,12 +1,12 @@
 import { useEffect, useRef, useContext } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { TrajectoriesContext } from "../../TrajectoriesContext"
 
 import { select } from "d3"
 import { includes, flattenDeep, values, map, isNil } from "lodash"
 import {
   getMinMaxStateFromTrajectories,
   getMinMaxFromTrajectoriesBetwenTwoStates,
-} from "../../../utils/getMinMax"
+} from "../../../../utils/getMinMax"
 
 import textures from "textures"
 
@@ -83,7 +83,7 @@ export const TrajectoriesLumped = (props) => {
 
     const presentTrajectories = filteredTrajectories.filter((d) => d.source.date >= startDate)
     const pastTrajectories = filteredTrajectories.filter(
-      (d) => d.source.date < startDate && d.source.date >= midpointDate
+      (d) => d.source.date < startDate && d.source.date >= midpointDate,
     )
     const remoteTrajectories = filteredTrajectories.filter((d) => d.source.date < midpointDate)
 
@@ -129,18 +129,18 @@ export const TrajectoriesLumped = (props) => {
 
     // Process present data with filtering
     const presentLumps = getMinMaxFromTrajectoriesBetwenTwoStates(presentTrajectories).filter(
-      (d) => d.items.length > 1
+      (d) => d.items.length > 1,
     )
     console.log("presentLumps", presentLumps)
 
     // Process past data with the same filtering logic as present
     const pastLumps = getMinMaxFromTrajectoriesBetwenTwoStates(pastTrajectories).filter(
-      (d) => d.items.length > 1
+      (d) => d.items.length > 1,
     )
 
     // Process remote data with the same filtering logic as present
     const remoteLumps = getMinMaxFromTrajectoriesBetwenTwoStates(remoteTrajectories).filter(
-      (d) => d.items.length > 1
+      (d) => d.items.length > 1,
     )
 
     !isNil(presentLumps) &&
@@ -163,7 +163,7 @@ export const TrajectoriesLumped = (props) => {
               .attr("fill", (d) =>
                 d.source.state === d.target.state
                   ? palette[d.source.state]
-                  : `url(#gradient-${d.source.state}-${d.target.state})`
+                  : `url(#gradient-${d.source.state}-${d.target.state})`,
               )
               .attr("opacity", 0.3)
               .attr("points", (d) => createOriginPolygonFromLump(d))
@@ -187,7 +187,7 @@ export const TrajectoriesLumped = (props) => {
               .attr("fill", (d) =>
                 d.source.state === d.target.state
                   ? palette[d.source.state]
-                  : `url(#gradient-${d.source.state}-${d.target.state})`
+                  : `url(#gradient-${d.source.state}-${d.target.state})`,
               )
 
             return update
@@ -202,7 +202,7 @@ export const TrajectoriesLumped = (props) => {
               .attr("points", (d) => createOriginPolygonFromLump(d))
 
             exit.transition().delay(50).remove()
-          }
+          },
         )
         .on("click", function (_event, d) {
           toggleSelectedLumps(d)
@@ -215,7 +215,7 @@ export const TrajectoriesLumped = (props) => {
         })
 
     const lumpLinesExtreme = getMinMaxFromTrajectoriesBetwenTwoStates(presentTrajectories).filter(
-      (d) => d.items.length === 1
+      (d) => d.items.length === 1,
     )
 
     lumpsGroup
@@ -256,7 +256,7 @@ export const TrajectoriesLumped = (props) => {
 
         (exit) => {
           exit.transition().duration(100).attr("opacity", 0).remove()
-        }
+        },
       )
       .on("click", function (_event, d) {
         toggleSelectedLumps(d)
@@ -307,7 +307,7 @@ export const TrajectoriesLumped = (props) => {
               .duration(300)
               .attr("opacity", 0)
               .attr("points", (d) => createOriginPolygonFromLump(d))
-              .remove()
+              .remove(),
         )
         .on("click", function (_event, d) {
           toggleSelectedLumps(d)
@@ -356,7 +356,7 @@ export const TrajectoriesLumped = (props) => {
               .duration(300)
               .attr("opacity", 0)
               .attr("points", (d) => createOriginPolygonFromLump(d))
-              .remove()
+              .remove(),
         )
         .on("click", function (_event, d) {
           toggleSelectedLumps(d)
@@ -471,7 +471,7 @@ export const TrajectoriesLumped = (props) => {
             .attr("opacity", 0.5)
           // .attr("fill", (d) => palette[d.state])
         },
-        (exit) => exit.call((exit) => exit.transition().duration(300).attr("opacity", 0).remove())
+        (exit) => exit.call((exit) => exit.transition().duration(300).attr("opacity", 0).remove()),
       )
   }, [
     x,

@@ -8,6 +8,7 @@ import { useFilters } from "../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
 import { union } from "lodash"
+import { cos } from "three/tsl"
 export function TrajectoriesMotion(props) {
   const { filters } = useFilters()
   const { palette } = useViz()
@@ -22,6 +23,7 @@ export function TrajectoriesMotion(props) {
     filteredLinks,
     hoveredTrajectoriesIDs,
     selectedIndex,
+    enableScrub,
   } = trajectoriesContext
 
   const { showLinesOfSelectedLumps } = props
@@ -38,17 +40,16 @@ export function TrajectoriesMotion(props) {
     filteredLinks.length < 20
       ? filteredLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
       : []
-  const highlightedTrajectories =
-    filteredLinks.length < 20
-      ? filteredLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
-      : []
+  const highlightedTrajectories = enableScrub
+    ? filteredLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
+    : []
+
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
+
   const lines =
     (!isSelectModeLines && selectedLumps.length > 0 && showLinesOfSelectedLumps && filteredLinks) ||
     (!isSelectModeLines && displayedTrajectories.length > 0 && displayedTrajectories) ||
     (isSelectModeLines && filteredLinks)
-
-  // console.log(lines)
 
   // const highlightedTrajectories =
   //   isSelectModeLines && filteredLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))

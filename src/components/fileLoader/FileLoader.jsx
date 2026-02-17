@@ -26,7 +26,7 @@ export function FileLoader({}) {
     clusterStates,
     setClusterStates,
   } = useData()
-  const { setIsLegend, statesOrder, isLegend } = useViz()
+  const { setIsLegend, statesOrder, isLegend, hasFlowChart } = useViz()
 
   const [isOpen, setIsOpen] = useState(true)
 
@@ -127,15 +127,16 @@ export function FileLoader({}) {
               <StateSelection />
               <AnimatePresence>
                 {/* <ScatterPlot data={silhouettes} width={300} height={300} /> */}
-                {sankeyData.nodes.length > 0 && isOpen && (
+                {isOpen && (
                   <motion.div
                     className="flow-data"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <StatesMatrix width={300} height={300} />
-                    {sankeyData.links.length > 0 && (
+                    {/* <StatesMatrix width={300} height={300} /> */}
+
+                    {sankeyData.links.length > 0 && hasFlowChart && (
                       <Sankey data={sankeyData} width={300} height={100} />
                     )}
                     {idealSilhouettesData.length > 0 && (
@@ -149,12 +150,14 @@ export function FileLoader({}) {
                         ))}
                       </div>
                     )}
-                    {idealSilhouettesData.length === 0 && <h4>No silhouettes found in dataset</h4>}
+                    {idealSilhouettesData.length === 0 && hasFlowChart && (
+                      <h4>No silhouettes found in dataset</h4>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            {!isLegend && <FlowChart setSankeyData={setSankeyData} />}
+            {!isLegend && hasFlowChart && <FlowChart setSankeyData={setSankeyData} />}
           </ReactFlowProvider>
         </div>
       )}
