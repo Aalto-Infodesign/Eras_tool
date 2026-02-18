@@ -72,12 +72,12 @@ export function SilhouettePathSvg({
             </g>
           )
         })}
-
+        {/* 
         {silhouetteName.length === 1 && (
           <text x={35} y={65} fill="white" fontSize={50} fontWeight="bold">
             {silhouetteName}
           </text>
-        )}
+        )} */}
       </g>
       <title>{silhouetteName}</title>
     </motion.svg>

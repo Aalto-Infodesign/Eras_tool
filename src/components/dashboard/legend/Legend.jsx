@@ -10,9 +10,9 @@ export function Legend() {
 
   return (
     <motion.div layout className={styles.legend}>
-      {statesOrder.map((state, _index) => (
+      {statesOrder.map((state, index) => (
         <motion.p layout key={state} className={styles.legendItem}>
-          <span className={styles.legendColor}>{state} - </span>
+          <span className={styles.legendColor}>{index} - </span>
           <span className={styles.legendLabel} style={{ color: palette[state] }}>
             {scales.indexToName(state)}
           </span>

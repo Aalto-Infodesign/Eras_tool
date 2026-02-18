@@ -31,6 +31,7 @@ export const Filters = () => {
               filter={filters.date}
               allPoints={allYears}
               hasPattern={true}
+              // hasDoubleHandle={true}
             />
           )}
           {filters.diseaseDuration.active && (
@@ -41,7 +42,7 @@ export const Filters = () => {
               filter={filters.diseaseDuration}
               allPoints={allDurations}
               hasPattern={false}
-              hasDoubleHandle={false}
+              hasDoubleHandle={true}
             />
           )}
         </div>

@@ -23,6 +23,7 @@ import { downloadIDs } from "../../../utils/exportFunctions"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
+import { useSilhouettesPoset } from "./hooks/usePosetLayout"
 
 // ! TODO Refactor completo
 
@@ -31,6 +32,9 @@ export const SilhouettesMorph = (props) => {
   const { palette, statesOrder, setStatesOrder } = useViz()
 
   const statesNames = statesData.statesNames
+  const statesNamesLoaded = isNil(statesOrder) ? statesNames.sort() : statesOrder
+
+  const basePosetData = useSilhouettesPoset(statesNamesLoaded)
 
   const {
     toggleSilhouetteFilter = () => {},
@@ -53,8 +57,6 @@ export const SilhouettesMorph = (props) => {
     h = 100 // Target R3F world height (10 units)
   const svgPadding = 10
   const isActive = selectedSilhouettes.length > 0
-
-  const statesNamesLoaded = isNil(statesOrder) ? statesNames.sort() : statesOrder
 
   const y = scaleBand(statesNamesLoaded, [svgPadding, h - svgPadding]).padding(0)
   const x = scaleLinear(
@@ -153,9 +155,6 @@ export const SilhouettesMorph = (props) => {
     visible: { opacity: 1, transition: { duration: 1 } },
   }
 
-  const f = performance.now()
-  // console.log(`Silhouette Morph in ${f - i} ms`)
-
   return (
     <motion.section
       key={"silhouettes"}
@@ -213,12 +212,13 @@ export const SilhouettesMorph = (props) => {
         <AnimatePresence>
           {statesNamesLoaded.length > 0 && (
             <motion.section
+              key={"hasse-wrapper"}
               layoutScroll
               variants={chartVariants}
-              style={{ overflowX: isHasse && "scroll" }}
-              // initial="hidden"
+              style={{ overflowX: "scroll" }}
+              initial="hidden"
               animate={"visible"}
-              // exit="hidden"
+              exit="hidden"
             >
               {isHasse && (
                 <HasseDiagram
@@ -229,16 +229,15 @@ export const SilhouettesMorph = (props) => {
                   palette={palette}
                   x={x}
                   y={y}
-                  statesNamesLoaded={statesNamesLoaded}
+                  basePosetData={basePosetData}
                 />
               )}
             </motion.section>
           )}
-        </AnimatePresence>
 
-        <AnimatePresence>
           {!isHasse && (
             <motion.div
+              key={"scroller-wrapper"}
               layoutScroll
               style={{
                 top: 0,

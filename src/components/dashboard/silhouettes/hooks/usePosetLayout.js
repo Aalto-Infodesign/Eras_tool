@@ -5,19 +5,10 @@ import { po } from "../../../../utils/po"
 import { groupBy, flattenDeep } from "lodash"
 
 import { scalePoint, scaleLinear } from "d3"
-export const usePosetLayout = (
-  silhouettes,
-  width,
-  height,
-  rectWidth,
-  rectHeight,
-  padding,
-  statesNamesLoaded,
-  hoveredNode,
-  isHasse,
-) => {
-  const paddingX = 80
+import { useData } from "../../../../contexts/ProcessedDataContext"
 
+export const useSilhouettesPoset = (statesNamesLoaded) => {
+  const { silhouettes } = useData()
   // Step 1: Memoize the expensive poset creation
   const basePosetData = useMemo(() => {
     // Signal that computation is starting
@@ -62,7 +53,24 @@ export const usePosetLayout = (
     return { poset, covers, leaves, orderedLeaves, silhouetteNames }
   }, [silhouettes, statesNamesLoaded])
 
-  // Step 2: Memoize the layout calculations
+  return basePosetData
+}
+
+// Step 2: Memoize the layout calculations
+export const usePosetLayout = (
+  basePosetData,
+  width,
+  height,
+  rectWidth,
+  rectHeight,
+  padding,
+  hoveredNode,
+  isHasse,
+) => {
+  console.time("Poset Layout")
+
+  const paddingX = 80
+
   const layoutData = useMemo(() => {
     const { poset, covers, leaves, orderedLeaves, silhouetteNames } = basePosetData
     if (!poset) {
@@ -143,6 +151,11 @@ export const usePosetLayout = (
             h === 0 ? setXPosition(name) : centerParentNodes(name, poset)
         })
       })
+
+    const coversByRoot = groupBy(covers, (c) => c.source.split("-")[0])
+
+    console.log(coversByRoot)
+    console.timeEnd("Poset Layout")
 
     return { poset, covers, yScale, layersByLength }
   }, [basePosetData, width, height, rectWidth, padding, hoveredNode, isHasse])

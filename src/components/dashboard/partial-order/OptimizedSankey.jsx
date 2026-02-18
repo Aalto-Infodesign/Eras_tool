@@ -8,6 +8,7 @@ import { romanize } from "../../../utils/numberHelpers"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
+import { index } from "d3"
 
 // --- Constants for better maintainability ---
 const MARGIN_Y = 25
@@ -297,8 +298,8 @@ function SankeyLink({
 
   const fullLink = {
     ...link,
-    source: { ...link.source, name: scales.indexToName(index_S) },
-    target: { ...link.target, name: scales.indexToName(index_F) },
+    source: { ...link.source, name: scales.indexToName(index_S), index: index_S },
+    target: { ...link.target, name: scales.indexToName(index_F), index: index_F },
   }
 
   return (
@@ -476,14 +477,14 @@ export function Sankey({ width, height, data }) {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <p>
                 <ArrowUpFromDot size={10} style={{ transform: "rotate(90deg)" }} />{" "}
-                <span style={{ color: palette[hoveredLink.source.depth] }}>
+                <span style={{ color: palette[hoveredLink.source.index] }}>
                   {hoveredLink.source.name}
                 </span>{" "}
                 at <span>{hoveredLink.source.depth + 1}</span>
               </p>
               <p>
                 <ArrowDownToDot size={10} style={{ transform: "rotate(-90deg)" }} />{" "}
-                <span style={{ color: palette[hoveredLink.target.depth] }}>
+                <span style={{ color: palette[hoveredLink.target.index] }}>
                   {hoveredLink.target.name}
                 </span>{" "}
                 at <span>{hoveredLink.target.depth + 1}</span>
