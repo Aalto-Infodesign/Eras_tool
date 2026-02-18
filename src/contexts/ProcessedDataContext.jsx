@@ -1,10 +1,11 @@
-import { createContext, useState, useContext, useCallback, useMemo } from "react"
+import { createContext, useState, useContext, useMemo } from "react"
 import { useRawData } from "./RawDataContext"
-import { groupBy } from "lodash"
 
 import { scaleOrdinal } from "d3"
 
 import { useDataProcessing } from "../components/hooks/useDataProcessing"
+
+import { tsvJSON } from "../utils/dataHelpers"
 
 const ProcessedDataContext = createContext(null)
 
@@ -13,10 +14,6 @@ export function ProcessedDataProvider({ children }) {
   const [clusterStates, setClusterStates] = useState(false) // Option in import
   const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
   const [idealSilhouettes, setIdealSilhouettes] = useState([])
-
-  // useEffect(() => {
-  //   if (rawData.length > 0) console.log("Raw data", rawData)
-  // }, [rawData])
 
   // Take Raw Data and parse it based on file format
   const parsedData = useMemo(() => {
@@ -162,107 +159,4 @@ function clusterStatesFunc(data) {
       years,
     }
   })
-}
-
-function tsvJSON(tsv) {
-  const lines = tsv.split("\n")
-  const result = []
-  const headers = lines[0].split("\t")
-
-  for (let i = 1; i < lines.length; i++) {
-    const obj = {}
-    const currentline = lines[i].split("\t")
-
-    for (let j = 0; j < headers.length; j++) {
-      obj[headers[j]] = currentline[j]
-    }
-
-    result.push(obj)
-  }
-
-  return formatTsvData(result)
-}
-
-function formatTsvData(data) {
-  console.log("Input Data", data)
-
-  // Check and remove empty TSV lines
-  const dataClean = data.filter((d) => d.FINNGENID !== "")
-
-  const groupedByFINNGENID = groupBy(dataClean, "FINNGENID")
-
-  console.log("Grouped by FINNGENID", Object.entries(groupedByFINNGENID))
-
-  const newObject = Object.entries(groupedByFINNGENID).map(([key, value]) => {
-    const newID = key
-    const newTrajectory = value.map((v) => v.stage)
-    const newSwitchEventAge = value.map((v) => Number(v.age))
-    const newYears = value.map((v) => dateToFractionalYear(v.date))
-    // const newYears = value.map((v) => Number(v.year))
-
-    // const diseaseDuration = max(newSwitchEventAge) - min(newSwitchEventAge)
-    const diseaseDuration = value[0].disease_duration
-      ? Number(value[0].disease_duration)
-      : newYears[newYears.length - 1] - newYears[0]
-    // const diseaseDuration = Number(value[0].disease_duration)
-
-    // TODO order by age or date?
-
-    return {
-      FINNGENID: newID,
-      trajectory: newTrajectory,
-      SwitchEventAge: newSwitchEventAge,
-      years: newYears,
-      diseaseDuration: diseaseDuration,
-    }
-  })
-
-  return newObject
-}
-
-function dateToFractionalYear(dateInput, decimals = 6) {
-  let date
-
-  // 1. Handle Date objects
-  if (dateInput instanceof Date) {
-    date = dateInput
-  }
-  // 2. Handle Numbers (Unix Timestamps in ms)
-  else if (typeof dateInput === "number") {
-    date = new Date(dateInput)
-  }
-  // 3. Handle Strings
-  else if (typeof dateInput === "string") {
-    // Try to normalize separators (replace dots or slashes with dashes)
-    const normalized = dateInput.replace(/[\.\/]/g, "-")
-
-    // Pattern: YYYY-MM-DD (ISO)
-    if (/^\d{4}-\d{1,2}-\d{1,2}/.test(normalized)) {
-      date = new Date(normalized)
-    }
-    // Pattern: DD-MM-YYYY (European)
-    else if (/^\d{1,2}-\d{1,2}-\d{4}/.test(normalized)) {
-      const [d, m, y] = normalized.split("-").map(Number)
-      date = new Date(y, m - 1, d)
-    }
-    // Fallback: Let the native parser try (for "Month Day, Year" etc.)
-    else {
-      date = new Date(dateInput)
-    }
-  }
-
-  // Validation
-  if (!date || isNaN(date.getTime())) {
-    throw new Error(`Invalid date input: ${dateInput}`)
-  }
-
-  const year = date.getFullYear()
-  const start = new Date(year, 0, 1)
-  const end = new Date(year + 1, 0, 1)
-
-  // Math: (Current - Start) / (Total ms in that specific year)
-  const fraction = (date - start) / (end - start)
-  const fractionalYear = year + fraction
-
-  return Number(fractionalYear.toFixed(decimals))
 }

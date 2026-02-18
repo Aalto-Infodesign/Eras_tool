@@ -28,7 +28,8 @@ export const usePosetLayout = (
 
     const silhouetteNames = silhouettes.map((s) => s.name)
     const dominancePairs = getDominancePairsSelf(silhouetteNames)
-    const pi = performance.now()
+
+    console.time("Poset Init")
 
     const { matrix, nodes } = po.domFromEdges(dominancePairs)
     const poset = po.createPoset(matrix, nodes)
@@ -48,8 +49,7 @@ export const usePosetLayout = (
         return name
       })
 
-    const pf = performance.now()
-    console.log(`Poset Initialization took ${pf - pi} milliseconds`)
+    console.timeEnd("Poset Init")
 
     const leaves = poset.layers[poset.layers.length - 1] || []
     const orderedLeaves = [...leaves].sort((a, b) => {
