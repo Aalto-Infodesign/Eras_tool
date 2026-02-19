@@ -44,7 +44,7 @@ export const RawDataProvider = ({ children }) => {
 export function useRawData() {
   const context = useContext(RawDataContext)
   if (!context) {
-    throw new Error("useData must be used within a RawDataProvider")
+    throw new Error("useRawData must be used within a RawDataProvider")
   }
   return context
 }

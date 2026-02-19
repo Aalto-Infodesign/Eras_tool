@@ -23,7 +23,6 @@ import { useViz } from "../../contexts/VizContext"
 import { useFilters } from "../../contexts/FiltersContext"
 import { Virtuoso } from "react-virtuoso"
 
-import { Filters } from "./filters/Filters"
 import { X } from "lucide-react"
 
 export function TrajectoriesExplorerChart(props) {
@@ -477,12 +476,6 @@ export function TrajectoriesExplorerChart(props) {
           )}
         </AnimatePresence>
       </motion.section>
-
-      {filters && (
-        <motion.section layout key={"filters"} id="chart-filters" className="bento-item filters">
-          <Filters />
-        </motion.section>
-      )}
     </>
   )
 }

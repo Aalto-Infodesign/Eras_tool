@@ -4,6 +4,8 @@ import { FilterWrapper } from "./UI/FilterWrapper"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
+import { motion } from "motion/react"
+import { SlidersHorizontal } from "lucide-react"
 
 import "./Filters.css"
 
@@ -19,8 +21,21 @@ export const Filters = () => {
     .filter((duration) => duration !== 0)
 
   return (
-    <>
-      <h3>Chart controls</h3>
+    <motion.section
+      key={"filters"}
+      id="chart-filters"
+      // initial={{ x: 100 }}
+      animate={{ x: 200 }}
+      whileHover={{ x: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="bento-item filters"
+    >
+      <div>
+        {/* <h3>Filters</h3> */}
+        <div className="menu-btn">
+          <SlidersHorizontal size={16} color="var(--surface-accent)" />
+        </div>
+      </div>
       <section id="filters">
         <div className="filter-wrapper">
           {filters.date.active && (
@@ -31,7 +46,7 @@ export const Filters = () => {
               filter={filters.date}
               allPoints={allYears}
               hasPattern={true}
-              // hasDoubleHandle={true}
+              hasDoubleHandle={true}
             />
           )}
           {filters.diseaseDuration.active && (
@@ -47,6 +62,6 @@ export const Filters = () => {
           )}
         </div>
       </section>
-    </>
+    </motion.section>
   )
 }

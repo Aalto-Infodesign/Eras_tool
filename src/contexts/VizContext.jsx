@@ -37,12 +37,12 @@ export function VizProvider({ children }) {
     const statesOrderOriginal = dominanceNodes.map((_t, i) => `${i}`)
     const stateNamesSorted = statesOrderOriginal.toSorted()
 
-    console.log("dominance Array", dominanceArray)
+    // console.log("dominance Array", dominanceArray)
 
     const { matrix, nodes } = po.domFromEdges(dominanceArray)
 
-    console.log("POSET Matrix:", matrix)
-    console.log("POSET Nodes:", nodes)
+    // console.log("POSET Matrix:", matrix)
+    // console.log("POSET Nodes:", nodes)
     const posetInterdipendency = po.createPoset(matrix, nodes)
 
     posetInterdipendency
@@ -63,8 +63,8 @@ export function VizProvider({ children }) {
 
     const posetFeatures = posetInterdipendency.features
 
-    console.log("POSET Features:", posetFeatures)
-    console.log("SNames:", dominanceNodes)
+    // console.log("POSET Features:", posetFeatures)
+    // console.log("SNames:", dominanceNodes)
 
     const posetPalette = dominanceNodes.map((s) => posetFeatures[s].fill)
     const palette = Object.fromEntries(zip(stateNamesSorted, posetPalette))
@@ -143,7 +143,7 @@ export function VizProvider({ children }) {
 export function useViz() {
   const context = useContext(VizContext)
   if (!context) {
-    throw new Error("useData must be used within a VizProvider")
+    throw new Error("useViz must be used within a VizProvider")
   }
   return context
 }

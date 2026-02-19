@@ -6,7 +6,8 @@ import { motion } from "motion/react"
 import { RawDataProvider } from "./contexts/RawDataContext"
 import { ProcessedDataProvider, useData } from "./contexts/ProcessedDataContext"
 import { VizProvider, useViz } from "./contexts/VizContext"
-import { FiltersProvider, useFilters } from "./contexts/FiltersContext"
+import { FiltersProvider } from "./contexts/FiltersContext"
+import { DerivedDataProvider } from "./contexts/DerivedDataContext"
 
 function App() {
   return (
@@ -14,7 +15,9 @@ function App() {
       <ProcessedDataProvider>
         <VizProvider>
           <FiltersProvider>
-            <AppContent />
+            <DerivedDataProvider>
+              <AppContent />
+            </DerivedDataProvider>
           </FiltersProvider>
         </VizProvider>
       </ProcessedDataProvider>

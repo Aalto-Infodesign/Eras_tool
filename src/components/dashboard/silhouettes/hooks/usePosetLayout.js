@@ -6,22 +6,22 @@ import { groupBy, flattenDeep } from "lodash"
 
 import { scalePoint, scaleLinear } from "d3"
 import { useData } from "../../../../contexts/ProcessedDataContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 export const useSilhouettesPoset = (statesNamesLoaded) => {
   const { silhouettes } = useData()
-  // Step 1: Memoize the expensive poset creation
-  const basePosetData = useMemo(() => {
-    // Signal that computation is starting
+  const { completeSilhouettes } = useDerivedData()
 
-    if (!silhouettes || silhouettes.length === 0 || !statesNamesLoaded) {
-      return { poset: null, covers: [], leaves: [], orderedLeaves: [] }
+  // Step 1: Heavy computation — only re-runs if silhouettes change
+  const basePosetData = useMemo(() => {
+    if (!silhouettes || silhouettes.length === 0) {
+      return null
     }
 
     const silhouetteNames = silhouettes.map((s) => s.name)
     const dominancePairs = getDominancePairsSelf(silhouetteNames)
 
     console.time("Poset Init")
-
     const { matrix, nodes } = po.domFromEdges(dominancePairs)
     const poset = po.createPoset(matrix, nodes)
     poset.setLayers()
@@ -32,28 +32,56 @@ export const useSilhouettesPoset = (statesNamesLoaded) => {
       .feature("children", (name) => poset.getCovering(name).map((child) => poset.features[child]))
       .feature("i", (name) => poset.elements.indexOf(name))
       .feature("statesArray", (name) => name.split("-"))
-      .feature("orderedName", (name) => {
-        const states = name.split("-")
-        if (statesNamesLoaded?.length > 0) {
-          return states.map((s) => statesNamesLoaded.indexOf(s).toString()).join("-")
-        }
-        return name
-      })
-
     console.timeEnd("Poset Init")
 
+    const covers = poset.getCoverRelations()
     const leaves = poset.layers[poset.layers.length - 1] || []
-    const orderedLeaves = [...leaves].sort((a, b) => {
-      return poset.features[a].orderedName.localeCompare(poset.features[b].orderedName, "en", {
-        numeric: true,
-      })
+
+    return { poset, covers, leaves, silhouetteNames }
+  }, [silhouettes]) // ← no statesNamesLoaded here
+
+  // Step 2: Cheap ordering layer — re-runs when statesNamesLoaded changes
+  const orderedData = useMemo(() => {
+    if (!basePosetData || !statesNamesLoaded) return basePosetData
+
+    const { poset, leaves } = basePosetData
+
+    // Add/overwrite the orderedName feature now that we have statesNamesLoaded
+    poset.feature("orderedName", (name) => {
+      const states = name.split("-")
+      if (statesNamesLoaded?.length > 0) {
+        return states.map((s) => statesNamesLoaded.indexOf(s).toString()).join("-")
+      }
+      return name
     })
 
-    const covers = poset.getCoverRelations()
-    return { poset, covers, leaves, orderedLeaves, silhouetteNames }
-  }, [silhouettes, statesNamesLoaded])
+    const orderedLeaves = [...leaves].sort((a, b) =>
+      poset.features[a].orderedName.localeCompare(poset.features[b].orderedName, "en", {
+        numeric: true,
+      }),
+    )
 
-  return basePosetData
+    return { ...basePosetData, orderedLeaves }
+  }, [basePosetData, statesNamesLoaded])
+
+  // Change opacity based of FilteredSilhouettes
+  const filteredData = useMemo(() => {
+    if (!orderedData || !completeSilhouettes) return orderedData
+
+    const { poset } = basePosetData
+    const filteredSilhouettesNames = completeSilhouettes.map((s) => s.isFiltered && s.name)
+
+    console.log(filteredSilhouettesNames)
+    // Add/overwrite the orderedName feature now that we have statesNamesLoaded
+    poset.feature("included", (name) => {
+      const included = filteredSilhouettesNames.includes(name)
+      return included
+    })
+
+    return orderedData
+  }, [completeSilhouettes])
+
+  return filteredData ?? { poset: null, covers: [], leaves: [], orderedLeaves: [] }
 }
 
 // Step 2: Memoize the layout calculations

@@ -8,6 +8,8 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
     if (!sourceData || !sourceData.length) return []
     console.time("Enrich")
 
+    console.log("sourceData", sourceData)
+
     const richData = sourceData
       .filter((datum) => datum.trajectory.length > 0)
       .map((datum) => ({
@@ -15,9 +17,13 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
         // trajectoryOG: datum.trajectory,
         years: datum.years.map((y) => +y),
         trajectory: datum.trajectory.map((t) => scales.nameToIndex(t)),
+        diseaseDuration: datum.diseaseDuration ?? 0,
         // trajectoryIndexes: datum.trajectory.map((t) => statesScaleIndexes(t)),
         // years: datum.SwitchEventAge.map((age) => age + startYear),
       }))
+
+    console.log("richData", richData)
+
     console.timeEnd("Enrich")
 
     return richData
@@ -158,48 +164,7 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
     // const longestPath = max(richData, (d) => d.trajectory.length)
     console.time("Trajectories Optimized v1")
 
-    const trajectories = richData.map((datum) => {
-      const { FINNGENID, diseaseDuration, trajectory, years, SwitchEventAge } = datum
-      const firstDate = years?.[0]
-      const lastIndex = trajectory.length - 1
-
-      const links = new Array(trajectory.length)
-
-      for (let n = 0; n < trajectory.length; n++) {
-        const isLast = n === lastIndex
-        const state = trajectory[n]
-
-        // Reuse variables to reduce lookups
-        const sourceAge = SwitchEventAge[n]
-        const targetAge = isLast ? sourceAge : SwitchEventAge[n + 1]
-
-        links[n] = {
-          id: FINNGENID,
-          diseaseDuration,
-          firstDate,
-          source: {
-            state,
-            date: years?.[n],
-            age: sourceAge,
-            x: sourceAge,
-          },
-          target: {
-            state: isLast ? state : trajectory[n + 1],
-            date: isLast ? years?.[n] : years?.[n + 1],
-            age: targetAge,
-            x: targetAge,
-          },
-          initialState: n === 0,
-          finalState: isLast,
-        }
-      }
-
-      links.states = trajectory
-      links.typology = trajectory.join("-")
-
-      return links
-    })
-
+    const trajectories = trajectoriesFromData(richData)
     console.timeEnd("Trajectories Optimized v1")
 
     const analytics = {
@@ -222,34 +187,8 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
 
   const silhouettes = useMemo(() => {
     if (trajectories.length === 0) return []
-    console.time("Silhouettes")
 
-    const grupedTrajectories = groups(trajectories, (t) => t.typology)
-
-    const silhouettes = //t[0] = "name", t[1] = Array di Array (1 x trajectory)
-      grupedTrajectories
-        .map((t) => ({
-          name: t[0],
-          trajectories: t[1],
-          states: t[1][0].states,
-          // minMaxState: getPolygonCoordinates(t[1]),
-          levenshteinDistance:
-            idealSilhouettes.length > 0
-              ? max(idealSilhouettes.map((s) => similarity(s.split("-"), t[0].split("-"))))
-              : 0,
-          size: t[1].length,
-          percentage: (t[1].length / richData.length) * 100,
-          trajectory: t[1][0].states.map((e, n) => ({
-            source: e,
-            target: n + 1 < t[1][0].length ? t[1][0].states[n + 1] : "fs",
-          })),
-          fs: t[1][0]?.at(-1)
-            ? { x: t[1][0].length - 1, state: t[1][0].at(-1).source.state }
-            : { x: 0, state: 0 },
-          // 'fs':{'y':10, 'x':11}
-        }))
-        .sort((a, b) => descending(a.size, b.size))
-    console.timeEnd("Silhouettes")
+    const silhouettes = silhouettesFromTrajectories(trajectories, idealSilhouettes, richData)
     return silhouettes
   }, [trajectories, idealSilhouettes])
 
@@ -272,9 +211,12 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
     const dateRange = dateActive ? range(dateExtent[0], dateExtent[1]) : []
 
     //.......diseaseDuration
+
+    // TODO Does 0 count?
     const durationsActive = columns.includes("diseaseDuration")
     const durationExtent = durationsActive
-      ? extent(richData, (d) => (d.diseaseDuration > 0 ? d.diseaseDuration : null))
+      ? // ? extent(richData, (d) => (d.diseaseDuration > 0 ? d.diseaseDuration : null))
+        extent(richData, (d) => d.diseaseDuration)
       : []
     const durationRange = range(durationExtent[0], durationExtent[1])
 
@@ -321,4 +263,82 @@ function dynamicSortLC(data, conditions) {
     }
     return 0 // All conditions are equal
   })
+}
+
+export const trajectoriesFromData = (data) => {
+  const trajectories = data.map((datum) => {
+    const { FINNGENID, diseaseDuration, trajectory, years, SwitchEventAge } = datum
+    const firstDate = years?.[0]
+    const lastIndex = trajectory.length - 1
+
+    const links = new Array(trajectory.length)
+
+    for (let n = 0; n < trajectory.length; n++) {
+      const isLast = n === lastIndex
+      const state = trajectory[n]
+
+      // Reuse variables to reduce lookups
+      const sourceAge = SwitchEventAge[n]
+      const targetAge = isLast ? sourceAge : SwitchEventAge[n + 1]
+
+      links[n] = {
+        id: FINNGENID,
+        diseaseDuration,
+        firstDate,
+        source: {
+          state,
+          date: years?.[n],
+          age: sourceAge,
+          x: sourceAge,
+        },
+        target: {
+          state: isLast ? state : trajectory[n + 1],
+          date: isLast ? years?.[n] : years?.[n + 1],
+          age: targetAge,
+          x: targetAge,
+        },
+        initialState: n === 0,
+        finalState: isLast,
+      }
+    }
+
+    links.states = trajectory
+    links.typology = trajectory.join("-")
+
+    return links
+  })
+
+  return trajectories
+}
+
+export const silhouettesFromTrajectories = (trajectories, idealSilhouettes, richData) => {
+  console.time("Silhouettes")
+
+  const grupedTrajectories = groups(trajectories, (t) => t.typology)
+
+  const silhouettes = //t[0] = "name", t[1] = Array di Array (1 x trajectory)
+    grupedTrajectories
+      .map((t) => ({
+        name: t[0],
+        trajectories: t[1],
+        states: t[1][0].states,
+        // minMaxState: getPolygonCoordinates(t[1]),
+        levenshteinDistance:
+          idealSilhouettes.length > 0
+            ? max(idealSilhouettes.map((s) => similarity(s.split("-"), t[0].split("-"))))
+            : 0,
+        size: t[1].length,
+        percentage: (t[1].length / richData.length) * 100,
+        trajectory: t[1][0].states.map((e, n) => ({
+          source: e,
+          target: n + 1 < t[1][0].length ? t[1][0].states[n + 1] : "fs",
+        })),
+        fs: t[1][0]?.at(-1)
+          ? { x: t[1][0].length - 1, state: t[1][0].at(-1).source.state }
+          : { x: 0, state: 0 },
+        // 'fs':{'y':10, 'x':11}
+      }))
+      .sort((a, b) => descending(a.size, b.size))
+  console.timeEnd("Silhouettes")
+  return silhouettes
 }

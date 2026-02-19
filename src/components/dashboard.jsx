@@ -18,6 +18,9 @@ import { ExportIDs } from "./dashboard/export/ExportIDs"
 
 import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
+import { useDerivedData } from "../contexts/DerivedDataContext"
+import { useFilters } from "../contexts/FiltersContext"
+import { Filters } from "./dashboard/filters/Filters"
 import { Command } from "lucide-react"
 
 // import Umap from "./dashboard/umap"
@@ -27,6 +30,8 @@ const Dashboard = () => {
 
   const { richData, analytics, silhouettes, idealSilhouettes } = useData()
   const { statesOrder } = useViz()
+  const { filters } = useFilters()
+  const { completeSilhouettes } = useDerivedData()
 
   //For File Loader
   const minHeight = 100
@@ -113,15 +118,24 @@ const Dashboard = () => {
 
   const isCmdPressed = useModifierKey("Meta")
 
-  const selectedSilhouettesData = silhouettes.filter((s) => includes(selectedSilhouettes, s.name))
+  console.log(completeSilhouettes)
+
+  const selectedSilhouettesData = completeSilhouettes.filter((s) =>
+    includes(selectedSilhouettes, s.name),
+  )
+
+  console.log(selectedSilhouettesData)
 
   // TODO: come creo logica inclusiva o esclusiva tra silhouettes e trajectories?
   const selectedIDs = useMemo(() => {
     // 1. Clean up the Silhouette IDs (Ensure we have a flat array of unique IDs)
     const IDsFromSilhouettes = selectedSilhouettesData
-      .flatMap((s) => s.trajectories) // Modern alternative to .map().flat()
+      .flatMap((s) => (s.isFiltered ? s.filtered.trajectories : s.trajectories)) // Modern alternative to .map().flat()
       .map((t) => t[0]?.id) // Use optional chaining to prevent crashes
       .filter(Boolean) // Remove any undefined/null values
+
+    console.log(IDsFromSilhouettes)
+    console.log(selectedTrajectoriesIDs)
 
     const IDsFromTrajectories = selectedTrajectoriesIDs || []
     const type = Number(chartType)
@@ -181,7 +195,7 @@ const Dashboard = () => {
   }
   useEffect(() => {
     countSvgElements()
-  }, [silhouettes, isCmdPressed])
+  }, [completeSilhouettes, isCmdPressed])
 
   return (
     <motion.main
@@ -276,6 +290,8 @@ const Dashboard = () => {
           // Other stuff
           reduceMotion={reduceMotion}
         />
+
+        {filters && <Filters />}
 
         {/* <StatesDendrogram
             marginTop={marginTop}

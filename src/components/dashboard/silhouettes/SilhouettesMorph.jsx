@@ -24,17 +24,20 @@ import { downloadIDs } from "../../../utils/exportFunctions"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 import { useSilhouettesPoset } from "./hooks/usePosetLayout"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 // ! TODO Refactor completo
 
 export const SilhouettesMorph = (props) => {
-  const { silhouettes, idealSilhouettes, statesData } = useData()
+  const { idealSilhouettes, statesData } = useData()
   const { palette, statesOrder, setStatesOrder } = useViz()
+
+  const { completeSilhouettes } = useDerivedData()
 
   const statesNames = statesData.statesNames
   const statesNamesLoaded = isNil(statesOrder) ? statesNames.sort() : statesOrder
 
-  const basePosetData = useSilhouettesPoset(statesNamesLoaded)
+  const basePosetData = useSilhouettesPoset(statesNamesLoaded, completeSilhouettes)
 
   const {
     toggleSilhouetteFilter = () => {},
@@ -60,25 +63,33 @@ export const SilhouettesMorph = (props) => {
 
   const y = scaleBand(statesNamesLoaded, [svgPadding, h - svgPadding]).padding(0)
   const x = scaleLinear(
-    [0, max(silhouettes.map((d) => d.states.length - 1))],
+    [0, max(completeSilhouettes.map((d) => d.states.length - 1))],
     [svgPadding, w - svgPadding], // Map from the left side of the world to the right side
   )
 
-  const animationDuration = silhouettes.length > 50 ? 0 : 0.2
+  const animationDuration = completeSilhouettes.length > 50 ? 0 : 0.2
 
   const orderedSilhouettes = useMemo(() => {
-    switch (orderMode) {
-      case "size":
-        return [...silhouettes].sort((a, b) => b.size - a.size)
-      case "distance":
-        return [...silhouettes].sort((a, b) => b.levenshteinDistance - a.levenshteinDistance)
-    }
-  }, [silhouettes, orderMode])
+    const sorted = [...completeSilhouettes].sort((a, b) => {
+      // Filtered items always float to the top
+      if (a.isFiltered !== b.isFiltered) return a.isFiltered ? -1 : 1
+      const aData = a.isFiltered ? a.filtered : a
+      const bData = b.isFiltered ? b.filtered : b
 
+      switch (orderMode) {
+        case "size":
+          return bData.size - aData.size
+        case "distance":
+          return bData.levenshteinDistance - aData.levenshteinDistance
+      }
+    })
+
+    return sorted
+  }, [completeSilhouettes, orderMode])
   const deriveSilhouettesFromId = (id) => {
     // This function now only contains the core logic
-    const next = silhouettes.filter((s) => s.name.includes(id) && s.name !== id)
-    const previous = silhouettes.filter((s) => id.includes(s.name) && s.name !== id)
+    const next = completeSilhouettes.filter((s) => s.name.includes(id) && s.name !== id)
+    const previous = completeSilhouettes.filter((s) => id.includes(s.name) && s.name !== id)
     const ds = { previous, next }
     setDerivedSilhouettes(ds)
   }
@@ -120,7 +131,7 @@ export const SilhouettesMorph = (props) => {
     // If Cmd is pressed or expandSides is true, and an item is being hovered...
     if (isCmdPressed && hoveredIndex !== null) {
       // Get the name/id of the currently hovered item
-      const hoveredItemName = silhouettes[hoveredIndex].name
+      const hoveredItemName = completeSilhouettes[hoveredIndex].name
       deriveSilhouettesFromId(hoveredItemName)
     }
 
@@ -129,7 +140,7 @@ export const SilhouettesMorph = (props) => {
       setDerivedSilhouettes(null)
       // setExpandSides(false)
     }
-  }, [isCmdPressed, hoveredIndex, silhouettes]) // Dependencies: run when these values change
+  }, [isCmdPressed, hoveredIndex, completeSilhouettes]) // Dependencies: run when these values change
 
   // console.log(statesNamesLoaded)
 
@@ -223,10 +234,8 @@ export const SilhouettesMorph = (props) => {
               {isHasse && (
                 <HasseDiagram
                   isHasse={isHasse}
-                  silhouettes={silhouettes}
                   selectedSilhouettes={selectedSilhouettes}
                   toggleSilhouetteFilter={toggleSilhouetteFilter}
-                  palette={palette}
                   x={x}
                   y={y}
                   basePosetData={basePosetData}
@@ -239,19 +248,19 @@ export const SilhouettesMorph = (props) => {
             <motion.div
               key={"scroller-wrapper"}
               layoutScroll
-              style={{
-                top: 0,
-                position: "absolute",
-              }}
+              // style={{
+              //   top: 0,
+              //   position: "absolute",
+              // }}
               variants={chartVariants}
               animate={"visible"}
               transition={{ delay: 1 }}
               className="filter-container silhouettes"
             >
-              {/* <motion.div className="filter-bar"> */}
               <Virtuoso
                 style={{
                   height: "100%",
+                  maxHeight: "150px",
                   width: "100%",
                   paddingLeft: "10px",
                   // paddingBottom: "10px",
@@ -275,8 +284,11 @@ export const SilhouettesMorph = (props) => {
 
                   const isExpandible = true
 
-                  const opacity =
-                    (isCmdPressed || expandSides) && hoveredIndex !== null && !isHovered ? 0.5 : 1
+                  const opacity = s.isFiltered
+                    ? (isCmdPressed || expandSides) && hoveredIndex !== null && !isHovered
+                      ? 0.5
+                      : 1
+                    : 0.5
 
                   const cardVariants = {
                     hidden: { opacity: 1, scale: 1 },
@@ -300,7 +312,7 @@ export const SilhouettesMorph = (props) => {
                       // exit={{ opacity: 0, scale: 0.5, transition: { duration: 1 } }}
                       whileHover={{
                         backgroundColor: isSideVisible ? "var(--surface-light)" : "none",
-                        padding: isSideVisible ? "var(--spacing-xs)" : "0 16px 0 0",
+                        // padding: isSideVisible ? "var(--spacing-xs)" : "0 16px 0 0",
                       }}
                       // whileTap={{ scale: !isCmdPressed || !expandSides ? 0.95 : 1 }}
                       onHoverStart={() => setHoveredIndex(i)}
@@ -363,7 +375,6 @@ export const SilhouettesMorph = (props) => {
                   )
                 }}
               />
-              {/* </motion.div> */}
             </motion.div>
           )}
         </AnimatePresence>
@@ -374,15 +385,13 @@ export const SilhouettesMorph = (props) => {
 
 function SilhouetteCardMain({ s, i, ...props }) {
   const {
-    palette,
     x,
     y,
     isSelected,
     handleSilhouetteClick,
     downloadIDs,
     isHovered,
-    handleExpandClick,
-    expandSides,
+
     isCmdPressed,
     isExpandible,
     handleLongPress,
@@ -392,6 +401,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
     idealSilhouettes,
   } = props
 
+  const { palette } = useViz()
   const isTouchDevice = useIsTouchDevice()
 
   const longPressProps = useLongPressWithProgress({
@@ -425,11 +435,9 @@ function SilhouetteCardMain({ s, i, ...props }) {
     tapped: { scale: 0.95, transition: { duration: 0.2 } },
   }
 
-  // const inViewRef = useRef(null)
-  const isInView = true
-  // const isInView = useInView(inViewRef, { margin: "0px 200px 0px 200px" })
-
   const ids = s.trajectories.map((d) => d[0].id)
+
+  const showFilterLabel = s.isFiltered && s.percentage !== s.filtered.percentage
 
   return (
     <motion.div
@@ -446,53 +454,72 @@ function SilhouetteCardMain({ s, i, ...props }) {
       {...longPressProps}
       // ref={inViewRef}
     >
-      {isInView && (
-        <div className="card-btn-wrapper">
-          {/* TODO In hover su typology mostra DW btn */}
-          {s.trajectories[0].length !== 0 && isInView && (
-            <button className="action-button download" onClick={(e) => downloadIDs(e, ids)}>
-              <Download size={9} />
-            </button>
-          )}
-          {/* TODO In hover su typology mostra DW btn */}
-          <button className="action-button order" onClick={(e) => handleOrderClick(e, s)}>
-            <Shuffle size={9} />
+      <div className="card-btn-wrapper">
+        {/* TODO In hover su typology mostra DW btn */}
+        {s.trajectories[0].length !== 0 && (
+          <button className="action-button download" onClick={(e) => downloadIDs(e, ids)}>
+            <Download size={9} />
           </button>
-        </div>
-      )}
+        )}
+        {/* TODO In hover su typology mostra DW btn */}
+        <button className="action-button order" onClick={(e) => handleOrderClick(e, s)}>
+          <Shuffle size={9} />
+        </button>
+      </div>
 
-      {isInView && (
-        <span className="typology-perc-text">
-          {s.percentage > 1 ? s.percentage.toFixed(2) : s.percentage.toFixed(4)}%
+      <span className="typology-perc-wrapper">
+        <span className={`typology-perc-text ${showFilterLabel && "filtered"}`}>
+          {s.percentage > 1
+            ? s.percentage.toFixed(showFilterLabel ? 1 : 2)
+            : s.percentage.toFixed(showFilterLabel ? 4 : 2)}
+          %
         </span>
-      )}
 
-      {isInView && <span className="typology-perc-text">{s.size}</span>}
-      {isInView && idealSilhouettes.length > 0 && (
+        {showFilterLabel && (
+          <span className="typology-perc-text">
+            {s.filtered.percentage > 1
+              ? s.filtered.percentage.toFixed(2)
+              : s.filtered.percentage.toFixed(4)}
+            %
+          </span>
+        )}
+      </span>
+
+      <span className="typology-perc-wrapper">
+        <span className={`typology-perc-text ${showFilterLabel && "filtered"}`}>
+          {s.size > 1 ? s.size : s.size}
+        </span>
+
+        {showFilterLabel && (
+          <span className="typology-perc-text">
+            {s.filtered.size > 1 ? s.filtered.size : s.filtered.size}
+          </span>
+        )}
+      </span>
+
+      {idealSilhouettes.length > 0 && (
         <span className="typology-perc-text">{s.levenshteinDistance.toFixed(2)}</span>
       )}
 
       {/* TODO Capire QUAL'é LA BEST MATCH */}
-      {isInView && s.levenshteinDistance > 0.9 && <span className="top-banner">★</span>}
+      {s.levenshteinDistance > 0.9 && <span className="top-banner">★</span>}
 
       <div className={`silhouette-wrapper `}>
-        {isInView && (
-          <SilhouettePathSvg
-            keyName="card"
-            silhouetteName={s.name}
-            palette={palette}
-            xScale={x}
-            yScale={y}
-            animationDuration={0.2}
-            useAsSize={true}
-            strokeWidth={9}
-            radius={9}
-            isHasse={isHasse}
-          />
-        )}
+        <SilhouettePathSvg
+          keyName="card"
+          silhouetteName={s.name}
+          palette={palette}
+          xScale={x}
+          yScale={y}
+          animationDuration={0.2}
+          useAsSize={true}
+          strokeWidth={9}
+          radius={9}
+          isHasse={isHasse}
+        />
       </div>
       <AnimatePresence>
-        {isHovered && isSelected && !isCmdPressed && isExpandible && isInView && (
+        {isHovered && isSelected && !isCmdPressed && isExpandible && (
           <div className="action-button expand">
             <AnimatePresence>
               {isTouchDevice && longPressProps?.isPressed && (
@@ -576,8 +603,6 @@ export function SilhouetteToggleButton({
   palette,
 }) {
   // const viewRef = useRef(null)
-  const isInView = true
-  // const isInView = useInView(viewRef, { margin: "50px 0px 50px 0px" })
   return (
     <motion.div
       key={`toggle-${silhouetteName}`}
@@ -586,9 +611,7 @@ export function SilhouetteToggleButton({
       whileTap={{ scale: 0.9 }}
       onClick={() => toggleSilhouetteFilter(silhouetteName)}
     >
-      {isInView && (
-        <SmallSilhouette silhouetteName={silhouetteName} palette={palette} x={x} y={y} />
-      )}
+      <SmallSilhouette silhouetteName={silhouetteName} palette={palette} x={x} y={y} />
     </motion.div>
   )
 }

@@ -266,7 +266,15 @@ const HasseNode = memo(function HasseNode({
   x,
   y,
 }) {
+  const { scales } = useData()
   const { palette } = useViz()
+
+  console.log(node.opacity)
+
+  const fullName = name
+    .split("-")
+    .map((l) => scales.indexToName(l))
+    .join("-")
 
   return (
     <motion.g
@@ -274,15 +282,16 @@ const HasseNode = memo(function HasseNode({
       initial={false}
       animate={{
         x: node.xPosition,
-        y: isHasse ? node.yPositionScaled : rectHeight / 2 - 10,
-        opacity: isHasse ? nodeStyle.opacity : 0,
+        y: node.yPositionScaled,
+        opacity: node.included ? nodeStyle.opacity : 0.2,
+        // opacity: node.opacity,
         scale: nodeStyle.scale,
       }}
       transition={{
         ...TRANSITION_DEFAULT,
         x: TRANSITION_MORPH,
         y: TRANSITION_MORPH,
-        opacity: { delay: isHasse ? 0 : 1.5 },
+        opacity: { delay: 0 },
       }}
     >
       <motion.g
@@ -368,7 +377,7 @@ const HasseNode = memo(function HasseNode({
         </motion.g>
       )}
 
-      <title>{name}</title>
+      <title>{fullName}</title>
     </motion.g>
   )
 })

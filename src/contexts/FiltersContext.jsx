@@ -3,6 +3,8 @@ import { useData } from "./ProcessedDataContext"
 
 const FiltersContext = createContext(null)
 
+// TODO Add toggles
+
 export function FiltersProvider({ children }) {
   const { filtersBlueprint } = useData()
   const [filters, setFilters] = useState(filtersBlueprint)
@@ -42,7 +44,7 @@ export function FiltersProvider({ children }) {
 export function useFilters() {
   const context = useContext(FiltersContext)
   if (!context) {
-    throw new Error("useData must be used within a VizProvider")
+    throw new Error("useFilters must be used within a FiltersProvider")
   }
   return context
 }

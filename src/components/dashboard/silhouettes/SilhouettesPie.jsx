@@ -6,10 +6,14 @@ import "./Pie.css"
 export function SilhouettesPie(props) {
   const { selectedSilhouettesData } = props
 
-  const selectedPercentages = selectedSilhouettesData.map((s) => s.percentage)
+  const selectedPercentages = selectedSilhouettesData.map((s) =>
+    s.isFiltered ? s.filtered.percentage : s.percentage,
+  )
   const summedPercentages = selectedPercentages.reduce((a, s) => a + s, 0)
 
-  const selectedSizes = selectedSilhouettesData.map((s) => s.size)
+  const selectedSizes = selectedSilhouettesData.map((s) =>
+    s.isFiltered ? s.filtered.size : s.size,
+  )
   const summedSizes = selectedSizes.reduce((a, s) => a + s, 0)
 
   // Chart dimensions

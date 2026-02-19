@@ -7,7 +7,10 @@
 .silhouette-card {
   display: flex;
   border-radius: var(--radius-md);
-  padding-right: 1rem;
+  /* padding-right: 1rem; */
+  padding: 0.5rem;
+  height: 100%;
+  max-height: 110px;
   /* gap: var(--spacing-sm); */
 }
 
@@ -74,10 +77,20 @@
   opacity: 1;
 }
 
+.typology-perc-wrapper {
+  height: 0.8rem;
+}
+
 .typology-perc-text {
   font-size: var(--text-xs);
   color: var(--text-light);
   font-weight: 500;
+  transition: font-size 200ms ease-out;
+}
+.typology-perc-text.filtered {
+  font-size: 0.5rem;
+  opacity: 0.5;
+  text-decoration: line-through;
 }
 .top-banner {
   position: absolute;
@@ -111,8 +124,11 @@
 }
 
 .filter-container.silhouettes {
-  overflow-y: hidden;
-  height: 150px;
+  display: flex;
+  align-items: center;
+  /* overflow-y: hidden; */
+  max-height: 150px;
+  height: 135px;
 }
 /* [data-testid="virtuoso-item-list"] {
   display: flex;
