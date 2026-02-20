@@ -5,39 +5,18 @@ import { select, scaleLinear, curveStep, mean, line } from "d3"
 import { isNil } from "lodash"
 
 import { useViz } from "../../../contexts/VizContext"
+import { useFilters } from "../../../contexts/FiltersContext"
 
 export function StateDensity(props) {
   const { palette } = useViz()
+  const { selectedSilhouettesNames } = useFilters()
   const trajectoriesContext = useContext(TrajectoriesContext)
-  const { marginTop, selectedSilhouettes, chartScales } = trajectoriesContext
+  const { marginTop, chartScales } = trajectoriesContext
 
-  // const { filteredLinks } = props
-  // const { showStateDensity } = props
   const { x, y } = chartScales
 
   const { unitedObjectsOriginal, mergedObjectsByState } = props
   const { hoveredDistribution } = props
-
-  // const filteredLinksBySourceState = groupBy(filteredLinks, "source.state")
-  // const filteredLinksByTargetState = groupBy(filteredLinks, "target.state")
-  // // TODO Merge these objects
-
-  // //   console.log(linksBysourceState)
-
-  // const filteredStatesAndItemsSource = values(
-  //   mapValues(filteredLinksBySourceState, (stateItems, stateKey) => ({
-  //     state: stateKey,
-  //     items: stateItems,
-  //   }))
-  // )
-
-  // const filteredStatesAndItemsTarget = values(
-  //   mapValues(filteredLinksByTargetState, (stateItems, stateKey) => ({
-  //     state: stateKey,
-  //     items: stateItems,
-  //   }))
-  // )
-  // console.log(statesAndItems)
 
   const densityYSource = scaleLinear().range([1, 0]).domain([0, 0.015])
   const densityYTarget = scaleLinear().range([0, 1]).domain([0, 0.015])
@@ -123,7 +102,7 @@ export function StateDensity(props) {
     densityGroup
       .selectAll(".density-state-source-filtered")
       .data(
-        selectedSilhouettes.length > 0 && mergedObjectsByState,
+        selectedSilhouettesNames.length > 0 && mergedObjectsByState,
         (d) => `density-state-source-filtered-${d.state}`,
       )
       .join(
@@ -256,7 +235,7 @@ export function StateDensity(props) {
     densityGroup
       .selectAll(".density-state-target-filtered")
       .data(
-        selectedSilhouettes.length > 0 && mergedObjectsByState,
+        selectedSilhouettesNames.length > 0 && mergedObjectsByState,
         (d) => `density-state-target-filtered-${d.state}`,
       )
       .join(

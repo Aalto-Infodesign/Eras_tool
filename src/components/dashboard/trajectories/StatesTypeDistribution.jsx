@@ -5,11 +5,13 @@ import { select, scaleLinear, scaleRadial, extent } from "d3"
 import { values, unionBy, flatten, isNil } from "lodash"
 
 import { useViz } from "../../../contexts/VizContext"
+import { useFilters } from "../../../contexts/FiltersContext"
 
 export function StateTypeDistribution(props) {
   const { palette } = useViz()
   const trajectoriesContext = useContext(TrajectoriesContext)
-  const { h, filteredLinks, marginTop, chartScales, selectedSilhouettes } = trajectoriesContext
+  const { selectedSilhouettesNames } = useFilters()
+  const { h, filteredLinks, marginTop, chartScales } = trajectoriesContext
 
   const { y } = chartScales
 
@@ -75,7 +77,7 @@ export function StateTypeDistribution(props) {
     distributionGroup
       .selectAll(".distribution-state")
       .data(
-        selectedSilhouettes.length === 0 ? unitedObjectsOriginal : mergedObjectsByState,
+        selectedSilhouettesNames.length === 0 ? unitedObjectsOriginal : mergedObjectsByState,
         (d) => `distribution-state-${d.state}`,
       )
       .join(
@@ -333,7 +335,14 @@ export function StateTypeDistribution(props) {
           exit.remove()
         },
       )
-  }, [filteredLinks, y, selectedSilhouettes, palette, unitedObjectsOriginal, mergedObjectsByState])
+  }, [
+    filteredLinks,
+    y,
+    selectedSilhouettesNames,
+    palette,
+    unitedObjectsOriginal,
+    mergedObjectsByState,
+  ])
   return <g id="statesDistribution"></g>
 }
 

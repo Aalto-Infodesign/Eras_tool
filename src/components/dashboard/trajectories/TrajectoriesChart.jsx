@@ -21,12 +21,14 @@ import { useModifierKey } from "../../hooks/useModifierKey"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
+import { useFilters } from "../../../contexts/FiltersContext"
 
 export function TrajectoriesChart() {
   // console.time("Trajectories")
 
   const { silhouettes } = useData()
   const { palette } = useViz()
+  const { selectedTrajectoriesIDs } = useFilters()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
 
@@ -40,7 +42,6 @@ export function TrajectoriesChart() {
     selectedIndex,
     selectedLumps,
     toggleSelectedTrajectory,
-    selectedTrajectoriesIDs,
     enableScrub,
   } = trajectoriesContext
 

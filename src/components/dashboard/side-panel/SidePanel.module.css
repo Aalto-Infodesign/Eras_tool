@@ -1,0 +1,52 @@
+.sidePanel {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 220px;
+
+  display: flex;
+  gap: 0;
+  z-index: 10;
+}
+
+.panelButtons {
+  max-width: 30px;
+  /* padding: var(--spacing-sm) 0; */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.panelBtn {
+  display: flex;
+  place-items: center;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  padding: var(--spacing-xs);
+
+  background-color: var(--surface-contrast);
+  color: var(--surface-accent);
+  box-shadow: 0 4px 5px rgba(0, 0, 22, 0.4);
+}
+.selected {
+  background-color: var(--surface-secondary);
+  color: var(--surface-accent);
+  /* background-color: var(--surface-tertiary);
+  color: var(--surface-primary); */
+  /* border: 1px solid var(--surface-light); */
+}
+/* .panelBtn.selected {
+  display: flex;
+  place-items: center;
+} */
+
+.panelContent {
+  padding: var(--spacing-sm);
+  width: 200px;
+  min-height: 400px;
+  background-color: var(--surface-secondary);
+  box-shadow: 0 4px 5px rgba(0, 0, 22, 0.4);
+
+  /* background-color: color-mix(in hsl, var(--surface-accent) 20%, var(--surface-primary) 80%); */
+
+  border-radius: 0 0 0 var(--radius-md);
+}

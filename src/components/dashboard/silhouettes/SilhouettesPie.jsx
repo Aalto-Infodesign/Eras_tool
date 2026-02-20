@@ -2,9 +2,10 @@ import { motion, AnimatePresence, useMotionValue, animate, useTransform } from "
 
 import { useEffect } from "react"
 import "./Pie.css"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
-export function SilhouettesPie(props) {
-  const { selectedSilhouettesData } = props
+export function SilhouettesPie() {
+  const { selectedSilhouettesData } = useDerivedData()
 
   const selectedPercentages = selectedSilhouettesData.map((s) =>
     s.isFiltered ? s.filtered.percentage : s.percentage,

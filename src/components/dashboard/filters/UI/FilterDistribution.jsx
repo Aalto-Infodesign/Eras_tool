@@ -11,7 +11,7 @@ export function FilterDistribution({ data, width, height, extentX, range, maskID
         x: e[0],
         y: e[1],
       })),
-    [data]
+    [data],
   )
 
   const valueExtent = useMemo(() => extent(dataCount.map((y) => y.y)), [dataCount])
@@ -22,7 +22,7 @@ export function FilterDistribution({ data, width, height, extentX, range, maskID
 
   const yScale = useMemo(
     () => scaleLinear([0, valueExtent[1]], [height, 0]),
-    [data, valueExtent, height]
+    [data, valueExtent, height],
   )
 
   const lineBuilder = useMemo(
@@ -31,7 +31,7 @@ export function FilterDistribution({ data, width, height, extentX, range, maskID
         .curve(curveStep)
         .x((d) => xScale(d.x))
         .y((d) => yScale(d.y)),
-    [xScale, yScale]
+    [xScale, yScale],
   )
 
   const linePath = useMemo(() => lineBuilder(dataCount), [lineBuilder, dataCount])
@@ -77,7 +77,7 @@ export function FilterDistribution({ data, width, height, extentX, range, maskID
               animate={{ pathLength: 1 }}
               exit={{ pathLength: 0 }}
               opacity={0.5}
-              transition={{ duration: 0.8, delay: 1 }}
+              transition={{ duration: 0.8, delay: 0 }}
               d={linePath}
               stroke="#ffffff"
               fill="none"
@@ -87,7 +87,7 @@ export function FilterDistribution({ data, width, height, extentX, range, maskID
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
               exit={{ pathLength: 0 }}
-              transition={{ duration: 0.8, delay: 1.8 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
               d={linePath}
               stroke="#ffffff"
               fill="none"

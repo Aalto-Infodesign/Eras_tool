@@ -116,6 +116,9 @@ export function HasseDiagram({
       {layersByLength.map(([key, value], i) => {
         const statesNumber = Number(key)
         const delay = 0.3 + 0.1 * i
+
+        const included = value.map((s) => poset.features[s].included).filter((inc) => inc === true)
+
         return (
           <motion.g
             key={`grid-line-${key}`}
@@ -145,7 +148,9 @@ export function HasseDiagram({
               fontSize={12}
               fill="var(--text-light)"
             >
-              {value.length} lines
+              {value.length !== included.length
+                ? `${included.length}/${value.length} lines`
+                : `${value.length} lines`}
             </motion.text>
           </motion.g>
         )
@@ -269,8 +274,6 @@ const HasseNode = memo(function HasseNode({
   const { scales } = useData()
   const { palette } = useViz()
 
-  console.log(node.opacity)
-
   const fullName = name
     .split("-")
     .map((l) => scales.indexToName(l))
@@ -284,7 +287,6 @@ const HasseNode = memo(function HasseNode({
         x: node.xPosition,
         y: node.yPositionScaled,
         opacity: node.included ? nodeStyle.opacity : 0.2,
-        // opacity: node.opacity,
         scale: nodeStyle.scale,
       }}
       transition={{

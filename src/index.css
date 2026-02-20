@@ -170,7 +170,7 @@ h1 {
   grid-auto-rows: minmax(75px, auto);
   /* gap: var(--spacing-md); */
   gap: var(--spacing-md);
-  padding: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) var(--spacing-md);
 }
 .bento-container .top-row {
   display: flex;
@@ -228,13 +228,14 @@ h1 {
 
   /* grid-row: span 1; */
 }
-.bento-item.filters {
+.side-panel {
   /* height: 400px; */
   display: flex;
   flex-direction: row;
   position: absolute;
   width: 210px;
-  top: 25vh;
+  top: 50%;
+
   right: 0;
   /* padding-bottom: var(--spacing-md); */
 
@@ -509,7 +510,7 @@ select {
     order: 5;
     /* grid-row: span 1; */
   }
-  /* .bento-item.filters {
+  /* .side-panel {
     grid-column: span 12;
   } */
 
@@ -525,7 +526,7 @@ select {
   .bento-item.chart {
     grid-column: span 12;
   }
-  /* .bento-item.filters {
+  /* .side-panel {
     grid-column: span 3;
   } */
 }

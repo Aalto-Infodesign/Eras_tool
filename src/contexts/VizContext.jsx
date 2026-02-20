@@ -14,12 +14,14 @@ export function VizProvider({ children }) {
   const [statesOrder, setStatesOrder] = useState([])
   const [dominanceArrayFromFlow, setDominanceArrayFromFlow] = useState(null)
   const [nodesFromFlow, setNodesFromFlow] = useState(null)
-  const [hasFlowChart, setHasFlowChart] = useState(false)
 
   // UI STATE
   const [theme, setTheme] = useState("dark")
   const [isLegend, setIsLegend] = useState(false)
   const [loadingCount, setLoadingCount] = useState(0)
+  const [hasFlowChart, setHasFlowChart] = useState(false)
+  const [chartType, setChartType] = useState(1) // 1: trajectories, 2: partial order
+  const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
 
   const startLoading = useCallback(() => setLoadingCount((c) => c + 1), [])
   const stopLoading = useCallback(() => setLoadingCount((c) => Math.max(0, c - 1)), [])
@@ -122,7 +124,12 @@ export function VizProvider({ children }) {
       setHasFlowChart,
       startLoading,
       stopLoading,
+      //UI
       isLoading: loadingCount > 0,
+      chartType,
+      setChartType,
+      isHasse,
+      setIsHasse,
     }),
     [
       palette,
@@ -134,6 +141,8 @@ export function VizProvider({ children }) {
       updatePosetColoring,
       startLoading,
       stopLoading,
+      chartType,
+      setChartType,
     ],
   )
 

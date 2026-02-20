@@ -8,6 +8,7 @@ import { ProcessedDataProvider, useData } from "./contexts/ProcessedDataContext"
 import { VizProvider, useViz } from "./contexts/VizContext"
 import { FiltersProvider } from "./contexts/FiltersContext"
 import { DerivedDataProvider } from "./contexts/DerivedDataContext"
+import { SidePanel } from "./components/dashboard/side-panel/SidePanel"
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function AppContent() {
       <AnimatePresence>
         {richData?.length && silhouettes && isLegend && <Dashboard />}
       </AnimatePresence>
+      {isLegend && <SidePanel />}
     </main>
   )
 }

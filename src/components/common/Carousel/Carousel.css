@@ -47,7 +47,9 @@
 }
 
 .export-ids-panel {
+  height: 100%;
   display: flex;
+  place-content: space-between;
   flex-direction: column;
   align-items: center;
 }

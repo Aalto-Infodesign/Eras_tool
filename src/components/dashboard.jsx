@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from "react"
-import { includes, union } from "lodash"
+import { useEffect, useMemo } from "react"
 import { TrajectoriesExplorerChart } from "./dashboard/ExplorerChart"
 import { SilhouettesMorph } from "./dashboard/silhouettes/SilhouettesMorph"
 import { CarouselWrapper } from "./common/Carousel/Carousel"
@@ -19,20 +18,17 @@ import { ExportIDs } from "./dashboard/export/ExportIDs"
 import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
 import { useDerivedData } from "../contexts/DerivedDataContext"
-import { useFilters } from "../contexts/FiltersContext"
-import { Filters } from "./dashboard/filters/Filters"
 import { Command } from "lucide-react"
+import { SidePanel } from "./dashboard/side-panel/SidePanel"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
+  const { richData, analytics, silhouettes } = useData()
+  const { statesOrder, isHasse } = useViz()
+  const { completeSilhouettes, selectedSilhouettesData, selectedIDs } = useDerivedData()
+
   const w = 170
   const marginTop = 10
-
-  const { richData, analytics, silhouettes, idealSilhouettes } = useData()
-  const { statesOrder } = useViz()
-  const { filters } = useFilters()
-  const { completeSilhouettes } = useDerivedData()
-
   //For File Loader
   const minHeight = 100
   let stateIncrement = 0
@@ -48,47 +44,10 @@ const Dashboard = () => {
   // const h = document.querySelector(".chart-container").
   const h = statesOrder.length * stateIncrement
 
-  // TODO Seleziona soloe Silh esistenti davvero
-  // ?? Auto-select silhouettes based on initial FLow?
-  const [selectedSilhouettes, setSelectedSilhouettes] = useState(idealSilhouettes) // Main filter
-  const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
-
-  const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
-
-  const [chartType, setChartType] = useState(1) // 1: trajectories, 2: partial order
-
-  const toggleSilhouetteFilter = (silhouette) => {
-    const silhouettesToToggle = Array.isArray(silhouette) ? silhouette : [silhouette]
-
-    let newFilter
-
-    // 2. Handle single-item toggles (the original behavior)
-    if (silhouettesToToggle.length === 1) {
-      const item = silhouettesToToggle[0]
-      // If the item is already selected, remove it. Otherwise, add it.
-      if (selectedSilhouettes.includes(item)) {
-        newFilter = selectedSilhouettes.filter((s) => s !== item)
-      } else {
-        newFilter = [...selectedSilhouettes, item]
-      }
-    } else {
-      // 3. Handle arrays: add all or remove all
-      const allAreSelected = silhouettesToToggle.every((s) => selectedSilhouettes.includes(s))
-
-      if (allAreSelected) {
-        // If every item is already in the filter, remove them all.
-        newFilter = selectedSilhouettes.filter((s) => !silhouettesToToggle.includes(s))
-      } else {
-        // If one or more items are missing, add all of them (uniquely).
-        newFilter = [...new Set([...selectedSilhouettes, ...silhouettesToToggle])]
-      }
-    }
-
-    setSelectedSilhouettes(newFilter)
-  }
-
   const [isPresent, safeToRemove] = usePresence()
   const [scope, animate] = useAnimate()
+
+  const isCmdPressed = useModifierKey("Meta")
 
   useEffect(() => {
     if (isPresent) {
@@ -116,52 +75,6 @@ const Dashboard = () => {
     }
   }, [richData, isPresent, animate, safeToRemove, scope])
 
-  const isCmdPressed = useModifierKey("Meta")
-
-  console.log(completeSilhouettes)
-
-  const selectedSilhouettesData = completeSilhouettes.filter((s) =>
-    includes(selectedSilhouettes, s.name),
-  )
-
-  console.log(selectedSilhouettesData)
-
-  // TODO: come creo logica inclusiva o esclusiva tra silhouettes e trajectories?
-  const selectedIDs = useMemo(() => {
-    // 1. Clean up the Silhouette IDs (Ensure we have a flat array of unique IDs)
-    const IDsFromSilhouettes = selectedSilhouettesData
-      .flatMap((s) => (s.isFiltered ? s.filtered.trajectories : s.trajectories)) // Modern alternative to .map().flat()
-      .map((t) => t[0]?.id) // Use optional chaining to prevent crashes
-      .filter(Boolean) // Remove any undefined/null values
-
-    console.log(IDsFromSilhouettes)
-    console.log(selectedTrajectoriesIDs)
-
-    const IDsFromTrajectories = selectedTrajectoriesIDs || []
-    const type = Number(chartType)
-
-    // If chartType is 1 (trajectories), combine both silhouette and trajectory selections
-    // If chartType is 2 (partial order), use only trajectory selections
-
-    if (type === 1) {
-      /** * INCLUSIVE (OR / UNION)
-       * Returns everything selected in BOTH silhouettes and trajectories.
-       */
-      return union(IDsFromSilhouettes, IDsFromTrajectories)
-    }
-
-    if (type === 2 && IDsFromTrajectories.length > 0) {
-      /** * EXCLUSIVE (AND / INTERSECTION)
-       * Returns only IDs that appear in BOTH categories.
-       */
-      return [...IDsFromTrajectories]
-    }
-
-    // Default fallback (e.g., just Silhouettes)
-    return [...IDsFromSilhouettes]
-  }, [selectedSilhouettesData, selectedTrajectoriesIDs, chartType])
-  // console.log("Rendering Ids:", selectedIDs)
-
   const boxVariants = {
     visible: {
       opacity: 1,
@@ -181,10 +94,8 @@ const Dashboard = () => {
   }
 
   const MOTION_TREHSHOLD = 25000
-
   const reduceMotion = useMemo(() => richData.length > MOTION_TREHSHOLD, [richData.length])
 
-  //debug function that prints count of all the elements containd in svgs
   const countSvgElements = () => {
     const svgs = document.querySelectorAll("svg")
     let count = 0
@@ -258,48 +169,22 @@ const Dashboard = () => {
                     <DebugPanel />
                   </div> */}
                   <div className="carousel-slides-content" data-title="Export">
-                    <ExportIDs selectedIDs={selectedIDs} />
+                    <ExportIDs />
                   </div>
                 </CarouselWrapper>
               </motion.section>
             )}
           </AnimatePresence>
-          <AnimatePresence>
-            {silhouettes && (
-              <SilhouettesMorph
-                toggleSilhouetteFilter={toggleSilhouetteFilter}
-                setSelectedSilhouettes={setSelectedSilhouettes}
-                selectedSilhouettes={selectedSilhouettes}
-                isHasse={isHasse}
-                setIsHasse={setIsHasse}
-              />
-            )}
-          </AnimatePresence>
+          <AnimatePresence>{silhouettes && <SilhouettesMorph />}</AnimatePresence>
         </motion.div>
 
         <TrajectoriesExplorerChart
           w={w}
           h={h}
           marginTop={marginTop}
-          selectedSilhouettes={selectedSilhouettes}
-          toggleSilhouetteFilter={toggleSilhouetteFilter}
-          selectedTrajectoriesIDs={selectedTrajectoriesIDs}
-          setSelectedTrajectoriesIDs={setSelectedTrajectoriesIDs}
-          chartType={chartType}
-          setChartType={setChartType}
           // Other stuff
           reduceMotion={reduceMotion}
         />
-
-        {filters && <Filters />}
-
-        {/* <StatesDendrogram
-            marginTop={marginTop}
-            palette={palette}
-            silhouettes={silhouettes}
-            toggleSilhouetteFilter={toggleSilhouetteFilter}
-            selectedSilhouettes={selectedSilhouettes}
-          /> */}
       </LayoutGroup>
     </motion.main>
   )

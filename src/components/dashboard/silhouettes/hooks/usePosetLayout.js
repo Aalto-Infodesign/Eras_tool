@@ -109,6 +109,8 @@ export const usePosetLayout = (
       groupBy(flattenDeep(poset.layers), (l) => l.split("-").length),
     )
 
+    console.log(poset)
+
     const namesForScale = isHasse ? orderedLeaves : silhouetteNames
     const xRange = isHasse
       ? [paddingX, width - padding]

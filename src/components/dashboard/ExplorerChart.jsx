@@ -30,25 +30,22 @@ export function TrajectoriesExplorerChart(props) {
   // Props
 
   const { silhouettes, analytics, statesData } = useData()
-  const { palette, statesOrder } = useViz()
-  const { filters } = useFilters()
+  const { palette, statesOrder, chartType, setChartType } = useViz()
+  const {
+    filters,
+    selectedTrajectoriesIDs,
+    setSelectedTrajectoriesIDs,
+    selectedSilhouettesNames,
+    toggleSilhouetteFilter,
+  } = useFilters()
 
   const { w, h, marginTop } = props
   const { ageRange } = analytics
   const { links, statesNames } = statesData
-  const { selectedSilhouettes } = props
-  const { toggleSilhouetteFilter } = props
-  const { selectedTrajectoriesIDs, setSelectedTrajectoriesIDs } = props
-  const { setStatesOrder } = props
 
-  // const { dateRange, setDateRange } = props
-  // const { durationRange, setDurationRange } = props
   const { reduceMotion } = props
 
-  const { chartType, setChartType } = props
-
   const [selectedLumps, setSelectedLumps] = useState([])
-  // const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
   const [hoveredTrajectoriesIDs, setHoveredTrajectoriesIDs] = useState([])
 
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -97,6 +94,7 @@ export function TrajectoriesExplorerChart(props) {
   const xScale = scaleLinear([0, max(silhouettes.map((d) => d.states.length - 1))], [10, 100 - 10])
 
   // FILTERING SILHOUETTES and TRAJECTORIES
+  // TODO FiltersContext
 
   // 1. MEMOIZZA I LINK COMPLETI (Evita ricreazione continua)
   const completeLinks = useMemo(() => {
@@ -109,15 +107,15 @@ export function TrajectoriesExplorerChart(props) {
   // 2. OTTIMIZZA IL SET DI INDIVIDUI (Usa Set per ricerca O(1))
   const { filteredSilhouettes, selectedIndividualsSet } = useMemo(() => {
     const filtered =
-      selectedSilhouettes.length === 0
+      selectedSilhouettesNames.length === 0
         ? silhouettes
-        : silhouettes.filter((d) => selectedSilhouettes.includes(d.name))
+        : silhouettes.filter((d) => selectedSilhouettesNames.includes(d.name))
 
     // Creiamo un Set: includes() su un Set è istantaneo, su un Array è O(n)
     const individuals = new Set(flattenDeep(filtered.map((s) => s.trajectories)).map((t) => t.id))
 
     return { filteredSilhouettes: filtered, selectedIndividualsSet: individuals }
-  }, [silhouettes, selectedSilhouettes])
+  }, [silhouettes, selectedSilhouettesNames])
 
   // 3. FILTRAGGIO EFFICIENTE
   const filteredLinks = useMemo(() => {
@@ -182,15 +180,12 @@ export function TrajectoriesExplorerChart(props) {
       completeLinks,
       filteredLinks,
       filteredSilhouettes,
-      selectedSilhouettes,
-      toggleSilhouetteFilter,
-      setStatesOrder,
+
       statesNamesLoaded,
       chartScales,
       selectedLumps,
       toggleSelectedLumps,
-      selectedTrajectoriesIDs,
-      setSelectedTrajectoriesIDs,
+
       toggleSelectedTrajectory,
       hoveredTrajectoriesIDs,
       setHoveredTrajectoriesIDs,
@@ -206,15 +201,13 @@ export function TrajectoriesExplorerChart(props) {
       filteredLinks,
       completeLinks,
       filteredSilhouettes,
-      selectedSilhouettes,
-      toggleSilhouetteFilter,
+
       // dateRange,
       // durationRange,
       statesNamesLoaded,
       selectedLumps,
       toggleSelectedLumps,
-      selectedTrajectoriesIDs,
-      setSelectedTrajectoriesIDs,
+
       toggleSelectedTrajectory,
       hoveredTrajectoriesIDs,
       setHoveredTrajectoriesIDs,
@@ -256,10 +249,10 @@ export function TrajectoriesExplorerChart(props) {
               onClick={() => setChartType(1)}
               data-selected={chartType === 1}
             >
-              Traj
+              Linear
             </motion.button>
             <button onClick={() => setChartType(2)} data-selected={chartType === 2}>
-              PO
+              Parallel
             </button>
           </div>
           <ExportPanel />
@@ -377,7 +370,7 @@ export function TrajectoriesExplorerChart(props) {
                     horizontalDirection
                     data={selectedIDssWithSilhouette}
                     itemContent={(i, id) => {
-                      const isSelected = includes(selectedSilhouettes, id.silhouette)
+                      const isSelected = includes(selectedSilhouettesNames, id.silhouette)
 
                       return (
                         <div

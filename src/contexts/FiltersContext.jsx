@@ -6,9 +6,14 @@ const FiltersContext = createContext(null)
 // TODO Add toggles
 
 export function FiltersProvider({ children }) {
-  const { filtersBlueprint } = useData()
+  const { filtersBlueprint, idealSilhouettes } = useData()
+  // Sliders
   const [filters, setFilters] = useState(filtersBlueprint)
   const [isDragging, setIsDragging] = useState(false)
+
+  // Selection Data
+  const [selectedSilhouettesNames, setSelectedSilhouettesNames] = useState(idealSilhouettes) // Main filter
+  const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
 
   // Sync internal state when the source data changes
   useEffect(() => {
@@ -29,9 +34,47 @@ export function FiltersProvider({ children }) {
     })
   }, [])
 
+  const toggleSilhouetteFilter = (silhouette) => {
+    const silhouettesToToggle = Array.isArray(silhouette) ? silhouette : [silhouette]
+
+    setSelectedSilhouettesNames((prev) => {
+      if (silhouettesToToggle.length === 1) {
+        const item = silhouettesToToggle[0]
+        return prev.includes(item) ? prev.filter((s) => s !== item) : [...prev, item]
+      } else {
+        const allAreSelected = silhouettesToToggle.every((s) => prev.includes(s))
+        return allAreSelected
+          ? prev.filter((s) => !silhouettesToToggle.includes(s))
+          : [...new Set([...prev, ...silhouettesToToggle])]
+      }
+    })
+  }
+
   const value = useMemo(
-    () => ({ filters, updateSelection, isDragging, setIsDragging }),
-    [filters, updateSelection, isDragging, setIsDragging],
+    () => ({
+      updateSelection,
+      // Sliders
+      filters,
+      isDragging,
+      setIsDragging,
+      // Selection
+      selectedSilhouettesNames,
+      setSelectedSilhouettesNames,
+      toggleSilhouetteFilter,
+      selectedTrajectoriesIDs,
+      setSelectedTrajectoriesIDs,
+    }),
+    [
+      filters,
+      updateSelection,
+      isDragging,
+      setIsDragging,
+      selectedSilhouettesNames,
+      setSelectedSilhouettesNames,
+      toggleSilhouetteFilter,
+      selectedTrajectoriesIDs,
+      setSelectedTrajectoriesIDs,
+    ],
   )
 
   // Prevent rendering consumers until we actually have filter data

@@ -8,16 +8,14 @@ import { useFilters } from "../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
 import { union } from "lodash"
-import { cos } from "three/tsl"
 export function TrajectoriesMotion(props) {
-  const { filters } = useFilters()
+  const { filters, selectedTrajectoriesIDs } = useFilters()
   const { palette } = useViz()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
     marginTop,
     chartScales,
-    selectedTrajectoriesIDs,
     selectedLumps,
     toggleSelectedTrajectory,
     filteredLinks,

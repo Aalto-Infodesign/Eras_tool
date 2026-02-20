@@ -14,7 +14,7 @@ export const useModifierKey = (targetKey) => {
         setIsKeyPressed(true)
       }
     },
-    [targetKey]
+    [targetKey],
   )
 
   const handleKeyUp = useCallback(
@@ -23,7 +23,7 @@ export const useModifierKey = (targetKey) => {
         setIsKeyPressed(false)
       }
     },
-    [targetKey]
+    [targetKey],
   )
 
   // 🐛 FIX: Add handler for window blur event 🐛

@@ -25,12 +25,15 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 import { useSilhouettesPoset } from "./hooks/usePosetLayout"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { useFilters } from "../../../contexts/FiltersContext"
 
 // ! TODO Refactor completo
 
-export const SilhouettesMorph = (props) => {
+export const SilhouettesMorph = () => {
   const { idealSilhouettes, statesData } = useData()
-  const { palette, statesOrder, setStatesOrder } = useViz()
+  const { palette, statesOrder, setStatesOrder, isHasse, setIsHasse } = useViz()
+  const { toggleSilhouetteFilter, setSelectedSilhouettesNames, selectedSilhouettesNames } =
+    useFilters()
 
   const { completeSilhouettes } = useDerivedData()
 
@@ -38,14 +41,6 @@ export const SilhouettesMorph = (props) => {
   const statesNamesLoaded = isNil(statesOrder) ? statesNames.sort() : statesOrder
 
   const basePosetData = useSilhouettesPoset(statesNamesLoaded, completeSilhouettes)
-
-  const {
-    toggleSilhouetteFilter = () => {},
-    setSelectedSilhouettes = () => {},
-    selectedSilhouettes = [],
-    isHasse,
-    setIsHasse,
-  } = props
 
   const isCmdPressed = useModifierKey("Meta")
 
@@ -59,7 +54,7 @@ export const SilhouettesMorph = (props) => {
   const w = 100, // Target R3F world width (10 units)
     h = 100 // Target R3F world height (10 units)
   const svgPadding = 10
-  const isActive = selectedSilhouettes.length > 0
+  const isActive = selectedSilhouettesNames.length > 0
 
   const y = scaleBand(statesNamesLoaded, [svgPadding, h - svgPadding]).padding(0)
   const x = scaleLinear(
@@ -86,6 +81,7 @@ export const SilhouettesMorph = (props) => {
 
     return sorted
   }, [completeSilhouettes, orderMode])
+
   const deriveSilhouettesFromId = (id) => {
     // This function now only contains the core logic
     const next = completeSilhouettes.filter((s) => s.name.includes(id) && s.name !== id)
@@ -96,6 +92,7 @@ export const SilhouettesMorph = (props) => {
 
   const handleSilhouetteClick = (id) => {
     // e.stopPropagation()
+    console.log("Click")
     toggleSilhouetteFilter(id)
   }
 
@@ -193,12 +190,12 @@ export const SilhouettesMorph = (props) => {
       </motion.div>
 
       <motion.div className="filter-container">
-        <ClearButton isActive={isActive} clearFunction={setSelectedSilhouettes}>
+        <ClearButton isActive={isActive} clearFunction={setSelectedSilhouettesNames}>
           Clear
         </ClearButton>
         <motion.div layout className="filter-bar padded">
           <AnimatePresence mode="popLayout">
-            {selectedSilhouettes.map((s, _i) => {
+            {selectedSilhouettesNames.map((s, _i) => {
               return (
                 <SilhouetteChip
                   key={s}
@@ -234,7 +231,7 @@ export const SilhouettesMorph = (props) => {
               {isHasse && (
                 <HasseDiagram
                   isHasse={isHasse}
-                  selectedSilhouettes={selectedSilhouettes}
+                  selectedSilhouettes={selectedSilhouettesNames}
                   toggleSilhouetteFilter={toggleSilhouetteFilter}
                   x={x}
                   y={y}
@@ -275,7 +272,7 @@ export const SilhouettesMorph = (props) => {
                 increaseViewportBy={100}
                 itemContent={(i, s) => {
                   const isHovered = hoveredIndex === i
-                  const isSelected = includes(selectedSilhouettes, s.name)
+                  const isSelected = includes(selectedSilhouettesNames, s.name)
 
                   const isCmdHovered = isCmdPressed && isHovered
                   const isSelectedExpand = expandSides && isSelected && isHovered
@@ -327,7 +324,7 @@ export const SilhouettesMorph = (props) => {
                           isSideVisible && (
                             <SubsetSelection
                               subset={derivedSilhouettes.previous}
-                              selectedSilhouettes={selectedSilhouettes}
+                              selectedSilhouettes={selectedSilhouettesNames}
                               toggleSilhouetteFilter={toggleSilhouetteFilter}
                               x={x}
                               y={y}
@@ -362,7 +359,7 @@ export const SilhouettesMorph = (props) => {
                         {derivedSilhouettes?.next.length > 0 && isSideVisible && (
                           <SubsetSelection
                             subset={derivedSilhouettes.next}
-                            selectedSilhouettes={selectedSilhouettes}
+                            selectedSilhouettes={selectedSilhouettesNames}
                             toggleSilhouetteFilter={toggleSilhouetteFilter}
                             palette={palette}
                             x={x}

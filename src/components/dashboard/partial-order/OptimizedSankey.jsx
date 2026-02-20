@@ -1,5 +1,4 @@
-import { useState, useContext, useMemo } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { useState, useMemo } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { motion, AnimatePresence } from "motion/react"
 import { Tooltip } from "../../common/Tooltip/Tooltip"
@@ -8,7 +7,7 @@ import { romanize } from "../../../utils/numberHelpers"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
-import { index } from "d3"
+import { useFilters } from "../../../contexts/FiltersContext"
 
 // --- Constants for better maintainability ---
 const MARGIN_Y = 25
@@ -338,23 +337,13 @@ function SankeyLink({
 // --- Main Sankey Component ---
 export function Sankey({ width, height, data }) {
   const { palette } = useViz()
-  const { setSelectedTrajectoriesIDs } = useContext(TrajectoriesContext)
+  const { setSelectedTrajectoriesIDs } = useFilters()
 
   const [hoveredLink, setHoveredLink] = useState(null)
   const [selectedLinks, setSelectedLinks] = useState([])
   const [selectedNode, setSelectedNode] = useState(null)
   const [selectionDirection, setSelectionDirection] = useState("right") // "left" or "right"
   const [hoveredSilhouette, setHoveredSilhouette] = useState(null)
-
-  // useEffect(() => {
-  //   const selectedIDs = selectedLinks
-  //     .map((l) => l.segments)
-  //     .flat()
-  //     .map((s) => s.id)
-  //   const uniqueSelectedIDs = Array.from(new Set(selectedIDs))
-  //   setSelectedTrajectoriesIDs(uniqueSelectedIDs)
-  //   // //console.log("Selected Trajectory IDs updated:", uniqueSelectedIDs)
-  // }, [selectedLinks])
 
   // OPTIMIZATION: Memoize the expensive Sankey layout calculation.
   // This ensures the layout is only re-calculated when data, width, or height change,
