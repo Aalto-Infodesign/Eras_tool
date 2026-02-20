@@ -159,8 +159,8 @@ export const SilhouettesMorph = () => {
   }
 
   const chartVariants = {
-    hidden: { opacity: 0, transition: { duration: 1 } },
-    visible: { opacity: 1, transition: { duration: 1 } },
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
   }
 
   return (
@@ -217,41 +217,34 @@ export const SilhouettesMorph = () => {
           position: "relative",
         }}
       >
-        <AnimatePresence>
-          {statesNamesLoaded.length > 0 && (
+        <AnimatePresence mode="popLayout">
+          {isHasse ? (
             <motion.section
-              key={"hasse-wrapper"}
-              layoutScroll
+              layout
+              key="hasse-wrapper"
               variants={chartVariants}
-              style={{ overflowX: "scroll" }}
               initial="hidden"
-              animate={"visible"}
+              animate="visible"
               exit="hidden"
+              style={{ overflowX: "scroll" }}
             >
-              {isHasse && (
-                <HasseDiagram
-                  isHasse={isHasse}
-                  selectedSilhouettes={selectedSilhouettesNames}
-                  toggleSilhouetteFilter={toggleSilhouetteFilter}
-                  x={x}
-                  y={y}
-                  basePosetData={basePosetData}
-                />
-              )}
+              <HasseDiagram
+                isHasse={isHasse}
+                selectedSilhouettes={selectedSilhouettesNames}
+                toggleSilhouetteFilter={toggleSilhouetteFilter}
+                x={x}
+                y={y}
+                basePosetData={basePosetData}
+              />
             </motion.section>
-          )}
-
-          {!isHasse && (
+          ) : (
             <motion.div
-              key={"scroller-wrapper"}
-              layoutScroll
-              // style={{
-              //   top: 0,
-              //   position: "absolute",
-              // }}
+              layout
+              key="scroller-wrapper"
               variants={chartVariants}
-              animate={"visible"}
-              transition={{ delay: 1 }}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
               className="filter-container silhouettes"
             >
               <Virtuoso
