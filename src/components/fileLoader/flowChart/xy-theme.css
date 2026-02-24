@@ -1,7 +1,7 @@
 /* xyflow theme files. Delete these to start from our base */
 
 .react-flow {
-  --xy-background-color: #d3d4d5;
+  --xy-background-color: var(--surface-secondary);
   /* Custom Variables */
   --xy-theme-selected: #7db3f5;
   --xy-theme-hover: #c5c5c5;
@@ -21,6 +21,8 @@
   --xy-handle-border-color-default: #aaaaaa;
 
   --xy-edge-label-color-default: #505050;
+
+  --xy-controls-button-background-color-default: var(--surface-primary);
 }
 
 .react-flow.dark {
@@ -101,7 +103,7 @@
 
 .react-flow__resize-control.handle {
   background-color: #ffffff;
-  border-color: #9e86ed;
+  border-color: var(--surface-accent);
   border-radius: 0;
   width: 5px;
   height: 5px;
@@ -126,9 +128,9 @@
 */
 
 :root {
-  --color-primary: #ff0073;
-  --color-background: #fefefe;
-  --color-hover-bg: #f6f6f6;
+  --color-primary: var(--surface-accent);
+  --color-background: var(--surface-primary);
+  --color-hover-bg: var(--surface-secondary);
   --color-disabled: #76797e;
 }
 
@@ -177,7 +179,7 @@
 }
 
 .xy-theme__button:hover {
-  background-color: var(--xy-controls-button-background-color-hover-default);
+  background-color: var(--color-hover-bg);
 }
 
 .xy-theme__button:active {
@@ -272,4 +274,8 @@
   margin-top: 10px;
   margin-bottom: 3px;
   display: inline-block;
+}
+
+.react-flow__controls-button {
+  border: 0px;
 }

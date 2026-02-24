@@ -20,6 +20,7 @@ import { calculateDominanceArray } from "../../../utils/POHelperFunctions"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useRawData } from "../../../contexts/RawDataContext"
 import { useViz } from "../../../contexts/VizContext"
+import DownloadButton from "./DownloadButton"
 
 const snapGrid = [25, 25]
 
@@ -115,6 +116,7 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
             )}
             <Controls />
             <Background />
+            <DownloadButton />
           </ReactFlow>
         </div>
       </div>

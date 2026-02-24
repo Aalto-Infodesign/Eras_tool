@@ -8,6 +8,7 @@ import { useFilters } from "../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
 import { union } from "lodash"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 export function TrajectoriesMotion(props) {
   const { filters, selectedTrajectoriesIDs } = useFilters()
   const { palette } = useViz()
@@ -113,9 +114,9 @@ export function TrajectoriesMotion(props) {
           lines.map((d) => {
             const isHovered = hoveredTrajectoriesIDs.includes(d.id)
             const isSelected = selectedTrajectoriesIDs.includes(d.id)
-            {
-              /* const isFilteredDate = d.source.date >= filters.date.selection[0] && d.source.date <= filters.date.selection[1] */
-            }
+            const isFilteredDate =
+              d.source.date >= filters.date.selection[0] &&
+              d.source.date <= filters.date.selection[1]
 
             let offset = 0
             if (
@@ -154,7 +155,7 @@ export function TrajectoriesMotion(props) {
                   y2: y(d.target.state) + marginTop,
                   strokeWidth: 0.25,
                   stroke: palette[d.source.state],
-                  // strokeDasharray: offset,
+                  strokeDasharray: offset,
                   strokeDashoffset: -1,
                   opacity: 0,
                 }}
@@ -176,6 +177,7 @@ export function TrajectoriesMotion(props) {
                 exit={{ opacity: 0 }}
                 transition={{
                   default: { duration: lines.length > 1000 ? 0.0 : 0.2 },
+                  opacity: { duration: 0.3 },
                   strokeWidth: { duration: 0.1 },
                 }}
                 onClick={() => toggleSelectedTrajectory(d.id)}

@@ -33,32 +33,34 @@ function AppContent() {
   const { isLegend, isLoading } = useViz()
 
   return (
-    <main
-      className="App"
-      // style={{ position: isLegend && "relative" }}
-    >
-      <AnimatePresence>{!richData?.length && <TitleAnimation />}</AnimatePresence>
-      {isLoading && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0, // covers viewport entirely
-            background: "rgba(0,0,0,0.4)",
-            zIndex: 9999,
-            display: "grid",
-            placeItems: "center", // centers your spinner
-          }}
-        >
-          {/* <Spinner /> */}
-          Loading
-        </div>
-      )}
-      <FileLoader />
-      <AnimatePresence>
-        {richData?.length && silhouettes && isLegend && <Dashboard />}
-      </AnimatePresence>
+    <>
+      <main
+        className="App"
+        // style={{ position: isLegend && "relative" }}
+      >
+        <AnimatePresence>{!richData?.length && <TitleAnimation />}</AnimatePresence>
+        {isLoading && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0, // covers viewport entirely
+              background: "rgba(0,0,0,0.4)",
+              zIndex: 9999,
+              display: "grid",
+              placeItems: "center", // centers your spinner
+            }}
+          >
+            {/* <Spinner /> */}
+            Loading
+          </div>
+        )}
+        <FileLoader />
+        <AnimatePresence>
+          {richData?.length && silhouettes && isLegend && <Dashboard />}
+        </AnimatePresence>
+      </main>
       {isLegend && <SidePanel />}
-    </main>
+    </>
   )
 }
 

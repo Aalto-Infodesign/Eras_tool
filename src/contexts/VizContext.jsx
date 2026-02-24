@@ -19,7 +19,7 @@ export function VizProvider({ children }) {
   const [theme, setTheme] = useState("dark")
   const [isLegend, setIsLegend] = useState(false)
   const [loadingCount, setLoadingCount] = useState(0)
-  const [hasFlowChart, setHasFlowChart] = useState(false)
+  const [hasFlowChart, setHasFlowChart] = useState(true)
   const [chartType, setChartType] = useState(1) // 1: trajectories, 2: partial order
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
 

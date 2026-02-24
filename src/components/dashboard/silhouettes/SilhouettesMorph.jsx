@@ -142,25 +142,25 @@ export const SilhouettesMorph = () => {
   // console.log(statesNamesLoaded)
 
   const boxVariants = {
-    hidden: { opacity: 0, x: -10 },
+    hidden: { opacity: 0 },
     hasse: {
       width: "100%",
       opacity: 1,
       x: 0,
-      transition: { default: { ease: "easeInOut", when: "beforeChildren" }, width: { delay: 0.5 } },
+      transition: { default: { ease: "easeInOut", when: "beforeChildren" }, width: { delay: 0.1 } },
     },
     trajectories: {
       width: "85%",
       opacity: 1,
       x: 0,
 
-      transition: { default: { ease: "easeInOut", when: "afterChildren" }, width: { delay: 1 } },
+      transition: { default: { ease: "easeInOut", when: "afterChildren" }, width: { delay: 0 } },
     },
   }
 
   const chartVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
+    hidden: { opacity: 0, height: 0 },
+    visible: { opacity: 1, height: "auto" },
   }
 
   return (
@@ -177,7 +177,25 @@ export const SilhouettesMorph = () => {
       <motion.div layout>
         <h3>Silhouettes filters</h3>
         <div className="header-section">
-          <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" />
+          <div className="chart-modes">
+            <motion.button
+              className="secondary"
+              whileHover={{ scale: 0.95 }}
+              onClick={() => setIsHasse(false)}
+              data-selected={isHasse === false}
+            >
+              Trajectories
+            </motion.button>
+            <motion.button
+              className="secondary"
+              whileHover={{ scale: 0.95 }}
+              onClick={() => setIsHasse(true)}
+              data-selected={isHasse === true}
+            >
+              Hasse
+            </motion.button>
+          </div>
+          {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}
           {idealSilhouettes.length > 0 && (
             <div className="order-dropdown">
               <select value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
@@ -189,8 +207,12 @@ export const SilhouettesMorph = () => {
         </div>
       </motion.div>
 
-      <motion.div className="filter-container">
-        <ClearButton isActive={isActive} clearFunction={setSelectedSilhouettesNames}>
+      <motion.div key={"filter-container"} className="filter-container">
+        <ClearButton
+          key={"clear-btn"}
+          isActive={isActive}
+          clearFunction={setSelectedSilhouettesNames}
+        >
           Clear
         </ClearButton>
         <motion.div layout className="filter-bar padded">
@@ -249,7 +271,7 @@ export const SilhouettesMorph = () => {
             >
               <Virtuoso
                 style={{
-                  height: "100%",
+                  height: "120px",
                   maxHeight: "150px",
                   width: "100%",
                   paddingLeft: "10px",

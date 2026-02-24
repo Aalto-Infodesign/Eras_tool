@@ -165,9 +165,9 @@ const Dashboard = () => {
                       {Math.round(analytics.dateRange[0])} - {Math.round(analytics.dateRange[1])}
                     </p>
                   </div>
-                  {/* <div className="carousel-slides-content" data-title="Debug Tools">
+                  <div className="carousel-slides-content" data-title="Debug Tools">
                     <DebugPanel />
-                  </div> */}
+                  </div>
                   <div className="carousel-slides-content" data-title="Export">
                     <ExportIDs />
                   </div>

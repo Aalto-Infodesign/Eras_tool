@@ -35,20 +35,29 @@ export function DerivedDataProvider({ children }) {
         (datum.diseaseDuration >= filters.diseaseDuration.selection[0] &&
           datum.diseaseDuration <= filters.diseaseDuration.selection[1]),
     )
+    // .filter((datum) => datum.date <= filters.date.selection[1])
   }, [richData, filters])
 
-  console.log(filteredData)
+  console.log("fd", filteredData)
+
+  const filteredTrajectories = useMemo(() => {
+    if (filteredData.length === 0) return []
+    return trajectoriesFromData(filteredData)
+  }, [filteredData])
+
+  const filteredSilhouettes = useMemo(() => {
+    if (filteredTrajectories.length === 0) return []
+    return silhouettesFromTrajectories(filteredTrajectories, idealSilhouettes, richData)
+  }, [filteredTrajectories, idealSilhouettes, richData])
 
   // Step 2: derive silhouettes from filtered data
   const silhouettesMap = useMemo(() => {
-    if (filteredData.length === 0) return new Map()
-    const trajectories = trajectoriesFromData(filteredData)
-    const filtered = silhouettesFromTrajectories(trajectories, idealSilhouettes, richData)
+    if (filteredSilhouettes.length === 0) return new Map()
 
     const map = new Map()
-    filtered.forEach((s) => map.set(s.name, s))
+    filteredSilhouettes.forEach((s) => map.set(s.name, s))
     return map
-  }, [filteredData, idealSilhouettes, richData])
+  }, [filteredData])
 
   const completeSilhouettes = useMemo(() => {
     if (!silhouettesMap) return []
@@ -95,8 +104,22 @@ export function DerivedDataProvider({ children }) {
   }, [selectedSilhouettesData, selectedTrajectoriesIDs, chartType])
 
   const value = useMemo(
-    () => ({ filteredData, completeSilhouettes, selectedSilhouettesData, selectedIDs }),
-    [filteredData, completeSilhouettes, selectedSilhouettesData, selectedIDs],
+    () => ({
+      filteredData,
+      filteredTrajectories,
+      filteredSilhouettes,
+      completeSilhouettes,
+      selectedSilhouettesData,
+      selectedIDs,
+    }),
+    [
+      filteredData,
+      filteredTrajectories,
+      filteredSilhouettes,
+      completeSilhouettes,
+      selectedSilhouettesData,
+      selectedIDs,
+    ],
   )
 
   if (!filteredData) return null

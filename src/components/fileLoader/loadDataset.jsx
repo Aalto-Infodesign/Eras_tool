@@ -9,7 +9,7 @@ const LoadDataset = () => {
 
   const templateVariants = {
     hidden: {
-      visobility: "hidden",
+      visibility: "hidden",
       opacity: 0,
       height: 0,
       transition: { duration: 0.15 },

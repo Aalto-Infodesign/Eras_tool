@@ -11,7 +11,7 @@ import "./ExplorerChart.css"
 import { PartialOrderChart } from "./partial-order/PartialOrderChart"
 import { TrajectoriesChart } from "./trajectories/TrajectoriesChart"
 import { TrajectoriesContext } from "./TrajectoriesContext"
-import { ExportPanel } from "../common/ExportPanel/ExportPanel"
+import { DownloadPanel } from "../common/ExportPanel/DownloadPanel"
 
 import { useModifierKey } from "../hooks/useModifierKey"
 
@@ -24,6 +24,7 @@ import { useFilters } from "../../contexts/FiltersContext"
 import { Virtuoso } from "react-virtuoso"
 
 import { X } from "lucide-react"
+import { useDerivedData } from "../../contexts/DerivedDataContext"
 
 export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
@@ -39,9 +40,13 @@ export function TrajectoriesExplorerChart(props) {
     toggleSilhouetteFilter,
   } = useFilters()
 
+  const { filteredTrajectories } = useDerivedData()
+
   const { w, h, marginTop } = props
   const { ageRange } = analytics
-  const { links, statesNames } = statesData
+  const { statesNames } = statesData
+
+  const links = filteredTrajectories.flat()
 
   const { reduceMotion } = props
 
@@ -127,15 +132,17 @@ export function TrajectoriesExplorerChart(props) {
       if (!selectedIndividualsSet.has(l.id)) return false
       if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
 
-      if (!isNil(l.diseaseDuration)) {
-        return (
-          l.diseaseDuration >= filters.diseaseDuration.selection[0] &&
-          l.diseaseDuration < filters.diseaseDuration.selection[1]
-        )
-      }
+      // if (!isNil(l.diseaseDuration)) {
+      //   return (
+      //     l.diseaseDuration >= filters.diseaseDuration.selection[0] &&
+      //     l.diseaseDuration < filters.diseaseDuration.selection[1]
+      //   )
+      // }
       return true
     })
   }, [completeLinks, selectedIndividualsSet, selectedLumps, filters])
+
+  console.log(completeLinks)
 
   // 4. MAPPA PER RICERCA SILHOUETTE (Evita loop annidati)
   const idToSilhouetteMap = useMemo(() => {
@@ -255,7 +262,7 @@ export function TrajectoriesExplorerChart(props) {
               Parallel
             </button>
           </div>
-          <ExportPanel />
+          <DownloadPanel />
         </motion.div>
         <div className="chart-wrapper">
           <TrajectoriesContext.Provider value={contextValue}>

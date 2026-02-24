@@ -2,14 +2,20 @@ import { motion } from "motion/react"
 import { SlidersHorizontal, Download } from "lucide-react"
 import styles from "./SidePanel.module.css"
 import { Filters } from "../filters/Filters"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useModifierKey } from "../../hooks/useModifierKey"
 import { ExportIDs } from "../export/ExportIDs"
-console.log(styles)
+import { useWindowSize } from "../../hooks/useWindowSize"
 
 export const SidePanel = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [panelContent, setPanelContent] = useState("filters")
+
+  const { width } = useWindowSize()
+
+  const containerWidth = useMemo(() => {
+    return document.querySelector(".App").getBoundingClientRect().width
+  }, [width])
 
   const handlePanelOpen = (content) => {
     setIsOpen(isOpen && panelContent === content ? false : true)
@@ -29,8 +35,8 @@ export const SidePanel = () => {
   }, [isFPressed, isEPressed])
 
   const panelVariants = {
-    closed: { x: 190, y: "-50%" },
-    open: { x: -2 },
+    closed: { x: width < 1844 ? containerWidth - 30 : 1440 - 20, y: "-50%" },
+    open: { x: width < 1844 ? width - (width - containerWidth) / 2 - 220 : 1440 - 20 },
   }
   return (
     <motion.section
