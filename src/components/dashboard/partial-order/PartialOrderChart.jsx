@@ -8,6 +8,7 @@ import { Sankey } from "./OptimizedSankey"
 import { useData } from "../../../contexts/ProcessedDataContext"
 
 import "./PartialOrderChart.css"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 // TODO Use idealSilhouettes to highlight nodes/links in the sankey diagram
 
@@ -126,13 +127,16 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
 
 export function PartialOrderChart() {
   const { idealSilhouettes } = useData()
-  const { filteredSilhouettes, filteredLinks } = useContext(TrajectoriesContext)
+  const { filteredSilhouettes } = useDerivedData()
+  const { filteredLinks } = useContext(TrajectoriesContext)
 
   console.log("Filtered Links in PO Chart:", filteredLinks)
+  console.log("Filtered Silhouettes in PO Chart:", filteredSilhouettes)
 
   // Use the custom hook to get memoized, processed data
   console.time("useSankeyData")
   const sankeyData = useSankeyData(filteredSilhouettes, filteredLinks, idealSilhouettes)
+  console.log(sankeyData)
   console.timeEnd("useSankeyData")
 
   return (

@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useData } from "../../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../../contexts/VizContext"
 
-import { usePosetLayout } from "../hooks/usePosetLayout"
+import { usePosetLayout, useSilhouettesPoset } from "../hooks/usePosetLayout"
 import { useNodeStyling } from "../hooks/useNodeStyling"
 
 import { SilhouettePathSvg } from "../shared/SilhouettePathSvg"
@@ -17,14 +17,15 @@ const TRANSITION_MORPH = { duration: 0.3, ease: "easeInOut" }
 // ─── HasseDiagram ─────────────────────────────────────────────────────────────
 
 export function HasseDiagram({
-  basePosetData,
-  isHasse,
+  posetData,
+  statesNamesLoaded,
   selectedSilhouettes,
   toggleSilhouetteFilter,
   x,
   y,
 }) {
   const { silhouettes } = useData()
+  const { isHasse } = useViz()
   const [hoveredNode, setHoveredNode] = useState(null)
   const hoverTimeoutRef = useRef(null)
 
@@ -77,8 +78,12 @@ export function HasseDiagram({
 
   // ── Poset layout & styles ────────────────────────────────────────────────────
 
+  const orderedPosetData = useSilhouettesPoset(posetData, statesNamesLoaded)
+
+  console.log("OP", orderedPosetData)
+
   const { covers, poset, yScale, layersByLength } = usePosetLayout(
-    basePosetData,
+    orderedPosetData,
     width,
     height,
     rectWidth,

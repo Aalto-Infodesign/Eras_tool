@@ -16,6 +16,12 @@ p {
 #filters rect {
   fill: var(--surface-light);
 }
+#filters rect.min.color {
+  fill: blue;
+}
+#filters rect.max.color {
+  fill: red;
+}
 
 #filters .filter-wrapper {
   display: flex;

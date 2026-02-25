@@ -1,7 +1,7 @@
 import { useContext, useMemo, useState, useEffect } from "react"
 import { TrajectoriesContext } from "../TrajectoriesContext"
 
-import { includes, flattenDeep, values, map, isNil } from "lodash"
+import { includes, map } from "lodash"
 import {
   getMinMaxStateFromTrajectories,
   getMinMaxFromTrajectoriesBetweenTwoStates,
@@ -19,7 +19,7 @@ import { scaleLinear, extent } from "d3"
 
 export const Lumps = (props) => {
   const { palette } = useViz()
-  const { filters, isDragging } = useFilters()
+  const { filters } = useFilters()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
@@ -38,7 +38,6 @@ export const Lumps = (props) => {
 
   const animationDuration = reduceMotion ? 0 : 0.2
 
-  const { filteredSilhouettes } = props
   const { isSelectModeLines } = props // Keeping isSelectModeLines for the render logic
   const { svgRef } = props
   const { hoveredLump, setHoveredLump } = props
@@ -79,39 +78,15 @@ export const Lumps = (props) => {
     }
   }
 
-  // console.log("fs", filteredSilhouettes)
-  // console.log("dr", filters.diseaseDuration.selection)
-
-  const filteredTrajectories = useMemo(() => {
-    if (!filteredSilhouettes || filteredSilhouettes.length === 0) return []
-
-    return values(flattenDeep(filteredSilhouettes.map((s) => s.trajectories)))
-      .map((t) => ({
-        ...t,
-        diseaseDuration: isNil(t.diseaseDuration)
-          ? filters.diseaseDuration.extent[0]
-          : t.diseaseDuration,
-      }))
-      .filter(
-        (d) =>
-          d.diseaseDuration >= filters.diseaseDuration.selection[0] &&
-          d.diseaseDuration < filters.diseaseDuration.selection[1],
-      )
-  }, [filteredSilhouettes, filters.diseaseDuration])
-
-  // console.log("ft", filteredTrajectories)
-
   const highlightedTrajectories = useMemo(() => {
     if (filteredLinks.length === 0 || hoveredTrajectoriesIDs.length === 0 || selectedIndex === null)
       return []
     return filteredLinks.filter((d) => hoveredTrajectoriesIDs.includes(d.id))
   }, [filteredLinks, hoveredTrajectoriesIDs, selectedIndex])
 
-  // console.log(highlightedTrajectories)
-
   const globalLumpData = useMemo(() => {
-    return getMinMaxStateFromTrajectories(filteredTrajectories)
-  }, [filteredTrajectories])
+    return getMinMaxStateFromTrajectories(filteredLinks)
+  }, [filteredLinks])
 
   const subsetLumpData = useMemo(() => {
     if (highlightedTrajectories.length === 0) return []
@@ -120,46 +95,30 @@ export const Lumps = (props) => {
 
   const dateExtent = filters.date.extent // Safely get dateExtent
   const minDate = dateExtent ? dateExtent[0] : 0 // Fallback to 0 if not present
-  const midpointDate = (minDate + filters.date.selection[0]) / 2
-
-  const [presentTrajectories, pastTrajectories, remoteTrajectories] = useMemo(() => {
-    const present = filteredTrajectories.filter((d) => d.source.date >= filters.date.selection[0])
-    const past = filteredTrajectories.filter(
-      (d) => d.source.date < filters.date.selection[0] && d.source.date >= midpointDate,
-    )
-    const remote = filteredTrajectories.filter((d) => d.source.date < midpointDate)
-    return [present, past, remote]
-  }, [filteredTrajectories, filters.date.selection, midpointDate])
 
   const allTypes = useMemo(() => {
-    return getMinMaxFromTrajectoriesBetweenTwoStates(filteredTrajectories).map((t) => t.type)
-  }, [filteredTrajectories])
+    return getMinMaxFromTrajectoriesBetweenTwoStates(filteredLinks).map((t) => t.type)
+  }, [filteredLinks])
 
-  const [presentLumps, pastLumps, remoteLumps, lumpLinesExtreme] = useMemo(() => {
+  const [presentLumps, lumpLinesExtreme] = useMemo(() => {
     const processLumps = (trajectories) =>
       getMinMaxFromTrajectoriesBetweenTwoStates(trajectories).filter((d) => d.items.length > 1)
 
-    const pLumps = processLumps(presentTrajectories)
-    const paLumps = processLumps(pastTrajectories)
-    const rLumps = processLumps(remoteTrajectories)
+    const pLumps = processLumps(filteredLinks)
 
-    const linesExtreme = getMinMaxFromTrajectoriesBetweenTwoStates(presentTrajectories).filter(
+    const linesExtreme = getMinMaxFromTrajectoriesBetweenTwoStates(filteredLinks).filter(
       (d) => d.items.length === 1,
     )
 
-    return [pLumps, paLumps, rLumps, linesExtreme]
-  }, [presentTrajectories, pastTrajectories, remoteTrajectories])
+    return [pLumps, linesExtreme]
+  }, [filteredLinks])
 
   const allLumps = useMemo(() => {
     return allTypes.map((t) => ({
       type: t,
       present: presentLumps.filter((p) => p.type === t),
-      past: pastLumps.filter((p) => p.type === t),
-      remote: remoteLumps.filter((p) => p.type === t),
     }))
-  }, [allTypes, presentLumps, pastLumps, remoteLumps])
-
-  // const subLumps = useMemo(() => {}, [])
+  }, [allTypes, presentLumps])
 
   const medianRect = {
     width: 1,
@@ -210,15 +169,11 @@ export const Lumps = (props) => {
       }
     }
 
-    // const reversedVisibleId = reverse(visibleIDs)
-
     const arraysEqual =
       visibleIDs.length === hoveredTrajectoriesIDs.length &&
       visibleIDs.every((v, i) => v === hoveredTrajectoriesIDs[i])
 
     if (!arraysEqual) {
-      // console.log(visibleIDs)
-
       setHoveredTrajectoriesIDs(visibleIDs)
     }
   }, [
@@ -256,30 +211,6 @@ export const Lumps = (props) => {
                   {...lumpPolygonProps}
                   data={present[0]}
                   timePlacement={"present"}
-                  selectedLumps={selectedLumps}
-                  animationDuration={animationDuration}
-                  opacityScale={opacityScale}
-                />
-              )}
-
-              {/* Past Lumps */}
-              {past.length > 0 && (
-                <LumpPolygon
-                  {...lumpPolygonProps}
-                  data={past[0]}
-                  timePlacement={"past"}
-                  selectedLumps={selectedLumps}
-                  animationDuration={animationDuration}
-                  opacityScale={opacityScale}
-                />
-              )}
-
-              {/* Remote Lumps */}
-              {remote.length > 0 && (
-                <LumpPolygon
-                  {...lumpPolygonProps}
-                  data={remote[0]}
-                  timePlacement={"remote"}
                   selectedLumps={selectedLumps}
                   animationDuration={animationDuration}
                   opacityScale={opacityScale}

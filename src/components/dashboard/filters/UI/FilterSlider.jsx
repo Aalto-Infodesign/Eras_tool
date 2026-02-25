@@ -1,8 +1,8 @@
+import { useRef, useCallback, useState, useEffect, useMemo } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { useRef, useCallback } from "react"
 import { TextureDefs } from "../../../common/Textures/TextureDefs"
 import { useFilters } from "../../../../contexts/FiltersContext"
-import { set } from "lodash"
+import { useMouseMove } from "../../../hooks/useMouseMove"
 
 export function FilterSlider({
   min = 0,
@@ -15,17 +15,50 @@ export function FilterSlider({
   cursorWidth = 6,
   hasPattern = false,
   hasRange = false,
+  mode = "single",
+  xScale,
 }) {
-  const { setIsDragging } = useFilters()
+  const { isDragging, setIsDragging } = useFilters()
   const sliderRef = useRef(null)
   const minCursorRef = useRef(null)
   const maxCursorRef = useRef(null)
 
-  // console.log(min)
-  // console.log(max)
-  // console.log(value)
-
+  const mousePosition = useMouseMove()
+  const [hoveredSvg, setHoveredSvg] = useState(false)
+  const [svgCursorPosition, setSvgCursorPosition] = useState({ x: 0, y: 0 })
   const [selectionMin, selectionMax] = value
+
+  // TODO useSvgCursorPosition
+  useEffect(() => {
+    if (!sliderRef.current || !mousePosition.x || !mousePosition.y || !hoveredSvg) return
+
+    const svg = sliderRef.current
+    const pt = svg.createSVGPoint()
+    pt.x = mousePosition.x
+    pt.y = mousePosition.y
+
+    const svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
+    setSvgCursorPosition({ x: svgP.x, y: svgP.y })
+  }, [mousePosition, sliderRef, hoveredSvg])
+
+  const middleCursorValue = useMemo(
+    () => Math.floor(xScale.invert(svgCursorPosition.x)),
+    [xScale, svgCursorPosition],
+  )
+
+  const isLeftCloser = useMemo(() => {
+    const distanceToMin = Math.abs(middleCursorValue - selectionMin)
+    const distanceToMax = Math.abs(middleCursorValue - selectionMax)
+
+    if (distanceToMin < distanceToMax) {
+      return true
+    } else {
+      return false
+    }
+  }, [middleCursorValue])
+
+  const sliderColors =
+    mode === "double" ? { min: "blue", max: "red" } : { min: "white", max: "white" }
 
   // Calculate positions
   const sliderWidth = width - cursorWidth
@@ -132,6 +165,8 @@ export function FilterSlider({
         height={cursorHeight + 10}
         className="svg-slider"
         onMouseDown={handleTrackClick}
+        onMouseEnter={() => setHoveredSvg(true)}
+        onMouseLeave={() => setHoveredSvg(false)}
       >
         {hasPattern && <TextureDefs />}
 
@@ -187,18 +222,76 @@ export function FilterSlider({
           </g>
         )}
 
+        {hoveredSvg && !isDragging && (
+          <g>
+            <motion.g
+              initial={{ x: svgCursorPosition.x }}
+              animate={{ x: svgCursorPosition.x }}
+              transition={{ duration: 0.1 }}
+            >
+              <line x1={0} x2={0} y1={0} y2={20} stroke={"black"} strokeWidth={1} />
+              <text y={-3} fill="white" textAnchor="middle" fontSize="10">
+                {middleCursorValue}
+              </text>
+            </motion.g>
+
+            {isLeftCloser ? (
+              <motion.line
+                initial={{
+                  strokeWidth: 0.5,
+                  x1: minCursorPosition,
+                  x2: svgCursorPosition.x,
+                  y1: 10,
+                  y2: 10,
+                }}
+                animate={{
+                  x1: minCursorPosition,
+                  x2: svgCursorPosition.x,
+                  y1: 10,
+                  y2: 10,
+                }}
+                exit={{}}
+                transition={{ duration: 0.1 }}
+                strokeDasharray={"5 5"}
+                stroke="black"
+              />
+            ) : (
+              <motion.line
+                initial={{
+                  strokeWidth: 0.5,
+                  x1: maxCursorPosition,
+                  x2: svgCursorPosition.x,
+                  y1: 10,
+                  y2: 10,
+                }}
+                animate={{
+                  x1: maxCursorPosition,
+                  x2: svgCursorPosition.x,
+                  y1: 10,
+                  y2: 10,
+                }}
+                exit={{}}
+                strokeDasharray={"5 5"}
+                transition={{ duration: 0.1 }}
+                stroke="black"
+              />
+            )}
+          </g>
+        )}
+
         {/* Min Cursor/Handle */}
         <motion.rect
           ref={minCursorRef}
           x={minCursorPosition}
           y={0}
           id="cursor"
+          className={`min ${mode === "double" && "color"}`}
+          fill={sliderColors.min}
           width={cursorWidth}
           height={cursorHeight}
           whileHover={{ scale: 0.9, transition: { duration: 0.2 }, cursor: "grab" }}
           whileTap={{
             scale: 1.1,
-            // fill: "var(--surface-accent)",
             transition: { duration: 0.2 },
             cursor: "grabbing",
           }}
@@ -212,10 +305,12 @@ export function FilterSlider({
             x={maxCursorPosition}
             y={0}
             id="cursor"
+            className={`max ${mode === "double" && "color"}`}
+            fill={sliderColors.max}
             width={cursorWidth}
             height={cursorHeight}
             whileHover={{ scale: 0.9, transition: { duration: 0.2 } }}
-            whileTap={{ scale: 1.1, fill: "--surface-accent", transition: { duration: 0.2 } }}
+            whileTap={{ scale: 1.1, transition: { duration: 0.2 } }}
             onMouseDown={handleMaxPointerDown}
             onTouchStart={handleMaxPointerDown}
           />
@@ -233,7 +328,7 @@ export function FilterSlider({
               y={-3}
               fill="white"
               textAnchor="middle"
-              fontSize="12"
+              fontSize="10"
             >
               {Math.floor(selectionMin)}
             </motion.text>
@@ -249,7 +344,7 @@ export function FilterSlider({
               y={-3}
               fill="white"
               textAnchor="middle"
-              fontSize="12"
+              fontSize="10"
             >
               {Math.floor(selectionMax)}
             </motion.text>

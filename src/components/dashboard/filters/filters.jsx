@@ -1,9 +1,10 @@
-import { flattenDeep, isNil, isEmpty } from "lodash"
+import { isNil, isEmpty } from "lodash"
 
 import { FilterWrapper } from "./UI/FilterWrapper"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
+import { min, max } from "d3"
 
 import "./Filters.css"
 
@@ -14,7 +15,13 @@ export const Filters = () => {
 
   if (isEmpty(filters)) return null
 
-  const allYears = flattenDeep(richData.map((d) => d.years))
+  // const allYears = flattenDeep(richData.map((d) => d.years))
+
+  const allMinYears = richData.map((t) => min(t.years))
+  const allMaxYears = richData.map((t) => max(t.years))
+
+  const allYears = { all: [...allMinYears, ...allMaxYears], min: allMinYears, max: allMaxYears }
+
   const allDurations = richData
     .map((d) => d.diseaseDuration)
     .filter((duration) => !isNil(duration))
@@ -30,10 +37,12 @@ export const Filters = () => {
             sliderDimensions={sliderDimensions}
             filter={filters.date}
             allPoints={allYears}
-            hasPattern={true}
+            hasPattern={false}
             hasDoubleHandle={true}
+            mode="double"
           />
         )}
+
         {filters.diseaseDuration.active && (
           <FilterWrapper
             name={"diseaseDuration"}

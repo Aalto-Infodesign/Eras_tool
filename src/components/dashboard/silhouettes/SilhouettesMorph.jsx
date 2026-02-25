@@ -23,9 +23,9 @@ import { downloadIDs } from "../../../utils/exportFunctions"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
-import { useSilhouettesPoset } from "./hooks/usePosetLayout"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
+import { usePosetWorker } from "./hooks/usePosetWorker"
 
 // ! TODO Refactor completo
 
@@ -40,7 +40,9 @@ export const SilhouettesMorph = () => {
   const statesNames = statesData.statesNames
   const statesNamesLoaded = isNil(statesOrder) ? statesNames.sort() : statesOrder
 
-  const basePosetData = useSilhouettesPoset(statesNamesLoaded, completeSilhouettes)
+  const posetData = usePosetWorker().result
+
+  // posetData && console.log(posetData)
 
   const isCmdPressed = useModifierKey("Meta")
 
@@ -191,8 +193,9 @@ export const SilhouettesMorph = () => {
               whileHover={{ scale: 0.95 }}
               onClick={() => setIsHasse(true)}
               data-selected={isHasse === true}
+              disabled={!posetData}
             >
-              Hasse
+              {!posetData ? "Loading..." : "Hasse"}
             </motion.button>
           </div>
           {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}
@@ -250,14 +253,18 @@ export const SilhouettesMorph = () => {
               exit="hidden"
               style={{ overflowX: "scroll" }}
             >
-              <HasseDiagram
-                isHasse={isHasse}
-                selectedSilhouettes={selectedSilhouettesNames}
-                toggleSilhouetteFilter={toggleSilhouetteFilter}
-                x={x}
-                y={y}
-                basePosetData={basePosetData}
-              />
+              {posetData ? (
+                <HasseDiagram
+                  posetData={posetData}
+                  selectedSilhouettes={selectedSilhouettesNames}
+                  toggleSilhouetteFilter={toggleSilhouetteFilter}
+                  x={x}
+                  y={y}
+                  statesNamesLoaded={statesNamesLoaded}
+                />
+              ) : (
+                <p>Loading...</p>
+              )}
             </motion.section>
           ) : (
             <motion.div

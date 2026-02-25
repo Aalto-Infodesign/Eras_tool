@@ -22,6 +22,7 @@ import { useModifierKey } from "../../hooks/useModifierKey"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 import { useFilters } from "../../../contexts/FiltersContext"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 export function TrajectoriesChart() {
   // console.time("Trajectories")
@@ -29,14 +30,14 @@ export function TrajectoriesChart() {
   const { silhouettes } = useData()
   const { palette } = useViz()
   const { selectedTrajectoriesIDs } = useFilters()
+  const { completeLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
 
   const {
     h,
-    completeLinks,
+
     filteredLinks,
-    filteredSilhouettes,
     statesNamesLoaded,
     hoveredTrajectoriesIDs,
     selectedIndex,
@@ -210,7 +211,6 @@ export function TrajectoriesChart() {
               //Extended Context
               isSelectModeLines={isSelectModeLines}
               //Local State
-              filteredSilhouettes={filteredSilhouettes}
               hoveredLump={hoveredLump}
               setHoveredLump={setHoveredLump}
               svgRef={svgRef}

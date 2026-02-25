@@ -1,3 +1,5 @@
+import { useMemo } from "react"
+import { scaleLinear } from "d3"
 import { FilterDistribution } from "./FilterDistribution"
 import { FilterSlider } from "./FilterSlider"
 import { useFilters } from "../../../../contexts/FiltersContext"
@@ -10,6 +12,7 @@ export const FilterWrapper = ({
   allPoints,
   hasPattern,
   hasDoubleHandle = false,
+  mode = "single",
 }) => {
   const { updateSelection } = useFilters()
 
@@ -21,6 +24,11 @@ export const FilterWrapper = ({
   const min = filter?.extent?.[0] || 0
   const max = filter?.extent?.[1] || 100
 
+  const xScale = useMemo(
+    () => scaleLinear(filter.extent, [0, sliderDimensions.x]),
+    [filter, sliderDimensions],
+  )
+
   return (
     <div
       id={`filter-${name}`}
@@ -28,16 +36,14 @@ export const FilterWrapper = ({
       data-state={`${filter.active ? "active" : "inactive"}`}
     >
       <p>{title}</p>
-
       <FilterDistribution
         data={allPoints}
-        width={sliderDimensions.x}
         height={50}
-        extentX={filter.extent}
+        xScale={xScale}
         range={filter.selection}
         maskID={`mask-${name}`}
+        mode={mode}
       />
-
       <FilterSlider
         min={min}
         max={max}
@@ -46,6 +52,8 @@ export const FilterWrapper = ({
         width={sliderDimensions.x}
         hasPattern={hasPattern}
         hasRange={hasDoubleHandle}
+        mode={mode}
+        xScale={xScale}
       />
     </div>
   )

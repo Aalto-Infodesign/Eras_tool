@@ -7,6 +7,7 @@ import { createContext, useContext, useMemo } from "react"
 import { useData } from "./ProcessedDataContext"
 import { useFilters } from "./FiltersContext"
 import { isEmpty, includes, union } from "lodash"
+import { min, max } from "d3"
 
 import {
   trajectoriesFromData,
@@ -23,19 +24,23 @@ export function DerivedDataProvider({ children }) {
 
   const isReady = silhouettes?.length > 0 && richData?.length > 0 && !isEmpty(filters)
 
-  console.log(isEmpty(filters))
-  console.log(isReady)
-
+  console.time("Derived Data")
   const filteredData = useMemo(() => {
     if (!isReady) return []
 
-    return richData.filter(
-      (datum) =>
-        datum.diseaseDuration === null ||
-        (datum.diseaseDuration >= filters.diseaseDuration.selection[0] &&
-          datum.diseaseDuration <= filters.diseaseDuration.selection[1]),
-    )
-    // .filter((datum) => datum.date <= filters.date.selection[1])
+    return richData
+      .filter(
+        (datum) =>
+          datum.diseaseDuration === null ||
+          (datum.diseaseDuration >= filters.diseaseDuration.selection[0] &&
+            datum.diseaseDuration <= filters.diseaseDuration.selection[1]),
+      )
+      .filter(
+        (datum) =>
+          datum.years.length === 0 ||
+          (min(datum.years) >= filters.date.selection[0] &&
+            max(datum.years) <= filters.date.selection[1]),
+      )
   }, [richData, filters])
 
   console.log("fd", filteredData)
@@ -44,6 +49,13 @@ export function DerivedDataProvider({ children }) {
     if (filteredData.length === 0) return []
     return trajectoriesFromData(filteredData)
   }, [filteredData])
+
+  const completeLinks = useMemo(() => {
+    return filteredTrajectories.flat().map((s) => ({
+      ...s,
+      lump: s.source.state + "-" + s.target.state,
+    }))
+  }, [filteredTrajectories])
 
   const filteredSilhouettes = useMemo(() => {
     if (filteredTrajectories.length === 0) return []
@@ -71,10 +83,9 @@ export function DerivedDataProvider({ children }) {
     })
   }, [silhouettes, silhouettesMap])
 
-  const selectedSilhouettesData = useMemo(
-    () => completeSilhouettes.filter((s) => includes(selectedSilhouettesNames, s.name)),
-    [completeSilhouettes, selectedSilhouettesNames],
-  )
+  const selectedSilhouettesData = useMemo(() => {
+    return completeSilhouettes.filter((s) => includes(selectedSilhouettesNames, s.name))
+  }, [completeSilhouettes, selectedSilhouettesNames])
 
   const selectedIDs = useMemo(() => {
     const IDsFromSilhouettes = selectedSilhouettesData
@@ -103,10 +114,12 @@ export function DerivedDataProvider({ children }) {
     return [...IDsFromSilhouettes]
   }, [selectedSilhouettesData, selectedTrajectoriesIDs, chartType])
 
+  console.time("Derived End")
+
   const value = useMemo(
     () => ({
       filteredData,
-      filteredTrajectories,
+      completeLinks,
       filteredSilhouettes,
       completeSilhouettes,
       selectedSilhouettesData,
@@ -114,7 +127,7 @@ export function DerivedDataProvider({ children }) {
     }),
     [
       filteredData,
-      filteredTrajectories,
+      completeLinks,
       filteredSilhouettes,
       completeSilhouettes,
       selectedSilhouettesData,

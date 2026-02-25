@@ -11,7 +11,7 @@ export function StateTypeDistribution(props) {
   const { palette } = useViz()
   const trajectoriesContext = useContext(TrajectoriesContext)
   const { selectedSilhouettesNames } = useFilters()
-  const { h, filteredLinks, marginTop, chartScales } = trajectoriesContext
+  const { h, marginTop, chartScales } = trajectoriesContext
 
   const { y } = chartScales
 
@@ -335,14 +335,7 @@ export function StateTypeDistribution(props) {
           exit.remove()
         },
       )
-  }, [
-    filteredLinks,
-    y,
-    selectedSilhouettesNames,
-    palette,
-    unitedObjectsOriginal,
-    mergedObjectsByState,
-  ])
+  }, [y, selectedSilhouettesNames, palette, unitedObjectsOriginal, mergedObjectsByState])
   return <g id="statesDistribution"></g>
 }
 

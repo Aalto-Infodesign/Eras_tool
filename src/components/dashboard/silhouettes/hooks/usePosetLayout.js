@@ -8,43 +8,25 @@ import { scalePoint, scaleLinear } from "d3"
 import { useData } from "../../../../contexts/ProcessedDataContext"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
-export const useSilhouettesPoset = (statesNamesLoaded) => {
-  const { silhouettes } = useData()
+export const useSilhouettesPoset = (posetData, statesNamesLoaded) => {
+  // const { silhouettes } = useData()
   const { completeSilhouettes } = useDerivedData()
 
-  // Step 1: Heavy computation — only re-runs if silhouettes change
-  const basePosetData = useMemo(() => {
-    if (!silhouettes || silhouettes.length === 0) {
-      return null
-    }
+  console.log("PO STRUCT", posetData)
 
-    const silhouetteNames = silhouettes.map((s) => s.name)
-    const dominancePairs = getDominancePairsSelf(silhouetteNames)
+  const poset = useMemo(() => {
+    if (!posetData || !statesNamesLoaded) return null
 
-    console.time("Poset Init")
-    const { matrix, nodes } = po.domFromEdges(dominancePairs)
-    const poset = po.createPoset(matrix, nodes)
-    poset.setLayers()
-    poset.setDepth()
-    poset
-      .enrich()
-      .feature("parents", (name) => poset.getCovered(name).map((parent) => poset.features[parent]))
-      .feature("children", (name) => poset.getCovering(name).map((child) => poset.features[child]))
-      .feature("i", (name) => poset.elements.indexOf(name))
-      .feature("statesArray", (name) => name.split("-"))
-    console.timeEnd("Poset Init")
+    const newPoset = po.createPoset(posetData.posetStructure)
 
-    const covers = poset.getCoverRelations()
-    const leaves = poset.layers[poset.layers.length - 1] || []
-
-    return { poset, covers, leaves, silhouetteNames }
-  }, [silhouettes]) // ← no statesNamesLoaded here
+    return newPoset
+  }, [posetData])
 
   // Step 2: Cheap ordering layer — re-runs when statesNamesLoaded changes
   const orderedData = useMemo(() => {
-    if (!basePosetData || !statesNamesLoaded) return basePosetData
+    if (!poset || !statesNamesLoaded) return null
 
-    const { poset, leaves } = basePosetData
+    const { leaves } = posetData
 
     // Add/overwrite the orderedName feature now that we have statesNamesLoaded
     poset.feature("orderedName", (name) => {
@@ -61,16 +43,16 @@ export const useSilhouettesPoset = (statesNamesLoaded) => {
       }),
     )
 
-    return { ...basePosetData, orderedLeaves }
-  }, [basePosetData, statesNamesLoaded])
+    return { ...posetData, poset: poset, orderedLeaves }
+  }, [posetData, statesNamesLoaded])
 
-  // Change opacity based of FilteredSilhouettes
   const filteredData = useMemo(() => {
-    if (!orderedData || !completeSilhouettes) return orderedData
+    if (!orderedData || !completeSilhouettes) return null
 
-    const { poset } = basePosetData
-    const filteredSilhouettesNames = completeSilhouettes.map((s) => s.isFiltered && s.name)
-
+    const { poset } = orderedData
+    const filteredSilhouettesNames = completeSilhouettes
+      .filter((s) => s.isFiltered)
+      .map((s) => s.name)
     console.log(filteredSilhouettesNames)
     // Add/overwrite the orderedName feature now that we have statesNamesLoaded
     poset.feature("included", (name) => {
@@ -79,14 +61,14 @@ export const useSilhouettesPoset = (statesNamesLoaded) => {
     })
 
     return orderedData
-  }, [completeSilhouettes])
+  }, [orderedData, completeSilhouettes])
 
   return filteredData ?? { poset: null, covers: [], leaves: [], orderedLeaves: [] }
 }
 
 // Step 2: Memoize the layout calculations
 export const usePosetLayout = (
-  basePosetData,
+  posetData,
   width,
   height,
   rectWidth,
@@ -100,16 +82,17 @@ export const usePosetLayout = (
   const paddingX = 80
 
   const layoutData = useMemo(() => {
-    const { poset, covers, leaves, orderedLeaves, silhouetteNames } = basePosetData
+    const { poset, covers, leaves, orderedLeaves, silhouetteNames } = posetData
     if (!poset) {
       return { poset: null, covers: [] }
     }
 
+    console.log("POSET", poset)
+
     const layersByLength = Object.entries(
       groupBy(flattenDeep(poset.layers), (l) => l.split("-").length),
     )
-
-    console.log(poset)
+    console.log(layersByLength)
 
     const namesForScale = isHasse ? orderedLeaves : silhouetteNames
     const xRange = isHasse
@@ -188,7 +171,7 @@ export const usePosetLayout = (
     console.timeEnd("Poset Layout")
 
     return { poset, covers, yScale, layersByLength }
-  }, [basePosetData, width, height, rectWidth, padding, hoveredNode, isHasse])
+  }, [posetData, width, height, rectWidth, padding, hoveredNode, isHasse])
 
   return layoutData
 }

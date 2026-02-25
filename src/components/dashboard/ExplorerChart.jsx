@@ -40,13 +40,11 @@ export function TrajectoriesExplorerChart(props) {
     toggleSilhouetteFilter,
   } = useFilters()
 
-  const { filteredTrajectories } = useDerivedData()
+  const { completeLinks, selectedSilhouettesData } = useDerivedData()
 
   const { w, h, marginTop } = props
   const { ageRange } = analytics
   const { statesNames } = statesData
-
-  const links = filteredTrajectories.flat()
 
   const { reduceMotion } = props
 
@@ -99,28 +97,16 @@ export function TrajectoriesExplorerChart(props) {
   const xScale = scaleLinear([0, max(silhouettes.map((d) => d.states.length - 1))], [10, 100 - 10])
 
   // FILTERING SILHOUETTES and TRAJECTORIES
-  // TODO FiltersContext
-
-  // 1. MEMOIZZA I LINK COMPLETI (Evita ricreazione continua)
-  const completeLinks = useMemo(() => {
-    return links.map((s) => ({
-      ...s,
-      lump: s.source.state + "-" + s.target.state,
-    }))
-  }, [links])
 
   // 2. OTTIMIZZA IL SET DI INDIVIDUI (Usa Set per ricerca O(1))
-  const { filteredSilhouettes, selectedIndividualsSet } = useMemo(() => {
-    const filtered =
-      selectedSilhouettesNames.length === 0
-        ? silhouettes
-        : silhouettes.filter((d) => selectedSilhouettesNames.includes(d.name))
-
+  const selectedIndividualsSet = useMemo(() => {
+    console.log(selectedSilhouettesData)
+    const s = selectedSilhouettesData.length === 0 ? silhouettes : selectedSilhouettesData
     // Creiamo un Set: includes() su un Set è istantaneo, su un Array è O(n)
-    const individuals = new Set(flattenDeep(filtered.map((s) => s.trajectories)).map((t) => t.id))
+    const individuals = new Set(flattenDeep(s.map((s) => s.trajectories)).map((t) => t.id))
 
-    return { filteredSilhouettes: filtered, selectedIndividualsSet: individuals }
-  }, [silhouettes, selectedSilhouettesNames])
+    return individuals
+  }, [selectedSilhouettesData, selectedSilhouettesNames])
 
   // 3. FILTRAGGIO EFFICIENTE
   const filteredLinks = useMemo(() => {
@@ -132,17 +118,9 @@ export function TrajectoriesExplorerChart(props) {
       if (!selectedIndividualsSet.has(l.id)) return false
       if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
 
-      // if (!isNil(l.diseaseDuration)) {
-      //   return (
-      //     l.diseaseDuration >= filters.diseaseDuration.selection[0] &&
-      //     l.diseaseDuration < filters.diseaseDuration.selection[1]
-      //   )
-      // }
       return true
     })
   }, [completeLinks, selectedIndividualsSet, selectedLumps, filters])
-
-  console.log(completeLinks)
 
   // 4. MAPPA PER RICERCA SILHOUETTE (Evita loop annidati)
   const idToSilhouetteMap = useMemo(() => {
@@ -184,9 +162,7 @@ export function TrajectoriesExplorerChart(props) {
       marginTop,
 
       //DATA
-      completeLinks,
       filteredLinks,
-      filteredSilhouettes,
 
       statesNamesLoaded,
       chartScales,
@@ -206,11 +182,7 @@ export function TrajectoriesExplorerChart(props) {
       w,
       h,
       filteredLinks,
-      completeLinks,
-      filteredSilhouettes,
 
-      // dateRange,
-      // durationRange,
       statesNamesLoaded,
       selectedLumps,
       toggleSelectedLumps,
@@ -425,51 +397,6 @@ export function TrajectoriesExplorerChart(props) {
                       )
                     }}
                   />
-                  {/* {selectedIDssWithSilhouette.map((id, i) => {
-                    const isSelected = includes(selectedSilhouettes, id.silhouette)
-                    return (
-                      <motion.div
-                        layout
-                        key={id.id}
-                        variants={childrenVariants}
-                        initial={"hidden"}
-                        animate={"visible"}
-                        exit={"hidden"}
-                        className="chip"
-                        onHoverStart={() => setChipHoveredId(id.id)}
-                        onHoverEnd={() => setChipHoveredId(null)}
-                      >
-                        
-                        <motion.div
-                          layout
-             
-                        >
-                          <SilhouetteToggleButton
-                            silhouetteName={id.silhouette}
-                            isSelected={isSelected}
-                            toggleSilhouetteFilter={toggleSilhouetteFilter}
-                            palette={palette}
-                            x={xScale}
-                            y={yScale}
-                          />
-                        </motion.div>
-            
-                        <motion.p layout>
-                          <span>{id.id}</span>
-                        </motion.p>
-                        <motion.button
-                          className="close-btn"
-                          variants={closeBtnVariants}
-                          initial={"hidden"}
-                          animate={chipHoveredId === id.id ? "visible" : "hidden"}
-                          layout
-                          onClick={() => toggleSelectedTrajectory(id.id)}
-                        >
-                          ×
-                        </motion.button>
-                      </motion.div>
-                    )
-                  })} */}
                 </AnimatePresence>
               </div>
             </motion.div>
