@@ -373,15 +373,15 @@ button {
     border 0.2s ease-in-out;
 }
 
-button[data-selected="true"] {
+/* button[data-selected="true"] {
   color: var(--text-dark);
   background-color: var(--surface-light);
-}
+} */
 
-button.center {
+/* button.center {
   display: flex;
   align-items: center;
-}
+} */
 
 /* .chip button {
   background-color: rgba(255, 255, 255, 0);
@@ -412,7 +412,7 @@ button.inactive {
   cursor: auto;
 }
 
-button.active:hover,
+/* button.active:hover,
 .controls button.selected,
 .controls button:hover,
 .chip button:hover,
@@ -420,7 +420,7 @@ button.active:hover,
 .typology button:hover {
   background-color: var(--surface-light);
   color: var(--text-dark);
-}
+} */
 
 .stateLabel-control-up,
 .stateLabel-control-down {

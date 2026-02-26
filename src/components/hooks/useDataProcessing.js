@@ -326,10 +326,9 @@ export const silhouettesFromTrajectories = (trajectories, idealSilhouettes, rich
         trajectories: t[1],
         states: t[1][0].states,
         // minMaxState: getPolygonCoordinates(t[1]),
-        levenshteinDistance:
-          idealSilhouettes.length > 0
-            ? max(idealSilhouettes.map((s) => similarity(s.split("-"), t[0].split("-"))))
-            : 0,
+        levenshteinDistance: idealSilhouettes
+          ? max(idealSilhouettes.map((s) => similarity(s.split("-"), t[0].split("-"))))
+          : 0,
         size: t[1].length,
         percentage: (t[1].length / richData.length) * 100,
         trajectory: t[1][0].states.map((e, n) => ({

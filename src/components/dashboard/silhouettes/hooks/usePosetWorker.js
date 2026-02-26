@@ -13,8 +13,6 @@ export function usePosetWorker() {
     startLoading()
     const worker = new Worker(new URL("./workers/poset.worker.js", import.meta.url))
 
-    // 💡 Sanitization: Ensure only "Data" is sent
-    // If silhouettes are complex objects, map them to plain ones here
     const cleanData = JSON.parse(JSON.stringify(silhouettes))
 
     worker.postMessage({ silhouettes: cleanData })
@@ -36,8 +34,3 @@ export function usePosetWorker() {
 
   return { result }
 }
-
-// function buildPosetFromValues({}) {
-//   const poset = {}
-//   return poset
-// }

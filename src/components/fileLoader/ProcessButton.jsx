@@ -1,9 +1,11 @@
 import { useRef, useEffect } from "react"
 import { motion } from "motion/react"
+import Button from "../common/Button/Button"
+import { useViz } from "../../contexts/VizContext"
 
-export function ProcessButton({ setIsLegend, setIsOpen, onClickEvent }) {
+export function ProcessButton({ setIsOpen }) {
+  const { setIsLegend } = useViz()
   const createVisualization = () => {
-    onClickEvent()
     setIsLegend(true)
     setIsOpen(false)
   }
@@ -21,7 +23,8 @@ export function ProcessButton({ setIsLegend, setIsOpen, onClickEvent }) {
   }
 
   return (
-    <motion.button
+    <Button
+      size="small"
       ref={buttonRef}
       variants={buttonVariants}
       initial={"disabled"}
@@ -36,6 +39,6 @@ export function ProcessButton({ setIsLegend, setIsOpen, onClickEvent }) {
       whileTap={{ scale: 0.9, transition: { duration: 0.2 } }}
     >
       Create Visualization
-    </motion.button>
+    </Button>
   )
 }

@@ -7,13 +7,13 @@ const FiltersContext = createContext(null)
 // TODO Add toggles
 
 export function FiltersProvider({ children }) {
-  const { filtersBlueprint, idealSilhouettes } = useData()
+  const { filtersBlueprint, existingIdealSilhouettes } = useData()
   // Sliders
   const [filters, setFilters] = useState(filtersBlueprint)
   const [isDragging, setIsDragging] = useState(false)
 
   // Selection Data
-  const [selectedSilhouettesNames, setSelectedSilhouettesNames] = useState(idealSilhouettes) // Main filter
+  const [selectedSilhouettesNames, setSelectedSilhouettesNames] = useState(null) // Main filter
   const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
 
   // Sync internal state when the source data changes
@@ -22,6 +22,12 @@ export function FiltersProvider({ children }) {
       setFilters(filtersBlueprint)
     }
   }, [filtersBlueprint])
+  useEffect(() => {
+    if (existingIdealSilhouettes) {
+      const names = existingIdealSilhouettes.map((s) => s.name)
+      setSelectedSilhouettesNames(names)
+    }
+  }, [existingIdealSilhouettes])
 
   const resetFilter = (key) => {
     setFilters((prev) => {

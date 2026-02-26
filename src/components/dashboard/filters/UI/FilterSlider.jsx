@@ -1,8 +1,9 @@
-import { useRef, useCallback, useState, useEffect, useMemo } from "react"
+import { useRef, useCallback, useEffect, useMemo } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { TextureDefs } from "../../../common/Textures/TextureDefs"
 import { useFilters } from "../../../../contexts/FiltersContext"
-import { useMouseMove, useMouseMoveSvg } from "../../../hooks/useMouseMove"
+import { useMouseMoveSvg } from "../../../hooks/useMouseMove"
+import { MotionText } from "../../../common/SVG/MotionText"
 
 export function FilterSlider({
   min = 0,
@@ -17,15 +18,21 @@ export function FilterSlider({
   hasRange = false,
   mode = "single",
   xScale,
+  setLineX,
+  hoveredSvg,
+  setHoveredSvg,
 }) {
   const { isDragging, setIsDragging } = useFilters()
   const sliderRef = useRef(null)
   const minCursorRef = useRef(null)
   const maxCursorRef = useRef(null)
 
-  const [hoveredSvg, setHoveredSvg] = useState(false)
   const svgCursorPosition = useMouseMoveSvg(sliderRef)
   const [selectionMin, selectionMax] = value
+
+  useEffect(() => {
+    setLineX(svgCursorPosition.x)
+  }, [svgCursorPosition])
 
   const middleCursorValue = useMemo(
     () => Math.floor(xScale.invert(svgCursorPosition.x)),
@@ -218,9 +225,10 @@ export function FilterSlider({
               transition={{ duration: 0.1 }}
             >
               <line x1={0} x2={0} y1={0} y2={20} stroke={"black"} strokeWidth={1} />
-              <text y={-3} fill="white" textAnchor="middle" fontSize="10">
+
+              <MotionText key={"middle-slider"} y={-3}>
                 {middleCursorValue}
-              </text>
+              </MotionText>
             </motion.g>
 
             {closerCursor === "min" ? (
@@ -306,36 +314,24 @@ export function FilterSlider({
         {/* Value display */}
         <AnimatePresence>
           {selectionMin > min && (
-            <motion.text
+            <MotionText
               key={"min-text"}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               className="slider-value"
               x={minCursorPosition + cursorWidth / 2}
               y={-3}
-              fill="white"
-              textAnchor="middle"
-              fontSize="10"
             >
               {Math.floor(selectionMin)}
-            </motion.text>
+            </MotionText>
           )}
           {selectionMax < max && (
-            <motion.text
+            <MotionText
               key={"max-text"}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               className="slider-value"
               x={maxCursorPosition + cursorWidth / 2}
               y={-3}
-              fill="white"
-              textAnchor="middle"
-              fontSize="10"
             >
               {Math.floor(selectionMax)}
-            </motion.text>
+            </MotionText>
           )}
         </AnimatePresence>
       </svg>

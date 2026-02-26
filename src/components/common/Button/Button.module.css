@@ -4,10 +4,12 @@
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out,
     border-color 0.2s ease-in-out;
   font-family: inherit; /* Eredita il font dal body */
   -webkit-font-smoothing: antialiased;
@@ -19,12 +21,22 @@
   color: white;
 }
 .primary:hover:not(:disabled) {
+  color: white;
   background-color: var(--surface-secondary);
 }
 
+.primary[data-selected="true"] {
+  color: var(--text-dark);
+  background-color: var(--surface-light);
+}
+.primary[data-selected="true"]:hover {
+  color: var(--text-dark);
+  background-color: var(--surface-accent);
+}
+
 .secondary {
-  background-color: var(--surface-tertiary);
-  color: white;
+  background-color: var(--surface-primary);
+  color: var(--surface-light);
 }
 .secondary:hover:not(:disabled) {
   background-color: var(--surface-tertiary);
@@ -40,13 +52,17 @@
 }
 
 /* Dimensioni */
+.xs {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+}
 .small {
-  font-size: 12px;
+  font-size: 0.75rem;
   padding: 4px 10px;
 }
 
 .medium {
-  font-size: 14px;
+  font-size: 1rem;
   padding: 10px 20px;
 }
 

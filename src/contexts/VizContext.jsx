@@ -21,7 +21,7 @@ export function VizProvider({ children }) {
   const [isLegend, setIsLegend] = useState(false)
   const [loadingCount, setLoadingCount] = useState(0)
   const [hasFlowChart, setHasFlowChart] = useState(true)
-  const [chartType, setChartType] = useState(2) // 1: trajectories, 2: partial order
+  const [chartType, setChartType] = useState(1)
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
 
   useModifierKey("1", () => setChartType(1))

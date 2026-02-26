@@ -18,33 +18,13 @@ import { useViz } from "../../contexts/VizContext"
 import { ChevronDown, Maximize2 } from "lucide-react"
 
 export function FileLoader({}) {
-  const {
-    richData,
-    silhouettes,
-    idealSilhouettes,
-    setIdealSilhouettes,
-    clusterStates,
-    setClusterStates,
-  } = useData()
+  const { richData, existingIdealSilhouettes, clusterStates, setClusterStates } = useData()
   const { setIsLegend, statesOrder, isLegend, hasFlowChart } = useViz()
 
   const [isOpen, setIsOpen] = useState(true)
 
   const [sankeyData, setSankeyData] = useState({ nodes: [], links: [] })
 
-  // TODO Refresh ONLY if FILE CHANGES, not STATES
-  // Reset isLegend when new data is loaded
-  // useEffect(() => {
-  //   if (richData.length > 0) {
-  //     // Reset isLegend when new data is loaded
-  //     if (isLegend) {
-  //       setIsLegend(false)
-  //       setIsOpen(true) // Ensure the accordion is open when returning to data loading state
-  //     }
-  //   }
-  // }, [richData])
-
-  // Ensure accordion is open when transitioning back from legend mode
   useEffect(() => {
     if (!isLegend) {
       setIsOpen(true)
@@ -53,24 +33,10 @@ export function FileLoader({}) {
 
   //TODO When sankey data changes, update useViz state and recreate palette using poset
 
-  const handleClick = () => {
-    // dataProcessing(data, statesOrder, scales, newDataset, newVizParameters, idealSilhouettes)
-
-    setIdealSilhouettes(idealSilhouettes)
-  }
-
   const legendClass = isLegend ? "corner" : "center"
   const openClass = isOpen ? "open" : "closed"
 
   const filterSection = document.querySelector("section.filter")
-
-  // const [idealSilhouettes, setIdealSilhouettes] = useState(null)
-
-  const idealSilhouettesData = useMemo(
-    () =>
-      silhouettes.length > 0 ? silhouettes.filter((s) => idealSilhouettes.includes(s.name)) : [],
-    [silhouettes, idealSilhouettes],
-  )
 
   return (
     <section
@@ -80,7 +46,6 @@ export function FileLoader({}) {
         padding: !richData.length ? "1rem" : "",
         width: filterSection ? filterSection.offsetWidth : "",
       }}
-      // style={{width:isLegend && }}
     >
       <div className="accordion-header">
         <LoadDataset />
@@ -97,16 +62,7 @@ export function FileLoader({}) {
             </label>
           </div>
         )}
-        {/* <span className="material-icons" onClick={() => setIsOpen(!isOpen)}>
-            <svg width={10} height={10} viewBox="-2 -2 4 4">
-              <path
-                d="M-2,-1 L2,-1 L0,2 Z"
-                className={`material-icons small animated`}
-                style={{ transform: `${isOpen ? "rotate(180deg)" : "rotate(0deg)"}` }}
-                fill="white"
-              />
-            </svg>
-          </span> */}
+
         {isLegend && (
           <>
             <ChevronDown
@@ -139,10 +95,10 @@ export function FileLoader({}) {
                     {sankeyData.links.length > 0 && hasFlowChart && (
                       <Sankey data={sankeyData} width={300} height={100} />
                     )}
-                    {idealSilhouettesData.length > 0 && (
+                    {existingIdealSilhouettes.length > 0 && (
                       <div>
                         <h4>Silhouettes found in dataset</h4>
-                        {idealSilhouettesData.map((s) => (
+                        {existingIdealSilhouettes.map((s) => (
                           <p key={s.name} className="ideal-silhouette-info">
                             <strong>{s.name}</strong>
                             <span> : {s.size}</span>
@@ -150,7 +106,7 @@ export function FileLoader({}) {
                         ))}
                       </div>
                     )}
-                    {idealSilhouettesData.length === 0 && hasFlowChart && (
+                    {existingIdealSilhouettes.length === 0 && hasFlowChart && (
                       <h4>No silhouettes found in dataset</h4>
                     )}
                   </motion.div>
@@ -163,7 +119,7 @@ export function FileLoader({}) {
       )}
 
       {statesOrder.length > 0 && richData.length > 0 && !isLegend && (
-        <ProcessButton setIsLegend={setIsLegend} setIsOpen={setIsOpen} onClickEvent={handleClick} />
+        <ProcessButton setIsOpen={setIsOpen} />
       )}
     </section>
   )

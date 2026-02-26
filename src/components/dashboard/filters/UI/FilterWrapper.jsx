@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { scaleLinear } from "d3"
 import { FilterDistribution } from "./FilterDistribution"
 import { FilterSlider } from "./FilterSlider"
@@ -17,6 +17,8 @@ export const FilterWrapper = ({
   mode = "single",
 }) => {
   const { updateSelection, resetFilter } = useFilters()
+  const [lineX, setLineX] = useState(0)
+  const [hoveredSvg, setHoveredSvg] = useState(false)
 
   const handleRangeChange = (value) => {
     console.log(name)
@@ -54,6 +56,8 @@ export const FilterWrapper = ({
         range={filter.selection}
         maskID={`mask-${name}`}
         mode={mode}
+        lineX={lineX}
+        hoveredSvg={hoveredSvg}
       />
       <FilterSlider
         min={min}
@@ -65,6 +69,9 @@ export const FilterWrapper = ({
         hasRange={hasDoubleHandle}
         mode={mode}
         xScale={xScale}
+        setLineX={setLineX}
+        hoveredSvg={hoveredSvg}
+        setHoveredSvg={setHoveredSvg}
       />
     </div>
   )

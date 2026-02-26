@@ -24,6 +24,7 @@ import { useViz } from "../../../contexts/VizContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
 import { usePosetWorker } from "./hooks/usePosetWorker"
+import Button from "../../common/Button/Button"
 
 // ! TODO Refactor completo
 
@@ -39,8 +40,6 @@ export const SilhouettesMorph = () => {
   const statesNamesLoaded = isNil(statesOrder) ? statesNames.sort() : statesOrder
 
   const posetData = usePosetWorker().result
-
-  // posetData && console.log(posetData)
 
   const isCmdPressed = useModifierKey("Meta")
 
@@ -65,20 +64,24 @@ export const SilhouettesMorph = () => {
   const animationDuration = completeSilhouettes.length > 50 ? 0 : 0.2
 
   const orderedSilhouettes = useMemo(() => {
+    console.log("CS", completeSilhouettes)
     const sorted = [...completeSilhouettes].sort((a, b) => {
-      // Filtered items always float to the top
       if (a.isFiltered !== b.isFiltered) return a.isFiltered ? -1 : 1
-      const aData = a.isFiltered ? a.filtered : a
-      const bData = b.isFiltered ? b.filtered : b
+      const aData = a.filtered ?? a
+      const bData = b.filtered ?? b
 
       switch (orderMode) {
         case "size":
+          console.log("Size Sort")
           return bData.size - aData.size
         case "distance":
           return bData.levenshteinDistance - aData.levenshteinDistance
+        default:
+          return 0
       }
     })
 
+    console.log("OS", sorted)
     return sorted
   }, [completeSilhouettes, orderMode])
 
@@ -91,7 +94,6 @@ export const SilhouettesMorph = () => {
   }
 
   const handleSilhouetteClick = (id) => {
-    // e.stopPropagation()
     console.log("Click")
     toggleSilhouetteFilter(id)
   }
@@ -103,20 +105,15 @@ export const SilhouettesMorph = () => {
   }
 
   const handleLongPress = (id) => {
-    // toggleSilhouetteFilter(id)
     setExpandSides(!expandSides)
     deriveSilhouettesFromId(id)
   }
 
   const handleOrderClick = (e, s) => {
     e.stopPropagation()
-    // console.log(statesOrder)
-    // console.log(s.name)
+
     const newOrder = uniq(s.name.split("-"))
     const leftOut = xor(statesOrder, newOrder)
-
-    // const filteredLeftOut = leftOut.filter((d) => !statesOrder.includes(d))
-    // console.log(filteredLeftOut)
 
     newOrder.push(...leftOut)
 
@@ -178,23 +175,24 @@ export const SilhouettesMorph = () => {
         <h3>Silhouettes filters</h3>
         <div className="header-section">
           <div className="chart-modes">
-            <motion.button
-              className="secondary"
+            <Button
+              size="xs"
               whileHover={{ scale: 0.95 }}
               onClick={() => setIsHasse(false)}
-              data-selected={isHasse === false}
+              data-selected={!isHasse}
             >
               Trajectories
-            </motion.button>
-            <motion.button
+            </Button>
+            <Button
+              size="xs"
               className="secondary"
               whileHover={{ scale: 0.95 }}
               onClick={() => setIsHasse(true)}
-              data-selected={isHasse === true}
+              data-selected={isHasse}
               disabled={!posetData}
             >
               {!posetData ? "Loading..." : "Hasse"}
-            </motion.button>
+            </Button>
           </div>
           {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}
           {idealSilhouettes.length > 0 && (

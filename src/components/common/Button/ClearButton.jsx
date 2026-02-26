@@ -1,11 +1,15 @@
+import Button from "./Button"
+
 export function ClearButton({ children, isActive, clearFunction }) {
   return (
-    <button
-      className={`${isActive ? "active" : "inactive"} secondary`}
+    <Button
+      size="xs"
+      disabled={!isActive}
+      variant={`secondary`}
       onClick={() => isActive && clearFunction([])}
       title="Clear all"
     >
       {children}
-    </button>
+    </Button>
   )
 }

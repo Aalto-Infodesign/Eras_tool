@@ -16,10 +16,12 @@ import { useFilters } from "../../../contexts/FiltersContext"
 import "./Lumps.css"
 
 import { scaleLinear, extent } from "d3"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 export const Lumps = (props) => {
   const { palette } = useViz()
   const { filters } = useFilters()
+  // const { filteredLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
@@ -548,6 +550,8 @@ const LumpPolygon = ({
       exit={{ points: originPolygonPoints }}
       transition={{ duration: animationDuration }}
       fill={fill}
+      strokeWidth={isSelected ? 0.5 : 0}
+      stroke={"white"}
       style={{ cursor: "pointer" }}
       onClick={() => toggleSelectedLumps(data)}
       onMouseEnter={() => setHoveredLump(data)}

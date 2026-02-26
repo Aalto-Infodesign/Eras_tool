@@ -33,7 +33,7 @@ const LoadDataset = () => {
       <div></div>
       <div>
         <label htmlFor="fileInput" className={`file-input-label ${isUploading ? "loading" : ""}`}>
-          <Upload size={12} />
+          <Upload size={14} />
           <span>{fileName ? `${fileName.slice(0, 20)}...` : "Upload"}</span>
           {fileExtention && <span className="filetype badge">{fileExtention.toUpperCase()}</span>}
         </label>

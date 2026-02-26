@@ -25,6 +25,7 @@ import { Virtuoso } from "react-virtuoso"
 
 import { X } from "lucide-react"
 import { useDerivedData } from "../../contexts/DerivedDataContext"
+import Button from "../common/Button/Button"
 
 export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
@@ -100,7 +101,6 @@ export function TrajectoriesExplorerChart(props) {
 
   // 2. OTTIMIZZA IL SET DI INDIVIDUI (Usa Set per ricerca O(1))
   const selectedIndividualsSet = useMemo(() => {
-    console.log(selectedSilhouettesData)
     const s = selectedSilhouettesData.length === 0 ? silhouettes : selectedSilhouettesData
     // Creiamo un Set: includes() su un Set è istantaneo, su un Array è O(n)
     const individuals = new Set(flattenDeep(s.map((s) => s.trajectories)).map((t) => t.id))
@@ -116,7 +116,7 @@ export function TrajectoriesExplorerChart(props) {
     return completeLinks.filter((l) => {
       // Ricerca O(1) invece di O(n)
       if (!selectedIndividualsSet.has(l.id)) return false
-      if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
+      // if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
 
       return true
     })
@@ -223,16 +223,12 @@ export function TrajectoriesExplorerChart(props) {
         {/* TODO! Toggle between chart types */}
         <motion.div layout className="function-row">
           <div className="chart-modes">
-            <motion.button
-              whileHover={{ scale: 0.95 }}
-              onClick={() => setChartType(1)}
-              data-selected={chartType === 1}
-            >
-              Linear
-            </motion.button>
-            <button onClick={() => setChartType(2)} data-selected={chartType === 2}>
+            <Button size="xs" onClick={() => setChartType(1)} data-selected={chartType === 1}>
               Parallel
-            </button>
+            </Button>
+            <Button size="xs" onClick={() => setChartType(2)} data-selected={chartType === 2}>
+              Linear
+            </Button>
           </div>
           <DownloadPanel />
         </motion.div>
@@ -247,9 +243,8 @@ export function TrajectoriesExplorerChart(props) {
               transition={{ duration: 0.3 }}
               className="trajectories-chart"
             >
-              {chartType === 1 && <TrajectoriesChart />}
-
-              {chartType === 2 && <PartialOrderChart />}
+              {chartType === 1 && <PartialOrderChart />}
+              {chartType === 2 && <TrajectoriesChart />}
             </motion.section>
           </TrajectoriesContext.Provider>
 

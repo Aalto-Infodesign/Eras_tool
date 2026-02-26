@@ -22,11 +22,15 @@ export function DerivedDataProvider({ children }) {
   const { filters, selectedSilhouettesNames, selectedTrajectoriesIDs } = useFilters()
   const { chartType } = useViz()
 
+  console.log("Silhouettes", silhouettes)
+
   const isReady = silhouettes?.length > 0 && richData?.length > 0 && !isEmpty(filters)
 
   console.time("Derived Data")
   const filteredData = useMemo(() => {
     if (!isReady) return []
+
+    if (!filters.date.isActive && !filters.diseaseDuration.isActive) return richData
 
     return richData
       .filter(
@@ -74,6 +78,8 @@ export function DerivedDataProvider({ children }) {
 
   const completeSilhouettes = useMemo(() => {
     if (!silhouettesMap) return []
+
+    console.log(silhouettesMap)
     return silhouettes.map((s) => {
       const filteredVersion = silhouettesMap.get(s.name) ?? null
       return {
@@ -85,10 +91,12 @@ export function DerivedDataProvider({ children }) {
   }, [silhouettes, silhouettesMap])
 
   const selectedSilhouettesData = useMemo(() => {
+    if (selectedSilhouettesNames && selectedSilhouettesNames.length === 0) return []
     return completeSilhouettes.filter((s) => includes(selectedSilhouettesNames, s.name))
   }, [completeSilhouettes, selectedSilhouettesNames])
 
   const selectedIDs = useMemo(() => {
+    if (!selectedSilhouettesData) return []
     const IDsFromSilhouettes = selectedSilhouettesData
       .flatMap((s) => (s.isFiltered ? s.filtered.trajectories : s.trajectories)) // Modern alternative to .map().flat()
       .map((t) => t[0]?.id) // Use optional chaining to prevent crashes

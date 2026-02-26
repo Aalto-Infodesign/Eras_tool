@@ -61,7 +61,7 @@ Button.propTypes = {
   /**
    * La dimensione del bottone.
    */
-  size: PropTypes.oneOf(["small", "medium", "large"]),
+  size: PropTypes.oneOf(["xs", "small", "medium", "large"]),
   /**
    * Se il bottone è disabilitato.
    */

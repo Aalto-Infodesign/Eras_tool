@@ -192,7 +192,7 @@ function SankeyNode({
           fontSize={SIZE / 2}
           textAnchor="middle"
           pointerEvents="none"
-          userSelect="none"
+          // userSelect="none"
         >
           {text}
         </text>
@@ -231,7 +231,7 @@ function SankeyNode({
           x: node.x0 + 6,
           y: node.y0 + 12,
           pointerEvents: "none",
-          userSelect: "none",
+          // userSelect: "none",
         }}
         animate={{
           fill: hoveredTrajectory ? "#FFFFFF" : "#000000",

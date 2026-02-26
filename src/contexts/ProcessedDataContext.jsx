@@ -87,12 +87,19 @@ export function ProcessedDataProvider({ children }) {
     idealSilhouettes,
   )
 
+  const existingIdealSilhouettes = useMemo(
+    () =>
+      silhouettes.length > 0 ? silhouettes.filter((s) => idealSilhouettes.includes(s.name)) : [],
+    [silhouettes, idealSilhouettes],
+  )
+
   const value = useMemo(
     () => ({
       // State
       richData,
       scales,
       idealSilhouettes,
+      existingIdealSilhouettes,
       removedStates,
       clusterStates,
       statesData,
@@ -108,6 +115,8 @@ export function ProcessedDataProvider({ children }) {
       richData,
       scales,
       idealSilhouettes,
+
+      existingIdealSilhouettes,
       removedStates,
       clusterStates,
       statesData,

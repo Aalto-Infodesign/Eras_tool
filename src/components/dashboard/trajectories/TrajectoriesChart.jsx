@@ -23,6 +23,7 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 import { useFilters } from "../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import Button from "../../common/Button/Button"
 
 export function TrajectoriesChart() {
   // console.time("Trajectories")
@@ -121,23 +122,25 @@ export function TrajectoriesChart() {
       <div className="controls">
         <div className={`lump-controls ${isSelectModeLines ? "Lines" : "Lumps"}`}>
           {filteredLinks.length < 500 && (
-            <button
-              className={` ${isSelectModeLines ? "" : "selected"}`}
+            <Button
+              data-selected={isSelectModeLines}
+              size="xs"
               onClick={() => setIsSelectModeLines(!isSelectModeLines)}
               title="Toggle from Lumps to lines"
             >
               {isSelectModeLines ? "Lumps" : "Lines"}
-            </button>
+            </Button>
           )}
 
           {!isSelectModeLines && selectedLumps.length > 0 && (
-            <button
-              className={` ${showLinesOfSelectedLumps ? "selected" : ""}`}
+            <Button
+              size="xs"
+              data-selected={showLinesOfSelectedLumps}
               onClick={() => setShowLinesOfSelectedLumps(!showLinesOfSelectedLumps)}
               title="When lumps are selected, show the lines"
             >
               {showLinesOfSelectedLumps ? "Hide" : "Show"}
-            </button>
+            </Button>
           )}
         </div>
 
@@ -152,22 +155,15 @@ export function TrajectoriesChart() {
         </AnimatePresence>
 
         <div className="controls">
-          {/* <div className="distribution-control">
-                    <button
-                      className={` ${showDistributions ? "selected" : ""}`}
-                      onClick={() => setShowDistributions(!showDistributions)}
-                    >
-                      {`${showDistributions ? "Hide" : "Show"} distributions`}
-                    </button>
-                  </div> */}
           <div className="density-control">
-            <button
-              className={` ${showStateDensity ? "selected" : ""}`}
+            <Button
+              size="xs"
+              data-selected={showStateDensity}
               onClick={() => setShowStateDensity(!showStateDensity)}
             >
               {`${showStateDensity ? "Hide" : "Show"} density`}
               {/* <span class="material-icons">ssid_chart</span> */}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -216,13 +212,14 @@ export function TrajectoriesChart() {
               svgRef={svgRef}
             />
 
-            <TrajectoriesMotion
-              //Extended Context
-              isSelectModeLines={isSelectModeLines}
-              //Local State
-              showLinesOfSelectedLumps={showLinesOfSelectedLumps}
-            />
-
+            {filteredLinks.length < 500 && (
+              <TrajectoriesMotion
+                //Extended Context
+                isSelectModeLines={isSelectModeLines}
+                //Local State
+                showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+              />
+            )}
             {showStateDensity && (
               <StateDensity
                 //Extended Context

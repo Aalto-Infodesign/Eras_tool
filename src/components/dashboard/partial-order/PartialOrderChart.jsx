@@ -127,15 +127,15 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
 
 export function PartialOrderChart() {
   const { idealSilhouettes } = useData()
-  const { filteredSilhouettes } = useDerivedData()
+  const { completeSilhouettes, selectedSilhouettesData } = useDerivedData()
   const { filteredLinks } = useContext(TrajectoriesContext)
 
-  console.log("Filtered Links in PO Chart:", filteredLinks)
-  console.log("Filtered Silhouettes in PO Chart:", filteredSilhouettes)
+  const silhouettesData =
+    selectedSilhouettesData.length === 0 ? completeSilhouettes : selectedSilhouettesData
 
   // Use the custom hook to get memoized, processed data
   console.time("useSankeyData")
-  const sankeyData = useSankeyData(filteredSilhouettes, filteredLinks, idealSilhouettes)
+  const sankeyData = useSankeyData(silhouettesData, filteredLinks, idealSilhouettes)
   console.log(sankeyData)
   console.timeEnd("useSankeyData")
 
@@ -144,7 +144,7 @@ export function PartialOrderChart() {
       {sankeyData && sankeyData.nodes.length > 0 ? (
         <Sankey width={1000} height={500} data={sankeyData} />
       ) : (
-        <div>Loading or no data available...</div>
+        <div>No data available...</div>
       )}
     </>
   )
