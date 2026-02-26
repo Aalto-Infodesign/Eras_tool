@@ -233,18 +233,21 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
         range: dateRange,
         extent: dateExtent,
         selection: dateExtent,
+        isActive: false,
       },
       diseaseDuration: {
         active: durationsActive,
         range: durationRange,
         extent: durationExtent,
         selection: durationExtent,
+        isActive: false,
       },
       age: {
         active: ageActive,
         range: ageRange,
         extent: ageExtent,
         selection: ageExtent,
+        isActive: false,
       },
     }
 

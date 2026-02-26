@@ -5,16 +5,17 @@ import { useState, useEffect, useCallback } from "react"
  * @param {string} targetKey The key to track (e.g., 'Meta', 'Control', 'Shift', 'Alt').
  * @returns {boolean} True if the key is currently pressed, false otherwise.
  */
-export const useModifierKey = (targetKey) => {
+export const useModifierKey = (targetKey, onPress) => {
   const [isKeyPressed, setIsKeyPressed] = useState(false)
 
   const handleKeyDown = useCallback(
     (event) => {
       if (event.key === targetKey) {
+        onPress?.()
         setIsKeyPressed(true)
       }
     },
-    [targetKey],
+    [targetKey, onPress],
   )
 
   const handleKeyUp = useCallback(

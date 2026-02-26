@@ -2,7 +2,7 @@ import { useRef, useCallback, useState, useEffect, useMemo } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { TextureDefs } from "../../../common/Textures/TextureDefs"
 import { useFilters } from "../../../../contexts/FiltersContext"
-import { useMouseMove } from "../../../hooks/useMouseMove"
+import { useMouseMove, useMouseMoveSvg } from "../../../hooks/useMouseMove"
 
 export function FilterSlider({
   min = 0,
@@ -23,37 +23,25 @@ export function FilterSlider({
   const minCursorRef = useRef(null)
   const maxCursorRef = useRef(null)
 
-  const mousePosition = useMouseMove()
   const [hoveredSvg, setHoveredSvg] = useState(false)
-  const [svgCursorPosition, setSvgCursorPosition] = useState({ x: 0, y: 0 })
+  const svgCursorPosition = useMouseMoveSvg(sliderRef)
   const [selectionMin, selectionMax] = value
-
-  // TODO useSvgCursorPosition
-  useEffect(() => {
-    if (!sliderRef.current || !mousePosition.x || !mousePosition.y || !hoveredSvg) return
-
-    const svg = sliderRef.current
-    const pt = svg.createSVGPoint()
-    pt.x = mousePosition.x
-    pt.y = mousePosition.y
-
-    const svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
-    setSvgCursorPosition({ x: svgP.x, y: svgP.y })
-  }, [mousePosition, sliderRef, hoveredSvg])
 
   const middleCursorValue = useMemo(
     () => Math.floor(xScale.invert(svgCursorPosition.x)),
     [xScale, svgCursorPosition],
   )
 
-  const isLeftCloser = useMemo(() => {
+  const closerCursor = useMemo(() => {
     const distanceToMin = Math.abs(middleCursorValue - selectionMin)
     const distanceToMax = Math.abs(middleCursorValue - selectionMax)
 
+    if (distanceToMin < 8 || distanceToMax < 8) return "over"
+
     if (distanceToMin < distanceToMax) {
-      return true
+      return "min"
     } else {
-      return false
+      return "max"
     }
   }, [middleCursorValue])
 
@@ -222,7 +210,7 @@ export function FilterSlider({
           </g>
         )}
 
-        {hoveredSvg && !isDragging && (
+        {hoveredSvg && !isDragging && closerCursor !== "over" && (
           <g>
             <motion.g
               initial={{ x: svgCursorPosition.x }}
@@ -235,7 +223,7 @@ export function FilterSlider({
               </text>
             </motion.g>
 
-            {isLeftCloser ? (
+            {closerCursor === "min" ? (
               <motion.line
                 initial={{
                   strokeWidth: 0.5,

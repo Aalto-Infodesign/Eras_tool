@@ -22,17 +22,8 @@ export const SidePanel = () => {
     setPanelContent(content)
   }
 
-  const isFPressed = useModifierKey("f")
-  const isEPressed = useModifierKey("e")
-
-  useEffect(() => {
-    if (isFPressed) {
-      handlePanelOpen("filters")
-    }
-    if (isEPressed) {
-      handlePanelOpen("export")
-    }
-  }, [isFPressed, isEPressed])
+  useModifierKey("f", () => handlePanelOpen("filters"))
+  useModifierKey("e", () => handlePanelOpen("export"))
 
   const panelVariants = {
     closed: { x: width < 1844 ? containerWidth - 30 : 1440 - 20, y: "-50%" },

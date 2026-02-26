@@ -9,7 +9,7 @@ import {
 
 import { AnimatePresence, motion } from "motion/react"
 
-import { useMouseMove } from "../../hooks/useMouseMove"
+import { useMouseMoveSvg } from "../../hooks/useMouseMove"
 
 import { useViz } from "../../../contexts/VizContext"
 import { useFilters } from "../../../contexts/FiltersContext"
@@ -50,21 +50,7 @@ export const Lumps = (props) => {
   const flashlightRadius = 2
 
   const [hoveredLine, setHoveredLine] = useState(null)
-  const mousePosition = useMouseMove()
-  const [svgCursorPosition, setSvgCursorPosition] = useState({ x: 0, y: 0 })
-  // console.log(mousePosition)
-
-  useEffect(() => {
-    if (!svgRef.current || !mousePosition.x || !mousePosition.y || hoveredLine === null) return
-
-    const svg = svgRef.current
-    const pt = svg.createSVGPoint()
-    pt.x = mousePosition.x
-    pt.y = mousePosition.y
-
-    const svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
-    setSvgCursorPosition({ x: svgP.x, y: svgP.y })
-  }, [mousePosition, svgRef, hoveredLine])
+  const svgCursorPosition = useMouseMoveSvg(svgRef)
 
   // Function to convert and check if circle is in flashlight
   const isInFlashlight = (cx, cy) => {
@@ -177,7 +163,6 @@ export const Lumps = (props) => {
       setHoveredTrajectoriesIDs(visibleIDs)
     }
   }, [
-    mousePosition,
     hoveredLine,
     svgRef,
     globalLumpData,

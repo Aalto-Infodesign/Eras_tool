@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useMemo, useCallback, useEffect } from "react"
 import { useData } from "./ProcessedDataContext"
+import { isEqual } from "lodash"
 
 const FiltersContext = createContext(null)
 
@@ -22,14 +23,26 @@ export function FiltersProvider({ children }) {
     }
   }, [filtersBlueprint])
 
-  const updateSelection = useCallback((key, newSelection) => {
-    console.log("Update filters", key)
+  const resetFilter = (key) => {
     setFilters((prev) => {
       // Guard clause to prevent errors if filters haven't loaded yet
       if (!prev || !prev[key]) return prev
       return {
         ...prev,
-        [key]: { ...prev[key], selection: newSelection },
+        [key]: { ...prev[key], selection: prev[key].extent, isActive: false },
+      }
+    })
+  }
+
+  const updateSelection = useCallback((key, newSelection) => {
+    console.log("Update filters", key)
+    setFilters((prev) => {
+      // Guard clause to prevent errors if filters haven't loaded yet
+      if (!prev || !prev[key]) return prev
+      const isActive = !isEqual(prev[key].selection, prev[key].extent)
+      return {
+        ...prev,
+        [key]: { ...prev[key], selection: newSelection, isActive: isActive },
       }
     })
   }, [])
@@ -53,6 +66,7 @@ export function FiltersProvider({ children }) {
   const value = useMemo(
     () => ({
       updateSelection,
+      resetFilter,
       // Sliders
       filters,
       isDragging,
@@ -65,8 +79,9 @@ export function FiltersProvider({ children }) {
       setSelectedTrajectoriesIDs,
     }),
     [
-      filters,
       updateSelection,
+      resetFilter,
+      filters,
       isDragging,
       setIsDragging,
       selectedSilhouettesNames,

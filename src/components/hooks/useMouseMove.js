@@ -13,22 +13,35 @@ export function useMouseMove() {
   }, [width])
 
   useEffect(() => {
-    // 2. Define the function that will update this component's state
     const handleMouseMove = (event) => {
       setPosition({ x: event.pageX - bodyMargin, y: event.pageY })
-      // setPosition({ x: event.clientX, y: event.clientY })
-      // console.log(`PageX: ${event.pageX}, PageX Corrected: ${event.pageX - bodyMargin} `)
     }
 
-    // 3. Add an event listener when the component mounts
     window.addEventListener("mousemove", handleMouseMove)
 
-    // 4. Return a cleanup function to remove the listener when the component unmounts
-    // This is crucial to prevent memory leaks and errors.
     return () => {
       window.removeEventListener("mousemove", handleMouseMove)
     }
-  }, [bodyMargin]) // 5. The empty dependency array [] ensures this effect runs only once (on mount and unmount)
+  }, [bodyMargin])
 
   return position
+}
+
+export function useMouseMoveSvg(svgRef) {
+  const mousePosition = useMouseMove()
+  const [svgCursorPosition, setSvgCursorPosition] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    if (!svgRef.current || !mousePosition.x || !mousePosition.y) return
+
+    const svg = svgRef.current
+    const pt = svg.createSVGPoint()
+    pt.x = mousePosition.x
+    pt.y = mousePosition.y
+
+    const svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
+    setSvgCursorPosition({ x: svgP.x, y: svgP.y })
+  }, [mousePosition, svgRef])
+
+  return svgCursorPosition
 }

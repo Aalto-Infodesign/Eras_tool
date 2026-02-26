@@ -40,6 +40,15 @@ p {
   justify-content: center; */
   align-items: center;
 }
+
+#filters .filter-header {
+  min-height: 1.5rem;
+  display: flex;
+  width: 100%;
+  place-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-sm);
+}
 #filters .slider-wrapper {
   display: flex;
   gap: var(--spacing-sm);

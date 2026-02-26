@@ -5,6 +5,7 @@ import { zip } from "lodash"
 
 import { po } from "../utils/po"
 import { getDominancePairsSelfUpper } from "../utils/POHelperFunctions"
+import { useModifierKey } from "../components/hooks/useModifierKey"
 
 const VizContext = createContext(null)
 
@@ -20,8 +21,11 @@ export function VizProvider({ children }) {
   const [isLegend, setIsLegend] = useState(false)
   const [loadingCount, setLoadingCount] = useState(0)
   const [hasFlowChart, setHasFlowChart] = useState(true)
-  const [chartType, setChartType] = useState(1) // 1: trajectories, 2: partial order
+  const [chartType, setChartType] = useState(2) // 1: trajectories, 2: partial order
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
+
+  useModifierKey("1", () => setChartType(1))
+  useModifierKey("2", () => setChartType(2))
 
   const startLoading = useCallback(() => setLoadingCount((c) => c + 1), [])
   const stopLoading = useCallback(() => setLoadingCount((c) => Math.max(0, c - 1)), [])

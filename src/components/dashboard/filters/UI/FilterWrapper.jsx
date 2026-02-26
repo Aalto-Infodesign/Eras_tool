@@ -3,6 +3,8 @@ import { scaleLinear } from "d3"
 import { FilterDistribution } from "./FilterDistribution"
 import { FilterSlider } from "./FilterSlider"
 import { useFilters } from "../../../../contexts/FiltersContext"
+import { RefreshCcw } from "lucide-react"
+import Button from "../../../common/Button/Button"
 
 export const FilterWrapper = ({
   name,
@@ -14,7 +16,7 @@ export const FilterWrapper = ({
   hasDoubleHandle = false,
   mode = "single",
 }) => {
-  const { updateSelection } = useFilters()
+  const { updateSelection, resetFilter } = useFilters()
 
   const handleRangeChange = (value) => {
     console.log(name)
@@ -35,7 +37,16 @@ export const FilterWrapper = ({
       className="filter-box"
       data-state={`${filter.active ? "active" : "inactive"}`}
     >
-      <p>{title}</p>
+      <div className="filter-header">
+        <p>{title}</p>
+
+        {filter.isActive && (
+          <Button size="small" onClick={() => resetFilter(name)}>
+            <RefreshCcw size={10} />
+          </Button>
+        )}
+      </div>
+
       <FilterDistribution
         data={allPoints}
         height={50}
