@@ -19,7 +19,6 @@ import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
 import { useDerivedData } from "../contexts/DerivedDataContext"
 import { Command } from "lucide-react"
-import { useSilhouettesPoset } from "./dashboard/silhouettes/hooks/usePosetLayout"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {

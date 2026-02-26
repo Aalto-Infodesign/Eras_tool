@@ -63,8 +63,6 @@ export function FilterDistribution({
     [countedBy, xScale],
   )
 
-  console.log(getCountAtX(lineX))
-
   const sharedPathProps = { range, height, xScale, yScale, extentX, width }
 
   return (

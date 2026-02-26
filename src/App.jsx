@@ -11,6 +11,9 @@ import { DerivedDataProvider } from "./contexts/DerivedDataContext"
 import { SidePanel } from "./components/dashboard/side-panel/SidePanel"
 
 import { Loader } from "lucide-react"
+import { TitleAnimation } from "./components/landing/TitleAnimation"
+
+import { FilterPanel } from "./components/dashboard/filter-panel/FilterPanel"
 
 function App() {
   return (
@@ -61,54 +64,12 @@ function AppContent() {
           </div>
         )}
         <FileLoader />
+        <FilterPanel />
         <AnimatePresence>
           {richData?.length && silhouettes && isLegend && <Dashboard />}
         </AnimatePresence>
       </main>
       {isLegend && <SidePanel />}
     </>
-  )
-}
-
-function TitleAnimation() {
-  const titleVariants = {
-    hidden: { opacity: 0, y: 0, filter: "blur(4px)" },
-    one: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.8, ease: "easeInOut" },
-    },
-    two: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.8, ease: "easeInOut", delay: 0.8 },
-    },
-    three: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.8, ease: "easeInOut", delay: 1.4 },
-    },
-  }
-  return (
-    <motion.div
-      variants={titleVariants}
-      initial="hidden"
-      animate="one"
-      exit={"hidden"}
-      className="app-title"
-    >
-      <motion.p variants={titleVariants} initial="hidden" animate="one">
-        FinnGen's
-      </motion.p>
-      <motion.h1 variants={titleVariants} initial="hidden" animate="two">
-        The Eras Tool
-      </motion.h1>
-      <motion.p variants={titleVariants} initial="hidden" animate="three">
-        Track evolution over time
-      </motion.p>
-    </motion.div>
   )
 }

@@ -1,16 +1,17 @@
 import { motion } from "framer-motion"
+import { useViz } from "../../../../contexts/VizContext"
 
 export function SilhouettePathSvg({
   keyName = "",
   silhouetteName,
-  palette,
   xScale,
   yScale,
   animationDuration = 0.2,
   strokeWidth = 5,
-  isHasse,
   isChip = false,
 }) {
+  const { palette, isHasse } = useViz()
+
   const size = isChip ? 32 : isHasse ? 30 : 64
 
   const svgVariants = {

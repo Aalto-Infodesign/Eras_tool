@@ -106,7 +106,7 @@ export function FileLoader({}) {
                         ))}
                       </div>
                     )}
-                    {existingIdealSilhouettes.length === 0 && hasFlowChart && (
+                    {existingIdealSilhouettes.length === 0 && hasFlowChart && !isLegend && (
                       <h4>No silhouettes found in dataset</h4>
                     )}
                   </motion.div>

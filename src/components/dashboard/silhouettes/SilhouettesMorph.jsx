@@ -523,14 +523,12 @@ function SilhouetteCardMain({ s, i, ...props }) {
         <SilhouettePathSvg
           keyName="card"
           silhouetteName={s.name}
-          palette={palette}
           xScale={x}
           yScale={y}
           animationDuration={0.2}
           useAsSize={true}
           strokeWidth={9}
           radius={9}
-          isHasse={isHasse}
         />
       </div>
       <AnimatePresence>
@@ -638,7 +636,6 @@ export function SmallSilhouette({ silhouetteName, palette, x, y }) {
         <SilhouettePathSvg
           keyName="chip"
           silhouetteName={silhouetteName}
-          palette={palette}
           xScale={x}
           yScale={y}
           isChip={true}
