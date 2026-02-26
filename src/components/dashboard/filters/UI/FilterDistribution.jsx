@@ -30,8 +30,6 @@ export function FilterDistribution({
 
   const valueExtent = useMemo(() => extent(dataCount, (c) => c.y), [dataCount])
 
-  console.log(maskID, valueExtent)
-
   const yScale = useMemo(
     () => scaleLinear([0, valueExtent[1]], [height, 0]),
     [data, valueExtent, height],

@@ -37,9 +37,10 @@ export function DerivedDataProvider({ children }) {
       )
       .filter(
         (datum) =>
+          datum.years === null ||
           datum.years.length === 0 ||
-          (min(datum.years) >= filters.date.selection[0] &&
-            max(datum.years) <= filters.date.selection[1]),
+          (Math.floor(min(datum.years)) >= filters.date.selection[0] &&
+            Math.floor(max(datum.years)) <= filters.date.selection[1]),
       )
   }, [richData, filters])
 

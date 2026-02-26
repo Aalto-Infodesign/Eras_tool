@@ -13,8 +13,6 @@ import { useModifierKey } from "../../hooks/useModifierKey"
 import { useLongPressWithProgress } from "../../hooks/useLongPress"
 import { useIsTouchDevice } from "../../hooks/useIsTouchDevice"
 
-import Switch from "../../common/Switch/Switch"
-
 import "./Silhouettes.css"
 
 import { Virtuoso } from "react-virtuoso"

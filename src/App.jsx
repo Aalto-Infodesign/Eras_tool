@@ -10,6 +10,8 @@ import { FiltersProvider } from "./contexts/FiltersContext"
 import { DerivedDataProvider } from "./contexts/DerivedDataContext"
 import { SidePanel } from "./components/dashboard/side-panel/SidePanel"
 
+import { Loader } from "lucide-react"
+
 function App() {
   return (
     <RawDataProvider>
@@ -42,16 +44,20 @@ function AppContent() {
         {isLoading && (
           <div
             style={{
-              position: "fixed",
-              inset: 0, // covers viewport entirely
-              background: "rgba(0,0,0,0.4)",
+              position: "absolute",
+              width: 100,
+              height: 100,
+              bottom: 0,
+              right: 0,
+              background: "rgba(0, 0, 0, 0)",
               zIndex: 9999,
               display: "grid",
               placeItems: "center", // centers your spinner
             }}
           >
-            {/* <Spinner /> */}
-            Loading
+            <motion.div animate={{ rotate: 180 }} transition={{ repeat: Infinity, duration: 2 }}>
+              <Loader />
+            </motion.div>
           </div>
         )}
         <FileLoader />
