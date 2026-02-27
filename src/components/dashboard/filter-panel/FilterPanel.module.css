@@ -1,7 +1,22 @@
 .filterPanel {
   position: relative;
   grid-column: span 12;
-  height: 20px;
+  /* height: 20px; */
+  display: flex;
+  gap: var(--spacing-md);
   background-color: var(--surface-contrast);
   padding: var(--spacing-md);
+}
+
+.filterChip {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--surface-light);
+  padding: 0 var(--spacing-sm);
+  max-height: 36px;
+}
+.filterChip span {
+  font-size: var(--text-sm);
 }

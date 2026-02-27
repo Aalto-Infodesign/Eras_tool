@@ -2,11 +2,12 @@ import { motion } from "framer-motion"
 import { useMemo } from "react"
 
 import { countBy } from "lodash"
-import { extent, line, curveStep, scaleLinear } from "d3"
+import { extent, line, curveStep, curveStepAfter, scaleLinear } from "d3"
 
 export const DistributionPath = ({
   data,
   range,
+  selection,
   color,
   maskID = "defaultID",
   height = 150,
@@ -22,16 +23,21 @@ export const DistributionPath = ({
     [data],
   )
 
+  const lookup = useMemo(() => new Map(dataCount.map((d) => [+d.x, d])), [dataCount])
+
+  const filledData = useMemo(() => range.map((xVal) => lookup.get(xVal) ?? null), [range, lookup])
+
   const lineBuilder = useMemo(
     () =>
       line()
+        .defined((d) => d !== null && d !== undefined && !isNaN(d.y))
         .curve(curveStep)
         .x((d) => xScale(d.x))
         .y((d) => yScale(d.y)),
     [xScale, yScale],
   )
 
-  const linePath = useMemo(() => lineBuilder(dataCount), [lineBuilder, dataCount])
+  const linePath = useMemo(() => lineBuilder(filledData), [lineBuilder, filledData])
   return (
     <g className="path-group">
       <defs>
@@ -40,8 +46,8 @@ export const DistributionPath = ({
             initial={{ x: 0, y: -1, height: height + 2 }}
             fill="white"
             animate={{
-              x: xScale(range[0]),
-              width: xScale(range[1]) - xScale(range[0]),
+              x: xScale(selection[0]),
+              width: xScale(selection[1]) - xScale(selection[0]),
             }}
             transition={{ duration: 0.1 }}
           />

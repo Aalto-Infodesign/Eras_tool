@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { useFilters } from "../../../contexts/FiltersContext"
 import styles from "./FilterPanel.module.css"
 import { X } from "lucide-react"
+import Button from "../../common/Button/Button"
 
 export function FilterPanel() {
   const activeFilters = useActiveFilters()
@@ -13,12 +14,12 @@ export function FilterPanel() {
   return (
     <section className={styles.filterPanel}>
       {activeFilters.map((filter) => (
-        <p>
+        <div className={styles.filterChip}>
           <span>{filter.label}</span>
-          <button onClick={filter.onRemove}>
-            <X />
-          </button>
-        </p>
+          <Button size="xs" onClick={filter.onRemove}>
+            <X size={12} />
+          </Button>
+        </div>
       ))}
     </section>
   )
@@ -54,6 +55,14 @@ export const useActiveFilters = () => {
         id: "diseaseDuration",
         label: `diseaseDuration: ${filters.diseaseDuration.selection[0].toFixed(0)}–${filters.diseaseDuration.selection[1].toFixed(0)}`,
         onRemove: () => resetFilter("diseaseDuration"),
+      })
+    }
+    // Range filter
+    if (filters.speed.isActive) {
+      chips.push({
+        id: "speed",
+        label: `speed: ${filters.speed.selection[0].toFixed(0)}–${filters.speed.selection[1].toFixed(0)}`,
+        onRemove: () => resetFilter("speed"),
       })
     }
 

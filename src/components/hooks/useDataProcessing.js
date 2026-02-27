@@ -199,6 +199,7 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
 
     const columns = Object.keys(richData[0])
 
+    // DATE
     const dateActive = columns.includes("years")
     const dateExtent = dateActive
       ? extent(
@@ -210,9 +211,7 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
       : []
     const dateRange = dateActive ? range(dateExtent[0], dateExtent[1]) : []
 
-    //.......diseaseDuration
-
-    // TODO Does 0 count?
+    // DISEASE DURATION
     const durationsActive = columns.includes("diseaseDuration")
     const durationExtent = durationsActive
       ? // ? extent(richData, (d) => (d.diseaseDuration > 0 ? d.diseaseDuration : null))
@@ -220,12 +219,18 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
       : []
     const durationRange = range(durationExtent[0], durationExtent[1])
 
-    //.... age
+    // AGE
     const ageActive = columns.includes("SwitchEventAge")
     const ageExtent = ageActive
       ? extent(richData, (d) => (d.SwitchEventAge > 0 ? d.SwitchEventAge : null))
       : []
     const ageRange = range(ageExtent[0], ageExtent[1])
+
+    // SPEED
+    const links = statesData.links
+    const speedExtent = extent(links, (d) => d.speed)
+
+    const speedRange = range(speedExtent[0], speedExtent[1])
 
     const filters = {
       date: {
@@ -247,6 +252,12 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
         range: ageRange,
         extent: ageExtent,
         selection: ageExtent,
+        isActive: false,
+      },
+      speed: {
+        range: speedRange,
+        extent: speedExtent,
+        selection: speedExtent,
         isActive: false,
       },
     }

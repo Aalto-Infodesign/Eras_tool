@@ -9,7 +9,7 @@ import { min, max } from "d3"
 import "./Filters.css"
 
 export const Filters = () => {
-  const { richData } = useData()
+  const { richData, statesData } = useData()
   const { filters } = useFilters()
   const sliderDimensions = { x: 150, y: 30 }
 
@@ -26,6 +26,10 @@ export const Filters = () => {
     .map((d) => d.diseaseDuration)
     .filter((duration) => !isNil(duration))
     .filter((duration) => duration !== 0)
+
+  const allSpeeds = statesData.links.map((d) => d.speed).filter((speed) => !isNil(speed))
+
+  // .filter((speed) => duration !== 0)
 
   return (
     <section id="filters" className="filters">
@@ -50,6 +54,17 @@ export const Filters = () => {
             sliderDimensions={sliderDimensions}
             filter={filters.diseaseDuration}
             allPoints={allDurations}
+            hasPattern={false}
+            hasDoubleHandle={true}
+          />
+        )}
+        {filters.speed && (
+          <FilterWrapper
+            name={"speed"}
+            title={"Speed"}
+            sliderDimensions={sliderDimensions}
+            filter={filters.speed}
+            allPoints={allSpeeds}
             hasPattern={false}
             hasDoubleHandle={true}
           />

@@ -12,6 +12,7 @@ export function FilterDistribution({
   height,
   extentX,
   range,
+  selection,
   maskID,
   color = "#fff",
   mode = "single",
@@ -32,6 +33,12 @@ export function FilterDistribution({
 
     return { dataCount, countedBy }
   }, [data])
+
+  const lookup = useMemo(() => new Map(dataCount.map((d) => [d.x, d])), [dataCount])
+
+  // const filledData = useMemo(() => range.map((xVal) => lookup.get(xVal) ?? 0), [range, lookup])
+
+  // console.log(filledData)
 
   const valueExtent = useMemo(() => extent(dataCount, (c) => c.y), [dataCount])
 
@@ -63,7 +70,12 @@ export function FilterDistribution({
     [countedBy, xScale],
   )
 
-  const sharedPathProps = { range, height, xScale, yScale, extentX, width }
+  const sharedPathProps = { range, selection, height, xScale, yScale, extentX, width }
+
+  const yValue = useMemo(() => {
+    const xValue = String(Math.floor(xScale.invert(lineX)))
+    return lookup.get(xValue)?.y ?? 0
+  }, [lookup, lineX, xScale])
 
   return (
     <div className="filter-distribution-wrapper">
@@ -120,7 +132,7 @@ export function FilterDistribution({
                   animate={{
                     x1: lineX,
                     x2: lineX,
-                    y2: yScale(getCountAtX(lineX)),
+                    y2: yScale(yValue),
                     pathLength: 1,
                   }}
                   exit={{ pathLength: 0 }}
@@ -136,13 +148,13 @@ export function FilterDistribution({
                   className="ruler-x"
                   initial={{
                     x2: lineX,
-                    y1: yScale(getCountAtX(lineX)),
-                    y2: yScale(getCountAtX(lineX)),
+                    y1: yScale(yValue),
+                    y2: yScale(yValue),
                   }}
                   animate={{
                     x2: lineX,
-                    y1: yScale(getCountAtX(lineX)),
-                    y2: yScale(getCountAtX(lineX)),
+                    y1: yScale(yValue),
+                    y2: yScale(yValue),
                     pathLength: 1,
                   }}
                   exit={{ pathLength: 0 }}
@@ -156,8 +168,8 @@ export function FilterDistribution({
                 />
 
                 <motion.g
-                  initial={{ x: lineX, y: yScale(getCountAtX(lineX)) }}
-                  animate={{ x: lineX, y: yScale(getCountAtX(lineX)) }}
+                  initial={{ x: lineX, y: yScale(yValue) }}
+                  animate={{ x: lineX, y: yScale(yValue) }}
                   transition={{
                     default: { duration: 0.1 },
                   }}
@@ -180,7 +192,7 @@ export function FilterDistribution({
                       fillOpacity={0.7}
                     />
 
-                    <MotionText key={"pin-label"}>{getCountAtX(lineX).toFixed(0)}</MotionText>
+                    <MotionText key={"pin-label"}>{yValue}</MotionText>
                   </motion.g>
                 </motion.g>
               </motion.g>

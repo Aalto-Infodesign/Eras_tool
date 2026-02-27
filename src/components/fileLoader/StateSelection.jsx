@@ -9,6 +9,7 @@ import { useViz } from "../../contexts/VizContext"
 import { ResetStatesOrder } from "./ResetStatesOrder"
 import { X, Workflow, Plus } from "lucide-react"
 import { useEffect, useCallback, useRef } from "react"
+import Button from "../common/Button/Button"
 
 export function StateSelection() {
   const { removedStates, setRemovedStates, scales } = useData()
@@ -223,20 +224,22 @@ export function StateSelection() {
 
                 <div className="buttons-wrapper">
                   {!isLegend && hasFlowChart && (
-                    <button
+                    <Button
+                      size="xs"
                       className="center"
                       onClick={() => addNodetoFlow("default", item, palette[item])}
                     >
                       <Workflow size={14} />
-                    </button>
+                    </Button>
                   )}
                   {statesOrder.length > 1 && (
-                    <button
+                    <Button
+                      size="xs"
                       className="center"
                       onClick={() => toggleRemovedState(scales.indexToName(item))}
                     >
                       <X size={14} />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </Reorder.Item>
@@ -270,9 +273,9 @@ export function StateSelection() {
               {removedStates.map((s, i) => (
                 <motion.li key={s} layout className="state-item">
                   <EraLabel index={i} text={s} color={"#fff"} />
-                  <button className="center" onClick={() => toggleRemovedState(s)}>
+                  <Button size="xs" className="center" onClick={() => toggleRemovedState(s)}>
                     <Plus size={14} />
-                  </button>
+                  </Button>
                 </motion.li>
               ))}
             </AnimatePresence>

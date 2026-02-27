@@ -109,11 +109,17 @@ export function DerivedDataProvider({ children }) {
   }, [silhouettes, selectedSilhouettesData, completeLinks])
 
   const filteredLinks = useMemo(() => {
-    if (trajectoriesSelectionMode === "all") return linksBySelectedSilhouettes
-    if (trajectoriesSelectionMode === "parallel")
-      return linksBySelectedSilhouettes.filter((l) => l.speed === 0)
-    else return linksBySelectedSilhouettes.filter((l) => l.speed !== 0)
-  }, [linksBySelectedSilhouettes, trajectoriesSelectionMode])
+    const links = linksBySelectedSilhouettes.filter(
+      (datum) =>
+        datum.speed === null ||
+        (Math.floor(datum.speed) >= filters.speed.selection[0] &&
+          Math.floor(datum.speed) <= filters.speed.selection[1]),
+    )
+
+    if (trajectoriesSelectionMode === "all") return links
+    if (trajectoriesSelectionMode === "parallel") return links.filter((l) => l.speed === 0)
+    else return links.filter((l) => l.speed !== 0)
+  }, [linksBySelectedSilhouettes, trajectoriesSelectionMode, filters])
 
   const selectedIDs = useMemo(() => {
     if (!selectedSilhouettesData) return []
