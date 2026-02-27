@@ -53,7 +53,9 @@ export function FilterSlider({
   }, [middleCursorValue])
 
   const sliderColors =
-    mode === "double" ? { min: "blue", max: "red" } : { min: "white", max: "white" }
+    mode === "double"
+      ? { min: "#fff", max: "var(--surface-accent-dark)" }
+      : { min: "white", max: "white" }
 
   // Calculate positions
   const sliderWidth = width - cursorWidth
@@ -168,7 +170,7 @@ export function FilterSlider({
         {!hasPattern && (
           <g id="normal-bg" transform={`translate(${cursorWidth / 2}, ${height / 2})`}>
             {/* Background track - before min */}
-            <rect width={minCursorPosition} height={height} style={{ opacity: 0.5 }} />
+            <rect width={minCursorPosition} height={height} fill="#fff" fillOpacity={0.5} />
 
             {/* Active track - between min and max */}
             <rect
@@ -183,7 +185,8 @@ export function FilterSlider({
               x={maxCursorPosition}
               width={sliderWidth - maxCursorPosition}
               height={height}
-              style={{ opacity: 0.5 }}
+              fill="#fff"
+              fillOpacity={0.5}
             />
           </g>
         )}
@@ -281,7 +284,8 @@ export function FilterSlider({
           x={minCursorPosition}
           y={0}
           id="cursor"
-          className={`min ${mode === "double" && "color"}`}
+          // className={`min ${mode === "double" && "color"}`}
+          // animate={{ fill: sliderColors.min }}
           fill={sliderColors.min}
           width={cursorWidth}
           height={cursorHeight}
@@ -301,8 +305,9 @@ export function FilterSlider({
             x={maxCursorPosition}
             y={0}
             id="cursor"
-            className={`max ${mode === "double" && "color"}`}
+            // className={`max ${mode === "double" && "color"}`}
             fill={sliderColors.max}
+            // animate={{ fill: sliderColors.max }}
             width={cursorWidth}
             height={cursorHeight}
             whileHover={{ scale: 0.9, transition: { duration: 0.2 } }}

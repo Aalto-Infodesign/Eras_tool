@@ -10,8 +10,9 @@ import "./Trajectories.css"
 import { union } from "lodash"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 export function TrajectoriesMotion(props) {
-  const { filters, selectedTrajectoriesIDs } = useFilters()
+  const { selectedTrajectoriesIDs } = useFilters()
   const { palette } = useViz()
+  const { filteredLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
@@ -19,7 +20,7 @@ export function TrajectoriesMotion(props) {
     chartScales,
     selectedLumps,
     toggleSelectedTrajectory,
-    filteredLinks,
+
     hoveredTrajectoriesIDs,
     selectedIndex,
     enableScrub,
@@ -114,15 +115,9 @@ export function TrajectoriesMotion(props) {
           lines.map((d) => {
             const isHovered = hoveredTrajectoriesIDs.includes(d.id)
             const isSelected = selectedTrajectoriesIDs.includes(d.id)
-            const isFilteredDate =
-              d.source.date >= filters.date.selection[0] &&
-              d.source.date <= filters.date.selection[1]
 
             let offset = 0
-            if (
-              d.source.date >= filters.date.selection[0] &&
-              d.source.date <= filters.date.selection[1]
-            ) {
+            if (d.speed !== 0) {
               const length = Math.hypot(
                 Math.abs(x(d.target.x) - x(d.source.x)),
                 Math.abs(y(d.target.state) - y(d.source.state)),
@@ -135,12 +130,7 @@ export function TrajectoriesMotion(props) {
 
               offset = `${visibleLength} ${totalGap} `
             } else {
-              if (
-                filters.date.selection[0] - d.source.date <
-                (filters.date.selection[0] - filters.date.extent[0]) / 2
-              )
-                offset = "1.1 1.1"
-              else offset = " .75 1.5"
+              offset = " .75 1.5"
             }
 
             return (

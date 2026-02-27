@@ -1,5 +1,6 @@
 .filterPanel {
   position: relative;
+  grid-column: span 12;
   height: 20px;
   background-color: var(--surface-contrast);
   padding: var(--spacing-md);

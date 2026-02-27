@@ -16,6 +16,8 @@ export function FiltersProvider({ children }) {
   const [selectedSilhouettesNames, setSelectedSilhouettesNames] = useState(null) // Main filter
   const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
 
+  const [trajectoriesSelectionMode, setTrajectoriesSelectionMode] = useState("all") // all, diagonal, parallel
+
   // Sync internal state when the source data changes
   useEffect(() => {
     if (filtersBlueprint) {
@@ -83,6 +85,8 @@ export function FiltersProvider({ children }) {
       toggleSilhouetteFilter,
       selectedTrajectoriesIDs,
       setSelectedTrajectoriesIDs,
+      trajectoriesSelectionMode,
+      setTrajectoriesSelectionMode,
     }),
     [
       updateSelection,
@@ -95,6 +99,8 @@ export function FiltersProvider({ children }) {
       toggleSilhouetteFilter,
       selectedTrajectoriesIDs,
       setSelectedTrajectoriesIDs,
+      trajectoriesSelectionMode,
+      setTrajectoriesSelectionMode,
     ],
   )
 

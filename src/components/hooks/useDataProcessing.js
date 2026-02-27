@@ -284,22 +284,32 @@ export const trajectoriesFromData = (data) => {
       const sourceAge = SwitchEventAge[n]
       const targetAge = isLast ? sourceAge : SwitchEventAge[n + 1]
 
+      const sourceState = state
+      const targetState = isLast ? state : trajectory[n + 1]
+
+      const sourceDate = years?.[n]
+      const targetDate = isLast ? years?.[n] : years?.[n + 1]
+
+      const speed = targetDate > sourceDate ? targetDate - sourceDate : sourceDate - targetDate
+
       links[n] = {
         id: FINNGENID,
         diseaseDuration,
         firstDate,
         source: {
-          state,
-          date: years?.[n],
+          state: sourceState,
+          date: sourceDate,
           age: sourceAge,
           x: sourceAge,
         },
         target: {
-          state: isLast ? state : trajectory[n + 1],
-          date: isLast ? years?.[n] : years?.[n + 1],
+          state: targetState,
+          date: targetDate,
           age: targetAge,
           x: targetAge,
         },
+        speed: speed,
+        lump: sourceState + "-" + targetState,
         initialState: n === 0,
         finalState: isLast,
       }

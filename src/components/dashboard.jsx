@@ -19,6 +19,7 @@ import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
 import { useDerivedData } from "../contexts/DerivedDataContext"
 import { Command } from "lucide-react"
+import { FilterPanel } from "./dashboard/filter-panel/FilterPanel"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
@@ -118,6 +119,8 @@ const Dashboard = () => {
     >
       <LayoutGroup>
         <AnimatePresence>
+          <FilterPanel />
+
           {isCmdPressed && (
             <motion.div className="key-pop-up">
               <Command size={16} />

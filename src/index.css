@@ -11,6 +11,7 @@
   --neutral-200: rgb(193, 193, 202);
   --neutral-400: rgb(146, 146, 155);
 
+  --violet-900: rgb(117, 87, 180);
   --violet-700: rgb(182, 148, 255);
   --violet-500: rgb(175, 155, 211);
 
@@ -54,6 +55,7 @@
   --surface-contrast-70: var(--blue-700-70);
   --surface-light: var(--neutral-200);
   --surface-accent: var(--violet-700);
+  --surface-accent-dark: var(--violet-900);
 
   --text-dark: var(--blue-700);
   --text-light: var(--neutral-200);

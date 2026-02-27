@@ -6,7 +6,7 @@
 import { createContext, useContext, useMemo } from "react"
 import { useData } from "./ProcessedDataContext"
 import { useFilters } from "./FiltersContext"
-import { isEmpty, includes, union } from "lodash"
+import { isEmpty, includes, union, flattenDeep } from "lodash"
 import { min, max } from "d3"
 
 import {
@@ -19,7 +19,8 @@ const DerivedContext = createContext(null)
 
 export function DerivedDataProvider({ children }) {
   const { silhouettes, richData, idealSilhouettes } = useData()
-  const { filters, selectedSilhouettesNames, selectedTrajectoriesIDs } = useFilters()
+  const { filters, selectedSilhouettesNames, selectedTrajectoriesIDs, trajectoriesSelectionMode } =
+    useFilters()
   const { chartType } = useViz()
 
   console.log("Silhouettes", silhouettes)
@@ -56,10 +57,7 @@ export function DerivedDataProvider({ children }) {
   }, [filteredData])
 
   const completeLinks = useMemo(() => {
-    return filteredTrajectories.flat().map((s) => ({
-      ...s,
-      lump: s.source.state + "-" + s.target.state,
-    }))
+    return filteredTrajectories.flat()
   }, [filteredTrajectories])
 
   const filteredSilhouettes = useMemo(() => {
@@ -94,6 +92,28 @@ export function DerivedDataProvider({ children }) {
     if (selectedSilhouettesNames && selectedSilhouettesNames.length === 0) return []
     return completeSilhouettes.filter((s) => includes(selectedSilhouettesNames, s.name))
   }, [completeSilhouettes, selectedSilhouettesNames])
+
+  const linksBySelectedSilhouettes = useMemo(() => {
+    console.time("Selected Links")
+    const s = selectedSilhouettesData.length === 0 ? silhouettes : selectedSilhouettesData
+    const individuals = new Set(flattenDeep(s.map((s) => s.trajectories)).map((t) => t.id))
+
+    console.timeEnd("Selected Links")
+    return completeLinks.filter((l) => {
+      // Ricerca O(1) invece di O(n)
+      if (!individuals.has(l.id)) return false
+      // if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
+
+      return true
+    })
+  }, [silhouettes, selectedSilhouettesData, completeLinks])
+
+  const filteredLinks = useMemo(() => {
+    if (trajectoriesSelectionMode === "all") return linksBySelectedSilhouettes
+    if (trajectoriesSelectionMode === "parallel")
+      return linksBySelectedSilhouettes.filter((l) => l.speed === 0)
+    else return linksBySelectedSilhouettes.filter((l) => l.speed !== 0)
+  }, [linksBySelectedSilhouettes, trajectoriesSelectionMode])
 
   const selectedIDs = useMemo(() => {
     if (!selectedSilhouettesData) return []
@@ -133,6 +153,7 @@ export function DerivedDataProvider({ children }) {
       completeSilhouettes,
       selectedSilhouettesData,
       selectedIDs,
+      filteredLinks,
     }),
     [
       filteredData,
@@ -141,6 +162,7 @@ export function DerivedDataProvider({ children }) {
       completeSilhouettes,
       selectedSilhouettesData,
       selectedIDs,
+      filteredLinks,
     ],
   )
 

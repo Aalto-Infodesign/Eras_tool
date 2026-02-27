@@ -41,7 +41,7 @@ export function TrajectoriesExplorerChart(props) {
     toggleSilhouetteFilter,
   } = useFilters()
 
-  const { completeLinks, selectedSilhouettesData } = useDerivedData()
+  const { filteredLinks } = useDerivedData()
 
   const { w, h, marginTop } = props
   const { ageRange } = analytics
@@ -97,31 +97,6 @@ export function TrajectoriesExplorerChart(props) {
   const yScale = scaleBand(statesNamesLoaded, [0, 100]).padding(1)
   const xScale = scaleLinear([0, max(silhouettes.map((d) => d.states.length - 1))], [10, 100 - 10])
 
-  // FILTERING SILHOUETTES and TRAJECTORIES
-
-  // 2. OTTIMIZZA IL SET DI INDIVIDUI (Usa Set per ricerca O(1))
-  const selectedIndividualsSet = useMemo(() => {
-    const s = selectedSilhouettesData.length === 0 ? silhouettes : selectedSilhouettesData
-    // Creiamo un Set: includes() su un Set è istantaneo, su un Array è O(n)
-    const individuals = new Set(flattenDeep(s.map((s) => s.trajectories)).map((t) => t.id))
-
-    return individuals
-  }, [selectedSilhouettesData, selectedSilhouettesNames])
-
-  // 3. FILTRAGGIO EFFICIENTE
-  const filteredLinks = useMemo(() => {
-    const selectedLumpsTypes = new Set(selectedLumps.map((l) => l.type))
-    const hasLumpFilter = selectedLumps.length > 0
-
-    return completeLinks.filter((l) => {
-      // Ricerca O(1) invece di O(n)
-      if (!selectedIndividualsSet.has(l.id)) return false
-      // if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
-
-      return true
-    })
-  }, [completeLinks, selectedIndividualsSet, selectedLumps, filters])
-
   // 4. MAPPA PER RICERCA SILHOUETTE (Evita loop annidati)
   const idToSilhouetteMap = useMemo(() => {
     const map = new Map()
@@ -162,7 +137,6 @@ export function TrajectoriesExplorerChart(props) {
       marginTop,
 
       //DATA
-      filteredLinks,
 
       statesNamesLoaded,
       chartScales,
@@ -181,7 +155,6 @@ export function TrajectoriesExplorerChart(props) {
     [
       w,
       h,
-      filteredLinks,
 
       statesNamesLoaded,
       selectedLumps,

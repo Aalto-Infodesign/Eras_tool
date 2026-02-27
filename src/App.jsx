@@ -13,8 +13,6 @@ import { SidePanel } from "./components/dashboard/side-panel/SidePanel"
 import { Loader } from "lucide-react"
 import { TitleAnimation } from "./components/landing/TitleAnimation"
 
-import { FilterPanel } from "./components/dashboard/filter-panel/FilterPanel"
-
 function App() {
   return (
     <RawDataProvider>
@@ -64,7 +62,6 @@ function AppContent() {
           </div>
         )}
         <FileLoader />
-        <FilterPanel />
         <AnimatePresence>
           {richData?.length && silhouettes && isLegend && <Dashboard />}
         </AnimatePresence>

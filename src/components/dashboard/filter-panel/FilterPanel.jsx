@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { useFilters } from "../../../contexts/FiltersContext"
 import styles from "./FilterPanel.module.css"
+import { X } from "lucide-react"
 
 export function FilterPanel() {
   const activeFilters = useActiveFilters()
@@ -12,7 +13,12 @@ export function FilterPanel() {
   return (
     <section className={styles.filterPanel}>
       {activeFilters.map((filter) => (
-        <span>{filter.label}</span>
+        <p>
+          <span>{filter.label}</span>
+          <button onClick={filter.onRemove}>
+            <X />
+          </button>
+        </p>
       ))}
     </section>
   )
@@ -20,7 +26,7 @@ export function FilterPanel() {
 
 // useActiveFilters.js
 export const useActiveFilters = () => {
-  const { filters } = useFilters()
+  const { filters, resetFilter } = useFilters()
 
   const activeFilters = useMemo(() => {
     const chips = []
@@ -38,16 +44,16 @@ export const useActiveFilters = () => {
     if (filters.date.isActive) {
       chips.push({
         id: "date",
-        label: `Date: ${filters.date.selection[0]}–${filters.date.selection[1]}`,
-        // onRemove: () => setFilters((prev) => ({ ...prev, date: null })),
+        label: `Date: ${filters.date.selection[0].toFixed(0)}–${filters.date.selection[1].toFixed(0)}`,
+        onRemove: () => resetFilter("date"),
       })
     }
     // Range filter
     if (filters.diseaseDuration.isActive) {
       chips.push({
         id: "diseaseDuration",
-        label: `diseaseDuration: ${filters.diseaseDuration.selection[0]}–${filters.diseaseDuration.selection[1]}`,
-        // onRemove: () => setFilters((prev) => ({ ...prev, ageRange: null })),
+        label: `diseaseDuration: ${filters.diseaseDuration.selection[0].toFixed(0)}–${filters.diseaseDuration.selection[1].toFixed(0)}`,
+        onRemove: () => resetFilter("diseaseDuration"),
       })
     }
 

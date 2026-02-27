@@ -90,13 +90,13 @@ export function FilterDistribution({
             <g>
               <DistributionPath
                 data={data.min}
-                color={"blue"}
+                color={"#fff"}
                 maskID={maskID + "-min"}
                 {...sharedPathProps}
               />
               <DistributionPath
                 data={data.max}
-                color={"red"}
+                color={"var(--surface-accent-dark)"}
                 maskID={maskID + "-max"}
                 {...sharedPathProps}
               />
@@ -162,7 +162,14 @@ export function FilterDistribution({
                     default: { duration: 0.1 },
                   }}
                 >
-                  <circle cx={0} cy={0} r={3} fill="var(--surface-accent)"></circle>
+                  <circle
+                    cx={0}
+                    cy={0}
+                    r={3}
+                    fill="var(--surface-accent)"
+                    stroke="#000"
+                    strokeWidth={2}
+                  />
                   <motion.g animate={{ y: -10 }}>
                     <rect
                       width={20}

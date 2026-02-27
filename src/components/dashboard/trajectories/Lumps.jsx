@@ -21,7 +21,7 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 export const Lumps = (props) => {
   const { palette } = useViz()
   const { filters } = useFilters()
-  // const { filteredLinks } = useDerivedData()
+  const { filteredLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
@@ -33,7 +33,6 @@ export const Lumps = (props) => {
     hoveredTrajectoriesIDs,
     setHoveredTrajectoriesIDs,
     selectedIndex,
-    filteredLinks,
     reduceMotion,
     enableScrub,
   } = trajectoriesContext

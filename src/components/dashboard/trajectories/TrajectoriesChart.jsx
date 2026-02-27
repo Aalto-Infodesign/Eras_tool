@@ -24,21 +24,22 @@ import { useViz } from "../../../contexts/VizContext"
 import { useFilters } from "../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import Button from "../../common/Button/Button"
+import { div } from "three/src/nodes/math/OperatorNode.js"
 
 export function TrajectoriesChart() {
   // console.time("Trajectories")
 
   const { silhouettes } = useData()
   const { palette } = useViz()
-  const { selectedTrajectoriesIDs } = useFilters()
-  const { completeLinks } = useDerivedData()
+  const { selectedTrajectoriesIDs, trajectoriesSelectionMode, setTrajectoriesSelectionMode } =
+    useFilters()
+  const { completeLinks, filteredLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
 
   const {
     h,
 
-    filteredLinks,
     statesNamesLoaded,
     hoveredTrajectoriesIDs,
     selectedIndex,
@@ -122,14 +123,24 @@ export function TrajectoriesChart() {
       <div className="controls">
         <div className={`lump-controls ${isSelectModeLines ? "Lines" : "Lumps"}`}>
           {filteredLinks.length < 500 && (
-            <Button
-              data-selected={isSelectModeLines}
-              size="xs"
-              onClick={() => setIsSelectModeLines(!isSelectModeLines)}
-              title="Toggle from Lumps to lines"
-            >
-              {isSelectModeLines ? "Lumps" : "Lines"}
-            </Button>
+            <div>
+              <Button
+                data-selected={isSelectModeLines}
+                size="xs"
+                onClick={() => setIsSelectModeLines(!isSelectModeLines)}
+                title="Toggle from Lumps to lines"
+              >
+                {"Lines"}
+              </Button>
+              <Button
+                data-selected={!isSelectModeLines}
+                size="xs"
+                onClick={() => setIsSelectModeLines(!isSelectModeLines)}
+                title="Toggle from Lumps to lines"
+              >
+                {"Lumps"}
+              </Button>
+            </div>
           )}
 
           {!isSelectModeLines && selectedLumps.length > 0 && (
@@ -143,6 +154,35 @@ export function TrajectoriesChart() {
             </Button>
           )}
         </div>
+
+        {isSelectModeLines && (
+          <div>
+            <Button
+              size="xs"
+              data-selected={trajectoriesSelectionMode === "all"}
+              onClick={() => setTrajectoriesSelectionMode("all")}
+              title="All lines"
+            >
+              {"All"}
+            </Button>
+            <Button
+              size="xs"
+              data-selected={trajectoriesSelectionMode === "parallel"}
+              onClick={() => setTrajectoriesSelectionMode("parallel")}
+              title="All lines"
+            >
+              {"Parallel"}
+            </Button>
+            <Button
+              size="xs"
+              data-selected={trajectoriesSelectionMode === "diagonal"}
+              onClick={() => setTrajectoriesSelectionMode("diagonal")}
+              title="diagonal lines"
+            >
+              {"Diagonal"}
+            </Button>
+          </div>
+        )}
 
         <AnimatePresence>
           {enableScrub && hoveredTrajectoriesIDs.length > 0 && (

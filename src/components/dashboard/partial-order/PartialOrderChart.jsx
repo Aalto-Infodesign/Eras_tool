@@ -127,8 +127,7 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
 
 export function PartialOrderChart() {
   const { idealSilhouettes } = useData()
-  const { completeSilhouettes, selectedSilhouettesData } = useDerivedData()
-  const { filteredLinks } = useContext(TrajectoriesContext)
+  const { completeSilhouettes, selectedSilhouettesData, filteredLinks } = useDerivedData()
 
   const silhouettesData =
     selectedSilhouettesData.length === 0 ? completeSilhouettes : selectedSilhouettesData
