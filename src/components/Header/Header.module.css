@@ -1,0 +1,15 @@
+.header {
+  position: relative;
+  min-height: 30px;
+  display: flex;
+  gap: var(--spacing-md);
+  background-color: var(--surface-contrast);
+  padding: var(--spacing-sm);
+  align-items: center;
+  border-radius: var(--radius-md);
+}
+
+h1.title {
+  font-size: var(--text-md);
+  margin: 0;
+}

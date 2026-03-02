@@ -1,15 +1,17 @@
 import { useMemo } from "react"
-import { getDominancePairsSelf } from "../../../../utils/POHelperFunctions"
+
 import { po } from "../../../../utils/po"
 
 import { groupBy, flattenDeep } from "lodash"
 
 import { scalePoint, scaleLinear } from "d3"
-import { useData } from "../../../../contexts/ProcessedDataContext"
+
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
+import { useFilters } from "../../../../contexts/FiltersContext"
 
 export const useSilhouettesPoset = (posetData, statesNamesLoaded) => {
   // const { silhouettes } = useData()
+  const { filtersActive } = useFilters()
   const { completeSilhouettes } = useDerivedData()
 
   console.log("PO STRUCT", posetData)
@@ -50,9 +52,11 @@ export const useSilhouettesPoset = (posetData, statesNamesLoaded) => {
     if (!orderedData || !completeSilhouettes) return null
 
     const { poset } = orderedData
-    const filteredSilhouettesNames = completeSilhouettes
-      .filter((s) => s.isFiltered)
-      .map((s) => s.name)
+
+    const data = filtersActive
+      ? completeSilhouettes.filter((s) => s.isFiltered)
+      : completeSilhouettes
+    const filteredSilhouettesNames = data.map((s) => s.name)
     console.log(filteredSilhouettesNames)
     // Add/overwrite the orderedName feature now that we have statesNamesLoaded
     poset.feature("included", (name) => {

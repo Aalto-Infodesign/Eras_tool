@@ -12,6 +12,7 @@ import { SidePanel } from "./components/dashboard/side-panel/SidePanel"
 
 import { Loader } from "lucide-react"
 import { TitleAnimation } from "./components/landing/TitleAnimation"
+import { Header } from "./components/Header/Header"
 
 function App() {
   return (
@@ -36,37 +37,37 @@ function AppContent() {
   const { isLegend, isLoading } = useViz()
 
   return (
-    <>
-      <main
-        className="App"
-        // style={{ position: isLegend && "relative" }}
-      >
-        <AnimatePresence>{!richData?.length && <TitleAnimation />}</AnimatePresence>
-        {isLoading && (
-          <div
-            style={{
-              position: "absolute",
-              width: 100,
-              height: 100,
-              bottom: 0,
-              right: 0,
-              background: "rgba(0, 0, 0, 0)",
-              zIndex: 9999,
-              display: "grid",
-              placeItems: "center", // centers your spinner
-            }}
-          >
-            <motion.div animate={{ rotate: 180 }} transition={{ repeat: Infinity, duration: 2 }}>
-              <Loader />
-            </motion.div>
-          </div>
+    <div className="App">
+      <AnimatePresence>{!richData?.length && <TitleAnimation />}</AnimatePresence>
+      {isLoading && (
+        <div
+          style={{
+            position: "absolute",
+            width: 100,
+            height: 100,
+            bottom: 0,
+            right: 0,
+            background: "rgba(0, 0, 0, 0)",
+            zIndex: 9999,
+            display: "grid",
+            placeItems: "center", // centers your spinner
+          }}
+        >
+          <motion.div animate={{ rotate: 180 }} transition={{ repeat: Infinity, duration: 2 }}>
+            <Loader />
+          </motion.div>
+        </div>
+      )}
+      <FileLoader />
+      <AnimatePresence>
+        {richData?.length && silhouettes && isLegend && (
+          <>
+            <Header />
+            <Dashboard />
+          </>
         )}
-        <FileLoader />
-        <AnimatePresence>
-          {richData?.length && silhouettes && isLegend && <Dashboard />}
-        </AnimatePresence>
-      </main>
+      </AnimatePresence>
       {isLegend && <SidePanel />}
-    </>
+    </div>
   )
 }

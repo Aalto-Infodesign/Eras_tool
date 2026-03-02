@@ -12,7 +12,7 @@ export function FilterPanel() {
     /* <Chip key={filter.id} label={filter.label} onRemove={filter.onRemove} /> */
   }
   return (
-    <section className={styles.filterPanel}>
+    <div className={styles.filterPanel}>
       {activeFilters.map((filter) => (
         <div className={styles.filterChip}>
           <span>{filter.label}</span>
@@ -21,7 +21,7 @@ export function FilterPanel() {
           </Button>
         </div>
       ))}
-    </section>
+    </div>
   )
 }
 

@@ -119,8 +119,6 @@ const Dashboard = () => {
     >
       <LayoutGroup>
         <AnimatePresence>
-          <FilterPanel />
-
           {isCmdPressed && (
             <motion.div className="key-pop-up">
               <Command size={16} />

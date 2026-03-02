@@ -35,7 +35,7 @@
 .loader-wrapper.corner {
   position: absolute;
   top: var(--spacing-md);
-  right: var(--spacing-md);
+  right: var(--spacing-xl);
   transform: translate(0, 0);
   padding: 0rem;
 }

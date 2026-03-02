@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useMemo, useCallback, useEffect } from "react"
 import { useData } from "./ProcessedDataContext"
-import { isEqual } from "lodash"
+import { isEqual, isEmpty } from "lodash"
 
 const FiltersContext = createContext(null)
 
@@ -71,6 +71,11 @@ export function FiltersProvider({ children }) {
     })
   }
 
+  const filtersActive = useMemo(() => {
+    if (isEmpty(filters)) return false
+    return filters.date.isActive || filters.diseaseDuration.isActive || filters.speed.isActive
+  }, [filters])
+
   const value = useMemo(
     () => ({
       updateSelection,
@@ -87,6 +92,8 @@ export function FiltersProvider({ children }) {
       setSelectedTrajectoriesIDs,
       trajectoriesSelectionMode,
       setTrajectoriesSelectionMode,
+      //Flag
+      filtersActive,
     }),
     [
       updateSelection,
@@ -101,6 +108,8 @@ export function FiltersProvider({ children }) {
       setSelectedTrajectoriesIDs,
       trajectoriesSelectionMode,
       setTrajectoriesSelectionMode,
+      //Flag
+      filtersActive,
     ],
   )
 

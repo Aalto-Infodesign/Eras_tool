@@ -19,8 +19,13 @@ const DerivedContext = createContext(null)
 
 export function DerivedDataProvider({ children }) {
   const { silhouettes, richData, idealSilhouettes } = useData()
-  const { filters, selectedSilhouettesNames, selectedTrajectoriesIDs, trajectoriesSelectionMode } =
-    useFilters()
+  const {
+    filters,
+    filtersActive,
+    selectedSilhouettesNames,
+    selectedTrajectoriesIDs,
+    trajectoriesSelectionMode,
+  } = useFilters()
   const { chartType } = useViz()
 
   console.log("Silhouettes", silhouettes)
@@ -31,7 +36,7 @@ export function DerivedDataProvider({ children }) {
   const filteredData = useMemo(() => {
     if (!isReady) return []
 
-    if (!filters.date.isActive && !filters.diseaseDuration.isActive) return richData
+    if (!filtersActive) return richData
 
     return richData
       .filter(
@@ -47,7 +52,7 @@ export function DerivedDataProvider({ children }) {
           (Math.floor(min(datum.years)) >= filters.date.selection[0] &&
             Math.floor(max(datum.years)) <= filters.date.selection[1]),
       )
-  }, [richData, filters])
+  }, [richData, filters, filtersActive])
 
   console.log("fd", filteredData)
 
@@ -67,7 +72,7 @@ export function DerivedDataProvider({ children }) {
 
   // Step 2: derive silhouettes from filtered data
   const silhouettesMap = useMemo(() => {
-    if (filteredSilhouettes.length === 0) return new Map()
+    if (filteredSilhouettes.length === 0 || !filtersActive) return new Map()
 
     const map = new Map()
     filteredSilhouettes.forEach((s) => map.set(s.name, s))

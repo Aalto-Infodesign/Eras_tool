@@ -8,6 +8,7 @@ import { usePosetLayout, useSilhouettesPoset } from "../hooks/usePosetLayout"
 import { useNodeStyling } from "../hooks/useNodeStyling"
 
 import { SilhouettePathSvg } from "../shared/SilhouettePathSvg"
+import { useFilters } from "../../../../contexts/FiltersContext"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -26,6 +27,7 @@ export function HasseDiagram({
 }) {
   const { silhouettes } = useData()
   const { isHasse } = useViz()
+  const { filterActive } = useFilters()
   const [hoveredNode, setHoveredNode] = useState(null)
   const hoverTimeoutRef = useRef(null)
 
@@ -223,8 +225,10 @@ export function HasseDiagram({
 const HasseLink = ({ cover, src, tgt, isHasse, isSelected, toggleSilhouetteFilter }) => {
   const { palette } = useViz()
   const d = `M${src.xPosition},${src.yPositionScaled} L${tgt.xPosition},${tgt.yPositionScaled}`
-
   const targetIndex = cover.target[cover.target.length - 1]
+
+  const opacity = src.included && tgt.included ? 1 : 0.2
+  const strokeColor = isSelected ? "#ccc" : palette[targetIndex]
 
   return (
     <motion.path
@@ -232,12 +236,14 @@ const HasseLink = ({ cover, src, tgt, isHasse, isSelected, toggleSilhouetteFilte
       initial={{
         pathLength: 0,
         d,
-        stroke: isSelected ? "#ccc" : palette[targetIndex],
+        stroke: strokeColor,
+        opacity: opacity,
       }}
       animate={{
         pathLength: 1,
         d,
-        stroke: isSelected ? "#ccc" : palette[targetIndex],
+        stroke: strokeColor,
+        opacity: opacity,
       }}
       exit={{ pathLength: 0 }}
       transition={{

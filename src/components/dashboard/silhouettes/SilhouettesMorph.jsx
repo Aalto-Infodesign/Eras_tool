@@ -31,8 +31,12 @@ import Button from "../../common/Button/Button"
 export const SilhouettesMorph = () => {
   const { idealSilhouettes, statesData } = useData()
   const { palette, statesOrder, setStatesOrder, isHasse, setIsHasse } = useViz()
-  const { toggleSilhouetteFilter, setSelectedSilhouettesNames, selectedSilhouettesNames } =
-    useFilters()
+  const {
+    filtersActive,
+    toggleSilhouetteFilter,
+    setSelectedSilhouettesNames,
+    selectedSilhouettesNames,
+  } = useFilters()
 
   const { completeSilhouettes } = useDerivedData()
 
@@ -299,11 +303,13 @@ export const SilhouettesMorph = () => {
 
                   const isExpandible = true
 
-                  const opacity = s.isFiltered
-                    ? (isCmdPressed || expandSides) && hoveredIndex !== null && !isHovered
-                      ? 0.5
-                      : 1
-                    : 0.5
+                  const opacity = !filtersActive
+                    ? 1
+                    : s.isFiltered
+                      ? (isCmdPressed || expandSides) && hoveredIndex !== null && !isHovered
+                        ? 0.5
+                        : 1
+                      : 0.5
 
                   const cardVariants = {
                     hidden: { opacity: 1, scale: 1 },
@@ -410,13 +416,12 @@ function SilhouetteCardMain({ s, i, ...props }) {
     isCmdPressed,
     isExpandible,
     handleLongPress,
-    isHasse,
+
     animationDuration,
     handleOrderClick,
     idealSilhouettes,
   } = props
 
-  const { palette } = useViz()
   const isTouchDevice = useIsTouchDevice()
 
   const longPressProps = useLongPressWithProgress({
@@ -486,17 +491,12 @@ function SilhouetteCardMain({ s, i, ...props }) {
         <span className={`typology-perc-text ${showFilterLabel && "filtered"}`}>
           {s.percentage > 1
             ? s.percentage.toFixed(showFilterLabel ? 1 : 2)
-            : s.percentage.toFixed(showFilterLabel ? 4 : 2)}
+            : s.percentage.toFixed(2)}
           %
         </span>
 
         {showFilterLabel && (
-          <span className="typology-perc-text">
-            {s.filtered.percentage > 1
-              ? s.filtered.percentage.toFixed(2)
-              : s.filtered.percentage.toFixed(4)}
-            %
-          </span>
+          <span className="typology-perc-text">{s.filtered.percentage.toFixed(2)}%</span>
         )}
       </span>
 
