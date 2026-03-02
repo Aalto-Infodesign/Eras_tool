@@ -1,7 +1,7 @@
 import { Panel, useReactFlow, getNodesBounds, getViewportForBounds } from "@xyflow/react"
 import { toPng } from "html-to-image"
 import { Download } from "lucide-react"
-import { downloadImage } from "../../../utils/downloadImage"
+import { downloadImage } from "../../../../utils/downloadImage"
 
 const imageWidth = 1024
 const imageHeight = 1024

@@ -17,6 +17,7 @@ export function VizProvider({ children }) {
   const [nodesFromFlow, setNodesFromFlow] = useState(null)
 
   // UI STATE
+  const [colorMode, setColorMode] = useState("standard") // standard || poset
   const [theme, setTheme] = useState("dark")
   const [isLegend, setIsLegend] = useState(false)
   const [loadingCount, setLoadingCount] = useState(0)
@@ -26,6 +27,12 @@ export function VizProvider({ children }) {
 
   useModifierKey("1", () => setChartType(1))
   useModifierKey("2", () => setChartType(2))
+
+  useModifierKey("p", () => setColorMode("poset"))
+  useModifierKey("s", () => setColorMode("standard"))
+
+  useModifierKey("t", () => setIsHasse(false))
+  useModifierKey("h", () => setIsHasse(true))
 
   const startLoading = useCallback(() => setLoadingCount((c) => c + 1), [])
   const stopLoading = useCallback(() => setLoadingCount((c) => Math.max(0, c - 1)), [])
@@ -100,7 +107,7 @@ export function VizProvider({ children }) {
   // Function that your FlowChart component can call
   const updatePosetColoring = (dominanceArray, nodes) => {
     // TODO Check if PO (only unique states)
-    if (dominanceArray && nodes) {
+    if (dominanceArray && nodes && colorMode === "poset") {
       console.log("Updating to flowchart-based POSET coloring")
       setDominanceArrayFromFlow(dominanceArray)
       setNodesFromFlow(nodes)
@@ -134,6 +141,8 @@ export function VizProvider({ children }) {
       setChartType,
       isHasse,
       setIsHasse,
+      colorMode,
+      setColorMode,
     }),
     [
       palette,
@@ -147,6 +156,8 @@ export function VizProvider({ children }) {
       stopLoading,
       chartType,
       setChartType,
+      colorMode,
+      setColorMode,
     ],
   )
 

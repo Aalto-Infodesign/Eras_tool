@@ -1,0 +1,8 @@
+.shortcut {
+  text-decoration: underline;
+  text-decoration-thickness: 0.1rem;
+}
+
+.separator {
+  padding: 0 0.2rem;
+}

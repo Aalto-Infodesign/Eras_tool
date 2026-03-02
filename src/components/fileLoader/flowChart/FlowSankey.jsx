@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
-import { Tooltip } from "../../common/Tooltip/Tooltip"
 import { motion } from "motion/react"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"

@@ -26,6 +26,7 @@ import { Virtuoso } from "react-virtuoso"
 import { X } from "lucide-react"
 import { useDerivedData } from "../../contexts/DerivedDataContext"
 import Button from "../common/Button/Button"
+import { ShortcutSpan } from "../common/ShortcutSpan/ShortcutSpan"
 
 export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
@@ -197,10 +198,10 @@ export function TrajectoriesExplorerChart(props) {
         <motion.div layout className="function-row">
           <div className="chart-modes">
             <Button size="xs" onClick={() => setChartType(1)} data-selected={chartType === 1}>
-              Parallel
+              <ShortcutSpan separator={"–"}>1</ShortcutSpan> Parallel
             </Button>
             <Button size="xs" onClick={() => setChartType(2)} data-selected={chartType === 2}>
-              Linear
+              <ShortcutSpan separator={"–"}>2</ShortcutSpan> Linear
             </Button>
           </div>
           <DownloadPanel />

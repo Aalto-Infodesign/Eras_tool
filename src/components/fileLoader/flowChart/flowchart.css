@@ -1,13 +1,20 @@
 @import url("./xy-theme.css");
 
+section.flow-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  place-content: center;
+}
+
 .dndflow {
   height: 100vh;
   max-height: 600px;
   width: 100vw;
   max-width: 600px;
   margin: 0 auto;
-  flex-direction: column;
   display: flex;
+  flex-direction: column;
   flex-grow: 1;
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -103,6 +110,20 @@
   /* position: absolute;
   bottom: 0;
   right: 1rem; */
+}
+
+.threshold-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  place-content: center;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  background-color: var(--surface-primary);
+}
+.threshold-panel input {
+  max-width: 75px;
 }
 
 @media screen and (min-width: 768px) {

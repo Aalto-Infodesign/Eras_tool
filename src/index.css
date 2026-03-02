@@ -433,15 +433,18 @@ button.inactive {
   stroke-width: 0.5px;
   cursor: pointer;
 }
-/* 
-@media (max-width: 1200px) {
-  .chart {
-    height: 30vh;
-  }
-  .chart-wrapper {
-    flex-direction: column;
-  }
-} */
+input[type="number"] {
+  width: 100%;
+  color: var(--text-light);
+  border: 1px solid var(--surface-light);
+  background-color: var(--surface-primary);
+  border-radius: var(--radius-md);
+  padding: 0.25rem;
+  margin: 10px 0;
+  box-sizing: border-box;
+  margin: 0;
+  margin-right: 0.2rem;
+}
 
 select {
   color: var(--surface-light);

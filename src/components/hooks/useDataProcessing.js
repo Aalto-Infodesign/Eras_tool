@@ -3,8 +3,8 @@ import { useMemo } from "react"
 import { max, range, quantile, groups, extent, descending, sort } from "d3"
 import { similarity } from "../../utils/levenshteinDistance"
 
-export function useDataProcessing(sourceData, scales, idealSilhouettes) {
-  const richData = useMemo(() => {
+export function useDataCleanup(sourceData, scales, statesThresholds) {
+  return useMemo(() => {
     if (!sourceData || !sourceData.length) return []
     console.time("Enrich")
 
@@ -22,13 +22,17 @@ export function useDataProcessing(sourceData, scales, idealSilhouettes) {
         // years: datum.SwitchEventAge.map((age) => age + startYear),
       }))
 
+    // Edit based on Couple of States Thresholds
+
     console.log("richData", richData)
 
     console.timeEnd("Enrich")
 
     return richData
-  }, [sourceData])
+  }, [sourceData, scales])
+}
 
+export function useDataProcessing(richData, idealSilhouettes) {
   const { statesData, analytics, trajectories } = useMemo(() => {
     if (!richData?.length) return { statesData: [], analytics: [], trajectories: [] }
     console.time("States Data")

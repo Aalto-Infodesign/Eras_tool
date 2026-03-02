@@ -25,6 +25,7 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
 import { usePosetWorker } from "./hooks/usePosetWorker"
 import Button from "../../common/Button/Button"
+import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 
 // ! TODO Refactor completo
 
@@ -185,7 +186,7 @@ export const SilhouettesMorph = () => {
               onClick={() => setIsHasse(false)}
               data-selected={!isHasse}
             >
-              Trajectories
+              <ShortcutSpan>T</ShortcutSpan>rajectories
             </Button>
             <Button
               size="xs"
@@ -195,7 +196,14 @@ export const SilhouettesMorph = () => {
               data-selected={isHasse}
               disabled={!posetData}
             >
-              {!posetData ? "Loading..." : "Hasse"}
+              {!posetData ? (
+                <span>Loading...</span>
+              ) : (
+                <span>
+                  <ShortcutSpan>H</ShortcutSpan>
+                  asse
+                </span>
+              )}
             </Button>
           </div>
           {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}

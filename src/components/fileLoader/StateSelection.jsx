@@ -34,8 +34,8 @@ export function StateSelection() {
         data: {
           label: `${currentIndex} – ${scales.indexToName(stateIndex)}`,
           index: stateIndex,
-          value: 100,
-          category: "Disease || Drug",
+          value: `${scales.indexToName(stateIndex)}`,
+          category: "category",
           color: color,
         },
       }

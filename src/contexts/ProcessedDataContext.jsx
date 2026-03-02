@@ -3,7 +3,7 @@ import { useRawData } from "./RawDataContext"
 
 import { scaleOrdinal } from "d3"
 
-import { useDataProcessing } from "../components/hooks/useDataProcessing"
+import { useDataCleanup, useDataProcessing } from "../components/hooks/useDataProcessing"
 
 import { tsvJSON } from "../utils/dataHelpers"
 
@@ -13,7 +13,10 @@ export function ProcessedDataProvider({ children }) {
   const { rawData, fileName } = useRawData()
   const [clusterStates, setClusterStates] = useState(false) // Option in import
   const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
+
+  // from Flowchart
   const [idealSilhouettes, setIdealSilhouettes] = useState([])
+  const [statesThresholds, setStatesThresholds] = useState(null)
 
   // Take Raw Data and parse it based on file format
   const parsedData = useMemo(() => {
@@ -81,9 +84,10 @@ export function ProcessedDataProvider({ children }) {
     return scales
   }, [data])
 
-  const { richData, statesData, analytics, silhouettes, filters } = useDataProcessing(
-    data,
-    scales,
+  const richData = useDataCleanup(data, scales, statesThresholds)
+
+  const { statesData, analytics, silhouettes, filters } = useDataProcessing(
+    richData,
     idealSilhouettes,
   )
 
@@ -93,6 +97,20 @@ export function ProcessedDataProvider({ children }) {
     [silhouettes, idealSilhouettes],
   )
 
+  const addStateThreshold = (obj) => {
+    setStatesThresholds((prev) => {
+      const exists = prev.some((item) => item.source === obj.source && item.target === obj.target)
+
+      if (exists) {
+        // Either skip or replace — here we replace:
+        return prev.map((item) =>
+          item.source === obj.source && item.target === obj.target ? obj : item,
+        )
+      }
+
+      return [...prev, obj]
+    })
+  }
   const value = useMemo(
     () => ({
       // State
@@ -110,6 +128,10 @@ export function ProcessedDataProvider({ children }) {
       setIdealSilhouettes,
       setClusterStates,
       setRemovedStates,
+
+      // From Flowhchart
+      statesThresholds,
+      addStateThreshold,
     }),
     [
       richData,
@@ -123,6 +145,8 @@ export function ProcessedDataProvider({ children }) {
       analytics,
       silhouettes,
       filters,
+      statesThresholds,
+      addStateThreshold,
     ],
   )
 
