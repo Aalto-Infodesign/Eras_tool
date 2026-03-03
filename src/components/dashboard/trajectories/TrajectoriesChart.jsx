@@ -127,6 +127,7 @@ export function TrajectoriesChart() {
               <Button
                 data-selected={isSelectModeLines}
                 size="xs"
+                variant="secondary"
                 onClick={() => setIsSelectModeLines(!isSelectModeLines)}
                 title="Toggle from Lumps to lines"
               >
@@ -135,6 +136,7 @@ export function TrajectoriesChart() {
               <Button
                 data-selected={!isSelectModeLines}
                 size="xs"
+                variant="secondary"
                 onClick={() => setIsSelectModeLines(!isSelectModeLines)}
                 title="Toggle from Lumps to lines"
               >
@@ -146,6 +148,7 @@ export function TrajectoriesChart() {
           {!isSelectModeLines && selectedLumps.length > 0 && (
             <Button
               size="xs"
+              variant="secondary"
               data-selected={showLinesOfSelectedLumps}
               onClick={() => setShowLinesOfSelectedLumps(!showLinesOfSelectedLumps)}
               title="When lumps are selected, show the lines"
@@ -159,6 +162,7 @@ export function TrajectoriesChart() {
           <div>
             <Button
               size="xs"
+              variant="secondary"
               data-selected={trajectoriesSelectionMode === "vertical"}
               onClick={() => setTrajectoriesSelectionMode("vertical")}
               title="Vertical lines"
@@ -167,6 +171,7 @@ export function TrajectoriesChart() {
             </Button>
             <Button
               size="xs"
+              variant="secondary"
               data-selected={trajectoriesSelectionMode === "all"}
               onClick={() => setTrajectoriesSelectionMode("all")}
               title="All lines"
@@ -175,6 +180,7 @@ export function TrajectoriesChart() {
             </Button>
             <Button
               size="xs"
+              variant="secondary"
               data-selected={trajectoriesSelectionMode === "diagonal"}
               onClick={() => setTrajectoriesSelectionMode("diagonal")}
               title="Diagonal lines"

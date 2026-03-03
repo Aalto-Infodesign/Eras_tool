@@ -99,12 +99,14 @@ export function ProcessedDataProvider({ children }) {
 
   const addStateThreshold = (obj) => {
     setStatesThresholds((prev) => {
-      const exists = prev.some((item) => item.source === obj.source && item.target === obj.target)
+      const exists = prev.some(
+        (item) => item.sourceState === obj.sourceState && item.targetState === obj.targetState,
+      )
 
       if (exists) {
         // Either skip or replace — here we replace:
         return prev.map((item) =>
-          item.source === obj.source && item.target === obj.target ? obj : item,
+          item.sourceState === obj.sourceState && item.targetState === obj.targetState ? obj : item,
         )
       }
 

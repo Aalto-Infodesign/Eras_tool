@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { EdgeToolbar, getBezierPath, BaseEdge, useReactFlow } from "@xyflow/react"
 import Button from "../../../common/Button/Button"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
@@ -13,19 +13,18 @@ export function EdgeWithField(props) {
 
   const inputRef = useRef(null)
 
-  const setThresholdBetweenStates = (n) => {
-    console.log(`${n} months`)
-    setShowInput(!showInput)
+  // useEffect(() => console.log("ST", statesThresholds), [statesThresholds])
 
+  const setThresholdBetweenStates = () => {
     if (inputRef.current) {
       const obj = {
         sourceState: sourceLabel,
         targetState: targetLabel,
         threshold: Number(inputRef.current.value),
       }
-
-      addStateThreshold(obj)
+      if (showInput) addStateThreshold(obj)
     }
+    setShowInput(!showInput)
   }
 
   //   const sourceLabel = "a"

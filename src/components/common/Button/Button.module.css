@@ -36,11 +36,27 @@
 
 .secondary {
   background-color: var(--surface-primary);
+  color: white;
+  opacity: 0.8;
+}
+.secondary[data-selected="true"] {
+  color: var(--text-dark);
+  background-color: var(--surface-light);
+  opacity: 0.8;
+}
+.secondary[data-selected="true"]:hover {
+  color: var(--text-dark);
+  background-color: var(--surface-accent);
+  opacity: 0.8;
+}
+
+/* .secondary {
+  background-color: var(--surface-primary);
   color: var(--surface-light);
-}
-.secondary:hover:not(:disabled) {
+} */
+/* .secondary:hover:not(:disabled) {
   background-color: var(--surface-tertiary);
-}
+} */
 
 .tertiary {
   background-color: transparent;

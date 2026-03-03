@@ -66,6 +66,7 @@ function applyRuleToPatient(patient, rule) {
   // a swap at index i doesn't affect whether index i+1 needs checking too.
   let i = 0
   while (i < trajectory.length - 1) {
+    console.log("Apply Rule")
     const currentState = trajectory[i]
     const nextState = trajectory[i + 1]
 

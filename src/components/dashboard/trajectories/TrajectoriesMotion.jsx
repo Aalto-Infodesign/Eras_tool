@@ -116,7 +116,7 @@ export function TrajectoriesMotion(props) {
             const isHovered = hoveredTrajectoriesIDs.includes(d.id)
             const isSelected = selectedTrajectoriesIDs.includes(d.id)
 
-            let offset = 0
+            let dash = 0
             if (d.speed !== 0) {
               const length = Math.hypot(
                 Math.abs(x(d.target.x) - x(d.source.x)),
@@ -128,7 +128,7 @@ export function TrajectoriesMotion(props) {
               const totalGap = startGap + endGap
               const visibleLength = length - totalGap
 
-              offset = `${visibleLength} ${totalGap} `
+              dash = `${visibleLength} ${totalGap} `
 
               return (
                 <MotionLine
@@ -140,15 +140,17 @@ export function TrajectoriesMotion(props) {
                   y1={y(d.source.state) + marginTop}
                   y2={y(d.target.state) + marginTop}
                   color={palette[d.source.state]}
-                  offset={offset}
+                  dash={dash}
                   isSelected={isSelected}
                   animationDuration={lines.length > 1000 ? 0.0 : 0.2}
                   onClick={() => toggleSelectedTrajectory(d.id)}
                 />
               )
             } else {
-              const offset1 = "1 0"
-              const offset2 = " 1 1"
+              const dash1 = "3 5"
+              const of1 = -3
+              const dash2 = "3 5"
+              const of2 = 1
               return (
                 <motion.g key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}>
                   <MotionLine
@@ -160,7 +162,9 @@ export function TrajectoriesMotion(props) {
                     y1={y(d.source.state) + marginTop}
                     y2={y(d.target.state) + marginTop}
                     color={palette[d.source.state]}
-                    offset={offset1}
+                    dash={dash1}
+                    dashOffset={of1}
+                    // strokeWidth={0.5}
                     isSelected={isSelected}
                     animationDuration={lines.length > 1000 ? 0.0 : 0.2}
                     onClick={() => toggleSelectedTrajectory(d.id)}
@@ -174,7 +178,9 @@ export function TrajectoriesMotion(props) {
                     y1={y(d.source.state) + marginTop}
                     y2={y(d.target.state) + marginTop}
                     color={palette[d.target.state]}
-                    offset={offset2}
+                    dash={dash2}
+                    dashOffset={of2}
+                    // strokeWidth={0.5}
                     isSelected={isSelected}
                     animationDuration={lines.length > 1000 ? 0.0 : 0.2}
                     onClick={() => toggleSelectedTrajectory(d.id)}
@@ -247,7 +253,9 @@ const MotionLine = ({
   y1,
   y2,
   color,
-  offset,
+  dash,
+  dashOffset = -1,
+  strokeWidth = 0.25,
   isSelected,
   animationDuration,
   onClick,
@@ -261,10 +269,10 @@ const MotionLine = ({
         x2: x2,
         y1: y1,
         y2: y2,
-        strokeWidth: 0.25,
+        strokeWidth: strokeWidth,
         stroke: color,
-        strokeDasharray: offset,
-        strokeDashoffset: -1,
+        strokeDasharray: dash,
+        strokeDashoffset: dashOffset,
         opacity: 0,
       }}
       animate={{
@@ -273,8 +281,9 @@ const MotionLine = ({
         y1: y1,
         y2: y2,
 
-        strokeDasharray: offset,
-        strokeWidth: isSelected ? 1.5 : 0.25,
+        strokeDasharray: dash,
+        strokeDashoffset: dashOffset,
+        strokeWidth: isSelected ? 1.5 : strokeWidth,
         stroke: color,
 
         opacity: 1,

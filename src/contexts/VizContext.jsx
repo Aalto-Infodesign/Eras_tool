@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useMemo, useEffect, useCallback } 
 import { useRawData } from "./RawDataContext"
 import { useData } from "./ProcessedDataContext"
 import { zip } from "lodash"
+import { max } from "d3"
 
 import { po } from "../utils/po"
 import { getDominancePairsSelfUpper } from "../utils/POHelperFunctions"
@@ -11,7 +12,7 @@ const VizContext = createContext(null)
 
 export function VizProvider({ children }) {
   const { fileName } = useRawData()
-  const { scales, statesData } = useData()
+  const { scales, statesData, idealSilhouettes } = useData()
   const [statesOrder, setStatesOrder] = useState([])
   const [dominanceArrayFromFlow, setDominanceArrayFromFlow] = useState(null)
   const [nodesFromFlow, setNodesFromFlow] = useState(null)
@@ -28,7 +29,7 @@ export function VizProvider({ children }) {
   useModifierKey("1", () => setChartType(1))
   useModifierKey("2", () => setChartType(2))
 
-  useModifierKey("p", () => setColorMode("poset"))
+  useModifierKey("t", () => setColorMode("poset"))
   useModifierKey("s", () => setColorMode("standard"))
 
   useModifierKey("t", () => setIsHasse(false))
@@ -43,6 +44,11 @@ export function VizProvider({ children }) {
     }
   }, [fileName])
 
+  const maxChainLength = useMemo(() => {
+    if (!idealSilhouettes.length) return 0
+    return max(idealSilhouettes.map((s) => s.split("-").length))
+  }, [idealSilhouettes])
+
   // Function to generate palette from dominance array
   const generatePaletteFromDominance = (dominanceArray, dominanceNodes) => {
     if (!dominanceArray) return null
@@ -50,31 +56,49 @@ export function VizProvider({ children }) {
     const statesOrderOriginal = dominanceNodes.map((_t, i) => `${i}`)
     const stateNamesSorted = statesOrderOriginal.toSorted()
 
-    // console.log("dominance Array", dominanceArray)
-
     const { matrix, nodes } = po.domFromEdges(dominanceArray)
+
+    const getColorSpace = (min, max, midPoint, step, length) => {
+      console.log(length)
+
+      if (length < 2) return { min: min, max: max }
+
+      const minV = midPoint - step * length
+      const maxV = midPoint + step * length
+      const Cmin = minV > min ? minV : min
+      const Cmax = maxV < max ? maxV : max
+
+      return { min: Cmin, max: Cmax }
+    }
 
     // console.log("POSET Matrix:", matrix)
     // console.log("POSET Nodes:", nodes)
-    const posetInterdipendency = po.createPoset(matrix, nodes)
+    const poset = po.createPoset(matrix, nodes)
 
-    posetInterdipendency
+    poset
       .enrich()
       .feature("aFeature", 0)
-      .feature("upset", (node) => posetInterdipendency.getUpset(node))
-      .feature("above", (node) => posetInterdipendency.getCovering(node))
-      .feature("below", (node) => posetInterdipendency.getCovered(node))
-      .feature("downset", (node) => posetInterdipendency.getDownset(node))
+      .feature("upset", (node) => poset.getUpset(node))
+      .feature("above", (node) => poset.getCovering(node))
+      .feature("below", (node) => poset.getCovered(node))
+      .feature("downset", (node) => poset.getDownset(node))
       .feature("upsetLength", (node, row) => row.upset.length)
       // SET Analytic che e una scala mappando
       .setLayers()
-      .color(0, 40, 80, false) // Based on Layer length
+
+    const { min, max } = getColorSpace(40, 90, 65, 5, maxChainLength)
+
+    console.log(min)
+    console.log(max)
+
+    poset.color(20, min, max, false) // Based on Layer length
+
     // .feature("jchFill", (_node, d) => {
     //   const JCH = jch(d.pTheta, d.pAlpha * 100, d.pL)
     //   return `hsl(${JCH.J},${JCH.C}%,${JCH.h}%)`
     // })
 
-    const posetFeatures = posetInterdipendency.features
+    const posetFeatures = poset.features
 
     // console.log("POSET Features:", posetFeatures)
     // console.log("SNames:", dominanceNodes)

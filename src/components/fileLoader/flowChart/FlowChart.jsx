@@ -109,14 +109,14 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
           data-selected={colorMode === "standard"}
           onClick={() => setColorMode("standard")}
         >
-          <ShortcutSpan>S</ShortcutSpan>tandard
+          <ShortcutSpan>S</ShortcutSpan>tate
         </Button>
         <Button
           size="xs"
           data-selected={colorMode === "poset"}
           onClick={() => setColorMode("poset")}
         >
-          <ShortcutSpan>P</ShortcutSpan>oset
+          <ShortcutSpan>T</ShortcutSpan>ransition
         </Button>
       </div>
       <div className="dndflow">

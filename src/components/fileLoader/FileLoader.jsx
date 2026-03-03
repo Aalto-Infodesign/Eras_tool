@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
+import { Activity } from "react"
 import LoadDataset from "./LoadDataset"
 import { StateSelection } from "./StateSelection"
 import { ProcessButton } from "./ProcessButton"
@@ -113,7 +114,10 @@ export function FileLoader({}) {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* <Activity mode={!isLegend && hasFlowChart ? "visible" : "hidden"}> */}
             {!isLegend && hasFlowChart && <FlowChart setSankeyData={setSankeyData} />}
+            {/* </Activity> */}
           </ReactFlowProvider>
         </div>
       )}
