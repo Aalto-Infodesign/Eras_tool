@@ -48,7 +48,7 @@ export const Sankey = ({ width, height, data }) => {
       console.error("Sankey Generation Failed:", error.message)
       return { nodes: [], links: [] }
     }
-  }, [data, width, height]) // Only recalculates if these change
+  }, [data, width, height, palette]) // Only recalculates if these change
 
   //   console.log("Sankey nodes:", nodes)
   useEffect(() => {

@@ -28,7 +28,7 @@ export function DerivedDataProvider({ children }) {
   } = useFilters()
   const { chartType } = useViz()
 
-  console.log("Silhouettes", silhouettes)
+  // console.log("Silhouettes", silhouettes)
 
   const isReady = silhouettes?.length > 0 && richData?.length > 0 && !isEmpty(filters)
 
@@ -54,7 +54,7 @@ export function DerivedDataProvider({ children }) {
       )
   }, [richData, filters, filtersActive])
 
-  console.log("fd", filteredData)
+  // console.log("fd", filteredData)
 
   const filteredTrajectories = useMemo(() => {
     if (filteredData.length === 0) return []
@@ -82,7 +82,7 @@ export function DerivedDataProvider({ children }) {
   const completeSilhouettes = useMemo(() => {
     if (!silhouettesMap) return []
 
-    console.log(silhouettesMap)
+    // console.log(silhouettesMap)
     return silhouettes.map((s) => {
       const filteredVersion = silhouettesMap.get(s.name) ?? null
       return {

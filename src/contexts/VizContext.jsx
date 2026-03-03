@@ -29,8 +29,8 @@ export function VizProvider({ children }) {
   useModifierKey("1", () => setChartType(1))
   useModifierKey("2", () => setChartType(2))
 
-  useModifierKey("t", () => setColorMode("poset"))
-  useModifierKey("s", () => setColorMode("standard"))
+  // useModifierKey("p", () => setColorMode("poset"))
+  useModifierKey("s", () => setColorMode((prev) => (prev === "standard" ? "poset" : "standard")))
 
   useModifierKey("t", () => setIsHasse(false))
   useModifierKey("h", () => setIsHasse(true))
@@ -49,6 +49,8 @@ export function VizProvider({ children }) {
     return max(idealSilhouettes.map((s) => s.split("-").length))
   }, [idealSilhouettes])
 
+  console.log("LENGTH", maxChainLength)
+
   // Function to generate palette from dominance array
   const generatePaletteFromDominance = (dominanceArray, dominanceNodes) => {
     if (!dominanceArray) return null
@@ -61,14 +63,29 @@ export function VizProvider({ children }) {
     const getColorSpace = (min, max, midPoint, step, length) => {
       console.log(length)
 
-      if (length < 2) return { min: min, max: max }
+      if (colorMode !== "poset") return { min: 40, max: 90 }
 
-      const minV = midPoint - step * length
-      const maxV = midPoint + step * length
-      const Cmin = minV > min ? minV : min
-      const Cmax = maxV < max ? maxV : max
+      if (length === 0) return { min: min, max: max }
 
-      return { min: Cmin, max: Cmax }
+      // console.log(step)
+      // const Step = (max - min) / 2 / length
+      // console.log("STEP", Step)
+
+      // const minV = midPoint - Step
+      // const maxV = midPoint + Step
+      // const Cmin = minV > min ? minV : min
+      // const Cmax = maxV < max ? maxV : max
+
+      // return { min: Cmin, max: Cmax }
+
+      const STEP = (max - min) / length
+
+      const minV = midPoint - STEP
+      const maxV = midPoint + STEP
+
+      if (minV > min || maxV < max) return { min: minV, max: maxV }
+
+      return { min: midPoint - 10 * length, max: midPoint - 10 * length }
     }
 
     // console.log("POSET Matrix:", matrix)
@@ -86,10 +103,10 @@ export function VizProvider({ children }) {
       // SET Analytic che e una scala mappando
       .setLayers()
 
-    const { min, max } = getColorSpace(40, 90, 65, 5, maxChainLength)
+    const { min, max } = getColorSpace(20, 90, 65, 10, maxChainLength)
 
-    console.log(min)
-    console.log(max)
+    console.log("MIN", min)
+    console.log("MAX", max)
 
     poset.color(20, min, max, false) // Based on Layer length
 
@@ -118,15 +135,19 @@ export function VizProvider({ children }) {
     const statesOrderOriginal = statesNames.map((_t, i) => `${i}`)
 
     // Priority: Use flowchart dominance if available, otherwise use default
-    const dominanceArray = dominanceArrayFromFlow || getDominancePairsSelfUpper(statesNames)
+    const dominanceFromStates = getDominancePairsSelfUpper(statesNames)
+    const dominanceArray = dominanceArrayFromFlow || dominanceFromStates
     const nodes = nodesFromFlow || statesNames
 
-    const palette = generatePaletteFromDominance(dominanceArray, nodes)
+    const palette =
+      colorMode === "poset"
+        ? generatePaletteFromDominance(dominanceArray, nodes)
+        : generatePaletteFromDominance(dominanceFromStates, statesNames)
 
     // console.timeEnd("Palette Poset")
 
     return { palette, statesOrderOriginal }
-  }, [statesData, scales, dominanceArrayFromFlow])
+  }, [statesData, scales, dominanceArrayFromFlow, idealSilhouettes, colorMode])
 
   // Function that your FlowChart component can call
   const updatePosetColoring = (dominanceArray, nodes) => {

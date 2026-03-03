@@ -58,7 +58,9 @@ function AppContent() {
           </motion.div>
         </div>
       )}
+
       <FileLoader />
+
       <AnimatePresence>
         {richData?.length && silhouettes && isLegend && (
           <>
