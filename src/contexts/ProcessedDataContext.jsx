@@ -16,7 +16,7 @@ export function ProcessedDataProvider({ children }) {
 
   // from Flowchart
   const [idealSilhouettes, setIdealSilhouettes] = useState([])
-  const [statesThresholds, setStatesThresholds] = useState(null)
+  const [statesThresholds, setStatesThresholds] = useState([])
 
   // Take Raw Data and parse it based on file format
   const parsedData = useMemo(() => {

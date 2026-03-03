@@ -12,7 +12,7 @@ export const Sankey = ({ width, height, data }) => {
   const { palette } = useViz()
   const [hoveredNode, setHoveredNode] = useState(null)
 
-  console.log("Sankey data", data)
+  // console.log("Sankey data", data)
   // Use useMemo to stabilize the 'nodes' and 'links' references
   const { nodes, links } = useMemo(() => {
     const dataForSankey = {

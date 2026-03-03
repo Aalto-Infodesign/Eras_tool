@@ -32,9 +32,9 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
       })
     })
 
-    console.log("Trajectory to Silhouette Map:", trajectoryToSilhouetteMap)
+    // console.log("Trajectory to Silhouette Map:", trajectoryToSilhouetteMap)
 
-    console.log("Filtered Links:", filteredLinks)
+    // console.log("Filtered Links:", filteredLinks)
 
     // Helper function to add sequential order to link states
     const addOrderToStates = (links) => {
@@ -71,7 +71,7 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
       silhouette: trajectoryToSilhouetteMap.get(l.id) || "unknown",
     }))
 
-    console.log("links with Order:", linksWithOrder)
+    // console.log("links with Order:", linksWithOrder)
     // --- Step 2: Calculate the Partially Ordered Set (Poset) ---
 
     const temporal_states = silhouettes.map((s) => ({
@@ -101,7 +101,7 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
       linksBySourceTargetMap.get(key).push(link)
     })
 
-    console.log("Links by Source-Target Map:", linksBySourceTargetMap)
+    // console.log("Links by Source-Target Map:", linksBySourceTargetMap)
 
     const linksWithValue = coverRels.map((c) => {
       // The key is flipped because the cover relation is reversed from the link direction.
@@ -116,7 +116,7 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
       }
     })
 
-    console.log("Links with Value:", linksWithValue)
+    // console.log("Links with Value:", linksWithValue)
 
     // const linksNotEmpty = linksWithValue
     const linksNotEmpty = linksWithValue.filter((l) => l.value > 0)

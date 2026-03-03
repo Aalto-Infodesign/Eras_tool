@@ -2,15 +2,26 @@ import { useMemo } from "react"
 
 import { max, range, quantile, groups, extent, descending, sort } from "d3"
 import { similarity } from "../../utils/levenshteinDistance"
+import { cleanTrajectories } from "../../utils/cleanTrajectories"
 
 export function useDataCleanup(sourceData, scales, statesThresholds) {
-  return useMemo(() => {
-    if (!sourceData || !sourceData.length) return []
-    console.time("Enrich")
+  const cleanData = useMemo(() => {
+    if (!sourceData) return []
 
     console.log("sourceData", sourceData)
 
-    const richData = sourceData
+    if (!statesThresholds.length) return sourceData
+
+    return cleanTrajectories(sourceData, statesThresholds)
+  }, [sourceData, statesThresholds])
+
+  const richData = useMemo(() => {
+    if (!cleanData.length) return []
+    console.time("Enrich")
+
+    console.log("cleanData", cleanData)
+
+    const richData = cleanData
       .filter((datum) => datum.trajectory.length > 0)
       .map((datum) => ({
         ...datum,
@@ -29,7 +40,9 @@ export function useDataCleanup(sourceData, scales, statesThresholds) {
     console.timeEnd("Enrich")
 
     return richData
-  }, [sourceData, scales])
+  }, [cleanData, scales])
+
+  return richData
 }
 
 export function useDataProcessing(richData, idealSilhouettes) {

@@ -7,13 +7,11 @@ import { useData } from "../../../../contexts/ProcessedDataContext"
 // Simple example of an edge with a floating toolbar based on the connected nodes' positions
 export function EdgeWithField(props) {
   const [edgePath, centerX, centerY] = getBezierPath(props)
-  const { deleteElements, getEdges, getNode, nodes } = useReactFlow()
+  const { getNode } = useReactFlow()
   const [showInput, setShowInput] = useState(false)
   const { statesThresholds, addStateThreshold } = useData()
 
   const inputRef = useRef(null)
-
-  console.log(useReactFlow())
 
   const setThresholdBetweenStates = (n) => {
     console.log(`${n} months`)
@@ -23,30 +21,22 @@ export function EdgeWithField(props) {
       const obj = {
         sourceState: sourceLabel,
         targetState: targetLabel,
-        value: inputRef.current.value,
+        threshold: Number(inputRef.current.value),
       }
 
       addStateThreshold(obj)
-
-      console.log(obj)
     }
   }
-  //   const deleteEdge = () => {
-  //     const edge = getEdges().find((e) => e.id === props.id);
-  //     if (edge) deleteElements({ edges: [edge] });
-  //   };
 
   //   const sourceLabel = "a"
   const sourceLabel = getNode(props.source).data.value
   const targetLabel = getNode(props.target).data.value
-  const y = Math.min(props.sourceY, props.targetY)
+  // const y = Math.min(props.sourceY, props.targetY)
 
   // Derive it instead:
-  const edgeThres = statesThresholds.find(
+  const edgeThres = statesThresholds?.find(
     (item) => item.sourceState === sourceLabel && item.targetState === targetLabel,
   )
-
-  console.log(props)
 
   const buttonLabel = !edgeThres ? "set" : "show"
 
@@ -75,10 +65,10 @@ export function EdgeWithField(props) {
           {showInput && (
             <p>
               <input type="number" ref={inputRef} />
-              <span>days</span>
+              <span>years</span>
             </p>
           )}
-          {!showInput && edgeThres?.value && <p>{edgeThres.value} years</p>}
+          {!showInput && edgeThres?.threshold && <p>{edgeThres.threshold} years</p>}
           <Button size="xs" onClick={setThresholdBetweenStates}>
             {buttonLabel}
           </Button>

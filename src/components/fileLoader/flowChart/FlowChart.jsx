@@ -61,8 +61,8 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
   useEffect(() => {
     setSankeyData({ nodes, links: edges })
 
-    console.log("Flow Chart Updated - Nodes:", nodes)
-    console.log("Flow Chart Updated - Edges:", edges)
+    // console.log("Flow Chart Updated - Nodes:", nodes)
+    // console.log("Flow Chart Updated - Edges:", edges)
 
     const dominanceArray = calculateDominanceArray(nodes, edges)
     console.log("Calculated Dominance Array:", dominanceArray)
@@ -98,7 +98,7 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
     )
   }, [setNodes])
 
-  console.log("Rendering Flow Chart with nodes:", nodes, "and edges:", edges)
+  // console.log("Rendering Flow Chart with nodes:", nodes, "and edges:", edges)
 
   return (
     <section className="flow-chart">

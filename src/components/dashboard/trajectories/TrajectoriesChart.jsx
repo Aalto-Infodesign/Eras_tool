@@ -159,6 +159,14 @@ export function TrajectoriesChart() {
           <div>
             <Button
               size="xs"
+              data-selected={trajectoriesSelectionMode === "vertical"}
+              onClick={() => setTrajectoriesSelectionMode("vertical")}
+              title="Vertical lines"
+            >
+              {"Vertical"}
+            </Button>
+            <Button
+              size="xs"
               data-selected={trajectoriesSelectionMode === "all"}
               onClick={() => setTrajectoriesSelectionMode("all")}
               title="All lines"
@@ -167,17 +175,9 @@ export function TrajectoriesChart() {
             </Button>
             <Button
               size="xs"
-              data-selected={trajectoriesSelectionMode === "parallel"}
-              onClick={() => setTrajectoriesSelectionMode("parallel")}
-              title="All lines"
-            >
-              {"Parallel"}
-            </Button>
-            <Button
-              size="xs"
               data-selected={trajectoriesSelectionMode === "diagonal"}
               onClick={() => setTrajectoriesSelectionMode("diagonal")}
-              title="diagonal lines"
+              title="Diagonal lines"
             >
               {"Diagonal"}
             </Button>

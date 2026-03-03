@@ -7,6 +7,27 @@
     "diseaseDuration": 118
   },
   {
+    "FINNGENID": "MOCKID_50",
+    "trajectory": ["b", "a", "c", "d", "e"],
+    "SwitchEventAge": [12, 12.1, 42, 59, 71],
+    "years": [1957, 1983, 2013, 2046, 2075],
+    "diseaseDuration": 118
+  },
+  {
+    "FINNGENID": "MOCKID_51",
+    "trajectory": ["b", "a", "c", "d", "e"],
+    "SwitchEventAge": [14, 14.2, 42, 59, 71],
+    "years": [1957, 1983, 2013, 2046, 2075],
+    "diseaseDuration": 118
+  },
+  {
+    "FINNGENID": "MOCKID_52",
+    "trajectory": ["b", "a", "c", "d", "e"],
+    "SwitchEventAge": [15, 16, 42, 59, 71],
+    "years": [1957, 1983, 2013, 2046, 2075],
+    "diseaseDuration": 118
+  },
+  {
     "FINNGENID": "MOCKID_1",
     "trajectory": ["a", "e", "c", "d", "e"],
     "SwitchEventAge": [17, 31, 54, 65, 90],

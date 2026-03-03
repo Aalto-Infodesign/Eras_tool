@@ -122,7 +122,7 @@ export function DerivedDataProvider({ children }) {
     )
 
     if (trajectoriesSelectionMode === "all") return links
-    if (trajectoriesSelectionMode === "parallel") return links.filter((l) => l.speed === 0)
+    if (trajectoriesSelectionMode === "vertical") return links.filter((l) => l.speed === 0)
     else return links.filter((l) => l.speed !== 0)
   }, [linksBySelectedSilhouettes, trajectoriesSelectionMode, filters])
 

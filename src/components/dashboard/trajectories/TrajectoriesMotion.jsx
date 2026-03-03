@@ -129,52 +129,59 @@ export function TrajectoriesMotion(props) {
               const visibleLength = length - totalGap
 
               offset = `${visibleLength} ${totalGap} `
+
+              return (
+                <MotionLine
+                  key={`switch-${d.id}-${d.lump}-${d.source.x}`}
+                  d={d}
+                  id={`switch-${d.id}-${d.lump}-${d.source.x}`}
+                  x1={x(d.source.x)}
+                  x2={x(d.target.x)}
+                  y1={y(d.source.state) + marginTop}
+                  y2={y(d.target.state) + marginTop}
+                  color={palette[d.source.state]}
+                  offset={offset}
+                  isSelected={isSelected}
+                  animationDuration={lines.length > 1000 ? 0.0 : 0.2}
+                  onClick={() => toggleSelectedTrajectory(d.id)}
+                />
+              )
             } else {
-              offset = " .75 1.5"
+              const offset1 = "1 0"
+              const offset2 = " 1 1"
+              return (
+                <motion.g key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}>
+                  <MotionLine
+                    key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-1`}
+                    id={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-1`}
+                    d={d}
+                    x1={x(d.source.x)}
+                    x2={x(d.target.x)}
+                    y1={y(d.source.state) + marginTop}
+                    y2={y(d.target.state) + marginTop}
+                    color={palette[d.source.state]}
+                    offset={offset1}
+                    isSelected={isSelected}
+                    animationDuration={lines.length > 1000 ? 0.0 : 0.2}
+                    onClick={() => toggleSelectedTrajectory(d.id)}
+                  />
+                  <MotionLine
+                    key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-2`}
+                    d={d}
+                    id={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-2`}
+                    x1={x(d.source.x)}
+                    x2={x(d.target.x)}
+                    y1={y(d.source.state) + marginTop}
+                    y2={y(d.target.state) + marginTop}
+                    color={palette[d.target.state]}
+                    offset={offset2}
+                    isSelected={isSelected}
+                    animationDuration={lines.length > 1000 ? 0.0 : 0.2}
+                    onClick={() => toggleSelectedTrajectory(d.id)}
+                  />
+                </motion.g>
+              )
             }
-
-            return (
-              <motion.line
-                key={`switch-${d.id}-${d.lump}-${d.source.x}`}
-                id={`switch-${d.id}-${d.lump}-${d.source.x}`}
-                // className={`switch `}
-                initial={{
-                  x1: x(d.source.x),
-                  x2: x(d.target.x),
-                  y1: y(d.source.state) + marginTop,
-                  y2: y(d.target.state) + marginTop,
-                  strokeWidth: 0.25,
-                  stroke: palette[d.source.state],
-                  strokeDasharray: offset,
-                  strokeDashoffset: -1,
-                  opacity: 0,
-                }}
-                animate={{
-                  x1: x(d.source.x),
-                  x2: x(d.target.x),
-                  y1: y(d.source.state) + marginTop,
-                  y2: y(d.target.state) + marginTop,
-
-                  // opacity: isFilteredDate ? 0.5 : 1,
-                  strokeDasharray: offset,
-                  // strokeDashoffset: d.source.date > filters.date.selection[0] ? -1 : 0,
-                  strokeWidth: isSelected ? 1.5 : 0.25,
-                  stroke: palette[d.source.state],
-
-                  opacity: 1,
-                }}
-                whileHover={{ strokeWidth: isSelected ? 1.5 : 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  default: { duration: lines.length > 1000 ? 0.0 : 0.2 },
-                  opacity: { duration: 0.3 },
-                  strokeWidth: { duration: 0.1 },
-                }}
-                onClick={() => toggleSelectedTrajectory(d.id)}
-              >
-                <title>{`ID: ${d.id}`}</title>
-              </motion.line>
-            )
           })}
 
         {displayedTrajectories &&
@@ -229,5 +236,59 @@ export function TrajectoriesMotion(props) {
           })}
       </AnimatePresence>
     </g>
+  )
+}
+
+const MotionLine = ({
+  d,
+  id,
+  x1,
+  x2,
+  y1,
+  y2,
+  color,
+  offset,
+  isSelected,
+  animationDuration,
+  onClick,
+}) => {
+  return (
+    <motion.line
+      // key={id}
+      id={id}
+      initial={{
+        x1: x1,
+        x2: x2,
+        y1: y1,
+        y2: y2,
+        strokeWidth: 0.25,
+        stroke: color,
+        strokeDasharray: offset,
+        strokeDashoffset: -1,
+        opacity: 0,
+      }}
+      animate={{
+        x1: x1,
+        x2: x2,
+        y1: y1,
+        y2: y2,
+
+        strokeDasharray: offset,
+        strokeWidth: isSelected ? 1.5 : 0.25,
+        stroke: color,
+
+        opacity: 1,
+      }}
+      whileHover={{ strokeWidth: isSelected ? 1.5 : 1 }}
+      exit={{ opacity: 0 }}
+      transition={{
+        default: { duration: animationDuration },
+        opacity: { duration: 0.3 },
+        strokeWidth: { duration: 0.1 },
+      }}
+      onClick={onClick}
+    >
+      <title>{`ID: ${d.id}`}</title>
+    </motion.line>
   )
 }
