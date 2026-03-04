@@ -24,6 +24,8 @@ export function ProcessedDataProvider({ children }) {
   useEffect(() => {
     setRemovedStates([])
     setIdealSilhouettes([])
+    setStatesThresholds([])
+    setStatesOrder([])
   }, [rawData])
 
   // Take Raw Data and parse it based on file format
@@ -98,6 +100,10 @@ export function ProcessedDataProvider({ children }) {
     richData,
     idealSilhouettes,
   )
+
+  // useEffect(() => {
+  //   console.log("S", silhouettes)
+  // }, [silhouettes])
 
   useEffect(() => {
     if (!statesData.statesNames) return

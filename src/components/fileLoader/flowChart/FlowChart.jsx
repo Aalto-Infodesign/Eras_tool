@@ -27,8 +27,8 @@ import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 
 const snapGrid = [25, 25]
 
-export const FlowChart = ({ setSankeyData = () => {} }) => {
-  const { scales, statesOrder } = useData()
+export const FlowChart = () => {
+  const { scales, statesOrder, idealSilhouettes, setIdealSilhouettes } = useData()
   const { updatePosetColoring, palette, colorMode, setColorMode, isLegend } = useViz()
   const reactFlowWrapper = useRef(null)
 
@@ -40,23 +40,50 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
 
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge({ ...params, type: `edgeField` }, eds)),
-    [setEdges],
+    (params) => {
+      setNodes((currentNodes) => {
+        const sourceNode = currentNodes.find((n) => n.id === params.source)
+        const targetNode = currentNodes.find((n) => n.id === params.target)
+
+        setEdges((eds) =>
+          addEdge(
+            {
+              ...params,
+              type: "edgeField",
+              data: {
+                source: {
+                  value: sourceNode?.data.value,
+                  index: sourceNode?.data.index,
+                },
+                target: {
+                  value: targetNode?.data.value,
+                  index: targetNode?.data.index,
+                },
+              },
+            },
+            eds,
+          ),
+        )
+        return currentNodes // don't actually change nodes
+      })
+    },
+    [setEdges, setNodes], // stable refs, never change
   )
+  // TODO setIdealSilhouettes
+  useEffect(() => {
+    const allCombinations = getFullPathsFromFlow(nodes, edges)
+    const silhouettesStrings = allCombinations.map((c) => c.join("-"))
+
+    setIdealSilhouettes(silhouettesStrings)
+  }, [nodes.length, edges])
 
   // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
-    setSankeyData({ nodes: nodes, links: edges })
-
-    // console.log("Flow Chart Updated - Nodes:", nodes)
-    // console.log("Flow Chart Updated - Edges:", edges)
-
     const dominanceArray = calculateDominanceArray(nodes, edges)
-    console.log("Calculated Dominance Array:", dominanceArray)
 
-    const nodesInexes = nodes.map((node) => node.data.index)
+    const nodesIndexes = nodes.map((node) => node.data.index)
 
-    updatePosetColoring(dominanceArray, nodesInexes)
+    updatePosetColoring(dominanceArray, nodesIndexes)
     // updatePosetColoring(dominanceArray, statesData.statesNames)
   }, [edges, colorMode])
 
@@ -85,8 +112,6 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
     )
   }, [setNodes])
 
-  // console.log("Rendering Flow Chart with nodes:", nodes, "and edges:", edges)
-
   return (
     <section className="flow-chart">
       <Activity mode={!isLegend ? "visible" : "hidden"}>
@@ -103,8 +128,9 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
             size="xs"
             data-selected={colorMode === "poset"}
             onClick={() => setColorMode("poset")}
+            disabled={idealSilhouettes.length === 0}
           >
-            Tran<ShortcutSpan keyCode="s">s</ShortcutSpan>ion
+            Tran<ShortcutSpan keyCode="s">s</ShortcutSpan>ition
           </Button>
         </div>
         <div className="dndflow">
@@ -142,4 +168,40 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
       </Activity>
     </section>
   )
+}
+
+function getFullPathsFromFlow(nodes, edges) {
+  const allPaths = []
+
+  // 1. Build ID-based adjacency list
+  const adj = new Map()
+  const hasIncoming = new Set()
+
+  edges.forEach((edge) => {
+    const { source, target } = edge // these are node IDs e.g. "node_1234_0.123"
+    if (!adj.has(source)) adj.set(source, [])
+    adj.get(source).push(target)
+    hasIncoming.add(target)
+  })
+
+  // 2. Find root nodes (no incoming edges)
+  const roots = nodes.map((n) => n.id).filter((id) => !hasIncoming.has(id))
+
+  // 3. DFS traversal using node IDs, collect labels
+  function traverse(nodeId, currentPath) {
+    const node = nodes.find((n) => n.id === nodeId)
+    if (!node) return
+
+    const newPath = [...currentPath, node.data.index] // or .label, whatever you need
+
+    if (!adj.has(nodeId) || adj.get(nodeId).length === 0) {
+      allPaths.push(newPath)
+      return
+    }
+
+    adj.get(nodeId).forEach((nextId) => traverse(nextId, newPath))
+  }
+
+  roots.forEach((rootId) => traverse(rootId, []))
+  return allPaths
 }

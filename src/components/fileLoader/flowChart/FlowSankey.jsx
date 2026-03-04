@@ -1,30 +1,34 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { motion } from "motion/react"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
+import { useEdges, useNodes } from "@xyflow/react"
 
-const MARGIN_Y = 15
 const MARGIN_X = 10
 
-export const Sankey = ({ width, height, data }) => {
-  const { idealSilhouettes, setIdealSilhouettes } = useData()
+export const Sankey = ({ width, height }) => {
+  const nodes = useNodes()
+  const edges = useEdges()
   const { palette } = useViz()
   const [hoveredNode, setHoveredNode] = useState(null)
 
   // console.log("Sankey data", data)
   // Use useMemo to stabilize the 'nodes' and 'links' references
-  const { nodes, links } = useMemo(() => {
+  const { sankeyNodes, sankeyLinks } = useMemo(() => {
+    if (!nodes || !edges) return { sankeyNodes: [], sankeyLinks: [] }
+
+    console.log(nodes)
     const dataForSankey = {
-      nodes: data.nodes.map((node) => ({
-        id: node.id,
-        name: node.data.label,
-        index: node.data.index,
-        trueIndex: Number(node.data.index),
-        color: palette[node.data.index] || node.data.color,
+      sankeyNodes: nodes.map((node) => ({
+        id: node.id, // must match nodeId()
+        name: node.data.value, // stable name
+        dataIndex: node.data.index,
+        color: palette[node.data.index],
+
         category: node.data.category,
       })),
-      links: data.links.map((link) => ({
+      sankeyLinks: edges.map((link) => ({
         source: link.source,
         target: link.target,
         value: 1,
@@ -42,46 +46,46 @@ export const Sankey = ({ width, height, data }) => {
       .nodeAlign(sankeyCenter)
 
     try {
-      const result = sankeyGenerator(dataForSankey)
-      return { nodes: result.nodes, links: result.links }
+      const result = sankeyGenerator({
+        nodes: dataForSankey.sankeyNodes,
+        links: dataForSankey.sankeyLinks,
+      })
+      return { sankeyNodes: result.nodes, sankeyLinks: result.links }
     } catch (error) {
       console.error("Sankey Generation Failed:", error.message)
-      return { nodes: [], links: [] }
+      return { sankeyNodes: [], sankeyLinks: [] }
     }
-  }, [data, width, height, palette]) // Only recalculates if these change
+  }, [nodes, edges, width, height, palette]) // Only recalculates if these change
+  console.log("NODES", nodes)
 
-  //   console.log("Sankey nodes:", nodes)
-  useEffect(() => {
-    if (!nodes?.length || !links?.length) return
+  console.log("SL", sankeyLinks)
 
-    const allCombinations = getSankeyPathArrays(nodes, links)
-    const silhouettesStrings = allCombinations.map((c) => c.join("-"))
-    const currentHash = silhouettesStrings.join("|")
-    const prevHash = idealSilhouettes.join("|")
+  if (sankeyNodes.length === 0 || sankeyLinks.length === 0) return
 
-    if (currentHash !== prevHash) setIdealSilhouettes(silhouettesStrings)
-  }, [nodes, links])
-
-  const allNodes = nodes.map((node) => {
+  const allNodes = sankeyNodes.map((node) => {
     const isHovered = hoveredNode && hoveredNode.id === node.id
+
+    console.log("Sankey Node", node)
     return (
       <motion.g
-        key={node.index}
+        key={node.id}
         onHoverStart={() => (setHoveredNode(node), console.log(node))}
         onHoverEnd={() => setHoveredNode(null)}
+        initial={{ x: node.x0, y: node.y0, opacity: 0 }}
+        animate={{ x: node.x0, y: node.y0, opacity: 1 }}
+        exit={{ x: node.x0, y: node.y0, opacity: 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
       >
         <motion.rect
-          // initial={{ height: 0 }}
-          // animate={{ height: node.y1 - node.y0 }}
-          // exit={{ height: 0 }}
-          height={node.y1 - node.y0}
+          initial={{ height: 0 }}
+          animate={{ height: node.y1 - node.y0, fill: node.color }}
+          transition={{ duration: 0.2 }}
+          exit={{ height: 0 }}
           width={20}
-          x={node.x0}
-          y={node.y0}
           whileHover={{ scale: 0.95 }}
           strokeWidth={0}
           stroke={"black"}
-          fill={node.color}
+          // fill={node.color}
           fillOpacity={0.8}
           rx={1}
         />
@@ -89,7 +93,7 @@ export const Sankey = ({ width, height, data }) => {
     )
   })
 
-  const allLinks = links.map((link, i) => {
+  const allLinks = sankeyLinks.map((link, i) => {
     const linkGenerator = sankeyLinkHorizontal()
     const path = linkGenerator(link)
 
@@ -115,63 +119,4 @@ export const Sankey = ({ width, height, data }) => {
       {/* <Tooltip isVisible={hoveredNode}>{hoveredNode && <div>{hoveredNode.name}</div>}</Tooltip> */}
     </div>
   )
-}
-
-function notifyUser(message) {
-  // Example: alert(message);
-  // Or: setErrorState(message);
-  console.warn("User Notification:", message)
-  alert(message)
-}
-
-/**
- * Extracts all full paths from source to sink as arrays of labels.
- * @param {Array} nodes - Array of node objects
- * @param {Array} links - Array of link objects
- * @returns {Array<String[]>} - e.g., [["Energy", "Electricity"], ["Energy", "Heating"]]
- */
-function getSankeyPathArrays(nodes, links) {
-  const allPaths = []
-
-  // 1. Build Adjacency List
-  const adj = new Map()
-  const hasIncoming = new Set()
-
-  links.forEach((link) => {
-    // Handle both index-based and object-based links (common in D3)
-    const sIdx = typeof link.source === "object" ? link.source.index : link.source
-    const tIdx = typeof link.target === "object" ? link.target.index : link.target
-
-    if (!adj.has(sIdx)) adj.set(sIdx, [])
-    adj.get(sIdx).push(tIdx)
-    hasIncoming.add(tIdx)
-  })
-
-  // 2. Find Root Nodes (Nodes that are never targets)
-  const roots = nodes.map((_, index) => index).filter((index) => !hasIncoming.has(index))
-
-  // 3. Recursive DFS Traversal
-  function traverse(nodeIdx, currentPath) {
-    const node = nodes[nodeIdx]
-    const index = node.trueIndex
-
-    // Create a new array for this branch to avoid reference issues
-    const newPath = [...currentPath, index]
-
-    // Check if it's a Sink (no outgoing links)
-    if (!adj.has(nodeIdx) || adj.get(nodeIdx).length === 0) {
-      allPaths.push(newPath)
-      return
-    }
-
-    // Continue to next nodes
-    adj.get(nodeIdx).forEach((nextIdx) => {
-      traverse(nextIdx, newPath)
-    })
-  }
-
-  // Start the engine
-  roots.forEach((rootIdx) => traverse(rootIdx, []))
-
-  return allPaths
 }

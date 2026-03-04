@@ -12,7 +12,7 @@ import { ResetStatesOrder } from "./ResetStatesOrder"
 import { X, Workflow, Plus } from "lucide-react"
 import Button from "../common/Button/Button"
 
-export function StateSelection({ setSankeyData }) {
+export function StateSelection() {
   const { rawData } = useRawData()
 
   const { removedStates, setRemovedStates, scales, statesData, statesOrder, setStatesOrder } =
@@ -50,7 +50,6 @@ export function StateSelection({ setSankeyData }) {
     // RESET
     setNodes([])
     setEdges([])
-    setSankeyData({ nodes: [], links: [] })
 
     if (statesData.statesNames.length === 0) return
 

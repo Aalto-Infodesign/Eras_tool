@@ -30,7 +30,11 @@ export function VizProvider({ children }) {
   useModifierKey("2", () => setChartType(2))
 
   // useModifierKey("p", () => setColorMode("poset"))
-  useModifierKey("s", () => setColorMode((prev) => (prev === "standard" ? "poset" : "standard")))
+  useModifierKey("s", () =>
+    setColorMode(
+      (prev) => idealSilhouettes.length !== 0 && (prev === "standard" ? "poset" : "standard"),
+    ),
+  )
 
   useModifierKey("t", () => setIsHasse(false))
   useModifierKey("h", () => setIsHasse(true))

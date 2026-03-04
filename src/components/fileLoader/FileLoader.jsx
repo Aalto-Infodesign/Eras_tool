@@ -24,8 +24,6 @@ export function FileLoader({}) {
 
   const [isOpen, setIsOpen] = useState(true)
 
-  const [sankeyData, setSankeyData] = useState({ nodes: [], links: [] })
-
   useEffect(() => {
     if (!isLegend) {
       setIsOpen(true)
@@ -37,15 +35,12 @@ export function FileLoader({}) {
   const legendClass = isLegend ? "corner" : "center"
   const openClass = isOpen ? "open" : "closed"
 
-  const filterSection = document.querySelector("section.filter")
-
   return (
     <section
       className={`loader-wrapper ${legendClass} accordion ${openClass}
     `}
       style={{
         padding: !richData.length ? "1rem" : "",
-        width: filterSection ? filterSection.offsetWidth : "",
       }}
     >
       <div className="accordion-header">
@@ -81,7 +76,7 @@ export function FileLoader({}) {
         <div className="loader-main">
           <ReactFlowProvider>
             <div>
-              <StateSelection setSankeyData={setSankeyData} />
+              <StateSelection />
               <AnimatePresence>
                 {/* <ScatterPlot data={silhouettes} width={300} height={300} /> */}
                 {isOpen && (
@@ -93,9 +88,7 @@ export function FileLoader({}) {
                   >
                     {/* <StatesMatrix width={300} height={300} /> */}
 
-                    {sankeyData.links.length > 0 && hasFlowChart && (
-                      <Sankey data={sankeyData} width={300} height={100} />
-                    )}
+                    {hasFlowChart && <Sankey width={300} height={100} />}
                     {existingIdealSilhouettes.length > 0 && (
                       <div>
                         <h4>Silhouettes found in dataset</h4>
@@ -108,13 +101,15 @@ export function FileLoader({}) {
                       </div>
                     )}
                     {existingIdealSilhouettes.length === 0 && hasFlowChart && !isLegend && (
-                      <h4>No silhouettes found in dataset</h4>
+                      <div>
+                        <h4>No silhouettes found in dataset</h4>
+                      </div>
                     )}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            <FlowChart setSankeyData={setSankeyData} />
+            <FlowChart />
           </ReactFlowProvider>
         </div>
       )}

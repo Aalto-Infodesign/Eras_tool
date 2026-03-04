@@ -888,7 +888,7 @@ export const po = {
       if (input.analytics) poset.analytics = input.analytics
     }
 
-    console.log("DM", input, dominanceMatrix)
+    // console.log("DM", input, dominanceMatrix)
     // Derive relations from dominance matrix
     if (isPoset) {
       poset.relationsP = input.relationsP
