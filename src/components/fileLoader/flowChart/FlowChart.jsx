@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react"
+import { useRef, useCallback, useEffect, Activity } from "react"
 import {
   ReactFlow,
   addEdge,
@@ -18,7 +18,6 @@ import { resolveCollisions } from "./resolveCollisions"
 import { calculateDominanceArray } from "../../../utils/POHelperFunctions"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
-import { useRawData } from "../../../contexts/RawDataContext"
 import { useViz } from "../../../contexts/VizContext"
 import DownloadButton from "./flow-components/DownloadButton"
 
@@ -29,9 +28,8 @@ import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 const snapGrid = [25, 25]
 
 export const FlowChart = ({ setSankeyData = () => {} }) => {
-  const { rawData } = useRawData()
-  const { scales } = useData()
-  const { updatePosetColoring, palette, statesOrder, colorMode, setColorMode } = useViz()
+  const { scales, statesOrder } = useData()
+  const { updatePosetColoring, palette, colorMode, setColorMode, isLegend } = useViz()
   const reactFlowWrapper = useRef(null)
 
   const edgeTypes = {
@@ -46,20 +44,9 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
     [setEdges],
   )
 
-  function resetFlowChartState() {
-    setNodes([])
-    setEdges([])
-  }
-
-  // Resetting Flowchart when new data is loaded
-  useEffect(() => {
-    console.log("Raw data changed, resetting Flow Chart state")
-    resetFlowChartState()
-  }, [rawData])
-
   // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
-    setSankeyData({ nodes, links: edges })
+    setSankeyData({ nodes: nodes, links: edges })
 
     // console.log("Flow Chart Updated - Nodes:", nodes)
     // console.log("Flow Chart Updated - Edges:", edges)
@@ -102,55 +89,57 @@ export const FlowChart = ({ setSankeyData = () => {} }) => {
 
   return (
     <section className="flow-chart">
-      <div className="buttons-wrapper">
-        <p>Coloring mode:</p>
-        <Button
-          size="xs"
-          data-selected={colorMode === "standard"}
-          onClick={() => setColorMode("standard")}
-        >
-          <ShortcutSpan keyCode="s">S</ShortcutSpan>tate
-        </Button>
-        <Button
-          size="xs"
-          data-selected={colorMode === "poset"}
-          onClick={() => setColorMode("poset")}
-        >
-          Tran<ShortcutSpan keyCode="s">s</ShortcutSpan>ion
-        </Button>
-      </div>
-      <div className="dndflow">
-        <div className="flowchart-wrapper">
-          <div className="reactflow-wrapper" ref={reactFlowWrapper}>
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onNodeDragStop={onNodeDragStop}
-              fitView
-              snapToGrid
-              snapGrid={snapGrid}
-              edgeTypes={edgeTypes}
-            >
-              {nodes.length > 0 && (
-                <MiniMap
-                  nodeStrokeWidth={3}
-                  pannable
-                  zoomable
-                  position="top"
-                  bgColor="#00000000"
-                  style={{ width: 100, height: 100 }}
-                />
-              )}
-              <Controls />
-              <Background />
-              <DownloadButton />
-            </ReactFlow>
+      <Activity mode={!isLegend ? "visible" : "hidden"}>
+        <div className="buttons-wrapper">
+          <p>Coloring mode:</p>
+          <Button
+            size="xs"
+            data-selected={colorMode === "standard"}
+            onClick={() => setColorMode("standard")}
+          >
+            <ShortcutSpan keyCode="s">S</ShortcutSpan>tate
+          </Button>
+          <Button
+            size="xs"
+            data-selected={colorMode === "poset"}
+            onClick={() => setColorMode("poset")}
+          >
+            Tran<ShortcutSpan keyCode="s">s</ShortcutSpan>ion
+          </Button>
+        </div>
+        <div className="dndflow">
+          <div className="flowchart-wrapper">
+            <div className="reactflow-wrapper" ref={reactFlowWrapper}>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onNodeDragStop={onNodeDragStop}
+                fitView
+                snapToGrid
+                snapGrid={snapGrid}
+                edgeTypes={edgeTypes}
+              >
+                {nodes.length > 0 && (
+                  <MiniMap
+                    nodeStrokeWidth={3}
+                    pannable
+                    zoomable
+                    position="top"
+                    bgColor="#00000000"
+                    style={{ width: 100, height: 100 }}
+                  />
+                )}
+                <Controls />
+                <Background />
+                <DownloadButton />
+              </ReactFlow>
+            </div>
           </div>
         </div>
-      </div>
+      </Activity>
     </section>
   )
 }

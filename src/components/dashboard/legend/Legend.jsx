@@ -5,8 +5,8 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 
 export function Legend() {
-  const { scales } = useData()
-  const { palette, statesOrder } = useViz()
+  const { scales, statesOrder } = useData()
+  const { palette } = useViz()
 
   return (
     <motion.div layout className={styles.legend}>

@@ -13,7 +13,7 @@ const VizContext = createContext(null)
 export function VizProvider({ children }) {
   const { fileName } = useRawData()
   const { scales, statesData, idealSilhouettes } = useData()
-  const [statesOrder, setStatesOrder] = useState([])
+
   const [dominanceArrayFromFlow, setDominanceArrayFromFlow] = useState(null)
   const [nodesFromFlow, setNodesFromFlow] = useState(null)
 
@@ -49,14 +49,11 @@ export function VizProvider({ children }) {
     return max(idealSilhouettes.map((s) => s.split("-").length))
   }, [idealSilhouettes])
 
-  console.log("LENGTH", maxChainLength)
-
   // Function to generate palette from dominance array
   const generatePaletteFromDominance = (dominanceArray, dominanceNodes) => {
     if (!dominanceArray) return null
 
-    const statesOrderOriginal = dominanceNodes.map((_t, i) => `${i}`)
-    const stateNamesSorted = statesOrderOriginal.toSorted()
+    const stateNamesSorted = dominanceNodes.map((_t, i) => `${i}`).toSorted()
 
     const { matrix, nodes } = po.domFromEdges(dominanceArray)
 
@@ -66,17 +63,6 @@ export function VizProvider({ children }) {
       if (colorMode !== "poset") return { min: 40, max: 90 }
 
       if (length === 0) return { min: min, max: max }
-
-      // console.log(step)
-      // const Step = (max - min) / 2 / length
-      // console.log("STEP", Step)
-
-      // const minV = midPoint - Step
-      // const maxV = midPoint + Step
-      // const Cmin = minV > min ? minV : min
-      // const Cmax = maxV < max ? maxV : max
-
-      // return { min: Cmin, max: Cmax }
 
       const STEP = (max - min) / length
 
@@ -88,8 +74,6 @@ export function VizProvider({ children }) {
       return { min: midPoint - 10 * length, max: midPoint - 10 * length }
     }
 
-    // console.log("POSET Matrix:", matrix)
-    // console.log("POSET Nodes:", nodes)
     const poset = po.createPoset(matrix, nodes)
 
     poset
@@ -105,20 +89,9 @@ export function VizProvider({ children }) {
 
     const { min, max } = getColorSpace(20, 90, 65, 10, maxChainLength)
 
-    console.log("MIN", min)
-    console.log("MAX", max)
-
     poset.color(20, min, max, false) // Based on Layer length
 
-    // .feature("jchFill", (_node, d) => {
-    //   const JCH = jch(d.pTheta, d.pAlpha * 100, d.pL)
-    //   return `hsl(${JCH.J},${JCH.C}%,${JCH.h}%)`
-    // })
-
     const posetFeatures = poset.features
-
-    // console.log("POSET Features:", posetFeatures)
-    // console.log("SNames:", dominanceNodes)
 
     const posetPalette = dominanceNodes.map((s) => posetFeatures[s].fill)
     const palette = Object.fromEntries(zip(stateNamesSorted, posetPalette))
@@ -127,12 +100,12 @@ export function VizProvider({ children }) {
   }
 
   // Calculate palette (combines data-derived and flowchart-derived dominance)
-  const { palette, statesOrderOriginal } = useMemo(() => {
-    if (!statesData || !scales) return { palette: {}, statesOrderOriginal: [] }
+  const { palette } = useMemo(() => {
+    if (!statesData || !scales) return { palette: {} }
 
     // console.log(statesData.statesNames)
     const statesNames = statesData.statesNames
-    const statesOrderOriginal = statesNames.map((_t, i) => `${i}`)
+    // const statesOrderOriginal = statesNames.map((_t, i) => `${i}`)
 
     // Priority: Use flowchart dominance if available, otherwise use default
     const dominanceFromStates = getDominancePairsSelfUpper(statesNames)
@@ -146,7 +119,7 @@ export function VizProvider({ children }) {
 
     // console.timeEnd("Palette Poset")
 
-    return { palette, statesOrderOriginal }
+    return { palette }
   }, [statesData, scales, dominanceArrayFromFlow, idealSilhouettes, colorMode])
 
   // Function that your FlowChart component can call
@@ -157,23 +130,23 @@ export function VizProvider({ children }) {
       setDominanceArrayFromFlow(dominanceArray)
       setNodesFromFlow(nodes)
     } else {
-      console.log("Reverting to unconnected state coloring")
+      // console.log("Reverting to unconnected state coloring")
       setDominanceArrayFromFlow(null)
       setNodesFromFlow(null)
     }
   }
 
-  useEffect(() => {
-    setStatesOrder(statesOrderOriginal)
-  }, [fileName, statesOrderOriginal])
+  // useEffect(() => {
+  //   setStatesOrder(statesOrderOriginal)
+  // }, [fileName, statesOrderOriginal])
 
   const value = useMemo(
     () => ({
       palette,
-      statesOrder,
-      statesOrderOriginal,
+      // statesOrder,
+      // statesOrderOriginal,
       isLegend,
-      setStatesOrder,
+      // setStatesOrder,
       setIsLegend,
       updatePosetColoring, // Expose this to child components
       hasFlowChart,
@@ -191,8 +164,8 @@ export function VizProvider({ children }) {
     }),
     [
       palette,
-      statesOrder,
-      statesOrderOriginal,
+      // statesOrder,
+      // statesOrderOriginal,
       isLegend,
       hasFlowChart,
       loadingCount,

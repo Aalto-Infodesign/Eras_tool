@@ -30,8 +30,8 @@ import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 // ! TODO Refactor completo
 
 export const SilhouettesMorph = () => {
-  const { idealSilhouettes, statesData } = useData()
-  const { palette, statesOrder, setStatesOrder, isHasse, setIsHasse } = useViz()
+  const { idealSilhouettes, statesData, statesOrder, setStatesOrder } = useData()
+  const { palette, isHasse, setIsHasse } = useViz()
   const {
     filtersActive,
     toggleSilhouetteFilter,

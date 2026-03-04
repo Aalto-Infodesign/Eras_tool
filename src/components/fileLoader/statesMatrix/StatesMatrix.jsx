@@ -16,8 +16,8 @@ import { curveStep, line } from "d3"
 const PADDING = 25
 
 export function StatesMatrix({ width, height }) {
-  const { statesData } = useData()
-  const { palette, statesOrder } = useViz()
+  const { statesData, statesOrder } = useData()
+  const { palette } = useViz()
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
   const [selectedCell, setSelectedCell] = useState(null)
 

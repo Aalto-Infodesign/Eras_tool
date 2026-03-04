@@ -32,8 +32,8 @@ export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
   // Props
 
-  const { silhouettes, analytics, statesData } = useData()
-  const { palette, statesOrder, chartType, setChartType } = useViz()
+  const { silhouettes, analytics, statesData, statesOrder } = useData()
+  const { palette, chartType, setChartType } = useViz()
   const {
     filters,
     selectedTrajectoriesIDs,

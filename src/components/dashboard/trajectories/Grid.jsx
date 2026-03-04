@@ -12,8 +12,8 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 
 export function Grid(props) {
-  const { scales, analytics } = useData()
-  const { palette, setStatesOrder } = useViz()
+  const { scales, analytics, setStatesOrder } = useData()
+  const { palette } = useViz()
   const trajectoriesContext = useContext(TrajectoriesContext)
   const { w, h, marginTop, chartScales } = trajectoriesContext
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, Activity } from "react"
+import { useState, useEffect } from "react"
 import LoadDataset from "./LoadDataset"
 import { StateSelection } from "./StateSelection"
 import { ProcessButton } from "./ProcessButton"
@@ -18,8 +18,9 @@ import { useViz } from "../../contexts/VizContext"
 import { ChevronDown, Maximize2 } from "lucide-react"
 
 export function FileLoader({}) {
-  const { richData, existingIdealSilhouettes, clusterStates, setClusterStates } = useData()
-  const { setIsLegend, statesOrder, isLegend, hasFlowChart } = useViz()
+  const { richData, existingIdealSilhouettes, clusterStates, setClusterStates, statesOrder } =
+    useData()
+  const { setIsLegend, isLegend, hasFlowChart } = useViz()
 
   const [isOpen, setIsOpen] = useState(true)
 
@@ -40,7 +41,7 @@ export function FileLoader({}) {
 
   return (
     <section
-      className={`loader-wrapper ${legendClass} accordion ${openClass} 
+      className={`loader-wrapper ${legendClass} accordion ${openClass}
     `}
       style={{
         padding: !richData.length ? "1rem" : "",
@@ -80,7 +81,7 @@ export function FileLoader({}) {
         <div className="loader-main">
           <ReactFlowProvider>
             <div>
-              <StateSelection />
+              <StateSelection setSankeyData={setSankeyData} />
               <AnimatePresence>
                 {/* <ScatterPlot data={silhouettes} width={300} height={300} /> */}
                 {isOpen && (
@@ -113,10 +114,7 @@ export function FileLoader({}) {
                 )}
               </AnimatePresence>
             </div>
-
-            <Activity mode={!isLegend && hasFlowChart ? "visible" : "hidden"}>
-              <FlowChart setSankeyData={setSankeyData} />
-            </Activity>
+            <FlowChart setSankeyData={setSankeyData} />
           </ReactFlowProvider>
         </div>
       )}

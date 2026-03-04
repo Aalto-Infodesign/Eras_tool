@@ -23,8 +23,8 @@ import { FilterPanel } from "./dashboard/filter-panel/FilterPanel"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
-  const { richData, analytics, silhouettes } = useData()
-  const { statesOrder, isHasse } = useViz()
+  const { richData, analytics, silhouettes, statesOrder } = useData()
+  const { isHasse } = useViz()
   const { completeSilhouettes, selectedSilhouettesData, selectedIDs } = useDerivedData()
 
   const w = 170
