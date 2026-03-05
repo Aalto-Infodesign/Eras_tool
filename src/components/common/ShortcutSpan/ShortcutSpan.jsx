@@ -7,7 +7,7 @@ export const ShortcutSpan = ({ children, separator = null, keyCode = "" }) => {
 
   const spanVariants = {
     default: { scale: 1 },
-    pressed: { scale: 0.7 },
+    pressed: { scale: 1 },
   }
 
   return (

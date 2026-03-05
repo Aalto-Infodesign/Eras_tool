@@ -205,11 +205,6 @@ li p {
   padding: 0;
 }
 
-.buttons-wrapper {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
 .toggle-btn {
   cursor: pointer;
 }

@@ -351,6 +351,12 @@ g#grid text {
   font-weight: 700;
 }
 
+.buttons-wrapper {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
 button,
 .controls button {
   font-family: inherit;

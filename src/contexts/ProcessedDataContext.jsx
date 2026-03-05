@@ -132,6 +132,13 @@ export function ProcessedDataProvider({ children }) {
       return [...prev, obj]
     })
   }
+  const removeStateThreshold = (obj) => {
+    setStatesThresholds((prev) =>
+      prev.filter(
+        (item) => !(item.sourceState === obj.sourceState && item.targetState === obj.targetState),
+      ),
+    )
+  }
   const value = useMemo(
     () => ({
       // State
@@ -155,6 +162,7 @@ export function ProcessedDataProvider({ children }) {
       // From Flowhchart
       statesThresholds,
       addStateThreshold,
+      removeStateThreshold,
     }),
     [
       richData,

@@ -23,10 +23,10 @@ import { useViz } from "../../contexts/VizContext"
 import { useFilters } from "../../contexts/FiltersContext"
 import { Virtuoso } from "react-virtuoso"
 
-import { X } from "lucide-react"
 import { useDerivedData } from "../../contexts/DerivedDataContext"
 import Button from "../common/Button/Button"
 import { ShortcutSpan } from "../common/ShortcutSpan/ShortcutSpan"
+import { CloseButton } from "../common/Button/CloseButton"
 
 export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
@@ -35,7 +35,6 @@ export function TrajectoriesExplorerChart(props) {
   const { silhouettes, analytics, statesData, statesOrder } = useData()
   const { palette, chartType, setChartType } = useViz()
   const {
-    filters,
     selectedTrajectoriesIDs,
     setSelectedTrajectoriesIDs,
     selectedSilhouettesNames,
@@ -179,11 +178,6 @@ export function TrajectoriesExplorerChart(props) {
     hovered: { scale: 0.95 },
   }
 
-  const closeBtnVariants = {
-    hidden: { scale: 0 },
-    visible: { scale: 1, transition: { ease: "easeInOut" } },
-  }
-
   console.timeEnd("Explorer Chart")
 
   return (
@@ -268,20 +262,10 @@ export function TrajectoriesExplorerChart(props) {
                           <span>-</span>
                           <span style={{ color: palette[l.target.state] }}>{l.target.state}</span>
                         </p>
-                        <motion.button
-                          className="close-btn"
-                          variants={closeBtnVariants}
-                          initial={"hidden"}
-                          animate={
-                            chipHoveredId === `${l.source.state}-${l.target.state}`
-                              ? "visible"
-                              : "hidden"
-                          }
-                          layout
+                        <CloseButton
+                          isVisible={chipHoveredId === `${l.source.state}-${l.target.state}`}
                           onClick={() => toggleSelectedLumps(l)}
-                        >
-                          <X size={20} />
-                        </motion.button>
+                        />
                       </motion.div>
                     )
                   })}
@@ -351,16 +335,10 @@ export function TrajectoriesExplorerChart(props) {
                             />
 
                             <span>{id.id}</span>
-
-                            <motion.button
-                              className="close-btn"
-                              variants={closeBtnVariants}
-                              initial="hidden"
-                              animate={chipHoveredId === id.id ? "visible" : "hidden"}
+                            <CloseButton
+                              isVisible={chipHoveredId === id.id ? "visible" : "hidden"}
                               onClick={() => toggleSelectedTrajectory(id.id)}
-                            >
-                              <X size={20} />
-                            </motion.button>
+                            />
                           </motion.div>
                         </div>
                       )

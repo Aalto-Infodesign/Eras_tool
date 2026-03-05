@@ -198,6 +198,8 @@ export function useDataProcessing(richData, idealSilhouettes) {
       links: trajectories.flat(),
     }
 
+    // console.log("STATES NAMES", statesNamesSorted)
+
     console.timeEnd("States Data")
     return { statesData, analytics, trajectories }
   }, [richData])
@@ -206,6 +208,8 @@ export function useDataProcessing(richData, idealSilhouettes) {
     if (trajectories.length === 0) return []
 
     const silhouettes = silhouettesFromTrajectories(trajectories, idealSilhouettes, richData)
+
+    // console.log("SIL", silhouettes)
     return silhouettes
   }, [trajectories, idealSilhouettes])
 

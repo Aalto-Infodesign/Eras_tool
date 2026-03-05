@@ -26,6 +26,7 @@ import { useFilters } from "../../../contexts/FiltersContext"
 import { usePosetWorker } from "./hooks/usePosetWorker"
 import Button from "../../common/Button/Button"
 import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
+import { CloseButton } from "../../common/Button/CloseButton"
 
 // ! TODO Refactor completo
 
@@ -657,15 +658,6 @@ const chipVariants = {
   hidden: { opacity: 0, y: 5 },
   visible: { opacity: 1, y: 0 },
 }
-const buttonVariants = {
-  visible: { opacity: 1, transition: { duration: 0.2 } },
-  hidden: { opacity: 0, transition: { duration: 0.2 } },
-}
-
-const closeBtnVariants = {
-  hidden: { scale: 0 },
-  visible: { scale: 1, transition: { ease: "easeInOut" } },
-}
 
 function SilhouetteChip({ s, palette, x, y, animationDuration, toggleSilhouetteFilter }) {
   const [isHovered, setIsHovered] = useState(false)
@@ -682,30 +674,8 @@ function SilhouetteChip({ s, palette, x, y, animationDuration, toggleSilhouetteF
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      {/* {isHovered && (
-        <motion.button
-          variants={buttonVariants}
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          whileTap={{ scale: 0.9, transition: 0.2 }}
-          className="close-button"
-          onClick={() => toggleSilhouetteFilter(s)}
-        >
-          ×
-        </motion.button>
-      )} */}
+      <CloseButton isVisible={isHovered} onClick={() => toggleSilhouetteFilter(s)} />
 
-      <motion.button
-        className="close-btn"
-        variants={closeBtnVariants}
-        initial={"hidden"}
-        animate={isHovered ? "visible" : "hidden"}
-        layout
-        onClick={() => toggleSilhouetteFilter(s)}
-      >
-        <X size={16} />
-      </motion.button>
       <SmallSilhouette
         silhouetteName={s}
         palette={palette}

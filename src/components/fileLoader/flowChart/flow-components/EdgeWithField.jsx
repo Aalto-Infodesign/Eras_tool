@@ -1,21 +1,34 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useMemo } from "react"
 import { EdgeToolbar, getBezierPath, BaseEdge, useReactFlow } from "@xyflow/react"
 import Button from "../../../common/Button/Button"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
 import { useData } from "../../../../contexts/ProcessedDataContext"
 
+import { motion } from "motion/react"
+import { CloseButton } from "../../../common/Button/CloseButton"
+
 // Simple example of an edge with a floating toolbar based on the connected nodes' positions
 export function EdgeWithField(props) {
   const [edgePath, centerX, centerY] = getBezierPath(props)
+
+  return (
+    <>
+      <BaseEdge id={props.id} path={edgePath} />
+      <EdgeToolbar edgeId={props.id} x={centerX} y={centerY} isVisible>
+        <ThresholdPanel props={props} />
+      </EdgeToolbar>
+    </>
+  )
+}
+
+function ThresholdPanel({ props }) {
   const { getNode } = useReactFlow()
   const [showInput, setShowInput] = useState(false)
-  const { statesThresholds, addStateThreshold } = useData()
+  const { statesThresholds, addStateThreshold, removeStateThreshold } = useData()
 
   const inputRef = useRef(null)
 
-  // useEffect(() => console.log("ST", statesThresholds), [statesThresholds])
-
-  const setThresholdBetweenStates = () => {
+  const handleAddClick = () => {
     if (inputRef.current) {
       const obj = {
         sourceState: sourceLabel,
@@ -25,6 +38,16 @@ export function EdgeWithField(props) {
       if (showInput) addStateThreshold(obj)
     }
     setShowInput(!showInput)
+  }
+
+  const handleRemoveClick = () => {
+    const obj = {
+      sourceState: sourceLabel,
+      targetState: targetLabel,
+    }
+
+    removeStateThreshold(obj)
+    setShowInput(false)
   }
 
   //   const sourceLabel = "a"
@@ -37,42 +60,60 @@ export function EdgeWithField(props) {
     (item) => item.sourceState === sourceLabel && item.targetState === targetLabel,
   )
 
-  const buttonLabel = !edgeThres ? "set" : "show"
+  const buttonLabel = useMemo(() => {
+    if (!edgeThres && !showInput) return "set threshold"
+    if (!edgeThres && showInput) return "set"
+    if (edgeThres && !showInput) return "edit"
+    else return "edit"
+  }, [edgeThres, showInput])
+
+  const templateVariants = {
+    hidden: {
+      visibility: "hidden",
+      opacity: 0,
+      height: 0,
+      transition: { duration: 0.15 },
+    },
+    visible: {
+      visibility: "visible",
+      opacity: 1,
+      height: "auto",
+      transition: { duration: 0.15 },
+    },
+  }
 
   return (
-    <>
-      <BaseEdge id={props.id} path={edgePath} />
-      <EdgeToolbar
-        edgeId={props.id}
-        x={centerX}
-        y={centerY}
-        // onClick={setThresholdBetweenStates}
-        isVisible
-      >
-        <div className="threshold-panel">
-          <p>
-            <span>
-              <ArrowUpFromDot size={10} />
-              {`${sourceLabel}`}
-            </span>{" "}
-            <span>
-              <ArrowDownToDot size={10} />
-              {`${targetLabel}`}
-            </span>
-          </p>
+    <motion.div
+      className="threshold-panel"
+      layout
+      initial="hidden"
+      whileHover="visible"
+      transition={{ duration: 0 }}
+    >
+      <motion.p variants={templateVariants} className="label">
+        <span>
+          <ArrowUpFromDot size={8} />
+          {`${sourceLabel}`}
+        </span>{" "}
+        <span>
+          <ArrowDownToDot size={8} />
+          {`${targetLabel}`}
+        </span>
+      </motion.p>
 
-          {showInput && (
-            <p>
-              <input type="number" ref={inputRef} />
-              <span>years</span>
-            </p>
-          )}
-          {!showInput && edgeThres?.threshold && <p>{edgeThres.threshold} years</p>}
-          <Button size="xs" onClick={setThresholdBetweenStates}>
-            {buttonLabel}
-          </Button>
-        </div>
-      </EdgeToolbar>
-    </>
+      {showInput && (
+        <motion.div className="input">
+          <input type="number" ref={inputRef} />
+          <span>years</span>
+        </motion.div>
+      )}
+      {!showInput && edgeThres?.threshold && <p className="value">{edgeThres.threshold} years</p>}
+      <motion.div variants={templateVariants} initial={!edgeThres ? "visible" : "hidden"}>
+        <Button size="xs" onClick={handleAddClick}>
+          {buttonLabel}
+        </Button>
+      </motion.div>
+      <CloseButton isVisible={edgeThres?.threshold} onClick={handleRemoveClick} />
+    </motion.div>
   )
 }

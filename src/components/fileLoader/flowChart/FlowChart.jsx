@@ -116,7 +116,7 @@ export const FlowChart = () => {
     <section className="flow-chart">
       <Activity mode={!isLegend ? "visible" : "hidden"}>
         <div className="buttons-wrapper">
-          <p>Coloring mode:</p>
+          <p>Coloring mode</p>
           <Button
             size="xs"
             data-selected={colorMode === "standard"}

@@ -5,6 +5,7 @@ section.flow-chart {
   flex-direction: column;
   gap: var(--spacing-sm);
   place-content: center;
+  font-size: var(--text-sm);
 }
 
 .dndflow {
@@ -116,14 +117,19 @@ section.flow-chart {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  align-items: center;
   place-content: center;
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   background-color: var(--surface-primary);
+  /* overflow: hidden; */
 }
 .threshold-panel input {
   max-width: 75px;
+}
+.threshold-panel .label {
+  font-size: var(--text-xs);
 }
 
 @media screen and (min-width: 768px) {
