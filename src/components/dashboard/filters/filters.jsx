@@ -4,9 +4,10 @@ import { FilterWrapper } from "./UI/FilterWrapper"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
-import { min, max } from "d3"
+import { min, max, extent } from "d3"
 
 import "./Filters.css"
+import StackedLines from "./StackedLines/StackedLines"
 
 export const Filters = () => {
   const { richData, statesData } = useData()
@@ -33,6 +34,7 @@ export const Filters = () => {
 
   return (
     <section id="filters" className="filters">
+      {/* <StackedLines data={richData} extent={extent(allYears.all)} width={150} height={150} /> */}
       <div className="filter-wrapper">
         {filters.date.active && (
           <FilterWrapper
