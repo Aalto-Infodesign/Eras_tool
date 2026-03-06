@@ -335,7 +335,7 @@ function SankeyLink({
         transition={DEFAULT_TRANSITION}
         stroke={`url(#grad-${index_S}-${index_F})`}
         fill="none"
-        // onMouseEnter={() => setHoveredLink(fullLink)}
+        onMouseEnter={() => setHoveredLink(fullLink)}
       />
     </>
   )

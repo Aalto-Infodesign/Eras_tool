@@ -71,16 +71,6 @@ svg.filter text {
   cursor: grab;
 }
 
-@media (max-width: 900px) {
-  #filters {
-    flex-direction: row;
-  }
-
-  #filters .filter-wrapper {
-    flex-direction: row;
-  }
-}
-
 /* SLIDER */
 
 .slider-container {

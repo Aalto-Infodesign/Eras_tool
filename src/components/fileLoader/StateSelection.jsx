@@ -18,8 +18,15 @@ export function StateSelection() {
   const { removedStates, setRemovedStates, scales, statesData, statesOrder, setStatesOrder } =
     useData()
   const { palette, isLegend, hasFlowChart } = useViz()
-  const { screenToFlowPosition, setNodes, getNodes, setEdges, updateNodeData, deleteElements } =
-    useReactFlow()
+  const {
+    screenToFlowPosition,
+    setNodes,
+    getNodes,
+    setEdges,
+    updateNodeData,
+    deleteElements,
+    fitView,
+  } = useReactFlow()
 
   // Centralized node creation function
   const createNode = useCallback(
@@ -85,6 +92,8 @@ export function StateSelection() {
         margin: 10,
       }),
     )
+
+    fitView()
   }, [fileName])
 
   // Sync node labels when statesOrder changes

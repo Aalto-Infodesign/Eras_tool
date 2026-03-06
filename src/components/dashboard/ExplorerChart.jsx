@@ -295,7 +295,7 @@ export function TrajectoriesExplorerChart(props) {
                   <Virtuoso
                     className="virtuoso-scroller-wrapper"
                     style={{
-                      height: "100px",
+                      height: "65px",
                       width: "100%",
                       paddingLeft: "10px",
                     }}
@@ -336,7 +336,7 @@ export function TrajectoriesExplorerChart(props) {
 
                             <span>{id.id}</span>
                             <CloseButton
-                              isVisible={chipHoveredId === id.id ? "visible" : "hidden"}
+                              isVisible={chipHoveredId === id.id}
                               onClick={() => toggleSelectedTrajectory(id.id)}
                             />
                           </motion.div>
