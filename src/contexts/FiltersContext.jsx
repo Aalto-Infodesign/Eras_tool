@@ -1,22 +1,31 @@
 import { createContext, useState, useContext, useMemo, useCallback, useEffect } from "react"
 import { useData } from "./ProcessedDataContext"
 import { isEqual, isEmpty } from "lodash"
+import { useRawData } from "./RawDataContext"
 
 const FiltersContext = createContext(null)
 
 // TODO Add toggles
 
 export function FiltersProvider({ children }) {
+  const { fileName } = useRawData()
   const { filtersBlueprint, existingIdealSilhouettes } = useData()
   // Sliders
   const [filters, setFilters] = useState(filtersBlueprint)
   const [isDragging, setIsDragging] = useState(false)
 
   // Selection Data
-  const [selectedSilhouettesNames, setSelectedSilhouettesNames] = useState(null) // Main filter
+  const [selectedSilhouettesNames, setSelectedSilhouettesNames] = useState([]) // Main filter
   const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
 
   const [trajectoriesSelectionMode, setTrajectoriesSelectionMode] = useState("all") // all, diagonal, parallel
+
+  //Reset when fileName changes
+  useEffect(() => {
+    setSelectedSilhouettesNames([])
+    setSelectedTrajectoriesIDs([])
+    setTrajectoriesSelectionMode("all")
+  }, [fileName])
 
   // Sync internal state when the source data changes
   useEffect(() => {
@@ -24,6 +33,7 @@ export function FiltersProvider({ children }) {
       setFilters(filtersBlueprint)
     }
   }, [filtersBlueprint])
+
   useEffect(() => {
     if (existingIdealSilhouettes) {
       const names = existingIdealSilhouettes.map((s) => s.name)

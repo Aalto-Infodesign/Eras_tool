@@ -50,7 +50,7 @@ export const FilterWrapper = ({
       </div>
 
       <FilterDistribution
-        data={allPoints}
+        allPoints={allPoints}
         height={50}
         xScale={xScale}
         range={filter.range}

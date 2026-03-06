@@ -61,13 +61,13 @@ function SankeyNode({
     console.log("Node clicked:", node)
     // selectLeftIds(node)
 
-    const upstreamData = traceUpstream(node)
+    const data = traceUpstream(node)
     //console.log("All nodes to the left:", upstreamData.nodes)
     //console.log("All links to the left:", upstreamData.links)
     setSelectionDirection("left")
     const targetSegments = getTargetSegments(node)
     setSelectedTrajectoriesIDs(targetSegments)
-    setSelectedLinks(upstreamData.links)
+    setSelectedLinks(data.links)
   }
 
   function getTargetSegments(node) {
@@ -82,13 +82,14 @@ function SankeyNode({
     //console.log("Node clicked:", node)
     // selectLeftIds(node)
 
-    const upstreamData = traceDownstream(node)
+    const data = traceDownstream(node)
     //console.log("All nodes to the left:", upstreamData.nodes)
     //console.log("All links to the left:", upstreamData.links)
     setSelectionDirection("right")
     const sourceSegments = getSourceSegments(node)
+    console.log(sourceSegments)
     setSelectedTrajectoriesIDs(sourceSegments)
-    setSelectedLinks(upstreamData.links)
+    setSelectedLinks(data.links)
   }
 
   function getSourceSegments(node) {
@@ -105,6 +106,7 @@ function SankeyNode({
    * @returns {Object} An object containing Sets of visited nodes and links.
    */
   function traceUpstream(startNode) {
+    console.time("Upstream")
     const visitedNodes = new Set()
     const visitedLinks = new Set()
 
@@ -133,6 +135,8 @@ function SankeyNode({
 
     traverse(startNode)
 
+    console.timeEnd("Upstream")
+
     return {
       nodes: Array.from(visitedNodes),
       links: Array.from(visitedLinks),
@@ -140,6 +144,8 @@ function SankeyNode({
   }
 
   function traceDownstream(startNode) {
+    console.time("Downstream")
+
     const visitedNodes = new Set()
     const visitedLinks = new Set()
 
@@ -162,6 +168,7 @@ function SankeyNode({
     }
 
     traverse(startNode)
+    console.timeEnd("Downstream")
 
     return {
       nodes: Array.from(visitedNodes),
@@ -328,7 +335,7 @@ function SankeyLink({
         transition={DEFAULT_TRANSITION}
         stroke={`url(#grad-${index_S}-${index_F})`}
         fill="none"
-        onMouseEnter={() => setHoveredLink(fullLink)}
+        // onMouseEnter={() => setHoveredLink(fullLink)}
       />
     </>
   )
@@ -338,6 +345,8 @@ function SankeyLink({
 export function Sankey({ width, height, data }) {
   const { palette } = useViz()
   const { setSelectedTrajectoriesIDs } = useFilters()
+
+  console.log("Sankey")
 
   const [hoveredLink, setHoveredLink] = useState(null)
   const [selectedLinks, setSelectedLinks] = useState([])

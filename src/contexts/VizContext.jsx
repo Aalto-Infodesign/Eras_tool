@@ -19,11 +19,11 @@ export function VizProvider({ children }) {
 
   // UI STATE
   const [colorMode, setColorMode] = useState("standard") // standard || poset
-  const [theme, setTheme] = useState("dark")
+  // const [theme, setTheme] = useState("dark")
   const [isLegend, setIsLegend] = useState(false)
   const [loadingCount, setLoadingCount] = useState(0)
   const [hasFlowChart, setHasFlowChart] = useState(true)
-  const [chartType, setChartType] = useState(1)
+  const [chartType, setChartType] = useState(2)
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
 
   useModifierKey("1", () => setChartType(1))
@@ -124,7 +124,15 @@ export function VizProvider({ children }) {
     // console.timeEnd("Palette Poset")
 
     return { palette }
-  }, [statesData, scales, dominanceArrayFromFlow, idealSilhouettes, colorMode])
+  }, [
+    idealSilhouettes,
+    statesData,
+    scales,
+    dominanceArrayFromFlow,
+    colorMode,
+    generatePaletteFromDominance,
+    nodesFromFlow,
+  ])
 
   // Function that your FlowChart component can call
   const updatePosetColoring = (dominanceArray, nodes) => {
@@ -140,17 +148,11 @@ export function VizProvider({ children }) {
     }
   }
 
-  // useEffect(() => {
-  //   setStatesOrder(statesOrderOriginal)
-  // }, [fileName, statesOrderOriginal])
-
   const value = useMemo(
     () => ({
       palette,
-      // statesOrder,
-      // statesOrderOriginal,
+
       isLegend,
-      // setStatesOrder,
       setIsLegend,
       updatePosetColoring, // Expose this to child components
       hasFlowChart,
@@ -168,12 +170,11 @@ export function VizProvider({ children }) {
     }),
     [
       palette,
-      // statesOrder,
-      // statesOrderOriginal,
       isLegend,
       hasFlowChart,
       loadingCount,
       updatePosetColoring,
+      isHasse,
       startLoading,
       stopLoading,
       chartType,

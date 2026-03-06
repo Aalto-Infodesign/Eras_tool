@@ -55,16 +55,12 @@ export const Sankey = ({ width, height }) => {
       return { sankeyNodes: [], sankeyLinks: [] }
     }
   }, [nodes, edges, width, height, palette]) // Only recalculates if these change
-  console.log("NODES", nodes)
-
-  console.log("SL", sankeyLinks)
 
   if (sankeyNodes.length === 0 || sankeyLinks.length === 0) return
 
   const allNodes = sankeyNodes.map((node) => {
-    const isHovered = hoveredNode && hoveredNode.id === node.id
+    // const isHovered = hoveredNode && hoveredNode.id === node.id
 
-    console.log("Sankey Node", node)
     return (
       <motion.g
         key={node.id}

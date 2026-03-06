@@ -3,7 +3,7 @@ import Dashboard from "./components/Dashboard"
 import { FileLoader } from "./components/fileLoader/FileLoader"
 import { AnimatePresence } from "motion/react"
 import { motion } from "motion/react"
-import { RawDataProvider } from "./contexts/RawDataContext"
+import { RawDataProvider, useRawData } from "./contexts/RawDataContext"
 import { ProcessedDataProvider, useData } from "./contexts/ProcessedDataContext"
 import { VizProvider, useViz } from "./contexts/VizContext"
 import { FiltersProvider } from "./contexts/FiltersContext"
@@ -33,13 +33,16 @@ function App() {
 export default App
 
 function AppContent() {
+  const { status } = useRawData()
   const { richData, silhouettes } = useData()
   const { isLegend, isLoading } = useViz()
+
+  console.log("Loading", isLoading)
 
   return (
     <div className="App">
       <AnimatePresence>{!richData?.length && <TitleAnimation />}</AnimatePresence>
-      {isLoading && (
+      {(isLoading || status === "loading") && (
         <div
           style={{
             position: "absolute",

@@ -15,10 +15,11 @@ export function usePosetWorker() {
 
     const cleanData = JSON.parse(JSON.stringify(silhouettes))
 
-    worker.postMessage({ silhouettes: cleanData })
+    worker.postMessage({ silhouettes })
 
     worker.onmessage = ({ data }) => {
       setResult(data)
+      console.log("WORKER DONE")
       stopLoading()
 
       worker.terminate() // Clean up after specific task if not reused
@@ -30,7 +31,7 @@ export function usePosetWorker() {
     }
 
     return () => worker.terminate()
-  }, [silhouettes, startLoading, stopLoading])
+  }, [silhouettes])
 
   return { result }
 }

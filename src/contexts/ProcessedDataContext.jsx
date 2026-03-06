@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useMemo, useEffect } from "react"
+import { createContext, useState, useContext, useMemo, useEffect, useCallback } from "react"
 import { useRawData } from "./RawDataContext"
 
 import { scaleOrdinal } from "d3"
@@ -26,7 +26,7 @@ export function ProcessedDataProvider({ children }) {
     setIdealSilhouettes([])
     setStatesThresholds([])
     setStatesOrder([])
-  }, [rawData])
+  }, [fileName])
 
   // Take Raw Data and parse it based on file format
   const parsedData = useMemo(() => {
@@ -46,7 +46,7 @@ export function ProcessedDataProvider({ children }) {
     const baseData = clusterStates ? clusterStatesFunc(parsed) : parsed
     console.timeEnd("parse data")
     return baseData
-  }, [rawData, fileName])
+  }, [fileName, clusterStates])
 
   // Remove states from parsed data
   const data = useMemo(() => {
@@ -70,17 +70,10 @@ export function ProcessedDataProvider({ children }) {
   // Create conversion scales from Data
   const scales = useMemo(() => {
     if (!data || data.length === 0) return null
-    const states = data
-      .map((d) => d.trajectory)
-      .flat()
-      .filter((e, n, l) => l.indexOf(e) === n)
-      .map((state) => ({
-        name: state,
-      }))
 
     // TODO FUnc che chiude con φ
 
-    const statesNames = states.map((state) => state.name)
+    const statesNames = [...new Set(data.flatMap((d) => d.trajectory))]
 
     // Index them based on their order
     const stateIndexes = statesNames.map((_, i) => `${i}`)
@@ -108,7 +101,7 @@ export function ProcessedDataProvider({ children }) {
   useEffect(() => {
     if (!statesData.statesNames) return
     setStatesOrder(statesData.statesNames.map((_t, i) => `${i}`))
-  }, [statesData])
+  }, [statesData.statesNames])
 
   const existingIdealSilhouettes = useMemo(
     () =>
@@ -116,7 +109,7 @@ export function ProcessedDataProvider({ children }) {
     [silhouettes, idealSilhouettes],
   )
 
-  const addStateThreshold = (obj) => {
+  const addStateThreshold = useCallback((obj) => {
     setStatesThresholds((prev) => {
       const exists = prev.some(
         (item) => item.sourceState === obj.sourceState && item.targetState === obj.targetState,
@@ -131,14 +124,16 @@ export function ProcessedDataProvider({ children }) {
 
       return [...prev, obj]
     })
-  }
-  const removeStateThreshold = (obj) => {
+  }, []) // No deps needed since it uses the functional updater form
+
+  const removeStateThreshold = useCallback((obj) => {
     setStatesThresholds((prev) =>
       prev.filter(
         (item) => !(item.sourceState === obj.sourceState && item.targetState === obj.targetState),
       ),
     )
-  }
+  }, [])
+
   const value = useMemo(
     () => ({
       // State

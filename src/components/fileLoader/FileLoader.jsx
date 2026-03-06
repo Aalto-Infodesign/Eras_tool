@@ -17,7 +17,7 @@ import { useViz } from "../../contexts/VizContext"
 
 import { ChevronDown, Maximize2 } from "lucide-react"
 
-export function FileLoader({}) {
+export function FileLoader() {
   const { richData, existingIdealSilhouettes, clusterStates, setClusterStates, statesOrder } =
     useData()
   const { setIsLegend, isLegend, hasFlowChart } = useViz()

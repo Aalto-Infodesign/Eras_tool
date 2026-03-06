@@ -32,7 +32,6 @@ export function DerivedDataProvider({ children }) {
 
   const isReady = silhouettes?.length > 0 && richData?.length > 0 && !isEmpty(filters)
 
-  console.time("Derived Data")
   const filteredData = useMemo(() => {
     if (!isReady) return []
 
@@ -77,7 +76,7 @@ export function DerivedDataProvider({ children }) {
     const map = new Map()
     filteredSilhouettes.forEach((s) => map.set(s.name, s))
     return map
-  }, [filteredData])
+  }, [filteredSilhouettes, filtersActive])
 
   const completeSilhouettes = useMemo(() => {
     if (!silhouettesMap) return []
@@ -114,6 +113,7 @@ export function DerivedDataProvider({ children }) {
   }, [silhouettes, selectedSilhouettesData, completeLinks])
 
   const filteredLinks = useMemo(() => {
+    if (!filtersActive) return linksBySelectedSilhouettes
     const links = linksBySelectedSilhouettes.filter(
       (datum) =>
         datum.speed === null ||
@@ -124,7 +124,7 @@ export function DerivedDataProvider({ children }) {
     if (trajectoriesSelectionMode === "all") return links
     if (trajectoriesSelectionMode === "vertical") return links.filter((l) => l.speed === 0)
     else return links.filter((l) => l.speed !== 0)
-  }, [linksBySelectedSilhouettes, trajectoriesSelectionMode, filters])
+  }, [linksBySelectedSilhouettes, trajectoriesSelectionMode, filters, filtersActive])
 
   const selectedIDs = useMemo(() => {
     if (!selectedSilhouettesData) return []
@@ -154,8 +154,6 @@ export function DerivedDataProvider({ children }) {
     return [...IDsFromSilhouettes]
   }, [selectedSilhouettesData, selectedTrajectoriesIDs, chartType])
 
-  console.time("Derived End")
-
   const value = useMemo(
     () => ({
       filteredData,
@@ -177,7 +175,6 @@ export function DerivedDataProvider({ children }) {
     ],
   )
 
-  if (!filteredData) return null
   return <DerivedContext.Provider value={value}>{children}</DerivedContext.Provider>
 }
 

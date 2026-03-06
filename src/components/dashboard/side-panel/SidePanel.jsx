@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useModifierKey } from "../../hooks/useModifierKey"
 import { ExportIDs } from "../export/ExportIDs"
 import { useWindowSize } from "../../hooks/useWindowSize"
+import { Activity } from "react"
 
 export const SidePanel = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -26,7 +27,7 @@ export const SidePanel = () => {
   useModifierKey("e", () => handlePanelOpen("export"))
 
   const panelVariants = {
-    closed: { x: width < 1844 ? containerWidth - 30 : 1440 - 20, y: "-50%" },
+    closed: { x: width < 1844 ? containerWidth - 30 : 1440 - 20 },
     open: { x: width < 1844 ? width - (width - containerWidth) / 2 - 220 : 1440 - 20 },
   }
   return (
@@ -37,7 +38,7 @@ export const SidePanel = () => {
       initial={"closed"}
       animate={isOpen ? "open" : "closed"}
       onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      // onMouseLeave={() => setIsOpen(false)}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className={styles.sidePanel}
     >
@@ -56,8 +57,14 @@ export const SidePanel = () => {
         </PanelButton>
       </div>
       <section className={styles.panelContent}>
-        {panelContent === "filters" && <Filters />}
-        {panelContent === "export" && <ExportIDs />}
+        <Activity mode={panelContent === "filters" ? "visible" : "hidden"}>
+          <Filters />
+        </Activity>
+        <Activity mode={panelContent === "export" ? "visible" : "hidden"}>
+          <ExportIDs />
+        </Activity>
+        {/* {panelContent === "filters" && <Filters />}
+        {panelContent === "export" && <ExportIDs />} */}
       </section>
     </motion.section>
   )

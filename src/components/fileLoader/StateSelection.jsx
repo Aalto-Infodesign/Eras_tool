@@ -13,7 +13,7 @@ import { X, Workflow, Plus } from "lucide-react"
 import Button from "../common/Button/Button"
 
 export function StateSelection() {
-  const { rawData } = useRawData()
+  const { fileName } = useRawData()
 
   const { removedStates, setRemovedStates, scales, statesData, statesOrder, setStatesOrder } =
     useData()
@@ -85,7 +85,7 @@ export function StateSelection() {
         margin: 10,
       }),
     )
-  }, [rawData])
+  }, [fileName])
 
   // Sync node labels when statesOrder changes
   useEffect(() => {
