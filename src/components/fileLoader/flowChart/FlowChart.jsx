@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, Activity } from "react"
+import { useRef, useCallback, useEffect } from "react"
 import {
   ReactFlow,
   addEdge,
@@ -114,7 +114,7 @@ export const FlowChart = () => {
 
   return (
     <section className="flow-chart">
-      <Activity mode={!isLegend ? "visible" : "hidden"}>
+      <div style={{ display: !isLegend ? "contents" : "none" }}>
         <div className="buttons-wrapper">
           <p>Coloring mode</p>
           <Button
@@ -165,7 +165,7 @@ export const FlowChart = () => {
             </div>
           </div>
         </div>
-      </Activity>
+      </div>
     </section>
   )
 }

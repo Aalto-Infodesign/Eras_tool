@@ -2,11 +2,10 @@ import { motion } from "motion/react"
 import { SlidersHorizontal, Download } from "lucide-react"
 import styles from "./SidePanel.module.css"
 import { Filters } from "../filters/Filters"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useModifierKey } from "../../hooks/useModifierKey"
 import { ExportIDs } from "../export/ExportIDs"
 import { useWindowSize } from "../../hooks/useWindowSize"
-import { Activity } from "react"
 
 export const SidePanel = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -57,14 +56,8 @@ export const SidePanel = () => {
         </PanelButton>
       </div>
       <section className={styles.panelContent}>
-        <Activity mode={panelContent === "filters" ? "visible" : "hidden"}>
-          <Filters />
-        </Activity>
-        <Activity mode={panelContent === "export" ? "visible" : "hidden"}>
-          <ExportIDs />
-        </Activity>
-        {/* {panelContent === "filters" && <Filters />}
-        {panelContent === "export" && <ExportIDs />} */}
+        {panelContent === "filters" && <Filters />}
+        {panelContent === "export" && <ExportIDs />}
       </section>
     </motion.section>
   )
