@@ -386,7 +386,7 @@ export function Sankey({ width, height, data }) {
 
   return (
     <div className="chart-container">
-      <div className="svg-container">
+      <div id="sankey-chart" className="svg-container">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="xMidYMid meet"

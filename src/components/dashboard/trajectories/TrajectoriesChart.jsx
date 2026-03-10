@@ -25,6 +25,7 @@ import { useFilters } from "../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import Button from "../../common/Button/Button"
 import { div } from "three/src/nodes/math/OperatorNode.js"
+import { StatesMatrix } from "../../fileLoader/statesMatrix/StatesMatrix"
 
 export function TrajectoriesChart() {
   // console.time("Trajectories")
@@ -216,8 +217,8 @@ export function TrajectoriesChart() {
 
       <div className="chart-container">
         {showDistributions && (
-          <div className="svg-container">
-            <svg id="distributionsSvg" preserveAspectRatio="xMidYMid meet" viewBox={`0 0 70 ${h}`}>
+          <div className="svg-container" id="distributions-chart">
+            <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 70 ${h}`}>
               <StateTypeDistribution
                 setHoveredDistribution={setHoveredDistribution}
                 unitedObjectsOriginal={processedData.unitedObjectsOriginal}
@@ -232,13 +233,8 @@ export function TrajectoriesChart() {
             </svg>
           </div>
         )}
-        <div className="svg-container">
-          <svg
-            ref={svgRef}
-            id="trajectoriesChartSvg"
-            preserveAspectRatio="xMidYMid meet"
-            viewBox={`0 0 210 ${h}`}
-          >
+        <div id="trajectories-chart" className="svg-container">
+          <svg ref={svgRef} preserveAspectRatio="xMidYMid meet" viewBox={`0 0 210 ${h}`}>
             <TextureDefs />
             <GradientDefs statesNamesLoaded={statesNamesLoaded} palette={palette} />
 
@@ -294,6 +290,8 @@ export function TrajectoriesChart() {
             <p>{hoveredStateLabel}</p>
           </Tooltip>
         </div>
+
+        <StatesMatrix width={h} height={h} />
       </div>
     </>
   )

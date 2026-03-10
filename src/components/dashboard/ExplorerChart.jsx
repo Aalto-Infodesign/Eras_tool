@@ -197,7 +197,7 @@ export function TrajectoriesExplorerChart(props) {
           </div>
           <DownloadPanel />
         </motion.div>
-        <div className="chart-wrapper">
+        <div>
           <TrajectoriesContext.Provider value={contextValue}>
             <motion.section
               key={chartType}
@@ -206,14 +206,15 @@ export function TrajectoriesExplorerChart(props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="trajectories-chart"
+              className="chart-wrapper"
+              // className="trajectories-chart"
             >
               {chartType === 1 && <PartialOrderChart />}
               {chartType === 2 && <TrajectoriesChart />}
             </motion.section>
           </TrajectoriesContext.Provider>
 
-          <Legend />
+          {/* <Legend /> */}
         </div>
       </motion.section>
 

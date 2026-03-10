@@ -5,7 +5,7 @@
 // - the number of times this couple appears in the silhouettes
 import { useState, useMemo } from "react"
 import { motion } from "motion/react"
-import { extent, scaleBand, scaleLinear } from "d3"
+import { extent, scaleBand, scaleLinear, scaleQuantile } from "d3"
 import { groupBy, map, countBy } from "lodash"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
@@ -13,7 +13,7 @@ import { ListFilter } from "lucide-react"
 
 import { curveStep, line } from "d3"
 
-const PADDING = 25
+const PADDING = 0
 
 export function StatesMatrix({ width, height }) {
   const { statesData, statesOrder } = useData()
@@ -82,17 +82,17 @@ export function StatesMatrix({ width, height }) {
   const xScale = scaleBand()
     .domain(statesOrder)
     .range([PADDING, width - PADDING])
-    .padding(0.1)
+    .padding(0.15)
 
   const yScale = scaleBand()
     .domain(statesOrder)
     .range([PADDING, height - PADDING])
-    .padding(0.1)
+    .padding(0.15)
 
   return (
-    <div>
+    <div className="svg-container" id="matrix-chart">
       {/* <h4>StatesMatrix</h4> */}
-      <div className="matrix-controls">
+      {/* <div className="matrix-controls">
         <ListFilter size={16} />
         <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
           <option value="duration">Duration</option>
@@ -101,10 +101,10 @@ export function StatesMatrix({ width, height }) {
           <option value="sourceAge">Source Age</option>
           <option value="targetAge">Target Age</option>
         </select>
-      </div>
+      </div> */}
 
-      <svg className="matrix" width={width} height={height}>
-        <g id="grid">
+      <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 140 ${height}`}>
+        {/* <g id="grid">
           {statesOrder.map((s) => {
             return (
               <g key={s}>
@@ -122,7 +122,7 @@ export function StatesMatrix({ width, height }) {
               </g>
             )
           })}
-        </g>
+        </g> */}
         <g id="cells">
           {matrixCouples.map((s, i) => {
             const dataMap = {
@@ -151,6 +151,8 @@ export function StatesMatrix({ width, height }) {
                 }}
                 onClick={() => setSelectedCell(isSelected ? null : s.id)}
               >
+                <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.target]} strokeWidth={0.5} />
+                <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.source]} strokeWidth={0.5} />
                 <rect
                   width={xScale.bandwidth()}
                   height={yScale.bandwidth()}
@@ -163,6 +165,12 @@ export function StatesMatrix({ width, height }) {
                   height={yScale.bandwidth()}
                   points={activePoints}
                 />
+                {/* <Quantiles
+                  width={xScale.bandwidth()}
+                  height={yScale.bandwidth()}
+                  points={activePoints}
+                  segments={4}
+                /> */}
                 <title>{`${s.id} – ${s.count}`}</title>
               </motion.g>
             )
@@ -199,6 +207,43 @@ function LineChart({ width, height, points }) {
       fill="none"
       strokeWidth={1}
     />
+  )
+}
+
+function Quantiles({ width, height, points, segments }) {
+  const xExtent = extent(points.map((p) => p.x))
+  const xScale = scaleLinear(xExtent, [0, width])
+
+  // Create evenly spaced bucket boundaries based on segment count
+  const buckets = Array.from({ length: segments }, (_, i) => Math.round((i / segments) * width))
+
+  const quant = scaleQuantile()
+    .domain(points.map((p) => p.x)) // ✅ array of numbers
+    .range(buckets) // ✅ discrete output values
+
+  // quant.quantiles() returns the 3 threshold x-values that divide data into 4 groups
+  const thresholds = [xExtent[0], ...quant.quantiles(), xExtent[1]]
+
+  const colors = ["#4e79a7", "#f28e2b", "#e15759", "#76b7b2"]
+
+  return (
+    <g>
+      {buckets.map((i) => {
+        const x0 = xScale(thresholds[i])
+        const x1 = xScale(thresholds[i + 1])
+        return (
+          <rect
+            key={i}
+            x={x0}
+            y={0}
+            width={x1 - x0}
+            height={height}
+            fill={colors[i]}
+            opacity={0.75}
+          />
+        )
+      })}
+    </g>
   )
 }
 
