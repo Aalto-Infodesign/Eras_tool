@@ -41,8 +41,6 @@ export default function StackedLines({ data, extent, width, height }) {
     }
   }, [data, orderMode])
 
-  console.log(sortedData)
-
   return (
     <div className="filter-box">
       <div>
@@ -112,14 +110,14 @@ export default function StackedLines({ data, extent, width, height }) {
             {orderMode !== "duration" ? (
               <p>
                 from
-                <span>{sortedData[hoveredIndex]?.years[0]}</span>
+                <span>{Math.floor(sortedData[hoveredIndex]?.years[0])}</span>
                 to
-                <span>{sortedData[hoveredIndex]?.years.at(-1)}</span>
+                <span>{Math.floor(sortedData[hoveredIndex]?.years.at(-1))}</span>
               </p>
             ) : (
               <p>
                 duration
-                <span>{sortedData[hoveredIndex]?.diseaseDuration}</span>
+                <span>{Math.floor(sortedData[hoveredIndex]?.diseaseDuration)}</span>
               </p>
             )}
           </div>
@@ -176,15 +174,12 @@ function HoveredLine({ data, domain, index }) {
 
   useEffect(() => {
     invalidate()
-    console.log(index)
   }, [index]) // tell R3F to re-render on index change
 
   if (index === null || !data[index]) return null
 
   const [x1, x2] = extent(data[index].years)
   const y = hw - spacing * (index + 1)
-
-  console.log(y)
 
   return (
     <group position={[0, y, 0]}>

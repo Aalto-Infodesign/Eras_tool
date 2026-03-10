@@ -32,8 +32,6 @@ export const Filters = () => {
 
   const allSpeeds = statesData.links.map((d) => d.speed).filter((speed) => !isNil(speed))
 
-  console.log("s", selectedData)
-
   return (
     <section id="filters" className="filters">
       <StackedLines data={selectedData} extent={extent(allYears.all)} width={150} height={150} />

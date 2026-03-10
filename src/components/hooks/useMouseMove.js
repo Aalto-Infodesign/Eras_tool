@@ -1,20 +1,21 @@
 import { useState, useEffect, useMemo } from "react"
-import useWindowSize from "./useWindowSize"
+// import useWindowSize from "./useWindowSize"
 
 export function useMouseMove() {
   // 1. Each component gets its OWN 'position' state, initialized to {x: 0, y: 0}
   const [position, setPosition] = useState({ x: 0, y: 0 })
 
-  const { width } = useWindowSize()
+  // const { width } = useWindowSize()
 
-  const bodyMargin = useMemo(() => {
-    const marginLeft = document.querySelector("body").getBoundingClientRect().left
-    return marginLeft
-  }, [width])
+  // const bodyMargin = useMemo(() => {
+  //   const marginLeft = document.querySelector("body").getBoundingClientRect().left
+  //   return marginLeft
+  // }, [width])
 
   useEffect(() => {
     const handleMouseMove = (event) => {
-      setPosition({ x: event.pageX - bodyMargin, y: event.pageY })
+      console.log(event.clientX)
+      setPosition({ x: event.clientX, y: event.clientY })
     }
 
     window.addEventListener("mousemove", handleMouseMove)
@@ -22,7 +23,7 @@ export function useMouseMove() {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove)
     }
-  }, [bodyMargin])
+  }, [])
 
   return position
 }
@@ -40,8 +41,10 @@ export function useMouseMoveSvg(svgRef) {
     pt.y = mousePosition.y
 
     const svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
+
+    console.log(svgP.x)
     setSvgCursorPosition({ x: svgP.x, y: svgP.y })
-  }, [mousePosition, svgRef])
+  }, [mousePosition])
 
   return svgCursorPosition
 }
