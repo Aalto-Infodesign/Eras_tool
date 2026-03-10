@@ -58,13 +58,21 @@
   background-color: var(--surface-tertiary);
 } */
 
-.tertiary {
+.tertiary[data-selected="false"] {
   background-color: transparent;
-  color: #6c757d;
+  color: var(--text-light);
   border-color: transparent;
+  font-weight: 500;
+  padding: 0px;
 }
 .tertiary:hover:not(:disabled) {
-  background-color: #f8f9fa;
+  /* background-color: #f8f9fa; */
+}
+.tertiary[data-selected="true"] {
+  color: var(--text-accent);
+  background-color: transparent;
+  font-weight: 700;
+  padding: 0px;
 }
 
 /* Dimensioni */

@@ -1,0 +1,8 @@
+.infoPanel {
+  min-height: 30px;
+}
+
+.infoPanel span {
+  padding: var(--spacing-xs);
+  font-weight: bold;
+}

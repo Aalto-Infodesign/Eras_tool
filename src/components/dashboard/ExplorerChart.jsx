@@ -37,6 +37,7 @@ export function TrajectoriesExplorerChart(props) {
   const {
     selectedTrajectoriesIDs,
     setSelectedTrajectoriesIDs,
+    toggleSelectedTrajectory,
     selectedSilhouettesNames,
     toggleSilhouetteFilter,
   } = useFilters()
@@ -77,10 +78,6 @@ export function TrajectoriesExplorerChart(props) {
     }
   }, [isArrowLeft, isArrowRight, hoveredTrajectoriesIDs.length])
 
-  const toggleSelectedTrajectory = (trajectoryID) => {
-    const newSelection = xor(selectedTrajectoriesIDs, [trajectoryID])
-    setSelectedTrajectoriesIDs(newSelection)
-  }
   const isTrajectoriesFilterActive = selectedTrajectoriesIDs.length > 0
 
   const toggleSelectedLumps = (lump) => {

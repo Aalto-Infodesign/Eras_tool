@@ -4,6 +4,7 @@ import { FilterWrapper } from "./UI/FilterWrapper"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { min, max, extent } from "d3"
 
 import "./Filters.css"
@@ -12,6 +13,7 @@ import StackedLines from "./StackedLines/StackedLines"
 export const Filters = () => {
   const { richData, statesData } = useData()
   const { filters } = useFilters()
+  const { selectedData } = useDerivedData()
   const sliderDimensions = { x: 150, y: 30 }
 
   if (isEmpty(filters)) return null
@@ -30,11 +32,11 @@ export const Filters = () => {
 
   const allSpeeds = statesData.links.map((d) => d.speed).filter((speed) => !isNil(speed))
 
-  // .filter((speed) => duration !== 0)
+  console.log("s", selectedData)
 
   return (
     <section id="filters" className="filters">
-      {/* <StackedLines data={richData} extent={extent(allYears.all)} width={150} height={150} /> */}
+      <StackedLines data={selectedData} extent={extent(allYears.all)} width={150} height={150} />
       <div className="filter-wrapper">
         {filters.date.active && (
           <FilterWrapper

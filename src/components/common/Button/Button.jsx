@@ -31,8 +31,8 @@ const Button = ({
       onClick={onClick}
       type={type}
       disabled={disabled}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
       {...rest} // Applica qualsiasi altra prop (es. aria-label)
     >
       {children}

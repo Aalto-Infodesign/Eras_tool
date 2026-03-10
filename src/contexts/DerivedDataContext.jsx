@@ -136,23 +136,28 @@ export function DerivedDataProvider({ children }) {
     const IDsFromTrajectories = selectedTrajectoriesIDs || []
     const type = Number(chartType)
 
-    if (type === 1) {
-      /** * INCLUSIVE (OR / UNION)
-       * Returns everything selected in BOTH silhouettes and trajectories.
-       */
-      return union(IDsFromSilhouettes, IDsFromTrajectories)
-    }
-
-    if (type === 2 && IDsFromTrajectories.length > 0) {
+    if (type === 1 && IDsFromTrajectories.length > 0) {
       /** * EXCLUSIVE (AND / INTERSECTION)
        * Returns only IDs that appear in BOTH categories.
        */
       return [...IDsFromTrajectories]
     }
 
+    if (type === 2) {
+      /** * INCLUSIVE (OR / UNION)
+       * Returns everything selected in BOTH silhouettes and trajectories.
+       */
+      return union(IDsFromSilhouettes, IDsFromTrajectories)
+    }
+
     // Default fallback (e.g., just Silhouettes)
     return [...IDsFromSilhouettes]
   }, [selectedSilhouettesData, selectedTrajectoriesIDs, chartType])
+
+  const selectedData = useMemo(() => {
+    if (selectedIDs.length === 0) return filteredData
+    return filteredData.filter((d) => selectedIDs.includes(d.FINNGENID))
+  }, [filteredData, selectedIDs])
 
   const value = useMemo(
     () => ({
@@ -163,6 +168,7 @@ export function DerivedDataProvider({ children }) {
       selectedSilhouettesData,
       selectedIDs,
       filteredLinks,
+      selectedData,
     }),
     [
       filteredData,
@@ -172,6 +178,7 @@ export function DerivedDataProvider({ children }) {
       selectedSilhouettesData,
       selectedIDs,
       filteredLinks,
+      selectedData,
     ],
   )
 

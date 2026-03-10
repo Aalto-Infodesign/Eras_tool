@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useMemo, useCallback, useEffect } 
 import { useData } from "./ProcessedDataContext"
 import { isEqual, isEmpty } from "lodash"
 import { useRawData } from "./RawDataContext"
+import { xor } from "lodash"
 
 const FiltersContext = createContext(null)
 
@@ -81,6 +82,12 @@ export function FiltersProvider({ children }) {
     })
   }
 
+  const toggleSelectedTrajectory = (trajectoryID) => {
+    setSelectedTrajectoriesIDs((prev) => {
+      return xor(prev, [trajectoryID])
+    })
+  }
+
   const filtersActive = useMemo(() => {
     if (isEmpty(filters)) return false
     return filters.date.isActive || filters.diseaseDuration.isActive || filters.speed.isActive
@@ -100,6 +107,7 @@ export function FiltersProvider({ children }) {
       toggleSilhouetteFilter,
       selectedTrajectoriesIDs,
       setSelectedTrajectoriesIDs,
+      toggleSelectedTrajectory,
       trajectoriesSelectionMode,
       setTrajectoriesSelectionMode,
       //Flag
@@ -116,6 +124,7 @@ export function FiltersProvider({ children }) {
       toggleSilhouetteFilter,
       selectedTrajectoriesIDs,
       setSelectedTrajectoriesIDs,
+      toggleSelectedTrajectory,
       trajectoriesSelectionMode,
       setTrajectoriesSelectionMode,
       //Flag

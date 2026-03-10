@@ -1,7 +1,7 @@
 .sidePanel {
   position: absolute;
   left: 0;
-  top: 25%;
+  top: 10%;
   width: 220px;
 
   display: flex;
