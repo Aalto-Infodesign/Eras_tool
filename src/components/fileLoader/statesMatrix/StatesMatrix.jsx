@@ -5,7 +5,7 @@
 // - the number of times this couple appears in the silhouettes
 import { useState, useMemo } from "react"
 import { motion } from "motion/react"
-import { extent, scaleBand, scaleLinear, scaleQuantile } from "d3"
+import { extent, scaleBand, scaleLinear, scaleQuantile, range } from "d3"
 import { groupBy, map, countBy } from "lodash"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
@@ -25,51 +25,45 @@ export function StatesMatrix({ width, height }) {
     () =>
       map(
         groupBy(statesData.links, (l) => [l.source.state, l.target.state]),
-        (value, key) => ({
-          id: key,
-          source: key.split(",")[0],
-          target: key.split(",")[1],
-          segments: value,
-          // durations: map(value, (v) => v.target.date - v.source.date),
-          countedDurations: map(
-            countBy(
-              map(value, (v) => v.target.date - v.source.date),
-              Math.floor,
-            ),
-            (v, k) => ({ x: Number(k), y: v }),
-          ),
-          // sourceDates: map(value, (v) => v.source.date),
-          countedSourceDates: map(
-            countBy(
-              map(value, (v) => v.source.date),
-              Math.floor,
-            ),
-            (v, k) => ({ x: Number(k), y: v }),
-          ),
-          // targetDates: map(value, (v) => v.target.date),
-          countedTargetDates: map(
-            countBy(
-              map(value, (v) => v.target.date),
-              Math.floor,
-            ),
-            (v, k) => ({ x: Number(k), y: v }),
-          ),
-          countedSourceAges: map(
-            countBy(
-              map(value, (v) => v.source.age),
-              Math.floor,
-            ),
-            (v, k) => ({ x: Number(k), y: v }),
-          ),
-          countedTargetAges: map(
-            countBy(
-              map(value, (v) => v.target.age),
-              Math.floor,
-            ),
-            (v, k) => ({ x: Number(k), y: v }),
-          ),
-          count: value.length,
-        }),
+        (value, key) => {
+          const durations = map(value, (v) => v.target.date - v.source.date)
+          const sourceDates = map(value, (v) => v.source.date)
+          const targetDates = map(value, (v) => v.source.date)
+          const sourceAges = map(value, (v) => v.source.age)
+          const targetAges = map(value, (v) => v.target.age)
+          return {
+            id: key,
+            source: key.split(",")[0],
+            target: key.split(",")[1],
+            segments: value,
+            duration: durations,
+            countedDurations: map(countBy(durations, Math.floor), (v, k) => ({
+              x: Number(k),
+              y: v,
+            })),
+            sourceDates: sourceDates,
+            countedSourceDates: map(countBy(sourceDates, Math.floor), (v, k) => ({
+              x: Number(k),
+              y: v,
+            })),
+            targetDates: targetDates,
+            countedTargetDates: map(countBy(targetDates, Math.floor), (v, k) => ({
+              x: Number(k),
+              y: v,
+            })),
+            sourceAges: sourceAges,
+            countedSourceAges: map(countBy(sourceAges, Math.floor), (v, k) => ({
+              x: Number(k),
+              y: v,
+            })),
+            targetAges: targetAges,
+            countedTargetAges: map(countBy(targetAges, Math.floor), (v, k) => ({
+              x: Number(k),
+              y: v,
+            })),
+            count: value.length,
+          }
+        },
       ),
     [statesData],
   )
@@ -140,19 +134,19 @@ export function StatesMatrix({ width, height }) {
               <motion.g
                 key={s.id}
                 initial={{
-                  x: xScale(s.source),
-                  y: yScale(s.target),
+                  x: xScale(s.target),
+                  y: yScale(s.source),
                   scale: 1,
                 }}
                 animate={{
-                  x: xScale(s.source),
-                  y: yScale(s.target),
+                  x: xScale(s.target),
+                  y: yScale(s.source),
                   scale: isSelected ? 1.1 : 1,
                 }}
                 onClick={() => setSelectedCell(isSelected ? null : s.id)}
               >
-                <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.target]} strokeWidth={0.5} />
-                <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.source]} strokeWidth={0.5} />
+                <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.source]} strokeWidth={0.5} />
+                <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.target]} strokeWidth={0.5} />
                 <rect
                   width={xScale.bandwidth()}
                   height={yScale.bandwidth()}
@@ -165,13 +159,13 @@ export function StatesMatrix({ width, height }) {
                   height={yScale.bandwidth()}
                   points={activePoints}
                 />
-                {/* <Quantiles
+                <Quantiles
                   width={xScale.bandwidth()}
                   height={yScale.bandwidth()}
-                  points={activePoints}
+                  points={s[lineChartMode]}
                   segments={4}
-                /> */}
-                <title>{`${s.id} – ${s.count}`}</title>
+                />
+                <title>{`${s.source} ${s.target} – ${s.count}`}</title>
               </motion.g>
             )
           })}
@@ -205,24 +199,26 @@ function LineChart({ width, height, points }) {
       d={linePath}
       stroke="red"
       fill="none"
-      strokeWidth={1}
+      strokeWidth={0.5}
     />
   )
 }
 
 function Quantiles({ width, height, points, segments }) {
-  const xExtent = extent(points.map((p) => p.x))
+  const xExtent = extent(points)
   const xScale = scaleLinear(xExtent, [0, width])
 
   // Create evenly spaced bucket boundaries based on segment count
-  const buckets = Array.from({ length: segments }, (_, i) => Math.round((i / segments) * width))
+  const buckets = range(segments)
 
   const quant = scaleQuantile()
-    .domain(points.map((p) => p.x)) // ✅ array of numbers
+    .domain(points) // ✅ array of numbers
     .range(buckets) // ✅ discrete output values
 
   // quant.quantiles() returns the 3 threshold x-values that divide data into 4 groups
   const thresholds = [xExtent[0], ...quant.quantiles(), xExtent[1]]
+
+  console.log(thresholds)
 
   const colors = ["#4e79a7", "#f28e2b", "#e15759", "#76b7b2"]
 
@@ -238,8 +234,8 @@ function Quantiles({ width, height, points, segments }) {
             y={0}
             width={x1 - x0}
             height={height}
-            fill={colors[i]}
-            opacity={0.75}
+            fill={"var(--surface-accent)"}
+            opacity={(1 / segments) * i}
           />
         )
       })}

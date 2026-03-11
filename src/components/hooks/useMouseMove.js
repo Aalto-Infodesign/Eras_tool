@@ -14,7 +14,6 @@ export function useMouseMove() {
 
   useEffect(() => {
     const handleMouseMove = (event) => {
-      console.log(event.clientX)
       setPosition({ x: event.clientX, y: event.clientY })
     }
 
@@ -42,7 +41,6 @@ export function useMouseMoveSvg(svgRef) {
 
     const svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
 
-    console.log(svgP.x)
     setSvgCursorPosition({ x: svgP.x, y: svgP.y })
   }, [mousePosition])
 
