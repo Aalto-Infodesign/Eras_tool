@@ -113,13 +113,14 @@ export function DerivedDataProvider({ children }) {
   }, [silhouettes, selectedSilhouettesData, completeLinks])
 
   const filteredLinks = useMemo(() => {
-    if (!filtersActive) return linksBySelectedSilhouettes
     const links = linksBySelectedSilhouettes.filter(
       (datum) =>
         datum.speed === null ||
         (Math.floor(datum.speed) >= filters.speed.selection[0] &&
           Math.floor(datum.speed) <= filters.speed.selection[1]),
     )
+
+    console.log(trajectoriesSelectionMode)
 
     if (trajectoriesSelectionMode === "all") return links
     if (trajectoriesSelectionMode === "vertical") return links.filter((l) => l.speed === 0)

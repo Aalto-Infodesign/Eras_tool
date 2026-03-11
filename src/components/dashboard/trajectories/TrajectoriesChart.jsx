@@ -118,6 +118,10 @@ export function TrajectoriesChart() {
       toggleSelectedTrajectory(hoveredTrajectoriesIDs[selectedIndex])
   }, [isEnter])
 
+  useEffect(() => {
+    if (filteredLinks.length > 500) setIsSelectModeLines(false)
+  }, [filteredLinks.length])
+
   // console.timeEnd("Trajectories")
 
   return (

@@ -40,9 +40,12 @@ export function TrajectoriesMotion(props) {
     filteredLinks.length < 20
       ? filteredLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
       : []
+
   const highlightedTrajectories = enableScrub
     ? filteredLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
     : []
+
+  console.log(filteredLinks)
 
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
 

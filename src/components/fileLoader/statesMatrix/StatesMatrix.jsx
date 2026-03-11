@@ -71,7 +71,7 @@ export function StatesMatrix({ width, height, lineChartMode }) {
     [statesData],
   )
 
-  console.log(matrixCouples)
+  // console.log(matrixCouples)
 
   const valuesExtent = extent(matrixCouples.map((c) => c.count))
   const opacityScale = scaleLinear([0, valuesExtent[1]], [0, 1])
@@ -238,7 +238,9 @@ function Quantiles({ width, height, points, segments, yScale, setHoveredQuantile
         const qHeight = yScale(pointsPerBucket)
 
         const rawSpan = thresholds[i + 1] - thresholds[i]
-        console.log(height)
+        {
+          /* console.log(height) */
+        }
 
         // Height proportional to density
         return (

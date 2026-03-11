@@ -68,7 +68,7 @@
 
   /* Screen Sizes */
   /* These won't work for MQs!! */
-  --screen-small: 600px;
+  --screen-small: 720px;
   --screen-medium: 900px;
   --screen-large: 1200px;
   --screen-xlarge: 1440px;
@@ -101,6 +101,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   display: flex;
+  min-width: var(--screen-small);
   max-width: var(--screen-xlarge);
   margin: 0 auto;
   background-color: var(--surface-primary);
