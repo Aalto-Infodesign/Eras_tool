@@ -16,7 +16,6 @@
   --violet-500: rgb(175, 155, 211);
 
   /* Spacing */
-
   --spacing-0: 0rem;
   --spacing-1: 0.25rem;
   --spacing-2: 0.5rem;
@@ -28,7 +27,6 @@
   --spacing-8: 2rem;
 
   /* Radii */
-
   --radius-none: 0;
   --radius-sm: 2px;
   --radius-md: 4px;
@@ -454,10 +452,13 @@ input[type="number"] {
 
 select {
   color: var(--surface-light);
-  background-color: var(--surface-contrast);
+  background-color: var(--surface-primary);
   border: 0px;
+  font-family: "Hack", monospace;
+  font-size: var(--text-sm);
+  font-weight: 700;
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--spacing-sm);
+  border-radius: var(--spacing-xs);
 }
 
 .side-panels-warpper {

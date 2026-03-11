@@ -16,22 +16,36 @@
   gap: var(--spacing-sm);
 }
 
-.controls {
+.chart-controls {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  /* place-content: space-between; */
+  /* gap: var(--spacing-md); */
+}
+
+#lump-controls {
+  grid-column: span 1;
+}
+#line-controls {
+  grid-column: span 2;
+}
+#matrix-controls {
+  grid-column: span 1;
   display: flex;
-  place-content: space-between;
-  gap: var(--spacing-md);
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .chart-container {
-  padding: var(--spacing-sm);
+  /* padding: var(--spacing-sm); */
   border-radius: var(--radius-md);
   background-color: var(--surface-contrast);
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   /* gap: var(--spacing-sm); */
   max-width: 1440px;
-  width: 100%;
-  min-height: 300px;
+  /* width: 100%; */
+  /* min-height: 300px; */
   height: 100%;
   overflow: scroll;
 }

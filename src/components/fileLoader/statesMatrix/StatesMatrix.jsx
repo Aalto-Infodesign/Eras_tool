@@ -9,17 +9,20 @@ import { extent, scaleBand, scaleLinear, scaleQuantile, range } from "d3"
 import { groupBy, map, countBy } from "lodash"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
-import { ListFilter } from "lucide-react"
+
+import { Tooltip } from "../../common/Tooltip/Tooltip"
 
 import { curveStep, line } from "d3"
 
 const PADDING = 0
+const SEGMENTS = 4
 
-export function StatesMatrix({ width, height }) {
+export function StatesMatrix({ width, height, lineChartMode }) {
   const { statesData, statesOrder } = useData()
   const { palette } = useViz()
-  const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
+
   const [selectedCell, setSelectedCell] = useState(null)
+  const [hoveredQuantile, setHoveredQuantile] = useState(null)
 
   const matrixCouples = useMemo(
     () =>
@@ -41,22 +44,22 @@ export function StatesMatrix({ width, height }) {
               x: Number(k),
               y: v,
             })),
-            sourceDates: sourceDates,
+            sourceD: sourceDates,
             countedSourceDates: map(countBy(sourceDates, Math.floor), (v, k) => ({
               x: Number(k),
               y: v,
             })),
-            targetDates: targetDates,
+            targetD: targetDates,
             countedTargetDates: map(countBy(targetDates, Math.floor), (v, k) => ({
               x: Number(k),
               y: v,
             })),
-            sourceAges: sourceAges,
+            sourceAge: sourceAges,
             countedSourceAges: map(countBy(sourceAges, Math.floor), (v, k) => ({
               x: Number(k),
               y: v,
             })),
-            targetAges: targetAges,
+            targetAge: targetAges,
             countedTargetAges: map(countBy(targetAges, Math.floor), (v, k) => ({
               x: Number(k),
               y: v,
@@ -83,19 +86,16 @@ export function StatesMatrix({ width, height }) {
     .range([PADDING, height - PADDING])
     .padding(0.15)
 
+  const countsExtent = extent(matrixCouples.map((mc) => mc.count))
+
+  const quantileYScale = scaleLinear(
+    [countsExtent[0], countsExtent[1] / SEGMENTS],
+    [0, yScale.bandwidth()],
+  )
+
   return (
     <div className="svg-container" id="matrix-chart">
       {/* <h4>StatesMatrix</h4> */}
-      {/* <div className="matrix-controls">
-        <ListFilter size={16} />
-        <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
-          <option value="duration">Duration</option>
-          <option value="source">Source</option>
-          <option value="target">Target</option>
-          <option value="sourceAge">Source Age</option>
-          <option value="targetAge">Target Age</option>
-        </select>
-      </div> */}
 
       <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 140 ${height}`}>
         {/* <g id="grid">
@@ -121,8 +121,8 @@ export function StatesMatrix({ width, height }) {
           {matrixCouples.map((s, i) => {
             const dataMap = {
               duration: s.countedDurations,
-              source: s.countedSourceDates,
-              target: s.countedTargetDates,
+              sourceD: s.countedSourceDates,
+              targetD: s.countedTargetDates,
               sourceAge: s.countedSourceAges,
               targetAge: s.countedTargetAges,
             }
@@ -141,12 +141,10 @@ export function StatesMatrix({ width, height }) {
                 animate={{
                   x: xScale(s.target),
                   y: yScale(s.source),
-                  scale: isSelected ? 1.1 : 1,
+                  // scale: isSelected ? 1.1 : 1,
                 }}
                 onClick={() => setSelectedCell(isSelected ? null : s.id)}
               >
-                <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.source]} strokeWidth={0.5} />
-                <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.target]} strokeWidth={0.5} />
                 <rect
                   width={xScale.bandwidth()}
                   height={yScale.bandwidth()}
@@ -154,23 +152,33 @@ export function StatesMatrix({ width, height }) {
                   fillOpacity={opacityScale(s.count)}
                   stroke="none"
                 />
-                <LineChart
-                  width={xScale.bandwidth()}
-                  height={yScale.bandwidth()}
-                  points={activePoints}
-                />
                 <Quantiles
                   width={xScale.bandwidth()}
                   height={yScale.bandwidth()}
                   points={s[lineChartMode]}
-                  segments={4}
+                  segments={SEGMENTS}
+                  yScale={quantileYScale}
+                  setHoveredQuantile={setHoveredQuantile}
                 />
+                {/* <LineChart
+                  width={xScale.bandwidth()}
+                  height={yScale.bandwidth()}
+                  points={activePoints}
+                /> */}
+                <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.source]} strokeWidth={0.5} />
+                <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.target]} strokeWidth={0.5} />
                 <title>{`${s.source} ${s.target} – ${s.count}`}</title>
               </motion.g>
             )
           })}
         </g>
       </svg>
+      <Tooltip isVisible={hoveredQuantile}>
+        <p>{hoveredQuantile?.totalPoints} total</p>
+        <p>Bucket {hoveredQuantile?.bucketValue}</p>
+        <p>Span {hoveredQuantile?.rawSpan}</p>
+        <p>{hoveredQuantile?.bucketPoints} ind.</p>
+      </Tooltip>
     </div>
   )
 }
@@ -194,17 +202,17 @@ function LineChart({ width, height, points }) {
       initial={{ pathLength: 0 }}
       animate={{ pathLength: 1 }}
       exit={{ pathLength: 0 }}
-      opacity={0.5}
+      opacity={0.3}
       transition={{ duration: 0.8, delay: 0 }}
       d={linePath}
       stroke="red"
       fill="none"
-      strokeWidth={0.5}
+      strokeWidth={0.3}
     />
   )
 }
 
-function Quantiles({ width, height, points, segments }) {
+function Quantiles({ width, height, points, segments, yScale, setHoveredQuantile }) {
   const xExtent = extent(points)
   const xScale = scaleLinear(xExtent, [0, width])
 
@@ -218,24 +226,43 @@ function Quantiles({ width, height, points, segments }) {
   // quant.quantiles() returns the 3 threshold x-values that divide data into 4 groups
   const thresholds = [xExtent[0], ...quant.quantiles(), xExtent[1]]
 
-  console.log(thresholds)
-
-  const colors = ["#4e79a7", "#f28e2b", "#e15759", "#76b7b2"]
+  const pointsPerBucket = points.length / segments
 
   return (
     <g>
       {buckets.map((i) => {
         const x0 = xScale(thresholds[i])
         const x1 = xScale(thresholds[i + 1])
+
+        const width = x1 - x0
+        const qHeight = yScale(pointsPerBucket)
+
+        const rawSpan = thresholds[i + 1] - thresholds[i]
+        console.log(height)
+
+        // Height proportional to density
         return (
-          <rect
+          <motion.rect
             key={i}
             x={x0}
-            y={0}
-            width={x1 - x0}
-            height={height}
+            y={height - qHeight}
+            animate={{ strokeWidth: 0 }}
+            width={width}
+            height={qHeight}
             fill={"var(--surface-accent)"}
-            opacity={(1 / segments) * i}
+            opacity={(1 / segments) * i + 1 / segments}
+            stroke={"black"}
+            whileHover={{ strokeWidth: 1 }}
+            transition={{ duration: 0.1, ease: "easeOut" }}
+            onMouseEnter={() =>
+              setHoveredQuantile({
+                bucketValue: i,
+                totalPoints: points.length,
+                rawSpan: rawSpan,
+                bucketPoints: pointsPerBucket,
+              })
+            }
+            onMouseLeave={() => setHoveredQuantile(null)}
           />
         )
       })}

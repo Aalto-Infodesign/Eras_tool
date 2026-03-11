@@ -36,7 +36,7 @@ export const SidePanel = () => {
       variants={panelVariants}
       initial={"closed"}
       animate={isOpen ? "open" : "closed"}
-      onMouseEnter={() => setIsOpen(true)}
+      // onMouseEnter={() => setIsOpen(true)}
       // onMouseLeave={() => setIsOpen(false)}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className={styles.sidePanel}

@@ -24,8 +24,8 @@ import { useViz } from "../../../contexts/VizContext"
 import { useFilters } from "../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import Button from "../../common/Button/Button"
-import { div } from "three/src/nodes/math/OperatorNode.js"
 import { StatesMatrix } from "../../fileLoader/statesMatrix/StatesMatrix"
+import { ListFilter } from "lucide-react"
 
 export function TrajectoriesChart() {
   // console.time("Trajectories")
@@ -55,6 +55,7 @@ export function TrajectoriesChart() {
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
   const [showStateDensity, setShowStateDensity] = useState(false)
   const [hoveredLump, setHoveredLump] = useState(null)
+  const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
   // const [showDistributions, setShowDistributions] = useState(true)
 
   const showDistributions = true
@@ -94,7 +95,7 @@ export function TrajectoriesChart() {
 
     const groupedObjectsByState = groupBy([...unitedObjects, ...unitedObjectsOriginal], "state")
 
-    const mergedObjectsByState = Object.entries(groupedObjectsByState).map(([state, objects]) => {
+    const mergedObjectsByState = Object.entries(groupedObjectsByState).map(([_state, objects]) => {
       return objects.reduce((result, obj) => merge(result, obj), {})
     })
 
@@ -121,8 +122,8 @@ export function TrajectoriesChart() {
 
   return (
     <>
-      <div className="controls">
-        <div className={`lump-controls ${isSelectModeLines ? "Lines" : "Lumps"}`}>
+      <div className="chart-controls">
+        <div id="lump-controls" className={` ${isSelectModeLines ? "Lines" : "Lumps"}`}>
           {filteredLinks.length < 500 && (
             <div>
               <Button
@@ -143,75 +144,87 @@ export function TrajectoriesChart() {
               >
                 {"Lumps"}
               </Button>
+              {!isSelectModeLines && selectedLumps.length > 0 && (
+                <Button
+                  size="xs"
+                  variant="secondary"
+                  data-selected={showLinesOfSelectedLumps}
+                  onClick={() => setShowLinesOfSelectedLumps(!showLinesOfSelectedLumps)}
+                  title="When lumps are selected, show the lines"
+                >
+                  {showLinesOfSelectedLumps ? "Hide" : "Show"}
+                </Button>
+              )}
             </div>
-          )}
-
-          {!isSelectModeLines && selectedLumps.length > 0 && (
-            <Button
-              size="xs"
-              variant="secondary"
-              data-selected={showLinesOfSelectedLumps}
-              onClick={() => setShowLinesOfSelectedLumps(!showLinesOfSelectedLumps)}
-              title="When lumps are selected, show the lines"
-            >
-              {showLinesOfSelectedLumps ? "Hide" : "Show"}
-            </Button>
           )}
         </div>
 
-        {isSelectModeLines && (
-          <div>
-            <Button
-              size="xs"
-              variant="secondary"
-              data-selected={trajectoriesSelectionMode === "vertical"}
-              onClick={() => setTrajectoriesSelectionMode("vertical")}
-              title="Vertical lines"
-            >
-              {"Vertical"}
-            </Button>
-            <Button
-              size="xs"
-              variant="secondary"
-              data-selected={trajectoriesSelectionMode === "all"}
-              onClick={() => setTrajectoriesSelectionMode("all")}
-              title="All lines"
-            >
-              {"All"}
-            </Button>
-            <Button
-              size="xs"
-              variant="secondary"
-              data-selected={trajectoriesSelectionMode === "diagonal"}
-              onClick={() => setTrajectoriesSelectionMode("diagonal")}
-              title="Diagonal lines"
-            >
-              {"Diagonal"}
-            </Button>
-          </div>
-        )}
-
-        <AnimatePresence>
-          {enableScrub && hoveredTrajectoriesIDs.length > 0 && (
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <span>
-                {selectedIndex + 1}/{hoveredTrajectoriesIDs.length}
-              </span>
-            </motion.p>
+        <div id="line-controls">
+          {(isSelectModeLines || showLinesOfSelectedLumps) && (
+            <>
+              <Button
+                size="xs"
+                variant="secondary"
+                data-selected={trajectoriesSelectionMode === "vertical"}
+                onClick={() => setTrajectoriesSelectionMode("vertical")}
+                title="Vertical lines"
+              >
+                {"Vertical"}
+              </Button>
+              <Button
+                size="xs"
+                variant="secondary"
+                data-selected={trajectoriesSelectionMode === "all"}
+                onClick={() => setTrajectoriesSelectionMode("all")}
+                title="All lines"
+              >
+                {"All"}
+              </Button>
+              <Button
+                size="xs"
+                variant="secondary"
+                data-selected={trajectoriesSelectionMode === "diagonal"}
+                onClick={() => setTrajectoriesSelectionMode("diagonal")}
+                title="Diagonal lines"
+              >
+                {"Diagonal"}
+              </Button>
+            </>
           )}
-        </AnimatePresence>
+        </div>
 
-        <div className="controls">
-          <div className="density-control">
-            <Button
-              size="xs"
-              data-selected={showStateDensity}
-              onClick={() => setShowStateDensity(!showStateDensity)}
-            >
-              {`${showStateDensity ? "Hide" : "Show"} density`}
-              {/* <span class="material-icons">ssid_chart</span> */}
-            </Button>
-          </div>
+        <div id="scrub-panel">
+          <AnimatePresence>
+            {enableScrub && hoveredTrajectoriesIDs.length > 0 && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <span>
+                  {selectedIndex + 1}/{hoveredTrajectoriesIDs.length}
+                </span>
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div id="density-control">
+          <Button
+            size="xs"
+            data-selected={showStateDensity}
+            onClick={() => setShowStateDensity(!showStateDensity)}
+          >
+            {`${showStateDensity ? "Hide" : "Show"} density`}
+            {/* <span class="material-icons">ssid_chart</span> */}
+          </Button>
+        </div>
+
+        <div id="matrix-controls">
+          <ListFilter size={16} />
+          <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
+            <option value="duration">Duration</option>
+            <option value="sourceD">Source</option>
+            <option value="targetD">Target</option>
+            <option value="sourceAge">Source Age</option>
+            <option value="targetAge">Target Age</option>
+          </select>
         </div>
       </div>
 
@@ -291,7 +304,7 @@ export function TrajectoriesChart() {
           </Tooltip>
         </div>
 
-        <StatesMatrix width={h} height={h} />
+        <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} />
       </div>
     </>
   )
