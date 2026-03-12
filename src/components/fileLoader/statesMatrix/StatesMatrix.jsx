@@ -6,7 +6,7 @@
 import { useState, useMemo } from "react"
 import { motion } from "motion/react"
 import { extent, scaleBand, scaleLinear, scaleQuantile, range } from "d3"
-import { groupBy, map, countBy } from "lodash"
+import { groupBy, map, countBy, uniq, flatten, max, values, sum } from "lodash"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
 
@@ -15,7 +15,6 @@ import { Tooltip } from "../../common/Tooltip/Tooltip"
 import { curveStep, line } from "d3"
 
 const PADDING = 0
-const SEGMENTS = 4
 
 export function StatesMatrix({ width, height, lineChartMode }) {
   const { statesData, statesOrder } = useData()
@@ -71,7 +70,14 @@ export function StatesMatrix({ width, height, lineChartMode }) {
     [statesData],
   )
 
-  // console.log(matrixCouples)
+  const buckets = ["short", "medium", "long", "longest"]
+
+  const uniqueData = useMemo(() => {
+    return uniq(flatten(matrixCouples.map((m) => m[lineChartMode]))).sort((a, b) => a - b)
+  }, [matrixCouples, lineChartMode])
+  console.log("uniqueData", uniqueData)
+
+  const quantileScale = scaleQuantile(uniqueData, buckets)
 
   const valuesExtent = extent(matrixCouples.map((c) => c.count))
   const opacityScale = scaleLinear([0, valuesExtent[1]], [0, 1])
@@ -85,13 +91,6 @@ export function StatesMatrix({ width, height, lineChartMode }) {
     .domain(statesOrder)
     .range([PADDING, height - PADDING])
     .padding(0.15)
-
-  const countsExtent = extent(matrixCouples.map((mc) => mc.count))
-
-  const quantileYScale = scaleLinear(
-    [countsExtent[0], countsExtent[1] / SEGMENTS],
-    [0, yScale.bandwidth()],
-  )
 
   return (
     <div className="svg-container" id="matrix-chart">
@@ -156,8 +155,8 @@ export function StatesMatrix({ width, height, lineChartMode }) {
                   width={xScale.bandwidth()}
                   height={yScale.bandwidth()}
                   points={s[lineChartMode]}
-                  segments={SEGMENTS}
-                  yScale={quantileYScale}
+                  buckets={buckets}
+                  quantileScale={quantileScale}
                   setHoveredQuantile={setHoveredQuantile}
                 />
                 {/* <LineChart
@@ -174,9 +173,11 @@ export function StatesMatrix({ width, height, lineChartMode }) {
         </g>
       </svg>
       <Tooltip isVisible={hoveredQuantile}>
-        <p>{hoveredQuantile?.totalPoints} total</p>
         <p>Bucket {hoveredQuantile?.bucketValue}</p>
-        <p>Span {hoveredQuantile?.rawSpan}</p>
+        {/* <p>Bucket {hoveredQuantile?.distribution}</p> */}
+        {/* <p>{hoveredQuantile?.totalPoints} total</p>
+        <p>Span {hoveredQuantile?.rawSpan}</p>*/}
+        <p>{hoveredQuantile?.uniqueBucketPoints} un ind.</p>
         <p>{hoveredQuantile?.bucketPoints} ind.</p>
       </Tooltip>
     </div>
@@ -212,56 +213,56 @@ function LineChart({ width, height, points }) {
   )
 }
 
-function Quantiles({ width, height, points, segments, yScale, setHoveredQuantile }) {
-  const xExtent = extent(points)
-  const xScale = scaleLinear(xExtent, [0, width])
+function Quantiles({ width, height, points, buckets, quantileScale, setHoveredQuantile }) {
+  const xScale = scaleLinear([0, 1], [0, width])
+  const yScale = scaleLinear([0, 1], [0, height])
 
-  // Create evenly spaced bucket boundaries based on segment count
-  const buckets = range(segments)
+  const uniquePoints = uniq(flatten(points))
+  const quantilesCount = countBy(points, (p) => quantileScale(p))
+  const uniqueQuantilesCount = countBy(uniquePoints, (p) => quantileScale(p))
 
-  const quant = scaleQuantile()
-    .domain(points) // ✅ array of numbers
-    .range(buckets) // ✅ discrete output values
+  const maximum = points.length
+  const Qmaximum = sum(values(uniqueQuantilesCount))
 
-  // quant.quantiles() returns the 3 threshold x-values that divide data into 4 groups
-  const thresholds = [xExtent[0], ...quant.quantiles(), xExtent[1]]
+  const counts = buckets.map((b) => uniqueQuantilesCount[b] ?? 0)
+  const cumulative = counts.reduce((acc, c, i) => {
+    acc.push((acc[i - 1] ?? 0) + c)
+    return acc
+  }, [])
 
-  const pointsPerBucket = points.length / segments
+  console.log("count", uniqueQuantilesCount)
 
   return (
     <g>
-      {buckets.map((i) => {
-        const x0 = xScale(thresholds[i])
-        const x1 = xScale(thresholds[i + 1])
+      {buckets.map((b, i) => {
+        const x = xScale((cumulative[i - 1] ?? 0) / Qmaximum)
+        const count = uniqueQuantilesCount[b] ?? 0
+        const barWidth = xScale(count / Qmaximum)
 
-        const width = x1 - x0
-        const qHeight = yScale(pointsPerBucket)
+        const quantileCount = quantilesCount[b]
+        const barHeight = yScale(quantileCount / maximum)
 
-        const rawSpan = thresholds[i + 1] - thresholds[i]
-        {
-          /* console.log(height) */
-        }
-
-        // Height proportional to density
         return (
           <motion.rect
             key={i}
-            x={x0}
-            y={height - qHeight}
-            animate={{ strokeWidth: 0 }}
-            width={width}
-            height={qHeight}
-            fill={"var(--surface-accent)"}
-            opacity={(1 / segments) * i + 1 / segments}
+            x={x}
+            y={height - barHeight}
+            color={"var(--surface-accent)"}
+            animate={{ strokeWidth: 0, fill: `oklch(from currentColor calc(l - ${i * 0.08}) c h)` }}
+            width={barWidth}
+            height={barHeight}
+            // opacity={(1 / segments) * i + 1 / segments}
             stroke={"black"}
             whileHover={{ strokeWidth: 1 }}
             transition={{ duration: 0.1, ease: "easeOut" }}
             onMouseEnter={() =>
               setHoveredQuantile({
-                bucketValue: i,
-                totalPoints: points.length,
-                rawSpan: rawSpan,
-                bucketPoints: pointsPerBucket,
+                bucketValue: b,
+                distribution: quantilesCount,
+                bucketPoints: quantileCount,
+                uniqueBucketPoints: count,
+                // totalPoints: points.length,
+                // rawSpan: rawSpan,
               })
             }
             onMouseLeave={() => setHoveredQuantile(null)}

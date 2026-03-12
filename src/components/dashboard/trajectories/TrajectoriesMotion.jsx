@@ -45,8 +45,6 @@ export function TrajectoriesMotion(props) {
     ? filteredLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
     : []
 
-  console.log(filteredLinks)
-
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
 
   const lines =
