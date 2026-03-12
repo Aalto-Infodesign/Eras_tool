@@ -13,8 +13,13 @@ import StackedLines from "./StackedLines/StackedLines"
 export const Filters = () => {
   const { richData, statesData } = useData()
   const { filters } = useFilters()
-  const { selectedData } = useDerivedData()
+  const { filteredData, IDsFromSelectedSilhouettes } = useDerivedData()
   const sliderDimensions = { x: 150, y: 30 }
+
+  const selectedData =
+    IDsFromSelectedSilhouettes.length > 0
+      ? filteredData.filter((d) => IDsFromSelectedSilhouettes.includes(d.FINNGENID))
+      : filteredData
 
   if (isEmpty(filters)) return null
 

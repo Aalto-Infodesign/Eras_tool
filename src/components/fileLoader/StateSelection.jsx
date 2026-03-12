@@ -15,7 +15,7 @@ import Button from "../common/Button/Button"
 export function StateSelection() {
   const { fileName } = useRawData()
 
-  const { removedStates, setRemovedStates, scales, statesData, statesOrder, setStatesOrder } =
+  const { removedStates, toggleRemovedState, scales, statesData, statesOrder, setStatesOrder } =
     useData()
   const { palette, isLegend, hasFlowChart } = useViz()
   const {
@@ -42,7 +42,7 @@ export function StateSelection() {
         style: { backgroundColor: color, padding: 10, borderRadius: 5 },
         data: {
           label: `${currentIndex} – ${scales.indexToName(stateIndex)}`,
-          index: stateIndex,
+          index: Number(stateIndex),
           value: `${scales.indexToName(stateIndex)}`,
           category: "category",
           color: color,
@@ -102,24 +102,26 @@ export function StateSelection() {
 
     nodes.forEach((node) => {
       if (node.data?.index !== undefined) {
-        const currentIndex = statesOrder.indexOf(node.data.index)
+        console.log(statesOrder)
+        const currentIndex = statesOrder.indexOf(Number(node.data.index))
 
         if (currentIndex !== -1) {
-          const newLabel = `${currentIndex} – ${scales.indexToName(node.data.index)}`
+          const newLabel = `${currentIndex} – ${node.data.value}`
           if (node.data.label !== newLabel) {
             updateNodeData(node.id, { label: newLabel })
           }
         }
       }
     })
-  }, [statesOrder, getNodes, updateNodeData, scales])
+  }, [statesOrder, updateNodeData, removedStates, getNodes])
 
   // Remove nodes when their state is removed
   useEffect(() => {
     const nodes = getNodes()
+
     const nodesToDelete = nodes.filter((node) => {
       if (node.data?.index !== undefined) {
-        const stateName = scales.indexToName(node.data.index)
+        const stateName = node.data.value
         return removedStates.includes(stateName)
       }
       return false
@@ -128,15 +130,7 @@ export function StateSelection() {
     if (nodesToDelete.length > 0) {
       deleteElements({ nodes: nodesToDelete })
     }
-  }, [removedStates, getNodes, deleteElements, scales])
-
-  const toggleRemovedState = useCallback(
-    (state) => {
-      const newRemovedStates = xor(removedStates, [state])
-      setRemovedStates(newRemovedStates)
-    },
-    [removedStates, setRemovedStates],
-  )
+  }, [removedStates, deleteElements, getNodes])
 
   const onDragEnd = useCallback(
     (event, nodeType, stateIndex, color) => {

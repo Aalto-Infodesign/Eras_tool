@@ -7,6 +7,8 @@ import { useDataCleanup, useDataProcessing } from "../components/hooks/useDataPr
 
 import { tsvJSON } from "../utils/dataHelpers"
 
+import { xor } from "lodash"
+
 const ProcessedDataContext = createContext(null)
 
 export function ProcessedDataProvider({ children }) {
@@ -134,6 +136,14 @@ export function ProcessedDataProvider({ children }) {
     )
   }, [])
 
+  const toggleRemovedState = useCallback(
+    (state) => {
+      const newRemovedStates = xor(removedStates, [state])
+      setRemovedStates(newRemovedStates)
+    },
+    [removedStates, setRemovedStates],
+  )
+
   const value = useMemo(
     () => ({
       // State
@@ -151,8 +161,8 @@ export function ProcessedDataProvider({ children }) {
       // Setters
       setIdealSilhouettes,
       setClusterStates,
-      setRemovedStates,
       setStatesOrder,
+      toggleRemovedState,
 
       // From Flowhchart
       statesThresholds,

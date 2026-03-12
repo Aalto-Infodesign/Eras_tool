@@ -385,7 +385,7 @@ export function Sankey({ width, height, data }) {
     .sort((a, b) => a - b)
 
   return (
-    <div className="chart-container">
+    <>
       <div id="sankey-chart" className="svg-container">
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -500,6 +500,6 @@ export function Sankey({ width, height, data }) {
           )}
         </AnimatePresence>
       </Tooltip>
-    </div>
+    </>
   )
 }

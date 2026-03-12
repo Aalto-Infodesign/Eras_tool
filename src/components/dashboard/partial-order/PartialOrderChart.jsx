@@ -6,6 +6,7 @@ import { getDominancePairs } from "../../../utils/POHelperFunctions"
 import { Sankey } from "./OptimizedSankey"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
+import { CircleAlert, CircleSlash } from "lucide-react"
 
 import "./PartialOrderChart.css"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
@@ -139,12 +140,15 @@ export function PartialOrderChart() {
   console.timeEnd("useSankeyData")
 
   return (
-    <>
+    <div className="chart-container">
       {sankeyData && sankeyData.nodes.length > 0 ? (
         <Sankey width={1000} height={500} data={sankeyData} />
       ) : (
-        <div>No data available...</div>
+        <div className="no-data-panel">
+          <CircleAlert size={64} />
+          <p>Not enough nodes for this chart! Try adjusting the Silhouettes selection</p>
+        </div>
       )}
-    </>
+    </div>
   )
 }

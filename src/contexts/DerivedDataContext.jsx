@@ -112,6 +112,14 @@ export function DerivedDataProvider({ children }) {
     })
   }, [silhouettes, selectedSilhouettesData, completeLinks])
 
+  const IDsFromSelectedSilhouettes = useMemo(() => {
+    if (!selectedSilhouettesData) return null
+    return selectedSilhouettesData
+      .flatMap((s) => (s.isFiltered ? s.filtered.trajectories : s.trajectories)) // Modern alternative to .map().flat()
+      .map((t) => t[0]?.id) // Use optional chaining to prevent crashes
+      .filter(Boolean) // Remove any undefined/null values
+  }, [selectedSilhouettesData])
+
   const filteredLinks = useMemo(() => {
     const links = linksBySelectedSilhouettes.filter(
       (datum) =>
@@ -120,19 +128,13 @@ export function DerivedDataProvider({ children }) {
           Math.floor(datum.speed) <= filters.speed.selection[1]),
     )
 
-    console.log(trajectoriesSelectionMode)
-
     if (trajectoriesSelectionMode === "all") return links
     if (trajectoriesSelectionMode === "vertical") return links.filter((l) => l.speed === 0)
     else return links.filter((l) => l.speed !== 0)
   }, [linksBySelectedSilhouettes, trajectoriesSelectionMode, filters, filtersActive])
 
   const selectedIDs = useMemo(() => {
-    if (!selectedSilhouettesData) return []
-    const IDsFromSilhouettes = selectedSilhouettesData
-      .flatMap((s) => (s.isFiltered ? s.filtered.trajectories : s.trajectories)) // Modern alternative to .map().flat()
-      .map((t) => t[0]?.id) // Use optional chaining to prevent crashes
-      .filter(Boolean) // Remove any undefined/null values
+    if (!IDsFromSelectedSilhouettes) return []
 
     const IDsFromTrajectories = selectedTrajectoriesIDs || []
     const type = Number(chartType)
@@ -148,17 +150,17 @@ export function DerivedDataProvider({ children }) {
       /** * INCLUSIVE (OR / UNION)
        * Returns everything selected in BOTH silhouettes and trajectories.
        */
-      return union(IDsFromSilhouettes, IDsFromTrajectories)
+      return union(IDsFromSelectedSilhouettes, IDsFromTrajectories)
     }
 
     // Default fallback (e.g., just Silhouettes)
-    return [...IDsFromSilhouettes]
-  }, [selectedSilhouettesData, selectedTrajectoriesIDs, chartType])
+    return [...IDsFromSelectedSilhouettes]
+  }, [IDsFromSelectedSilhouettes, selectedTrajectoriesIDs, chartType])
 
-  const selectedData = useMemo(() => {
-    if (selectedIDs.length === 0) return filteredData
-    return filteredData.filter((d) => selectedIDs.includes(d.FINNGENID))
-  }, [filteredData, selectedIDs])
+  // const selectedData = useMemo(() => {
+  //   if (selectedIDs.length === 0) return filteredData
+  //   return filteredData.filter((d) => selectedIDs.includes(d.FINNGENID))
+  // }, [filteredData, selectedIDs])
 
   const value = useMemo(
     () => ({
@@ -169,7 +171,8 @@ export function DerivedDataProvider({ children }) {
       selectedSilhouettesData,
       selectedIDs,
       filteredLinks,
-      selectedData,
+      IDsFromSelectedSilhouettes,
+      // selectedData,
     }),
     [
       filteredData,
@@ -179,7 +182,8 @@ export function DerivedDataProvider({ children }) {
       selectedSilhouettesData,
       selectedIDs,
       filteredLinks,
-      selectedData,
+      IDsFromSelectedSilhouettes,
+      // selectedData,
     ],
   )
 

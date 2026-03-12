@@ -34,7 +34,7 @@ p {
   /* width: 100%; */
   gap: var(--spacing-md);
   background-color: var(--surface-contrast);
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-md);
   /* place-content: center;
   justify-content: center; */

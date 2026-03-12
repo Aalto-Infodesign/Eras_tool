@@ -11,7 +11,7 @@ import styles from "./StackedLines.module.css"
 export default function StackedLines({ data, extent, width, height }) {
   const [orderMode, setOrderMode] = useState("start")
   const [hoveredIndex, setHoveredIndex] = useState(null)
-  const { toggleSelectedTrajectory } = useFilters()
+  const { toggleSelectedTrajectory, selectedTrajectoriesIDs } = useFilters()
 
   const handleMouseMove = useCallback(
     (e) => {
@@ -44,7 +44,6 @@ export default function StackedLines({ data, extent, width, height }) {
   return (
     <div className="filter-box">
       <div>
-        Sort by
         <div className="buttons-wrapper">
           <Button
             variant="tertiary"
@@ -76,7 +75,7 @@ export default function StackedLines({ data, extent, width, height }) {
         style={{ width, height, position: "relative" }}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setHoveredIndex(null)}
-        // onClick={() => toggleSelectedTrajectory(sortedData[hoveredIndex].FINNGENID)}
+        onClick={() => toggleSelectedTrajectory(sortedData[hoveredIndex].FINNGENID)}
       >
         <Canvas
           orthographic
@@ -88,7 +87,11 @@ export default function StackedLines({ data, extent, width, height }) {
             gl.setPixelRatio(window.devicePixelRatio)
           }}
         >
-          <AllLines data={sortedData} domain={extent} />
+          <AllLines
+            data={sortedData}
+            domain={extent}
+            selectedTrajectoriesIDs={selectedTrajectoriesIDs}
+          />
         </Canvas>
         <Canvas
           orthographic
@@ -127,11 +130,9 @@ export default function StackedLines({ data, extent, width, height }) {
   )
 }
 
-function AllLines({ data, domain }) {
-  const { viewport, raycaster } = useThree()
+function AllLines({ data, domain, selectedTrajectoriesIDs }) {
+  const { viewport } = useThree()
   const hw = viewport.width / 2
-
-  raycaster.params.Line.threshold = 3
 
   const xScale = useMemo(() => scaleLinear().domain(domain).range([-hw, hw]), [hw, domain])
   const spacing = viewport.height / (data.length + 1)
@@ -154,14 +155,31 @@ function AllLines({ data, domain }) {
       positions[offset + 5] = 0
     })
 
+    const colors = new Float32Array(data.length * 6) // RGB per vertex
+
+    data.forEach((d, i) => {
+      const isSelected = selectedTrajectoriesIDs.includes(d.FINNGENID)
+      const color = new THREE.Color(isSelected ? "rgb(132, 75, 255)" : "white")
+      const offset = i * 6
+      // same color for both endpoints of each line
+      colors[offset + 0] = color.r
+      colors[offset + 1] = color.g
+      colors[offset + 2] = color.b
+      colors[offset + 3] = color.r
+      colors[offset + 4] = color.g
+      colors[offset + 5] = color.b
+    })
+
     const geo = new THREE.BufferGeometry()
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3))
+    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3))
     return geo
   }, [data, domain, viewport, spacing])
 
   return (
     <lineSegments geometry={geometry}>
-      <lineBasicMaterial color={"white"} opacity={0.5} transparent />
+      <lineBasicMaterial vertexColors opacity={0.5} transparent />
+      {/* <lineBasicMaterial color={"white"} opacity={0.5} transparent /> */}
     </lineSegments>
   )
 }

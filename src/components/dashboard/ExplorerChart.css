@@ -45,7 +45,7 @@
   /* gap: var(--spacing-sm); */
   max-width: 1440px;
   /* width: 100%; */
-  /* min-height: 300px; */
+  /* min-height: 500px; */
   height: 100%;
   overflow: scroll;
 }
@@ -63,6 +63,17 @@
 }
 #sankey-chart {
   grid-column: span 5;
+}
+
+.no-data-panel {
+  display: flex;
+  grid-column: 3 / span 2;
+  gap: var(--spacing-md);
+  width: 100%;
+  min-width: 300px;
+  min-height: 400px;
+  justify-content: center;
+  align-items: center;
 }
 
 svg {

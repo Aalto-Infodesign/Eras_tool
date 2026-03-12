@@ -24,7 +24,7 @@ import { FilterPanel } from "./dashboard/filter-panel/FilterPanel"
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
   const { richData, analytics, silhouettes, statesOrder } = useData()
-  const { isHasse } = useViz()
+  const { isHasse, isLegend } = useViz()
   const { completeSilhouettes, selectedSilhouettesData, selectedIDs } = useDerivedData()
 
   const w = 170
@@ -50,7 +50,7 @@ const Dashboard = () => {
   const isCmdPressed = useModifierKey("Meta")
 
   useEffect(() => {
-    if (isPresent) {
+    if (isPresent && isLegend) {
       const enterAnimation = async () => {
         await animate(scope.current, { opacity: 1 })
         await animate(
@@ -73,7 +73,7 @@ const Dashboard = () => {
 
       exitAnimation()
     }
-  }, [richData, isPresent, animate, safeToRemove, scope])
+  }, [isLegend, isPresent, animate, safeToRemove, scope])
 
   const boxVariants = {
     visible: {

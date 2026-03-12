@@ -62,15 +62,17 @@ function AppContent() {
         </div>
       )}
 
-      <FileLoader />
-
       <AnimatePresence>
-        {richData?.length && silhouettes && isLegend && (
-          <>
-            <Header />
-            <Dashboard />
-          </>
-        )}
+        <>
+          <FileLoader />
+
+          {richData && silhouettes && isLegend && (
+            <>
+              <Header />
+              <Dashboard />
+            </>
+          )}
+        </>
       </AnimatePresence>
       {isLegend && <SidePanel />}
     </div>

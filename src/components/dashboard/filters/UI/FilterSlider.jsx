@@ -140,15 +140,16 @@ export function FilterSlider({
       const distanceToMin = Math.abs(clickValue - selectionMin)
       const distanceToMax = Math.abs(clickValue - selectionMax)
 
+      console.log("TRACK CLICK")
       if (!hasRange) {
-        onChange?.([Math.min(clickValue, selectionMax), selectionMax])
+        onChange([Math.min(clickValue, selectionMax), selectionMax])
         return
       }
 
       if (distanceToMin < distanceToMax) {
-        onChange?.([Math.min(clickValue, selectionMax), selectionMax])
+        onChange([Math.min(clickValue, selectionMax), selectionMax])
       } else {
-        onChange?.([selectionMin, Math.max(clickValue, selectionMin)])
+        onChange([selectionMin, Math.max(clickValue, selectionMin)])
       }
     },
     [pixelToValue, selectionMin, selectionMax, onChange],

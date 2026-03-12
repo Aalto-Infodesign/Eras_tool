@@ -58,7 +58,8 @@ export function FiltersProvider({ children }) {
     setFilters((prev) => {
       // Guard clause to prevent errors if filters haven't loaded yet
       if (!prev || !prev[key]) return prev
-      const isActive = !isEqual(prev[key].selection, prev[key].extent)
+      const isActive = !isEqual(newSelection, prev[key].extent) // ← compare NEW value
+
       return {
         ...prev,
         [key]: { ...prev[key], selection: newSelection, isActive: isActive },

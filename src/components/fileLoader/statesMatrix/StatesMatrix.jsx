@@ -17,7 +17,7 @@ import { curveStep, line } from "d3"
 const PADDING = 0
 
 export function StatesMatrix({ width, height, lineChartMode }) {
-  const { statesData, statesOrder } = useData()
+  const { statesData, statesOrder, scales } = useData()
   const { palette } = useViz()
 
   const [selectedCell, setSelectedCell] = useState(null)
@@ -75,7 +75,6 @@ export function StatesMatrix({ width, height, lineChartMode }) {
   const uniqueData = useMemo(() => {
     return uniq(flatten(matrixCouples.map((m) => m[lineChartMode]))).sort((a, b) => a - b)
   }, [matrixCouples, lineChartMode])
-  console.log("uniqueData", uniqueData)
 
   const quantileScale = scaleQuantile(uniqueData, buckets)
 
@@ -166,14 +165,16 @@ export function StatesMatrix({ width, height, lineChartMode }) {
                 /> */}
                 <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.source]} strokeWidth={0.5} />
                 <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.target]} strokeWidth={0.5} />
-                <title>{`${s.source} ${s.target} – ${s.count}`}</title>
+                <title>{`From ${scales.indexToName(s.source)} to ${scales.indexToName(s.target)} – ${s.count} `}</title>
               </motion.g>
             )
           })}
         </g>
       </svg>
       <Tooltip isVisible={hoveredQuantile}>
-        <p>Bucket {hoveredQuantile?.bucketValue}</p>
+        <p>
+          {lineChartMode} {hoveredQuantile?.bucketValue}
+        </p>
         {/* <p>Bucket {hoveredQuantile?.distribution}</p> */}
         {/* <p>{hoveredQuantile?.totalPoints} total</p>
         <p>Span {hoveredQuantile?.rawSpan}</p>*/}
@@ -217,7 +218,7 @@ function Quantiles({ width, height, points, buckets, quantileScale, setHoveredQu
   const xScale = scaleLinear([0, 1], [0, width])
   const yScale = scaleLinear([0, 1], [0, height])
 
-  const uniquePoints = uniq(flatten(points))
+  const uniquePoints = uniq(flatten(points, (p) => Math.floor(p)))
   const quantilesCount = countBy(points, (p) => quantileScale(p))
   const uniqueQuantilesCount = countBy(uniquePoints, (p) => quantileScale(p))
 
@@ -229,8 +230,6 @@ function Quantiles({ width, height, points, buckets, quantileScale, setHoveredQu
     acc.push((acc[i - 1] ?? 0) + c)
     return acc
   }, [])
-
-  console.log("count", uniqueQuantilesCount)
 
   return (
     <g>
@@ -248,12 +247,11 @@ function Quantiles({ width, height, points, buckets, quantileScale, setHoveredQu
             x={x}
             y={height - barHeight}
             color={"var(--surface-accent)"}
-            animate={{ strokeWidth: 0, fill: `oklch(from currentColor calc(l - ${i * 0.08}) c h)` }}
+            animate={{ opacity: 1, fill: `oklch(from currentColor calc(l - ${i * 0.08}) c h)` }}
             width={barWidth}
             height={barHeight}
             // opacity={(1 / segments) * i + 1 / segments}
-            stroke={"black"}
-            whileHover={{ strokeWidth: 1 }}
+            whileHover={{ opacity: 0.5 }}
             transition={{ duration: 0.1, ease: "easeOut" }}
             onMouseEnter={() =>
               setHoveredQuantile({
