@@ -1,3 +1,14 @@
+@font-face {
+  font-family: Hack;
+  src: url(/public/fonts/hack/Hack-Regular.ttf);
+  font-weight: 500;
+}
+@font-face {
+  font-family: Hack;
+  src: url(/public/fonts/hack/Hack-Bold.ttf);
+  font-weight: 700;
+}
+
 :root {
   /* Primitives */
   /* Colors */
