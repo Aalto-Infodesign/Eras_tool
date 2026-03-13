@@ -1,8 +1,6 @@
 import { createContext, useState, useContext, useMemo, useEffect, useCallback } from "react"
 import { useRawData } from "./RawDataContext"
 
-import { scaleOrdinal } from "d3"
-
 import { useDataCleanup, useDataProcessing } from "../components/hooks/useDataProcessing"
 
 import { tsvJSON } from "../utils/dataHelpers"
@@ -69,41 +67,18 @@ export function ProcessedDataProvider({ children }) {
     })
   }, [parsedData, removedStates])
 
-  // Create conversion scales from Data
-  const scales = useMemo(() => {
-    if (!data || data.length === 0) return null
-
-    // TODO FUnc che chiude con φ
-
-    const statesNames = [...new Set(data.flatMap((d) => d.trajectory))]
-
-    // Index them based on their order
-    const stateIndexes = statesNames.map((_, i) => `${i}`)
-
-    // Using the array and indexes to create two ordinal scales
-    const scales = {
-      nameToIndex: scaleOrdinal(statesNames, stateIndexes),
-      indexToName: scaleOrdinal(stateIndexes, statesNames),
-    }
-
-    return scales
-  }, [data])
-
-  const richData = useDataCleanup(data, scales, statesThresholds)
+  const richData = useDataCleanup(data, statesThresholds)
 
   const { statesData, analytics, silhouettes, filters } = useDataProcessing(
     richData,
     idealSilhouettes,
   )
 
-  // useEffect(() => {
-  //   console.log("S", silhouettes)
-  // }, [silhouettes])
-
   useEffect(() => {
     if (!statesData.statesNames) return
-    setStatesOrder(statesData.statesNames.map((_t, i) => `${i}`))
-  }, [statesData.statesNames])
+    const removed = new Set(removedStates)
+    setStatesOrder(statesData.statesNames.filter((s) => !removed.has(s)))
+  }, [statesData.statesNames, removedStates])
 
   const existingIdealSilhouettes = useMemo(
     () =>
@@ -148,7 +123,6 @@ export function ProcessedDataProvider({ children }) {
     () => ({
       // State
       richData,
-      scales,
       idealSilhouettes,
       existingIdealSilhouettes,
       removedStates,
@@ -163,7 +137,6 @@ export function ProcessedDataProvider({ children }) {
       setClusterStates,
       setStatesOrder,
       toggleRemovedState,
-
       // From Flowhchart
       statesThresholds,
       addStateThreshold,
@@ -171,10 +144,8 @@ export function ProcessedDataProvider({ children }) {
     }),
     [
       richData,
-      scales,
       idealSilhouettes,
       statesOrder,
-
       existingIdealSilhouettes,
       removedStates,
       clusterStates,

@@ -56,12 +56,12 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
           source: {
             ...item.source,
             order: newOrder,
-            id: `${item.source.state}_${newOrder}`,
+            id: `${item.source.state}-${newOrder}`,
           },
           target: {
             ...item.target,
             order: item.finalState ? newOrder : newOrder + 1,
-            id: `${item.target.state}_${item.finalState ? newOrder : newOrder + 1}`,
+            id: `${item.target.state}-${item.finalState ? newOrder : newOrder + 1}`,
           },
         }
       })
@@ -77,7 +77,7 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
 
     const temporal_states = silhouettes.map((s) => ({
       name: s.name,
-      timed_states: s.states.map((state, i) => `${state}_${i}`),
+      timed_states: s.states.map((state, i) => `${state}-${i}`),
     }))
 
     const dominancePairs = flatten(temporal_states.map((s) => getDominancePairs(s.timed_states)))

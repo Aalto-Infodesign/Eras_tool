@@ -1,5 +1,4 @@
 import { useRef, useEffect } from "react"
-import { motion } from "motion/react"
 import Button from "../common/Button/Button"
 import { useViz } from "../../contexts/VizContext"
 
@@ -11,11 +10,11 @@ export function ProcessButton({ setIsOpen }) {
   }
   const buttonRef = useRef(null)
 
-  useEffect(() => {
-    setTimeout(() => {
-      buttonRef.current && buttonRef.current.focus()
-    }, 1000)
-  }, [])
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     buttonRef.current && buttonRef.current.focus()
+  //   }, 1000)
+  // }, [])
 
   const buttonVariants = {
     disabled: { opacity: 0.5, pointerEvents: "none" },
@@ -25,7 +24,7 @@ export function ProcessButton({ setIsOpen }) {
   return (
     <Button
       size="small"
-      ref={buttonRef}
+      // ref={buttonRef}
       variants={buttonVariants}
       initial={"disabled"}
       animate={"active"}

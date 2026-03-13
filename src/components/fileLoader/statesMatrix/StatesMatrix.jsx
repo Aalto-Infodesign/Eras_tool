@@ -17,7 +17,7 @@ import { curveStep, line } from "d3"
 const PADDING = 0
 
 export function StatesMatrix({ width, height, lineChartMode }) {
-  const { statesData, statesOrder, scales } = useData()
+  const { statesData, statesOrder } = useData()
   const { palette } = useViz()
 
   const [selectedCell, setSelectedCell] = useState(null)
@@ -165,7 +165,7 @@ export function StatesMatrix({ width, height, lineChartMode }) {
                 /> */}
                 <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.source]} strokeWidth={0.5} />
                 <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.target]} strokeWidth={0.5} />
-                <title>{`From ${scales.indexToName(s.source)} to ${scales.indexToName(s.target)} – ${s.count} `}</title>
+                <title>{`From ${s.source} to ${s.target} – ${s.count} `}</title>
               </motion.g>
             )
           })}

@@ -18,6 +18,7 @@ export function useMouseMove() {
         rawX: event.clientX,
         x: event.clientX - bodyMargin,
         y: event.clientY,
+        pageY: event.pageY,
       })
     }
 

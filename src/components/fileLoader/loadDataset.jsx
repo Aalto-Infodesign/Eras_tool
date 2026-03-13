@@ -2,6 +2,7 @@ import Button from "../common/Button/Button.jsx"
 import { useRawData } from "../../contexts/RawDataContext.jsx"
 import { Upload } from "lucide-react"
 import { motion } from "motion/react"
+import { useMemo } from "react"
 
 const LoadDataset = () => {
   const { loadData, fileName, fileExtention, status } = useRawData()
@@ -22,10 +23,18 @@ const LoadDataset = () => {
     },
   }
 
+  const label = useMemo(() => {
+    if (!fileName) return "Upload"
+
+    if (fileName.length > 25) return `${fileName.slice(0, 25)}...`
+
+    return fileName
+  }, [fileName])
+
   return (
     <motion.section
       id="upload"
-      layout
+      // layout
       className="upload-section"
       initial="hidden"
       whileHover="visible"
@@ -34,7 +43,7 @@ const LoadDataset = () => {
       <div>
         <label htmlFor="fileInput" className={`file-input-label ${isUploading ? "loading" : ""}`}>
           <Upload size={14} />
-          <span>{fileName ? `${fileName.slice(0, 20)}...` : "Upload"}</span>
+          <span>{label}</span>
           {fileExtention && <span className="filetype badge">{fileExtention.toUpperCase()}</span>}
         </label>
         <input

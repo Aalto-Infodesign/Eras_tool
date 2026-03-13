@@ -6,7 +6,8 @@ import { useData } from "../../contexts/ProcessedDataContext"
 export const ResetStatesOrder = () => {
   const { statesOrder, setStatesOrder, statesData } = useData()
 
-  const statesOrderOriginal = statesData.statesNames.map((_t, i) => `${i}`)
+  const statesOrderOriginal = statesData.statesNames
+  // const statesOrderOriginal = statesData.statesNames.map((_t, i) => `${i}`)
 
   const isActive = !isNil(statesOrder) && !areArraysEqual(statesOrder, statesOrderOriginal)
 

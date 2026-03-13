@@ -3,8 +3,9 @@ import { useMemo } from "react"
 import { max, range, quantile, groups, extent, descending, sort } from "d3"
 import { similarity } from "../../utils/levenshteinDistance"
 import { cleanTrajectories } from "../../utils/cleanTrajectories"
+import { keyBy, snakeCase } from "lodash"
 
-export function useDataCleanup(sourceData, scales, statesThresholds) {
+export function useDataCleanup(sourceData, statesThresholds) {
   const cleanData = useMemo(() => {
     if (!sourceData) return []
 
@@ -27,7 +28,8 @@ export function useDataCleanup(sourceData, scales, statesThresholds) {
         ...datum,
         // trajectoryOG: datum.trajectory,
         years: datum.years.map((y) => +y),
-        trajectory: datum.trajectory.map((t) => scales.nameToIndex(t)),
+        trajectory: datum.trajectory.map((t) => snakeCase(t)),
+        // trajectory: datum.trajectory.map((t) => scales.nameToIndex(t)),
         diseaseDuration: datum.diseaseDuration ?? 0,
         // trajectoryIndexes: datum.trajectory.map((t) => statesScaleIndexes(t)),
         // years: datum.SwitchEventAge.map((age) => age + startYear),
@@ -40,7 +42,7 @@ export function useDataCleanup(sourceData, scales, statesThresholds) {
     console.timeEnd("Enrich")
 
     return richData
-  }, [cleanData, scales])
+  }, [cleanData])
 
   return richData
 }
@@ -125,6 +127,8 @@ export function useDataProcessing(richData, idealSilhouettes) {
     const statesNamesSorted = dynamicSortLC(linearCombinations, trajectorySlots).map(
       (lc) => lc.state,
     )
+
+    console.table("LC", linearCombinations)
     const statesSorted = dynamicSortLC(states, trajectorySlots)
 
     console.timeEnd("Linear Combo Optimized")
@@ -194,6 +198,7 @@ export function useDataProcessing(richData, idealSilhouettes) {
 
     const statesData = {
       statesNames: statesNamesSorted,
+      statesObject: keyBy(statesSorted, (s) => s.name),
       states: statesSorted,
       links: trajectories.flat(),
     }
@@ -202,7 +207,7 @@ export function useDataProcessing(richData, idealSilhouettes) {
 
     console.timeEnd("States Data")
     return { statesData, analytics, trajectories }
-  }, [richData])
+  }, [richData.length])
 
   const silhouettes = useMemo(() => {
     if (trajectories.length === 0) return []

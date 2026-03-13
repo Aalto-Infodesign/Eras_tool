@@ -13,7 +13,7 @@ export function Tooltip({ children, isVisible }) {
       {isVisible && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1, x: mousePosition.x + 15, y: mousePosition.y + 15 }}
+          animate={{ opacity: 1, x: mousePosition.x + 15, y: mousePosition.pageY + 15 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0 }}
           className={styles.tooltip}

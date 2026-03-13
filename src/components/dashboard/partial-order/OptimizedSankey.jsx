@@ -30,7 +30,6 @@ function addPathOffset(path, offset = 0.001) {
 // --- Sub-component for rendering a single Sankey Node ---
 function SankeyNode({
   node,
-  palette,
   hoveredTrajectory,
   setSelectedLinks,
   selectedNode,
@@ -38,7 +37,9 @@ function SankeyNode({
   setSelectionDirection,
   setSelectedTrajectoriesIDs,
 }) {
-  const [index] = node.id.split("_")
+  const { palette } = useViz()
+
+  const [name, _index] = node.id.split("-")
   const nodeHeight = node.y1 - node.y0
 
   if (nodeHeight <= 0) {
@@ -59,11 +60,9 @@ function SankeyNode({
 
   function handleClickLeft(node) {
     console.log("Node clicked:", node)
-    // selectLeftIds(node)
 
     const data = traceUpstream(node)
-    //console.log("All nodes to the left:", upstreamData.nodes)
-    //console.log("All links to the left:", upstreamData.links)
+
     setSelectionDirection("left")
     const targetSegments = getTargetSegments(node)
     setSelectedTrajectoriesIDs(targetSegments)
@@ -79,15 +78,10 @@ function SankeyNode({
   }
 
   function handleClickRight(node) {
-    //console.log("Node clicked:", node)
-    // selectLeftIds(node)
-
     const data = traceDownstream(node)
-    //console.log("All nodes to the left:", upstreamData.nodes)
-    //console.log("All links to the left:", upstreamData.links)
+
     setSelectionDirection("right")
     const sourceSegments = getSourceSegments(node)
-    console.log(sourceSegments)
     setSelectedTrajectoriesIDs(sourceSegments)
     setSelectedLinks(data.links)
   }
@@ -229,7 +223,7 @@ function SankeyNode({
         onClick={() => handleNodeClick(node)}
         transition={DEFAULT_TRANSITION}
         stroke={isSelected ? "white" : "black"}
-        fill={palette[index]}
+        fill={palette[name]}
         rx={1}
       />
       <motion.text
@@ -249,7 +243,7 @@ function SankeyNode({
         transition={DEFAULT_TRANSITION}
         fontSize={8}
       >
-        {node.id.split("_")[0]}
+        {node.id.split("-")[0]}
       </motion.text>
 
       <AnimatePresence>
@@ -285,17 +279,16 @@ function SankeyNode({
 // --- Sub-component for rendering a single Sankey Link background ---
 function SankeyLink({
   link,
-  palette,
   setHoveredLink,
   hoveredTrajectory,
   selectedLinks,
   selectionDirection,
 }) {
-  const { scales } = useData()
+  const { palette } = useViz()
   const linkGenerator = sankeyLinkHorizontal()
   const path = linkGenerator(link)
-  const [index_S] = link.source.id.split("_")
-  const [index_F] = link.target.id.split("_")
+  const [state_S] = link.source.id.split("-")
+  const [state_F] = link.target.id.split("-")
 
   const isSelectedLeft = selectedLinks.map((s) => s.target.id).includes(link.target.id)
   const isSelectedRight = selectedLinks.map((s) => s.source.id).includes(link.source.id)
@@ -304,15 +297,15 @@ function SankeyLink({
 
   const fullLink = {
     ...link,
-    source: { ...link.source, name: scales.indexToName(index_S), index: index_S },
-    target: { ...link.target, name: scales.indexToName(index_F), index: index_F },
+    source: { ...link.source, name: state_S, index: state_S },
+    target: { ...link.target, name: state_F, index: state_F },
   }
 
   return (
     <>
-      <linearGradient key={`grad-${link.id}`} id={`grad-${index_S}-${index_F}`}>
-        <stop offset="0%" stopColor={palette[index_S]} />
-        <stop offset="100%" stopColor={palette[index_F]} />
+      <linearGradient key={`grad-${link.id}`} id={`grad-${state_S}-${state_F}`}>
+        <stop offset="0%" stopColor={palette[state_S]} />
+        <stop offset="100%" stopColor={palette[state_F]} />
       </linearGradient>
       <motion.path
         key={`link-${link.source.id}-${link.target.id}`}
@@ -333,7 +326,7 @@ function SankeyLink({
         whileHover={{ opacity: 1 }}
         exit={{ pathLength: 0, strokeOpacity: 0.5 }}
         transition={DEFAULT_TRANSITION}
-        stroke={`url(#grad-${index_S}-${index_F})`}
+        stroke={`url(#grad-${state_S}-${state_F})`}
         fill="none"
         onMouseEnter={() => setHoveredLink(fullLink)}
       />
@@ -345,8 +338,6 @@ function SankeyLink({
 export function Sankey({ width, height, data }) {
   const { palette } = useViz()
   const { setSelectedTrajectoriesIDs } = useFilters()
-
-  console.log("Sankey")
 
   const [hoveredLink, setHoveredLink] = useState(null)
   const [selectedLinks, setSelectedLinks] = useState([])
@@ -370,15 +361,10 @@ export function Sankey({ width, height, data }) {
     return sankeyGenerator(data)
   }, [data, width, height])
 
-  //console.log(links)
-
   const handleMouseLeave = () => {
     setHoveredLink(null)
     setHoveredSilhouette(null)
   }
-
-  // const f = performance.now()
-  //console.log(`Sankey Layout Computation Finished in ${f - i} ms`)
 
   const columns = keys(groupBy(nodes, "x0"))
     .map((x) => Number(x))
@@ -394,12 +380,12 @@ export function Sankey({ width, height, data }) {
         >
           <defs>
             {links.map((link) => {
-              const [index_S] = link.source.id.split("_")
-              const [index_F] = link.target.id.split("_")
+              const [state_S] = link.source.id.split("-")
+              const [state_F] = link.target.id.split("-")
               return (
-                <linearGradient key={`grad-def-${link.index}`} id={`grad-${index_S}-${index_F}`}>
-                  <stop offset="0%" stopColor={palette[index_S]} />
-                  <stop offset="100%" stopColor={palette[index_F]} />
+                <linearGradient key={`grad-def-${link.index}`} id={`grad-${state_S}-${state_F}`}>
+                  <stop offset="0%" stopColor={palette[state_S]} />
+                  <stop offset="100%" stopColor={palette[state_F]} />
                 </linearGradient>
               )
             })}
@@ -426,7 +412,6 @@ export function Sankey({ width, height, data }) {
                 <SankeyLink
                   key={`link-bg-${link.source.id}-${link.target.id}`}
                   link={link}
-                  palette={palette}
                   hoveredLink={hoveredLink}
                   setHoveredLink={setHoveredLink}
                   hoveredTrajectory={hoveredSilhouette} // Dim links if a silhouette is hovered
@@ -442,7 +427,6 @@ export function Sankey({ width, height, data }) {
               <SankeyNode
                 key={`node-${node.id}`}
                 node={node}
-                palette={palette}
                 hoveredTrajectory={hoveredSilhouette} // Dim nodes if a silhouette is hovered
                 setSelectedLinks={setSelectedLinks}
                 selectedNode={selectedNode}

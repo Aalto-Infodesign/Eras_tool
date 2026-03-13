@@ -46,6 +46,7 @@
 .loader-main {
   display: flex;
   gap: 1rem;
+  padding: 0 var(--spacing-sm);
 }
 
 #fileInput {
@@ -87,12 +88,18 @@
   gap: var(--spacing-sm);
 }
 
+.accordion-controls {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
 .accordion-content {
   display: flex;
   flex-direction: column;
   min-width: 300px;
   transition: all 0.4s ease-in-out;
   border-top: 0.5px solid var(--surface-light);
+  padding: var(--spacing-sm) 0;
 
   /* background-color: #ffffff; */
   /* padding-bottom: var(--spacing-sm); */
@@ -107,10 +114,12 @@
 .closed .accordion-content {
   max-height: 0;
   opacity: 0;
-  /* padding: 0 var(--spacing-sm); */
+  padding: 0;
 }
 
 #upload {
+  width: 100%;
+  max-width: 300px;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
@@ -130,7 +139,7 @@
   max-height: 400px;
   /* overflow-y: auto;
   overflow-x: visible; */
-  padding: var(--spacing-sm);
+
   /* border-bottom: 0.5px solid var(--surface-light); */
 
   /* hide native scrollbars while preserving scrolling */
@@ -205,6 +214,18 @@ li p {
   padding: 0;
 }
 
+.era-header,
+.era-label {
+  font-size: var(--text-sm);
+  display: grid;
+  grid-template-columns: 2rem 5rem auto;
+  gap: var(--spacing-sm);
+}
+
+.era-header {
+  padding-bottom: var(--spacing-sm);
+}
+
 .toggle-btn {
   cursor: pointer;
 }
@@ -249,4 +270,11 @@ hr {
   gap: var(--spacing-sm);
   align-items: center;
   padding-top: var(--spacing-sm);
+}
+
+.ideal-silhouette-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  font-size: var(--text-sm);
 }

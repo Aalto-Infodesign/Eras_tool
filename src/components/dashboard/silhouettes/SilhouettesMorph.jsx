@@ -32,7 +32,7 @@ import { CloseButton } from "../../common/Button/CloseButton"
 
 export const SilhouettesMorph = () => {
   const { idealSilhouettes, statesData, statesOrder, setStatesOrder } = useData()
-  const { palette, isHasse, setIsHasse } = useViz()
+  const { isHasse, setIsHasse } = useViz()
   const {
     filtersActive,
     toggleSilhouetteFilter,
@@ -234,7 +234,6 @@ export const SilhouettesMorph = () => {
                 <SilhouetteChip
                   key={s}
                   s={s}
-                  palette={palette}
                   x={x}
                   y={y}
                   animationDuration={animationDuration}
@@ -361,7 +360,6 @@ export const SilhouettesMorph = () => {
                               toggleSilhouetteFilter={toggleSilhouetteFilter}
                               x={x}
                               y={y}
-                              palette={palette}
                               animationDuration={animationDuration}
                             />
                           )}
@@ -372,7 +370,6 @@ export const SilhouettesMorph = () => {
                         i={i}
                         x={x}
                         y={y}
-                        palette={palette}
                         animationDuration={animationDuration}
                         isSelected={isSelected}
                         handleSilhouetteClick={handleSilhouetteClick}
@@ -394,7 +391,6 @@ export const SilhouettesMorph = () => {
                             subset={derivedSilhouettes.next}
                             selectedSilhouettes={selectedSilhouettesNames}
                             toggleSilhouetteFilter={toggleSilhouetteFilter}
-                            palette={palette}
                             x={x}
                             y={y}
                             animationDuration={animationDuration}
@@ -577,14 +573,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
   )
 }
 
-export function SubsetSelection({
-  subset,
-  selectedSilhouettes,
-  toggleSilhouetteFilter,
-  palette,
-  x,
-  y,
-}) {
+export function SubsetSelection({ subset, selectedSilhouettes, toggleSilhouetteFilter, x, y }) {
   const subsetNames = subset.map((s) => s.name)
 
   return (
@@ -607,7 +596,6 @@ export function SubsetSelection({
               toggleSilhouetteFilter={toggleSilhouetteFilter}
               x={x}
               y={y}
-              palette={palette}
             />
           )
         })}
@@ -622,7 +610,6 @@ export function SilhouetteToggleButton({
   toggleSilhouetteFilter,
   x,
   y,
-  palette,
 }) {
   // const viewRef = useRef(null)
   return (
@@ -633,12 +620,12 @@ export function SilhouetteToggleButton({
       whileTap={{ scale: 0.9 }}
       onClick={() => toggleSilhouetteFilter(silhouetteName)}
     >
-      <SmallSilhouette silhouetteName={silhouetteName} palette={palette} x={x} y={y} />
+      <SmallSilhouette silhouetteName={silhouetteName} x={x} y={y} />
     </motion.div>
   )
 }
 
-export function SmallSilhouette({ silhouetteName, palette, x, y }) {
+export function SmallSilhouette({ silhouetteName, x, y }) {
   if (silhouetteName.length > 1)
     return (
       <motion.div layout transition={{ duration: 0.2 }} className="chip-svg-wrapper">
@@ -659,7 +646,7 @@ const chipVariants = {
   visible: { opacity: 1, y: 0 },
 }
 
-function SilhouetteChip({ s, palette, x, y, animationDuration, toggleSilhouetteFilter }) {
+function SilhouetteChip({ s, x, y, animationDuration, toggleSilhouetteFilter }) {
   const [isHovered, setIsHovered] = useState(false)
   return (
     <motion.div
@@ -676,13 +663,7 @@ function SilhouetteChip({ s, palette, x, y, animationDuration, toggleSilhouetteF
     >
       <CloseButton isVisible={isHovered} onClick={() => toggleSilhouetteFilter(s)} />
 
-      <SmallSilhouette
-        silhouetteName={s}
-        palette={palette}
-        x={x}
-        y={y}
-        animationDuration={animationDuration}
-      />
+      <SmallSilhouette silhouetteName={s} x={x} y={y} animationDuration={animationDuration} />
     </motion.div>
   )
 }

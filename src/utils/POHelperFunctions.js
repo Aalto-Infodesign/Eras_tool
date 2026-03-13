@@ -140,135 +140,231 @@ export function createCompletePO(arr, separator = "-", closingSymbol = "φ") {
  * @param {Array} edges - ReactFlow edges array
  * @returns {Array|null} - Array of [dominator, dominated] pairs or null if not a valid POSET
  */
+// export function calculateDominanceArray(nodes, edges) {
+//   if (!nodes || nodes.length === 0 || !edges || edges.length === 0) {
+//     return null
+//   }
+
+//   // Exit if nodes contain duplicates based on data.value
+//   const nameSet = new Set()
+//   const hasDuplicates = nodes.some((node) => {
+//     if (node.data?.value !== undefined) {
+//       if (nameSet.has(node.data.value)) {
+//         return true // Found duplicate
+//       }
+//       nameSet.add(node.data.value)
+//     }
+//     return false
+//   })
+
+//   if (hasDuplicates) {
+//     console.warn("Duplicate nodes detected, cannot calculate dominance")
+//     return null
+//   }
+
+//   // Create a map of node IDs to their labels/names
+//   const nodeIdToName = new Map()
+//   nodes.forEach((node) => {
+//     // Use label from data, or fall back to id
+//     nodeIdToName.set(node.id, node.data?.index || node.id)
+//   })
+
+//   // Build adjacency list for cycle detection
+//   const adjacencyList = new Map()
+//   nodes.forEach((node) => adjacencyList.set(node.id, []))
+
+//   edges.forEach((edge) => {
+//     if (adjacencyList.has(edge.source)) {
+//       adjacencyList.get(edge.source).push(edge.target)
+//     }
+//   })
+
+//   // Cycle detection using DFS
+//   const visited = new Set()
+//   const recStack = new Set()
+
+//   function hasCycleDFS(nodeId) {
+//     visited.add(nodeId)
+//     recStack.add(nodeId)
+
+//     for (const neighbor of adjacencyList.get(nodeId) || []) {
+//       if (!visited.has(neighbor)) {
+//         if (hasCycleDFS(neighbor)) return true
+//       } else if (recStack.has(neighbor)) {
+//         return true
+//       }
+//     }
+
+//     recStack.delete(nodeId)
+//     return false
+//   }
+
+//   // Check for cycles
+//   for (const node of nodes) {
+//     if (!visited.has(node.id)) {
+//       if (hasCycleDFS(node.id)) {
+//         console.warn("Graph contains a cycle - not a valid POSET")
+//         return null
+//       }
+//     }
+//   }
+
+//   // Compute transitive closure to get all dominance relationships
+//   const n = nodes.length
+//   const nodeIdToIndex = new Map()
+//   const indexToNodeId = new Map()
+
+//   nodes.forEach((node, index) => {
+//     nodeIdToIndex.set(node.id, index)
+//     indexToNodeId.set(index, node.id)
+//   })
+
+//   // Initialize reachability matrix
+//   const reachabilityMatrix = Array(n)
+//     .fill(null)
+//     .map(() => Array(n).fill(false))
+
+//   // Add direct edges
+//   edges.forEach((edge) => {
+//     const sourceIdx = nodeIdToIndex.get(edge.source)
+//     const targetIdx = nodeIdToIndex.get(edge.target)
+
+//     if (sourceIdx !== undefined && targetIdx !== undefined) {
+//       reachabilityMatrix[sourceIdx][targetIdx] = true
+//     }
+//   })
+
+//   // Floyd-Warshall for transitive closure
+//   for (let k = 0; k < n; k++) {
+//     for (let i = 0; i < n; i++) {
+//       for (let j = 0; j < n; j++) {
+//         if (reachabilityMatrix[i][k] && reachabilityMatrix[k][j]) {
+//           reachabilityMatrix[i][j] = true
+//         }
+//       }
+//     }
+//   }
+
+//   // Build dominance pairs: [dominator, dominated]
+//   // In a flowchart, if there's an edge A → B, then A dominates B
+//   const dominancePairs = []
+
+//   for (let i = 0; i < n; i++) {
+//     for (let j = 0; j < n; j++) {
+//       if (i !== j && reachabilityMatrix[i][j]) {
+//         const dominatorName = nodeIdToName.get(indexToNodeId.get(i))
+//         const dominatedName = nodeIdToName.get(indexToNodeId.get(j))
+//         dominancePairs.push([dominatorName, dominatedName])
+//       }
+//     }
+//   }
+
+//   // Add φ nodes for root elements (nodes with no incoming edges)
+//   const hasIncomingEdge = new Set()
+//   edges.forEach((edge) => hasIncomingEdge.add(edge.target))
+
+//   let phiIndex = 0
+//   nodes.forEach((node) => {
+//     if (!hasIncomingEdge.has(node.id)) {
+//       const nodeName = nodeIdToName.get(node.id)
+//       dominancePairs.push([`φ${phiIndex}`, nodeName])
+//       phiIndex++
+//     }
+//   })
+
+//   return dominancePairs
+// }
+
 export function calculateDominanceArray(nodes, edges) {
-  if (!nodes || nodes.length === 0 || !edges || edges.length === 0) {
-    return null
-  }
+  if (!nodes?.length || !edges?.length) return null
 
-  // Exit if nodes contain duplicates based on data.index
-  const indexSet = new Set()
-  const hasDuplicates = nodes.some((node) => {
-    if (node.data?.index !== undefined) {
-      if (indexSet.has(node.data.index)) {
-        return true // Found duplicate
-      }
-      indexSet.add(node.data.index)
+  // 1. Map IDs to our key (node.data.value) and check for duplicates
+  const nodeIdToValue = new Map()
+  const valueSet = new Set()
+
+  for (const node of nodes) {
+    const val = node.data?.value
+
+    if (val === undefined || val === null) {
+      console.warn(`Node ${node.id} is missing data.value`)
+      return null
     }
-    return false
-  })
 
-  if (hasDuplicates) {
-    console.warn("Duplicate nodes detected, cannot calculate dominance")
-    return null
+    if (valueSet.has(val)) {
+      console.warn(`Duplicate value detected: ${val}. Cannot calculate dominance.`)
+      return null
+    }
+
+    valueSet.add(val)
+    nodeIdToValue.set(node.id, val)
   }
 
-  // Create a map of node IDs to their labels/names
-  const nodeIdToName = new Map()
-  nodes.forEach((node) => {
-    // Use label from data, or fall back to id
-    nodeIdToName.set(node.id, node.data?.index || node.id)
-  })
-
-  // Build adjacency list for cycle detection
-  const adjacencyList = new Map()
-  nodes.forEach((node) => adjacencyList.set(node.id, []))
-
+  // 2. Build adjacency list for Cycle Detection (DFS)
+  const adj = new Map(nodes.map((n) => [n.id, []]))
   edges.forEach((edge) => {
-    if (adjacencyList.has(edge.source)) {
-      adjacencyList.get(edge.source).push(edge.target)
-    }
+    if (adj.has(edge.source)) adj.get(edge.source).push(edge.target)
   })
 
-  // Cycle detection using DFS
   const visited = new Set()
   const recStack = new Set()
 
-  function hasCycleDFS(nodeId) {
-    visited.add(nodeId)
-    recStack.add(nodeId)
-
-    for (const neighbor of adjacencyList.get(nodeId) || []) {
-      if (!visited.has(neighbor)) {
-        if (hasCycleDFS(neighbor)) return true
-      } else if (recStack.has(neighbor)) {
-        return true
-      }
+  function hasCycle(u) {
+    visited.add(u)
+    recStack.add(u)
+    for (const v of adj.get(u) || []) {
+      if (!visited.has(v) && hasCycle(v)) return true
+      if (recStack.has(v)) return true
     }
-
-    recStack.delete(nodeId)
+    recStack.delete(u)
     return false
   }
 
-  // Check for cycles
   for (const node of nodes) {
-    if (!visited.has(node.id)) {
-      if (hasCycleDFS(node.id)) {
-        console.warn("Graph contains a cycle - not a valid POSET")
-        return null
-      }
+    if (!visited.has(node.id) && hasCycle(node.id)) {
+      console.warn("Graph contains a cycle - not a valid POSET")
+      return null
     }
   }
 
-  // Compute transitive closure to get all dominance relationships
+  // 3. Compute Transitive Closure (Floyd-Warshall)
   const n = nodes.length
-  const nodeIdToIndex = new Map()
-  const indexToNodeId = new Map()
-
-  nodes.forEach((node, index) => {
-    nodeIdToIndex.set(node.id, index)
-    indexToNodeId.set(index, node.id)
-  })
+  const idToIndex = new Map(nodes.map((node, i) => [node.id, i]))
+  const indexToValue = nodes.map((node) => nodeIdToValue.get(node.id))
 
   // Initialize reachability matrix
-  const reachabilityMatrix = Array(n)
-    .fill(null)
-    .map(() => Array(n).fill(false))
+  const dist = Array.from({ length: n }, () => Array(n).fill(false))
 
-  // Add direct edges
   edges.forEach((edge) => {
-    const sourceIdx = nodeIdToIndex.get(edge.source)
-    const targetIdx = nodeIdToIndex.get(edge.target)
-
-    if (sourceIdx !== undefined && targetIdx !== undefined) {
-      reachabilityMatrix[sourceIdx][targetIdx] = true
-    }
+    const u = idToIndex.get(edge.source)
+    const v = idToIndex.get(edge.target)
+    if (u !== undefined && v !== undefined) dist[u][v] = true
   })
 
-  // Floyd-Warshall for transitive closure
   for (let k = 0; k < n; k++) {
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
-        if (reachabilityMatrix[i][k] && reachabilityMatrix[k][j]) {
-          reachabilityMatrix[i][j] = true
-        }
+        if (dist[i][k] && dist[k][j]) dist[i][j] = true
       }
     }
   }
 
-  // Build dominance pairs: [dominator, dominated]
-  // In a flowchart, if there's an edge A → B, then A dominates B
+  // 4. Build dominance pairs
   const dominancePairs = []
-
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
-      if (i !== j && reachabilityMatrix[i][j]) {
-        const dominatorName = nodeIdToName.get(indexToNodeId.get(i))
-        const dominatedName = nodeIdToName.get(indexToNodeId.get(j))
-        dominancePairs.push([dominatorName, dominatedName])
+      if (i !== j && dist[i][j]) {
+        dominancePairs.push([indexToValue[i], indexToValue[j]])
       }
     }
   }
 
-  // Add φ nodes for root elements (nodes with no incoming edges)
-  const hasIncomingEdge = new Set()
-  edges.forEach((edge) => hasIncomingEdge.add(edge.target))
+  // 5. Add φ nodes for roots (nodes with no incoming edges)
+  const targets = new Set(edges.map((e) => e.target))
+  let phiCount = 0
 
-  let phiIndex = 0
   nodes.forEach((node) => {
-    if (!hasIncomingEdge.has(node.id)) {
-      const nodeName = nodeIdToName.get(node.id)
-      dominancePairs.push([`φ${phiIndex}`, nodeName])
-      phiIndex++
+    if (!targets.has(node.id)) {
+      dominancePairs.push([`φ${phiCount++}`, nodeIdToValue.get(node.id)])
     }
   })
 

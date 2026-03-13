@@ -15,8 +15,7 @@ import Button from "../common/Button/Button"
 export function StateSelection() {
   const { fileName } = useRawData()
 
-  const { removedStates, toggleRemovedState, scales, statesData, statesOrder, setStatesOrder } =
-    useData()
+  const { removedStates, toggleRemovedState, statesData, statesOrder, setStatesOrder } = useData()
   const { palette, isLegend, hasFlowChart } = useViz()
   const {
     screenToFlowPosition,
@@ -30,9 +29,9 @@ export function StateSelection() {
 
   // Centralized node creation function
   const createNode = useCallback(
-    (stateIndex, position, nodeType = "default") => {
-      const currentIndex = statesOrder.indexOf(stateIndex)
-      const color = palette[stateIndex]
+    (stateName, position, nodeType = "default") => {
+      const currentIndex = statesOrder.indexOf(stateName)
+      const color = palette[stateName]
 
       return {
         id: `node_${Date.now()}_${Math.random()}`, // More unique ID
@@ -41,15 +40,15 @@ export function StateSelection() {
         className: "dnd-node",
         style: { backgroundColor: color, padding: 10, borderRadius: 5 },
         data: {
-          label: `${currentIndex} – ${scales.indexToName(stateIndex)}`,
-          index: Number(stateIndex),
-          value: `${scales.indexToName(stateIndex)}`,
+          label: `${currentIndex} – ${stateName}`,
+          index: currentIndex,
+          value: stateName,
           category: "category",
           color: color,
         },
       }
     },
-    [statesOrder, palette, scales],
+    [statesOrder, palette],
   )
 
   // Auto-populate flowchart on first load or RawData change
@@ -60,7 +59,7 @@ export function StateSelection() {
 
     if (statesData.statesNames.length === 0) return
 
-    const states = statesData.statesNames.map((_t, i) => `${i}`)
+    const states = statesData.statesNames
 
     const flowCenter = document.querySelector(".react-flow__viewport")?.getBoundingClientRect()
     if (!flowCenter) return
@@ -70,20 +69,18 @@ export function StateSelection() {
       y: flowCenter.top + flowCenter.height / 2,
     })
 
-    const newNodes = states.map((stateIndex, i) => {
+    const newNodes = states.map((stateName, i) => {
       // Offset nodes in a grid pattern or stacked
       const offset = {
         x: (i % 3) * 150 - 150, // 3 columns
         y: Math.floor(i / 3) * 100 - 100, // Rows
       }
 
-      return createNode(stateIndex, {
+      return createNode(stateName, {
         x: centerPosition.x + offset.x,
         y: centerPosition.y + offset.y,
       })
     })
-
-    console.log(newNodes.length)
 
     setNodes((nds) =>
       resolveCollisions([...nds, ...newNodes], {
@@ -101,9 +98,8 @@ export function StateSelection() {
     const nodes = getNodes()
 
     nodes.forEach((node) => {
-      if (node.data?.index !== undefined) {
-        console.log(statesOrder)
-        const currentIndex = statesOrder.indexOf(Number(node.data.index))
+      if (node.data?.value !== undefined) {
+        const currentIndex = statesOrder.indexOf(node.data.value)
 
         if (currentIndex !== -1) {
           const newLabel = `${currentIndex} – ${node.data.value}`
@@ -120,7 +116,7 @@ export function StateSelection() {
     const nodes = getNodes()
 
     const nodesToDelete = nodes.filter((node) => {
-      if (node.data?.index !== undefined) {
+      if (node.data?.value !== undefined) {
         const stateName = node.data.value
         return removedStates.includes(stateName)
       }
@@ -130,10 +126,12 @@ export function StateSelection() {
     if (nodesToDelete.length > 0) {
       deleteElements({ nodes: nodesToDelete })
     }
+
+    fitView()
   }, [removedStates, deleteElements, getNodes])
 
   const onDragEnd = useCallback(
-    (event, nodeType, stateIndex, color) => {
+    (event, nodeType, stateIndex) => {
       if (isLegend) return
 
       const { clientX, clientY } = event
@@ -157,7 +155,7 @@ export function StateSelection() {
   )
 
   const addNodetoFlow = useCallback(
-    (nodeType, stateIndex, color = "white") => {
+    (nodeType, stateIndex) => {
       const flowCenter = document.querySelector(".react-flow__viewport")?.getBoundingClientRect()
 
       if (!flowCenter) return
@@ -176,6 +174,8 @@ export function StateSelection() {
           margin: 10,
         }),
       )
+
+      fitView()
     },
     [screenToFlowPosition, createNode, setNodes],
   )
@@ -195,6 +195,11 @@ export function StateSelection() {
 
   return (
     <motion.section className="accordion-content" layout>
+      <p className="era-header">
+        <span> i </span>
+        <span>era</span>
+        {<span>population</span>}
+      </p>
       <motion.div
         layout
         className="list-wrapper scroll-shadows"
@@ -213,11 +218,12 @@ export function StateSelection() {
           onReorder={setStatesOrder}
           values={statesOrder}
         >
-          <AnimatePresence>
+          <AnimatePresence mode="popLayout">
             {statesOrder.map((item, i) => (
               <Reorder.Item
                 key={item}
                 value={item}
+                id={`reorder-${item}`}
                 as="div"
                 className="state-item drag"
                 whileTap={{ scale: 1.02 }}
@@ -229,26 +235,27 @@ export function StateSelection() {
                 drag
                 layout
                 transition={transition}
-                onDragEnd={(event) => onDragEnd(event, "default", item, palette[item])}
+                onDragEnd={(event) => onDragEnd(event, "default", item)}
               >
-                <EraLabel index={i} text={scales.indexToName(item)} color={palette[item]} />
+                <EraLabel
+                  index={i}
+                  text={item}
+                  population={statesData.statesObject[item]?.population_size}
+                  color={palette[item]}
+                />
 
                 <div className="buttons-wrapper">
                   {!isLegend && hasFlowChart && (
                     <Button
                       size="xs"
                       className="center"
-                      onClick={() => addNodetoFlow("default", item, palette[item])}
+                      onClick={() => addNodetoFlow("default", item)}
                     >
                       <Workflow size={14} />
                     </Button>
                   )}
                   {statesOrder.length > 1 && (
-                    <Button
-                      size="xs"
-                      className="center"
-                      onClick={() => toggleRemovedState(scales.indexToName(item))}
-                    >
+                    <Button size="xs" className="center" onClick={() => toggleRemovedState(item)}>
                       <X size={14} />
                     </Button>
                   )}
@@ -280,7 +287,7 @@ export function StateSelection() {
           }}
         >
           <motion.ul layout className="removed-states">
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               {removedStates.map((s, i) => (
                 <motion.li key={s} layout className="state-item">
                   <EraLabel index={i} text={s} color={"#fff"} />
@@ -299,17 +306,23 @@ export function StateSelection() {
   )
 }
 
-function EraLabel({ index, text, color }) {
+function EraLabel({ index, text, color, population }) {
   return (
-    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.p
+      className="era-label"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <span>{index} –</span>
       <motion.span
         initial={{ color: color, marginLeft: "-5px" }}
-        animate={{ color: color, marginLeft: "5px" }}
+        animate={{ color: color, marginLeft: "0px" }}
         exit={{ marginLeft: "0px" }}
       >
         {text}
       </motion.span>
+      {population && <span>{population}</span>}
     </motion.p>
   )
 }

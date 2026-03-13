@@ -12,7 +12,7 @@ const VizContext = createContext(null)
 
 export function VizProvider({ children }) {
   const { fileName } = useRawData()
-  const { scales, statesData, idealSilhouettes } = useData()
+  const { statesData, idealSilhouettes, removedStates } = useData()
 
   const [dominanceArrayFromFlow, setDominanceArrayFromFlow] = useState(null)
   const [nodesFromFlow, setNodesFromFlow] = useState(null)
@@ -57,13 +57,12 @@ export function VizProvider({ children }) {
   const generatePaletteFromDominance = (dominanceArray, dominanceNodes) => {
     if (!dominanceArray) return null
 
-    const stateNamesSorted = dominanceNodes.map((_t, i) => `${i}`).toSorted()
+    const stateNamesSorted = dominanceNodes
+    // const stateNamesSorted = dominanceNodes.map((_t, i) => `${i}`).toSorted()
 
     const { matrix, nodes } = po.domFromEdges(dominanceArray)
 
     const getColorSpace = (min, max, midPoint, step, length) => {
-      console.log(length)
-
       if (colorMode !== "poset") return { min: 40, max: 90 }
 
       if (length === 0) return { min: min, max: max }
@@ -105,15 +104,15 @@ export function VizProvider({ children }) {
 
   // Calculate palette (combines data-derived and flowchart-derived dominance)
   const { palette } = useMemo(() => {
-    if (!statesData || !scales) return { palette: {} }
+    if (!statesData.statesNames) return { palette: {} }
 
-    // console.log(statesData.statesNames)
     const statesNames = statesData.statesNames
-    // const statesOrderOriginal = statesNames.map((_t, i) => `${i}`)
 
     // Priority: Use flowchart dominance if available, otherwise use default
     const dominanceFromStates = getDominancePairsSelfUpper(statesNames)
+
     const dominanceArray = dominanceArrayFromFlow || dominanceFromStates
+    console.log("dominanceArray", dominanceArray)
     const nodes = nodesFromFlow || statesNames
 
     const palette =
@@ -121,13 +120,11 @@ export function VizProvider({ children }) {
         ? generatePaletteFromDominance(dominanceArray, nodes)
         : generatePaletteFromDominance(dominanceFromStates, statesNames)
 
-    // console.timeEnd("Palette Poset")
-
     return { palette }
   }, [
     idealSilhouettes,
     statesData,
-    scales,
+    removedStates,
     dominanceArrayFromFlow,
     colorMode,
     generatePaletteFromDominance,
@@ -142,7 +139,7 @@ export function VizProvider({ children }) {
       setDominanceArrayFromFlow(dominanceArray)
       setNodesFromFlow(nodes)
     } else {
-      // console.log("Reverting to unconnected state coloring")
+      console.log("Reverting to unconnected state coloring")
       setDominanceArrayFromFlow(null)
       setNodesFromFlow(null)
     }

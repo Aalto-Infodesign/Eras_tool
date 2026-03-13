@@ -27,7 +27,6 @@ export function HasseDiagram({
 }) {
   const { silhouettes } = useData()
   const { isHasse } = useViz()
-  const { filterActive } = useFilters()
   const [hoveredNode, setHoveredNode] = useState(null)
   const hoverTimeoutRef = useRef(null)
 
@@ -225,10 +224,10 @@ export function HasseDiagram({
 const HasseLink = ({ cover, src, tgt, isHasse, isSelected, toggleSilhouetteFilter }) => {
   const { palette } = useViz()
   const d = `M${src.xPosition},${src.yPositionScaled} L${tgt.xPosition},${tgt.yPositionScaled}`
-  const targetIndex = cover.target[cover.target.length - 1]
+  const targetName = cover.target.split("-").at(-1)
 
   const opacity = src.included && tgt.included ? 1 : 0.2
-  const strokeColor = isSelected ? "#ccc" : palette[targetIndex]
+  const strokeColor = isSelected ? "#ccc" : palette[targetName]
 
   return (
     <motion.path
@@ -282,13 +281,9 @@ const HasseNode = memo(function HasseNode({
   x,
   y,
 }) {
-  const { scales } = useData()
   const { palette } = useViz()
 
-  const fullName = name
-    .split("-")
-    .map((l) => scales.indexToName(l))
-    .join("-")
+  const silhouetteNames = name.split("-")
 
   return (
     <motion.g
@@ -318,7 +313,7 @@ const HasseNode = memo(function HasseNode({
           <motion.circle
             animate={{ r: 5 }}
             transition={{ duration: 1 }}
-            fill={palette[name[name.length - 1]] ?? "var(--surface-contrast)"}
+            fill={palette[silhouetteNames.at(-1)] ?? "var(--surface-contrast)"}
             whileTap={{ scale: 0.95 }}
           />
         )}
@@ -336,7 +331,9 @@ const HasseNode = memo(function HasseNode({
                 x={-rectWidth / 2}
                 y={-rectWidth / 2}
                 fill="var(--surface-contrast)"
-                stroke={isSelected ? "var(--surface-accent)" : (palette[name[0]] ?? "#ccc")}
+                stroke={
+                  isSelected ? "var(--surface-accent)" : (palette[silhouetteNames[0]] ?? "#ccc")
+                }
                 strokeWidth={isHasse ? (isSelected ? 2 : 0.5) : 0}
                 rx={4}
                 ry={4}
@@ -345,7 +342,6 @@ const HasseNode = memo(function HasseNode({
               <SilhouettePathSvg
                 keyName="hasse"
                 silhouetteName={name}
-                palette={palette}
                 animationDuration={0.2}
                 xScale={x}
                 yScale={y}
@@ -390,7 +386,7 @@ const HasseNode = memo(function HasseNode({
         </motion.g>
       )}
 
-      <title>{fullName}</title>
+      <title>{name}</title>
     </motion.g>
   )
 })

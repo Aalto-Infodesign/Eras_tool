@@ -28,7 +28,7 @@ import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 const snapGrid = [25, 25]
 
 export const FlowChart = () => {
-  const { scales, statesOrder, idealSilhouettes, setIdealSilhouettes } = useData()
+  const { statesOrder, idealSilhouettes, setIdealSilhouettes } = useData()
   const { updatePosetColoring, palette, colorMode, setColorMode, isLegend } = useViz()
   const reactFlowWrapper = useRef(null)
 
@@ -80,10 +80,11 @@ export const FlowChart = () => {
   // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
     const dominanceArray = calculateDominanceArray(nodes, edges)
+    console.log(dominanceArray)
 
-    const nodesIndexes = nodes.map((node) => node.data.index)
+    const nodesNames = nodes.map((node) => node.data.value)
 
-    updatePosetColoring(dominanceArray, nodesIndexes)
+    updatePosetColoring(dominanceArray, nodesNames)
     // updatePosetColoring(dominanceArray, statesData.statesNames)
   }, [edges, colorMode])
 
@@ -93,11 +94,11 @@ export const FlowChart = () => {
         ...node,
         data: {
           ...node.data,
-          label: `${node.data.index} – ${scales.indexToName(node.data.index)}`,
+          label: `${statesOrder.indexOf(node.data.value)} – ${node.data.value}`,
           index: node.data.index,
-          color: palette[node.data.index],
+          color: palette[node.data.value],
         },
-        style: { ...node.style, backgroundColor: `${palette[node.data.index]}` },
+        style: { ...node.style, backgroundColor: `${palette[node.data.value]}` },
       })),
     )
   }, [palette, setNodes, statesOrder])
@@ -192,7 +193,7 @@ function getFullPathsFromFlow(nodes, edges) {
     const node = nodes.find((n) => n.id === nodeId)
     if (!node) return
 
-    const newPath = [...currentPath, node.data.index] // or .label, whatever you need
+    const newPath = [...currentPath, node.data.value] // or .label, whatever you need
 
     if (!adj.has(nodeId) || adj.get(nodeId).length === 0) {
       allPaths.push(newPath)

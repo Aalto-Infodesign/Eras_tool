@@ -12,7 +12,7 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 
 export function Grid(props) {
-  const { scales, analytics, setStatesOrder } = useData()
+  const { analytics, setStatesOrder, statesOrder } = useData()
   const { palette } = useViz()
   const trajectoriesContext = useContext(TrajectoriesContext)
   const { w, h, marginTop, chartScales } = trajectoriesContext
@@ -22,7 +22,6 @@ export function Grid(props) {
   const { setHoveredStateLabel = () => {} } = props
 
   const { ageRange } = analytics
-  const { indexToName } = scales
 
   const xScale = chartScales.x
   const yScale = chartScales.y
@@ -87,7 +86,7 @@ export function Grid(props) {
               animate={{ y: yScale(name) + marginTop - 3 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              onMouseOver={() => setHoveredStateLabel(indexToName(name))}
+              onMouseOver={() => setHoveredStateLabel(name)}
               onMouseLeave={() => setHoveredStateLabel()}
             >
               <text
@@ -97,9 +96,9 @@ export function Grid(props) {
                 fontSize={4}
                 textAnchor="start"
               >
-                {indexToName(name).length > 15
-                  ? `${name} • ${indexToName(name).substring(0, 8)}` + "..."
-                  : `${name} • ${indexToName(name)}`}
+                {name.length > 15
+                  ? `${statesOrder.indexOf(name)} • ${name.substring(0, 8)}` + "..."
+                  : `${statesOrder.indexOf(name)} • ${name}`}
               </text>
               <g className="line-controls" transform={`translate(${10}, ${7})`}>
                 <motion.path

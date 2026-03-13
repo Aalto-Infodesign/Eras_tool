@@ -60,7 +60,7 @@ export function FileLoader() {
         )}
 
         {isLegend && (
-          <>
+          <div className="accordion-controls">
             <ChevronDown
               size={16}
               className="animated"
@@ -68,7 +68,7 @@ export function FileLoader() {
               transform={isOpen ? "rotate(180)" : "rotate(0)"}
             />
             <Maximize2 size={16} onClick={() => setIsLegend(false)} />
-          </>
+          </div>
         )}
       </div>
 
@@ -90,10 +90,10 @@ export function FileLoader() {
 
                     {hasFlowChart && <Sankey width={300} height={100} />}
                     {existingIdealSilhouettes.length > 0 && (
-                      <div>
+                      <div className="ideal-silhouette-info">
                         <h4>Silhouettes found in dataset</h4>
                         {existingIdealSilhouettes.map((s) => (
-                          <p key={s.name} className="ideal-silhouette-info">
+                          <p key={s.name}>
                             <strong>{s.name}</strong>
                             <span> : {s.size}</span>
                           </p>

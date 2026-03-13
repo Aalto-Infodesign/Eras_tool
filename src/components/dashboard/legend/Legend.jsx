@@ -5,7 +5,7 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 
 export function Legend() {
-  const { scales, statesOrder } = useData()
+  const { statesOrder } = useData()
   const { palette } = useViz()
 
   return (
@@ -14,7 +14,7 @@ export function Legend() {
         <motion.p layout key={state} className={styles.legendItem}>
           <span className={styles.legendColor}>{index} - </span>
           <span className={styles.legendLabel} style={{ color: palette[state] }}>
-            {scales.indexToName(state)}
+            {state}
           </span>
         </motion.p>
       ))}

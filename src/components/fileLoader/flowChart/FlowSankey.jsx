@@ -3,6 +3,7 @@ import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { motion } from "motion/react"
 import { useViz } from "../../../contexts/VizContext"
 import { useEdges, useNodes } from "@xyflow/react"
+import { Tooltip } from "../../common/Tooltip/Tooltip"
 
 const MARGIN_X = 10
 
@@ -12,21 +13,21 @@ export const Sankey = ({ width, height }) => {
   const { palette } = useViz()
   const [hoveredNode, setHoveredNode] = useState(null)
 
-  // console.log("Sankey data", data)
-  // Use useMemo to stabilize the 'nodes' and 'links' references
   const { sankeyNodes, sankeyLinks } = useMemo(() => {
     if (!nodes || !edges) return { sankeyNodes: [], sankeyLinks: [] }
 
-    console.log(nodes)
-    const dataForSankey = {
-      sankeyNodes: nodes.map((node) => ({
-        id: node.id, // must match nodeId()
-        name: node.data.value, // stable name
-        dataIndex: node.data.index,
-        color: palette[node.data.index],
+    const usedNodeIds = new Set(edges.flatMap((e) => [e.source, e.target]))
 
-        category: node.data.category,
-      })),
+    const dataForSankey = {
+      sankeyNodes: nodes
+        .filter((node) => usedNodeIds.has(node.id))
+        .map((node) => ({
+          id: node.id,
+          name: node.data.value,
+          dataIndex: node.data.index,
+          color: palette[node.data.value],
+          category: node.data.category,
+        })),
       sankeyLinks: edges.map((link) => ({
         source: link.source,
         target: link.target,
@@ -36,7 +37,7 @@ export const Sankey = ({ width, height }) => {
 
     const sankeyGenerator = sankey()
       .nodeWidth(Math.min(25, width / 10))
-      .nodePadding(20)
+      .nodePadding(10)
       .extent([
         [MARGIN_X, 0],
         [width - MARGIN_X, height],
@@ -72,7 +73,7 @@ export const Sankey = ({ width, height }) => {
         transition={{ duration: 0.2, ease: "easeOut" }}
       >
         <motion.rect
-          initial={{ height: 0 }}
+          initial={{ height: 0, fill: node.color }}
           animate={{ height: node.y1 - node.y0, fill: node.color }}
           transition={{ duration: 0.2 }}
           exit={{ height: 0 }}
@@ -104,14 +105,17 @@ export const Sankey = ({ width, height }) => {
       />
     )
   })
+
   return (
     <div className="flex-sankey-wrapper">
-      <svg width={width} height={height}>
-        {/* Sankey diagram rendering logic goes here */}
-        <g className="sankey-nodes">{allNodes}</g>
-        <g className="sankey-links">{allLinks}</g>
-      </svg>
-      {/* <Tooltip isVisible={hoveredNode}>{hoveredNode && <div>{hoveredNode.name}</div>}</Tooltip> */}
+      {edges && (
+        <svg width={width} height={height}>
+          {/* Sankey diagram rendering logic goes here */}
+          <g className="sankey-nodes">{allNodes}</g>
+          <g className="sankey-links">{allLinks}</g>
+        </svg>
+      )}
+      <Tooltip isVisible={hoveredNode}>{hoveredNode && <div>{hoveredNode.name}</div>}</Tooltip>
     </div>
   )
 }
