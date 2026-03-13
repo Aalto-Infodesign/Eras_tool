@@ -6,6 +6,7 @@ import { useMemo, useState } from "react"
 import { useModifierKey } from "../../hooks/useModifierKey"
 import { ExportIDs } from "../export/ExportIDs"
 import { useWindowSize } from "../../hooks/useWindowSize"
+import { createPortal } from "react-dom"
 
 export const SidePanel = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -14,6 +15,7 @@ export const SidePanel = () => {
   const { width } = useWindowSize()
 
   const containerWidth = useMemo(() => {
+    console.log(document.querySelector(".App"))
     return document.querySelector(".App").getBoundingClientRect().width
   }, [width])
 
@@ -26,10 +28,10 @@ export const SidePanel = () => {
   useModifierKey("e", () => handlePanelOpen("export"))
 
   const panelVariants = {
-    closed: { x: width < 1844 ? containerWidth - 30 : 1440 - 20 },
-    open: { x: width < 1844 ? width - (width - containerWidth) / 2 - 220 : 1440 - 20 },
+    closed: { x: width < 1840 ? width - 28 : width - 220 },
+    open: { x: width - 220 },
   }
-  return (
+  return createPortal(
     <motion.section
       key={"side-panel"}
       id="side-panel"
@@ -59,7 +61,8 @@ export const SidePanel = () => {
         {panelContent === "filters" && <Filters />}
         {panelContent === "export" && <ExportIDs />}
       </section>
-    </motion.section>
+    </motion.section>,
+    document.body,
   )
 }
 

@@ -226,7 +226,7 @@ function SankeyNode({
         fill={palette[name]}
         rx={1}
       />
-      <motion.text
+      {/* <motion.text
         initial={{
           fill: hoveredTrajectory ? "#FFFFFF" : "#000000",
           x: node.x0 + 6,
@@ -244,7 +244,7 @@ function SankeyNode({
         fontSize={8}
       >
         {node.id.split("-")[0]}
-      </motion.text>
+      </motion.text> */}
 
       <AnimatePresence>
         {isSelected && (

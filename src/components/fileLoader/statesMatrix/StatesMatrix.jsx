@@ -81,15 +81,23 @@ export function StatesMatrix({ width, height, lineChartMode }) {
   const valuesExtent = extent(matrixCouples.map((c) => c.count))
   const opacityScale = scaleLinear([0, valuesExtent[1]], [0, 1])
 
-  const xScale = scaleBand()
-    .domain(statesOrder)
-    .range([PADDING, width - PADDING])
-    .padding(0.15)
+  const xScale = useMemo(
+    () =>
+      scaleBand()
+        .domain(statesOrder)
+        .range([PADDING, width - PADDING])
+        .padding(0.15),
+    [statesOrder],
+  )
 
-  const yScale = scaleBand()
-    .domain(statesOrder)
-    .range([PADDING, height - PADDING])
-    .padding(0.15)
+  const yScale = useMemo(
+    () =>
+      scaleBand()
+        .domain(statesOrder)
+        .range([PADDING, height - PADDING])
+        .padding(0.15),
+    [statesOrder],
+  )
 
   return (
     <div className="svg-container" id="matrix-chart">

@@ -213,8 +213,6 @@ export function TrajectoriesExplorerChart(props) {
               {chartType === 2 && <TrajectoriesChart />}
             </motion.section>
           </TrajectoriesContext.Provider>
-
-          {/* <Legend /> */}
         </div>
       </motion.section>
 

@@ -10,6 +10,7 @@ import { CircleAlert, CircleSlash } from "lucide-react"
 
 import "./PartialOrderChart.css"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { Legend } from "../legend/Legend"
 
 // TODO Use idealSilhouettes to highlight nodes/links in the sankey diagram
 
@@ -140,15 +141,18 @@ export function PartialOrderChart() {
   console.timeEnd("useSankeyData")
 
   return (
-    <div className="chart-container">
-      {sankeyData && sankeyData.nodes.length > 0 ? (
-        <Sankey width={1000} height={500} data={sankeyData} />
-      ) : (
-        <div className="no-data-panel">
-          <CircleAlert size={64} />
-          <p>Not enough nodes for this chart! Try adjusting the Silhouettes selection</p>
-        </div>
-      )}
-    </div>
+    <>
+      <div className="chart-container">
+        {sankeyData && sankeyData.nodes.length > 0 ? (
+          <Sankey width={1000} height={500} data={sankeyData} />
+        ) : (
+          <div className="no-data-panel">
+            <CircleAlert size={64} />
+            <p>Not enough nodes for this chart! Try adjusting the Silhouettes selection</p>
+          </div>
+        )}
+        <Legend />
+      </div>
+    </>
   )
 }

@@ -198,7 +198,7 @@ export function StateSelection() {
       <p className="era-header">
         <span> i </span>
         <span>era</span>
-        {<span>population</span>}
+        {/* <span>population</span> */}
       </p>
       <motion.div
         layout
@@ -322,7 +322,7 @@ function EraLabel({ index, text, color, population }) {
       >
         {text}
       </motion.span>
-      {population && <span>{population}</span>}
+      {/* {population && <span>{population}</span>} */}
     </motion.p>
   )
 }
