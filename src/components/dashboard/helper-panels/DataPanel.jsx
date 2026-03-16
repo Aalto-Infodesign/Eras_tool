@@ -3,9 +3,15 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import styles from "./DataPanel.module.css"
 
 export function DataPanel({}) {
-  const { analytics, silhouettes, statesData } = useData()
-  const { selectedIDs, filteredData, selectedSilhouettesData, filteredSilhouettes, filteredLinks } =
-    useDerivedData()
+  const { silhouettes, statesData } = useData()
+  const {
+    selectedIDs,
+    filteredData,
+    selectedSilhouettesData,
+    filteredSilhouettes,
+    filteredLinks,
+    analytics,
+  } = useDerivedData()
 
   return (
     <div id="data-panel">

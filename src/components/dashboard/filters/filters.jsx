@@ -11,9 +11,8 @@ import "./Filters.css"
 import StackedLines from "./StackedLines/StackedLines"
 
 export const Filters = () => {
-  const { richData, statesData } = useData()
   const { filters } = useFilters()
-  const { filteredData, IDsFromSelectedSilhouettes } = useDerivedData()
+  const { data, filteredData, IDsFromSelectedSilhouettes, trajectories } = useDerivedData()
   const sliderDimensions = { x: 150, y: 30 }
 
   const selectedData =
@@ -23,19 +22,22 @@ export const Filters = () => {
 
   if (isEmpty(filters)) return null
 
-  // const allYears = flattenDeep(richData.map((d) => d.years))
+  // const allYears = flattenDeep(data.map((d) => d.years))
 
-  const allMinYears = richData.map((t) => min(t.years))
-  const allMaxYears = richData.map((t) => max(t.years))
+  const allMinYears = data.map((t) => min(t.years))
+  const allMaxYears = data.map((t) => max(t.years))
 
   const allYears = { all: [...allMinYears, ...allMaxYears], min: allMinYears, max: allMaxYears }
 
-  const allDurations = richData
+  const allDurations = data
     .map((d) => d.diseaseDuration)
     .filter((duration) => !isNil(duration))
     .filter((duration) => duration !== 0)
 
-  const allSpeeds = statesData.links.map((d) => d.speed).filter((speed) => !isNil(speed))
+  const allSpeeds = trajectories
+    .flat()
+    .map((d) => d.speed)
+    .filter((speed) => !isNil(speed))
 
   return (
     <section id="filters" className="filters">

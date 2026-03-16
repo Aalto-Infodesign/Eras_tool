@@ -52,12 +52,15 @@ export function DerivedDataProvider({ children }) {
     })
   }, [richData, removedStates])
 
+  // USE DATA PROCESSING??
   const trajectories = useMemo(() => {
     if (data.length === 0) return []
     return trajectoriesFromData(data)
   }, [data])
 
-  console.log(trajectories)
+  const links = useMemo(() => {
+    return trajectories.flat()
+  }, [trajectories])
 
   const silhouettes = useMemo(() => {
     if (trajectories.length === 0) return []
@@ -196,6 +199,7 @@ export function DerivedDataProvider({ children }) {
 
   const value = useMemo(
     () => ({
+      data,
       trajectories,
       silhouettes,
       filteredData,
@@ -209,6 +213,7 @@ export function DerivedDataProvider({ children }) {
       // selectedData,
     }),
     [
+      data,
       trajectories,
       silhouettes,
       filteredData,
