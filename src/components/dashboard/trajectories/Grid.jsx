@@ -10,15 +10,17 @@ import { moveElementInArray } from "../../../utils/moveChar"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { flattenDeep } from "lodash"
 
 export function Grid(props) {
-  const { analytics, setStatesOrder, statesOrder } = useData()
+  const { analytics, setStatesOrder, statesOrder, trajectories } = useData()
   const { palette } = useViz()
+  const { filteredTrajectories } = useDerivedData()
   const trajectoriesContext = useContext(TrajectoriesContext)
   const { w, h, marginTop, chartScales } = trajectoriesContext
 
-  const { allTrajectories } = props
-  const { statesNamesLoaded } = props
+  const t = !filteredTrajectories ? trajectories : filteredTrajectories
   const { setHoveredStateLabel = () => {} } = props
 
   const { ageRange } = analytics
@@ -26,7 +28,7 @@ export function Grid(props) {
   const xScale = chartScales.x
   const yScale = chartScales.y
 
-  const minMaxStates = getMinMaxStateFromTrajectories(allTrajectories)
+  const minMaxStates = getMinMaxStateFromTrajectories(flattenDeep(t))
 
   const verticalLines = ticks(1, ageRange[1], ageRange[1] / 10)
 
@@ -47,7 +49,7 @@ export function Grid(props) {
           />
         )
       })}
-      {statesNamesLoaded.map((name) => {
+      {statesOrder.map((name) => {
         return (
           <motion.g
             exit={{ opacity: 0 }}
@@ -103,27 +105,23 @@ export function Grid(props) {
               <g className="line-controls" transform={`translate(${10}, ${7})`}>
                 <motion.path
                   className={`stateLabel-control-up material-icons small ${
-                    statesNamesLoaded.indexOf(name) === 0 ? "inactive" : ""
+                    statesOrder.indexOf(name) === 0 ? "inactive" : ""
                   }`}
                   transform={`translate(0, -9)`}
                   d="M-1.5,0 L1.5,0 L0,-2 Z"
                   // whileHover={{ scale: 0.95 }}
                   fill={palette[name]}
-                  onClick={() => moveElementInArray(statesNamesLoaded, name, "up", setStatesOrder)}
+                  onClick={() => moveElementInArray(statesOrder, name, "up", setStatesOrder)}
                 />
                 <motion.path
                   className={`stateLabel-control-down material-icons small ${
-                    statesNamesLoaded.indexOf(name) === statesNamesLoaded.length - 1
-                      ? "inactive"
-                      : ""
+                    statesOrder.indexOf(name) === statesOrder.length - 1 ? "inactive" : ""
                   }`}
                   transform={`translate(0, 0)`}
                   // whileHover={{ scale: 0.95 }}
                   d="M-1.5,0 L1.5,0 L0,2 Z"
                   fill={palette[name]}
-                  onClick={() =>
-                    moveElementInArray(statesNamesLoaded, name, "down", setStatesOrder)
-                  }
+                  onClick={() => moveElementInArray(statesOrder, name, "down", setStatesOrder)}
                 />
               </g>
             </motion.g>

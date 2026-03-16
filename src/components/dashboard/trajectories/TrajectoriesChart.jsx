@@ -29,10 +29,6 @@ import { ListFilter } from "lucide-react"
 import { Legend } from "../legend/Legend"
 
 export function TrajectoriesChart() {
-  // console.time("Trajectories")
-
-  const { silhouettes } = useData()
-  const { palette } = useViz()
   const { selectedTrajectoriesIDs, trajectoriesSelectionMode, setTrajectoriesSelectionMode } =
     useFilters()
   const { completeLinks, filteredLinks } = useDerivedData()
@@ -41,8 +37,6 @@ export function TrajectoriesChart() {
 
   const {
     h,
-
-    statesNamesLoaded,
     hoveredTrajectoriesIDs,
     selectedIndex,
     selectedLumps,
@@ -107,11 +101,6 @@ export function TrajectoriesChart() {
       initialAndFinalCompletePerStateTarget,
     }
   }, [filteredLinks, completeLinks])
-
-  const allTrajectories = useMemo(
-    () => flattenDeep(silhouettes.map((s) => s.trajectories)),
-    [silhouettes],
-  )
 
   useEffect(() => {
     isEnter &&
@@ -254,12 +243,10 @@ export function TrajectoriesChart() {
         <div id="trajectories-chart" className="svg-container">
           <svg ref={svgRef} preserveAspectRatio="xMidYMid meet" viewBox={`0 0 210 ${h}`}>
             <TextureDefs />
-            <GradientDefs statesNamesLoaded={statesNamesLoaded} palette={palette} />
+            <GradientDefs />
 
             <Grid
               isSelectModeLines={isSelectModeLines}
-              statesNamesLoaded={statesNamesLoaded}
-              allTrajectories={allTrajectories}
               setHoveredStateLabel={setHoveredStateLabel}
             />
 
@@ -359,26 +346,28 @@ const HoveredTrajectoryPopUp = ({
 }
 
 // Create gradient definitions based on the statesNamesLoaded order
-function GradientDefs({ statesNamesLoaded, palette }) {
-  // Get the state positions based on their order
-  const statePositions = {}
-  statesNamesLoaded.forEach((state, index) => {
-    statePositions[state] = index
-  })
+function GradientDefs() {
+  const { statesOrder } = useData()
+  const { palette } = useViz()
+  // // Get the state positions based on their order
+  // const statePositions = {}
+  // statesOrder.forEach((state, index) => {
+  //   statePositions[state] = index
+  // })
 
   // Generate all necessary gradient data
   const gradients = []
   // Create gradients for all possible state combinations based on the order
-  for (let i = 0; i < statesNamesLoaded.length; i++) {
-    for (let j = 0; j < statesNamesLoaded.length; j++) {
+  for (let i = 0; i < statesOrder.length; i++) {
+    for (let j = 0; j < statesOrder.length; j++) {
       if (i !== j) {
         // Skip creating gradients for the same state
-        const sourceState = statesNamesLoaded[i]
-        const targetState = statesNamesLoaded[j]
+        const sourceState = statesOrder[i]
+        const targetState = statesOrder[j]
 
         // Determine gradient direction based on visual position
-        const sourcePos = statePositions[sourceState]
-        const targetPos = statePositions[targetState]
+        const sourcePos = statesOrder.indexOf(sourceState)
+        const targetPos = statesOrder.indexOf(targetState)
 
         // If source is below target (higher index), gradient goes bottom to top
         // If source is above target (lower index), gradient goes top to bottom

@@ -9,6 +9,7 @@ import { useNodeStyling } from "../hooks/useNodeStyling"
 
 import { SilhouettePathSvg } from "../shared/SilhouettePathSvg"
 import { useFilters } from "../../../../contexts/FiltersContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -25,8 +26,9 @@ export function HasseDiagram({
   x,
   y,
 }) {
-  const { silhouettes } = useData()
+  // const { silhouettes } = useData()
   const { isHasse } = useViz()
+  const { silhouettes } = useDerivedData()
   const [hoveredNode, setHoveredNode] = useState(null)
   const hoverTimeoutRef = useRef(null)
 

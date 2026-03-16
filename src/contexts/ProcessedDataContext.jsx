@@ -5,14 +5,14 @@ import { useDataCleanup, useDataProcessing } from "../components/hooks/useDataPr
 
 import { tsvJSON } from "../utils/dataHelpers"
 
-import { xor } from "lodash"
+import { difference, xor } from "lodash"
 
 const ProcessedDataContext = createContext(null)
 
 export function ProcessedDataProvider({ children }) {
   const { rawData, fileName } = useRawData()
   const [clusterStates, setClusterStates] = useState(false) // Option in import
-  const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
+  // const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
 
   const [statesOrder, setStatesOrder] = useState([])
 
@@ -22,7 +22,6 @@ export function ProcessedDataProvider({ children }) {
 
   // Cleanup
   useEffect(() => {
-    setRemovedStates([])
     setIdealSilhouettes([])
     setStatesThresholds([])
     setStatesOrder([])
@@ -48,37 +47,13 @@ export function ProcessedDataProvider({ children }) {
     return baseData
   }, [fileName, clusterStates])
 
-  // Remove states from parsed data
-  const data = useMemo(() => {
-    if (!parsedData) return []
-    return parsedData.map((d) => {
-      // Find all indexes to remove
-      const indexesToRemove = d.trajectory
-        .map((state, idx) => (removedStates.includes(state) ? idx : -1))
-        .filter((idx) => idx !== -1)
-      if (indexesToRemove.length > 0) {
-        const newTrajectory = d.trajectory.filter((_, idx) => !indexesToRemove.includes(idx))
-        const newSWA = d.SwitchEventAge.filter((_, idx) => !indexesToRemove.includes(idx))
-        const newYears = d.years.filter((_, idx) => !indexesToRemove.includes(idx))
-        return { ...d, trajectory: newTrajectory, SwitchEventAge: newSWA, years: newYears }
-      } else {
-        return d
-      }
-    })
-  }, [parsedData, removedStates])
+  const richData = useDataCleanup(parsedData, statesThresholds)
 
-  const richData = useDataCleanup(data, statesThresholds)
-
+  // TODO Rename originalSilhouettes
   const { statesData, analytics, silhouettes, filters } = useDataProcessing(
     richData,
     idealSilhouettes,
   )
-
-  useEffect(() => {
-    if (!statesData.statesNames) return
-    const removed = new Set(removedStates)
-    setStatesOrder(statesData.statesNames.filter((s) => !removed.has(s)))
-  }, [statesData.statesNames, removedStates])
 
   const existingIdealSilhouettes = useMemo(
     () =>
@@ -111,13 +86,10 @@ export function ProcessedDataProvider({ children }) {
     )
   }, [])
 
-  const toggleRemovedState = useCallback(
-    (state) => {
-      const newRemovedStates = xor(removedStates, [state])
-      setRemovedStates(newRemovedStates)
-    },
-    [removedStates, setRemovedStates],
-  )
+  useEffect(() => {
+    if (!statesData.statesNames) return
+    setStatesOrder(statesData.statesNames)
+  }, [statesData.statesNames])
 
   const value = useMemo(
     () => ({
@@ -125,7 +97,7 @@ export function ProcessedDataProvider({ children }) {
       richData,
       idealSilhouettes,
       existingIdealSilhouettes,
-      removedStates,
+
       clusterStates,
       statesData,
       analytics,
@@ -136,7 +108,7 @@ export function ProcessedDataProvider({ children }) {
       setIdealSilhouettes,
       setClusterStates,
       setStatesOrder,
-      toggleRemovedState,
+
       // From Flowhchart
       statesThresholds,
       addStateThreshold,
@@ -147,7 +119,7 @@ export function ProcessedDataProvider({ children }) {
       idealSilhouettes,
       statesOrder,
       existingIdealSilhouettes,
-      removedStates,
+
       clusterStates,
       statesData,
       analytics,

@@ -18,26 +18,58 @@ import { useViz } from "./VizContext"
 const DerivedContext = createContext(null)
 
 export function DerivedDataProvider({ children }) {
-  const { silhouettes, richData, idealSilhouettes } = useData()
+  const { richData, idealSilhouettes } = useData()
   const {
     filters,
     filtersActive,
     selectedSilhouettesNames,
     selectedTrajectoriesIDs,
     trajectoriesSelectionMode,
+    removedStates,
   } = useFilters()
   const { chartType } = useViz()
 
   // console.log("Silhouettes", silhouettes)
 
-  const isReady = silhouettes?.length > 0 && richData?.length > 0 && !isEmpty(filters)
+  const isReady = richData?.length > 0 && !isEmpty(filters)
+
+  const data = useMemo(() => {
+    if (!richData) return []
+    if (removedStates.length === 0) return richData
+    return richData.map((d) => {
+      // Find all indexes to remove
+      const indexesToRemove = d.trajectory
+        .map((state, idx) => (removedStates.includes(state) ? idx : -1))
+        .filter((idx) => idx !== -1)
+      if (indexesToRemove.length > 0) {
+        const newTrajectory = d.trajectory.filter((_, idx) => !indexesToRemove.includes(idx))
+        const newSWA = d.SwitchEventAge.filter((_, idx) => !indexesToRemove.includes(idx))
+        const newYears = d.years.filter((_, idx) => !indexesToRemove.includes(idx))
+        return { ...d, trajectory: newTrajectory, SwitchEventAge: newSWA, years: newYears }
+      } else {
+        return d
+      }
+    })
+  }, [richData, removedStates])
+
+  const trajectories = useMemo(() => {
+    if (data.length === 0) return []
+    return trajectoriesFromData(data)
+  }, [data])
+
+  console.log(trajectories)
+
+  const silhouettes = useMemo(() => {
+    if (trajectories.length === 0) return []
+    return silhouettesFromTrajectories(trajectories, idealSilhouettes, data)
+  }, [trajectories, idealSilhouettes, data])
 
   const filteredData = useMemo(() => {
     if (!isReady) return []
 
-    if (!filtersActive) return richData
+    if (!filtersActive) return data
 
-    return richData
+    return data
       .filter(
         (datum) =>
           datum.diseaseDuration === null ||
@@ -51,7 +83,7 @@ export function DerivedDataProvider({ children }) {
           (Math.floor(min(datum.years)) >= filters.date.selection[0] &&
             Math.floor(max(datum.years)) <= filters.date.selection[1]),
       )
-  }, [richData, filters, filtersActive])
+  }, [data, filters, filtersActive])
 
   // console.log("fd", filteredData)
 
@@ -66,8 +98,8 @@ export function DerivedDataProvider({ children }) {
 
   const filteredSilhouettes = useMemo(() => {
     if (filteredTrajectories.length === 0) return []
-    return silhouettesFromTrajectories(filteredTrajectories, idealSilhouettes, richData)
-  }, [filteredTrajectories, idealSilhouettes, richData])
+    return silhouettesFromTrajectories(filteredTrajectories, idealSilhouettes, data)
+  }, [filteredTrajectories, idealSilhouettes, data])
 
   // Step 2: derive silhouettes from filtered data
   const silhouettesMap = useMemo(() => {
@@ -164,6 +196,8 @@ export function DerivedDataProvider({ children }) {
 
   const value = useMemo(
     () => ({
+      trajectories,
+      silhouettes,
       filteredData,
       completeLinks,
       filteredSilhouettes,
@@ -175,6 +209,8 @@ export function DerivedDataProvider({ children }) {
       // selectedData,
     }),
     [
+      trajectories,
+      silhouettes,
       filteredData,
       completeLinks,
       filteredSilhouettes,

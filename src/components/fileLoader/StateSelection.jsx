@@ -11,12 +11,14 @@ import { useViz } from "../../contexts/VizContext"
 import { ResetStatesOrder } from "./ResetStatesOrder"
 import { X, Workflow, Plus } from "lucide-react"
 import Button from "../common/Button/Button"
+import { useFilters } from "../../contexts/FiltersContext"
 
 export function StateSelection() {
   const { fileName } = useRawData()
 
-  const { removedStates, toggleRemovedState, statesData, statesOrder, setStatesOrder } = useData()
+  const { statesData, statesOrder, setStatesOrder } = useData()
   const { palette, isLegend, hasFlowChart } = useViz()
+  const { removedStates, toggleRemovedState } = useFilters()
   const {
     screenToFlowPosition,
     setNodes,
@@ -57,38 +59,38 @@ export function StateSelection() {
     setNodes([])
     setEdges([])
 
-    if (statesData.statesNames.length === 0) return
+    // if (statesData.statesNames.length === 0) return
 
-    const states = statesData.statesNames
+    // const states = statesData.statesNames
 
-    const flowCenter = document.querySelector(".react-flow__viewport")?.getBoundingClientRect()
-    if (!flowCenter) return
+    // const flowCenter = document.querySelector(".react-flow__viewport")?.getBoundingClientRect()
+    // if (!flowCenter) return
 
-    const centerPosition = screenToFlowPosition({
-      x: flowCenter.left + flowCenter.width / 2,
-      y: flowCenter.top + flowCenter.height / 2,
-    })
+    // const centerPosition = screenToFlowPosition({
+    //   x: flowCenter.left + flowCenter.width / 2,
+    //   y: flowCenter.top + flowCenter.height / 2,
+    // })
 
-    const newNodes = states.map((stateName, i) => {
-      // Offset nodes in a grid pattern or stacked
-      const offset = {
-        x: (i % 3) * 150 - 150, // 3 columns
-        y: Math.floor(i / 3) * 100 - 100, // Rows
-      }
+    // const newNodes = states.map((stateName, i) => {
+    //   // Offset nodes in a grid pattern or stacked
+    //   const offset = {
+    //     x: (i % 3) * 150 - 150, // 3 columns
+    //     y: Math.floor(i / 3) * 100 - 100, // Rows
+    //   }
 
-      return createNode(stateName, {
-        x: centerPosition.x + offset.x,
-        y: centerPosition.y + offset.y,
-      })
-    })
+    //   return createNode(stateName, {
+    //     x: centerPosition.x + offset.x,
+    //     y: centerPosition.y + offset.y,
+    //   })
+    // })
 
-    setNodes((nds) =>
-      resolveCollisions([...nds, ...newNodes], {
-        maxIterations: Infinity,
-        overlapThreshold: 0.5,
-        margin: 10,
-      }),
-    )
+    // setNodes((nds) =>
+    //   resolveCollisions([...nds, ...newNodes], {
+    //     maxIterations: Infinity,
+    //     overlapThreshold: 0.5,
+    //     margin: 10,
+    //   }),
+    // )
 
     fitView()
   }, [fileName])

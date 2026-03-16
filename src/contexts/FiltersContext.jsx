@@ -2,7 +2,7 @@ import { createContext, useState, useContext, useMemo, useCallback, useEffect } 
 import { useData } from "./ProcessedDataContext"
 import { isEqual, isEmpty } from "lodash"
 import { useRawData } from "./RawDataContext"
-import { xor } from "lodash"
+import { xor, difference } from "lodash"
 
 const FiltersContext = createContext(null)
 
@@ -10,7 +10,11 @@ const FiltersContext = createContext(null)
 
 export function FiltersProvider({ children }) {
   const { fileName } = useRawData()
-  const { filtersBlueprint, existingIdealSilhouettes } = useData()
+  const { filtersBlueprint, existingIdealSilhouettes, statesData, setStatesOrder } = useData()
+
+  //States
+  const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
+
   // Sliders
   const [filters, setFilters] = useState(filtersBlueprint)
   const [isDragging, setIsDragging] = useState(false)
@@ -26,7 +30,13 @@ export function FiltersProvider({ children }) {
     setSelectedSilhouettesNames([])
     setSelectedTrajectoriesIDs([])
     setTrajectoriesSelectionMode("all")
+    setRemovedStates([])
   }, [fileName])
+
+  useEffect(() => {
+    if (!statesData.statesNames) return
+    setStatesOrder(difference(statesData.statesNames, removedStates))
+  }, [statesData.statesNames, removedStates])
 
   // Sync internal state when the source data changes
   useEffect(() => {
@@ -94,10 +104,19 @@ export function FiltersProvider({ children }) {
     return filters.date.isActive || filters.diseaseDuration.isActive || filters.speed.isActive
   }, [filters])
 
+  const toggleRemovedState = useCallback((state) => {
+    setRemovedStates((prev) => xor(prev, [state]))
+  }, [])
+
   const value = useMemo(
     () => ({
       updateSelection,
       resetFilter,
+
+      // States
+      removedStates,
+      toggleRemovedState,
+      setRemovedStates,
       // Sliders
       filters,
       isDragging,

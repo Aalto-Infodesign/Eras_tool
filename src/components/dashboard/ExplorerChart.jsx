@@ -32,7 +32,7 @@ export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
   // Props
 
-  const { silhouettes, analytics, statesData, statesOrder } = useData()
+  const { analytics, statesOrder } = useData()
   const { palette, chartType, setChartType } = useViz()
   const {
     selectedTrajectoriesIDs,
@@ -42,11 +42,10 @@ export function TrajectoriesExplorerChart(props) {
     toggleSilhouetteFilter,
   } = useFilters()
 
-  const { filteredLinks } = useDerivedData()
+  const { filteredLinks, silhouettes } = useDerivedData()
 
   const { w, h, marginTop } = props
   const { ageRange } = analytics
-  const { statesNames } = statesData
 
   const { reduceMotion } = props
 
@@ -90,8 +89,8 @@ export function TrajectoriesExplorerChart(props) {
   const isFilterActive = isLumpFilterActive || isTrajectoriesFilterActive
 
   // STATES ORDER
-  const statesNamesLoaded = isNil(statesOrder) ? statesNames.sort() : statesOrder
-  const yScale = scaleBand(statesNamesLoaded, [0, 100]).padding(1)
+
+  const yScale = scaleBand(statesOrder, [0, 100]).padding(1)
   const xScale = scaleLinear([0, max(silhouettes.map((d) => d.states.length - 1))], [10, 100 - 10])
 
   // 4. MAPPA PER RICERCA SILHOUETTE (Evita loop annidati)
@@ -117,12 +116,12 @@ export function TrajectoriesExplorerChart(props) {
   const chartScales = useMemo(
     () => ({
       x: scaleLinear([0, ageRange[1]], [0, w]),
-      y: scaleBand(statesNamesLoaded, [0, h]),
+      y: scaleBand(statesOrder, [0, h]),
     }),
-    [ageRange, statesNamesLoaded, w, h],
+    [ageRange, statesOrder, w, h],
   )
 
-  const chartRowSpan = Math.floor(statesNamesLoaded.length / 6) + 1
+  const chartRowSpan = Math.floor(statesOrder.length / 6) + 1
 
   const enableScrub = filteredLinks.length < 2000
 
@@ -135,7 +134,6 @@ export function TrajectoriesExplorerChart(props) {
 
       //DATA
 
-      statesNamesLoaded,
       chartScales,
       selectedLumps,
       toggleSelectedLumps,
@@ -153,7 +151,6 @@ export function TrajectoriesExplorerChart(props) {
       w,
       h,
 
-      statesNamesLoaded,
       selectedLumps,
       toggleSelectedLumps,
 

@@ -358,7 +358,7 @@ export const trajectoriesFromData = (data) => {
     return links
   })
 
-  return trajectories
+  return trajectories.filter((t) => t.length > 0)
 }
 
 export const silhouettesFromTrajectories = (trajectories, idealSilhouettes, richData) => {

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
 import { useData } from "../../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../../contexts/VizContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 export function usePosetWorker() {
-  const { silhouettes } = useData()
+  // const { silhouettes } = useData()
+  const { silhouettes } = useDerivedData()
   const { startLoading, stopLoading } = useViz()
   const [result, setResult] = useState(null)
 

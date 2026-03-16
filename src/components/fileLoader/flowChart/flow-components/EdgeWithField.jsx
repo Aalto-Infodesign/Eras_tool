@@ -55,13 +55,12 @@ function ThresholdPanel({ props }) {
   const targetLabel = getNode(props.target).data.value
   // const y = Math.min(props.sourceY, props.targetY)
 
-  // Derive it instead:
   const edgeThres = statesThresholds?.find(
     (item) => item.sourceState === sourceLabel && item.targetState === targetLabel,
   )
 
   const buttonLabel = useMemo(() => {
-    if (!edgeThres && !showInput) return "set threshold"
+    if (!edgeThres && !showInput) return "set"
     if (!edgeThres && showInput) return "set"
     if (edgeThres && !showInput) return "edit"
     else return "edit"
@@ -107,8 +106,8 @@ function ThresholdPanel({ props }) {
           <span>years</span>
         </motion.div>
       )}
-      {!showInput && edgeThres?.threshold && <p className="value">{edgeThres.threshold} years</p>}
-      <motion.div variants={templateVariants} initial={!edgeThres ? "visible" : "hidden"}>
+      {!showInput && <p className="value">{edgeThres?.threshold ?? 0}</p>}
+      <motion.div variants={templateVariants}>
         <Button size="xs" onClick={handleAddClick}>
           {buttonLabel}
         </Button>

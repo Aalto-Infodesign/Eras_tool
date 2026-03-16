@@ -12,7 +12,7 @@ const VizContext = createContext(null)
 
 export function VizProvider({ children }) {
   const { fileName } = useRawData()
-  const { statesData, idealSilhouettes, removedStates } = useData()
+  const { statesOrder, idealSilhouettes } = useData()
 
   const [dominanceArrayFromFlow, setDominanceArrayFromFlow] = useState(null)
   const [nodesFromFlow, setNodesFromFlow] = useState(null)
@@ -104,27 +104,27 @@ export function VizProvider({ children }) {
 
   // Calculate palette (combines data-derived and flowchart-derived dominance)
   const { palette } = useMemo(() => {
-    if (!statesData.statesNames) return { palette: {} }
+    if (statesOrder.length === 0) return { palette: {} }
 
-    const statesNames = statesData.statesNames
+    const states = statesOrder
 
     // Priority: Use flowchart dominance if available, otherwise use default
-    const dominanceFromStates = getDominancePairsSelfUpper(statesNames)
+    const dominanceFromStates = getDominancePairsSelfUpper(states)
 
     const dominanceArray = dominanceArrayFromFlow || dominanceFromStates
-    console.log("dominanceArray", dominanceArray)
-    const nodes = nodesFromFlow || statesNames
+    // console.log("dominanceArray", dominanceArray)
+    const nodes = nodesFromFlow || states
 
     const palette =
       colorMode === "poset"
         ? generatePaletteFromDominance(dominanceArray, nodes)
-        : generatePaletteFromDominance(dominanceFromStates, statesNames)
+        : generatePaletteFromDominance(dominanceFromStates, states)
 
     return { palette }
   }, [
     idealSilhouettes,
-    statesData,
-    removedStates,
+    statesOrder,
+
     dominanceArrayFromFlow,
     colorMode,
     generatePaletteFromDominance,

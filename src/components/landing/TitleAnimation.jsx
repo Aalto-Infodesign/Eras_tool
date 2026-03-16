@@ -22,10 +22,10 @@ export function TitleAnimation() {
         FinnGen's
       </motion.p>
       <motion.h1 variants={titleVariants} custom={1}>
-        The ERAS Tool
+        The Eras Tool
       </motion.h1>
       <motion.p variants={titleVariants} custom={2}>
-        Track evolution over time
+        Trajectoies of evolution
       </motion.p>
     </motion.div>
   )

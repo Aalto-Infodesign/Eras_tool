@@ -3,7 +3,7 @@ import { TrajectoriesExplorerChart } from "./dashboard/ExplorerChart"
 import { SilhouettesMorph } from "./dashboard/silhouettes/SilhouettesMorph"
 import { CarouselWrapper } from "./common/Carousel/Carousel"
 import { SilhouettesPie } from "./dashboard/silhouettes/SilhouettesPie"
-import { DebugPanel } from "./dashboard/debug/DebugPanel"
+import { DebugPanel } from "./dashboard/helper-panels/DebugPanel"
 import {
   motion,
   useAnimate,
@@ -20,12 +20,13 @@ import { useViz } from "../contexts/VizContext"
 import { useDerivedData } from "../contexts/DerivedDataContext"
 import { Command } from "lucide-react"
 import { FilterPanel } from "./dashboard/filter-panel/FilterPanel"
+import { DataPanel } from "./dashboard/helper-panels/DataPanel"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
-  const { richData, analytics, silhouettes, statesOrder } = useData()
+  const { richData, statesOrder } = useData()
   const { isHasse, isLegend } = useViz()
-  const { completeSilhouettes, selectedSilhouettesData, selectedIDs } = useDerivedData()
+  const { completeSilhouettes, selectedSilhouettesData, silhouettes } = useDerivedData()
 
   const w = 170
   const marginTop = 10
@@ -140,30 +141,11 @@ const Dashboard = () => {
                 className="bento-item carousel"
               >
                 <CarouselWrapper>
+                  <div className="carousel-slides-content" data-title="Analytics ">
+                    <DataPanel />
+                  </div>
                   <div className="carousel-slides-content" data-title="Silhouettes selected">
                     <SilhouettesPie selectedSilhouettesData={selectedSilhouettesData} />
-                  </div>
-                  <div className="carousel-slides-content" data-title="Analytics">
-                    <h4>Datapoints</h4>
-                    <p>
-                      {selectedIDs.length > 0 && <span>{selectedIDs.length} / </span>}
-                      {analytics.datapoints}
-                    </p>
-                    <h4>Silhouettes</h4>
-                    <p>
-                      {selectedSilhouettesData.length > 0 && (
-                        <span>{selectedSilhouettesData.length} / </span>
-                      )}
-                      {silhouettes.length}
-                    </p>
-                    <h4>Age Range</h4>
-                    <p>
-                      {Math.round(analytics.ageRange[0])} - {Math.round(analytics.ageRange[1])}
-                    </p>
-                    <h4>Date Range</h4>
-                    <p>
-                      {Math.round(analytics.dateRange[0])} - {Math.round(analytics.dateRange[1])}
-                    </p>
                   </div>
                   <div className="carousel-slides-content" data-title="Debug Tools">
                     <DebugPanel />

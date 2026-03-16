@@ -31,7 +31,7 @@ import { CloseButton } from "../../common/Button/CloseButton"
 // ! TODO Refactor completo
 
 export const SilhouettesMorph = () => {
-  const { idealSilhouettes, statesData, statesOrder, setStatesOrder } = useData()
+  const { idealSilhouettes, statesOrder, setStatesOrder } = useData()
   const { isHasse, setIsHasse } = useViz()
   const {
     filtersActive,
@@ -41,9 +41,6 @@ export const SilhouettesMorph = () => {
   } = useFilters()
 
   const { completeSilhouettes } = useDerivedData()
-
-  const statesNames = statesData.statesNames
-  const statesNamesLoaded = isNil(statesOrder) ? statesNames.sort() : statesOrder
 
   const posetData = usePosetWorker().result
 
@@ -61,7 +58,7 @@ export const SilhouettesMorph = () => {
   const svgPadding = 10
   const isActive = selectedSilhouettesNames.length > 0
 
-  const y = scaleBand(statesNamesLoaded, [svgPadding, h - svgPadding]).padding(0)
+  const y = scaleBand(statesOrder, [svgPadding, h - svgPadding]).padding(0)
   const x = scaleLinear(
     [0, max(completeSilhouettes.map((d) => d.states.length - 1))],
     [svgPadding, w - svgPadding], // Map from the left side of the world to the right side
@@ -268,7 +265,7 @@ export const SilhouettesMorph = () => {
                   toggleSilhouetteFilter={toggleSilhouetteFilter}
                   x={x}
                   y={y}
-                  statesNamesLoaded={statesNamesLoaded}
+                  statesNamesLoaded={statesOrder}
                 />
               ) : (
                 <p>Loading...</p>
@@ -460,7 +457,9 @@ function SilhouetteCardMain({ s, i, ...props }) {
     tapped: { scale: 0.95, transition: { duration: 0.2 } },
   }
 
-  const ids = s.trajectories.map((d) => d[0].id)
+  console.log(s)
+  const ids = s.trajectories.map((d) => d[0]?.id ?? "id not found")
+  console.log(ids)
 
   const showFilterLabel = s.isFiltered && s.percentage !== s.filtered.percentage
 
