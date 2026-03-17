@@ -457,9 +457,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
     tapped: { scale: 0.95, transition: { duration: 0.2 } },
   }
 
-  console.log(s)
   const ids = s.trajectories.map((d) => d[0]?.id ?? "id not found")
-  console.log(ids)
 
   const showFilterLabel = s.isFiltered && s.percentage !== s.filtered.percentage
 

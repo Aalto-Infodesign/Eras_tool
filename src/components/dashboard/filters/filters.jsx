@@ -11,8 +11,7 @@ import "./Filters.css"
 import StackedLines from "./StackedLines/StackedLines"
 
 export const Filters = () => {
-  const { filters } = useFilters()
-  const { data, filteredData, IDsFromSelectedSilhouettes, trajectories } = useDerivedData()
+  const { data, filteredData, IDsFromSelectedSilhouettes, trajectories, filters } = useDerivedData()
   const sliderDimensions = { x: 150, y: 30 }
 
   const selectedData =

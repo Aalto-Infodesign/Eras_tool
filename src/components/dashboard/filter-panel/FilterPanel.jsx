@@ -3,6 +3,7 @@ import { useFilters } from "../../../contexts/FiltersContext"
 import styles from "./FilterPanel.module.css"
 import { X } from "lucide-react"
 import Button from "../../common/Button/Button"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 export function FilterPanel() {
   const activeFilters = useActiveFilters()
@@ -27,7 +28,8 @@ export function FilterPanel() {
 
 // useActiveFilters.js
 export const useActiveFilters = () => {
-  const { filters, resetFilter } = useFilters()
+  const { resetFilter } = useFilters()
+  const { filters } = useDerivedData()
 
   const activeFilters = useMemo(() => {
     const chips = []

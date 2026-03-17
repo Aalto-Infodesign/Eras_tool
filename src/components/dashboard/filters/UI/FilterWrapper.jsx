@@ -33,6 +33,11 @@ export const FilterWrapper = ({
     [filter, sliderDimensions],
   )
 
+  const selection = [
+    Math.max(filter.selection[0], filter.extent[0]),
+    Math.min(filter.selection[1], filter.extent[1]),
+  ]
+
   return (
     <div
       id={`filter-${name}`}
@@ -54,7 +59,7 @@ export const FilterWrapper = ({
         height={50}
         xScale={xScale}
         range={filter.range}
-        selection={filter.selection}
+        selection={selection}
         maskID={`mask-${name}`}
         mode={mode}
         lineX={lineX}
@@ -63,7 +68,7 @@ export const FilterWrapper = ({
       <FilterSlider
         min={min}
         max={max}
-        value={filter.selection}
+        value={selection}
         onChange={handleRangeChange}
         width={sliderDimensions.x}
         hasPattern={hasPattern}

@@ -32,7 +32,10 @@ export function TrajectoriesExplorerChart(props) {
   console.time("Explorer Chart")
   // Props
 
-  const { analytics, statesOrder } = useData()
+  const {
+    // analytics,
+    statesOrder,
+  } = useData()
   const { palette, chartType, setChartType } = useViz()
   const {
     selectedTrajectoriesIDs,
@@ -42,7 +45,7 @@ export function TrajectoriesExplorerChart(props) {
     toggleSilhouetteFilter,
   } = useFilters()
 
-  const { filteredLinks, silhouettes } = useDerivedData()
+  const { filteredLinks, silhouettes, analytics } = useDerivedData()
 
   const { w, h, marginTop } = props
   const { ageRange } = analytics

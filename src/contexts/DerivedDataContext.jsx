@@ -3,15 +3,17 @@
  * and depend on Filters
  */
 
-import { createContext, useContext, useMemo } from "react"
+import { createContext, useContext, useMemo, useEffect } from "react"
 import { useData } from "./ProcessedDataContext"
 import { useFilters } from "./FiltersContext"
 import { isEmpty, includes, union, flattenDeep } from "lodash"
 import { min, max } from "d3"
 
 import {
-  trajectoriesFromData,
-  silhouettesFromTrajectories,
+  useTrajectoriesFromData,
+  useSilhouettesFromTrajectories,
+  useAnalytics,
+  useFiltersSetup,
 } from "../components/hooks/useDataProcessing"
 import { useViz } from "./VizContext"
 
@@ -20,7 +22,7 @@ const DerivedContext = createContext(null)
 export function DerivedDataProvider({ children }) {
   const { richData, idealSilhouettes } = useData()
   const {
-    filters,
+    filtersSelection,
     filtersActive,
     selectedSilhouettesNames,
     selectedTrajectoriesIDs,
@@ -31,7 +33,7 @@ export function DerivedDataProvider({ children }) {
 
   // console.log("Silhouettes", silhouettes)
 
-  const isReady = richData?.length > 0 && !isEmpty(filters)
+  const isReady = richData?.length > 0 && !isEmpty(filtersSelection)
 
   const data = useMemo(() => {
     if (!richData) return []
@@ -52,20 +54,10 @@ export function DerivedDataProvider({ children }) {
     })
   }, [richData, removedStates])
 
-  // USE DATA PROCESSING??
-  const trajectories = useMemo(() => {
-    if (data.length === 0) return []
-    return trajectoriesFromData(data)
-  }, [data])
-
-  const links = useMemo(() => {
-    return trajectories.flat()
-  }, [trajectories])
-
-  const silhouettes = useMemo(() => {
-    if (trajectories.length === 0) return []
-    return silhouettesFromTrajectories(trajectories, idealSilhouettes, data)
-  }, [trajectories, idealSilhouettes, data])
+  const trajectories = useTrajectoriesFromData(data)
+  const silhouettes = useSilhouettesFromTrajectories(trajectories, idealSilhouettes, data)
+  const analytics = useAnalytics(data)
+  const filters = useFiltersSetup(data, trajectories.flat(), filtersSelection)
 
   const filteredData = useMemo(() => {
     if (!isReady) return []
@@ -90,19 +82,17 @@ export function DerivedDataProvider({ children }) {
 
   // console.log("fd", filteredData)
 
-  const filteredTrajectories = useMemo(() => {
-    if (filteredData.length === 0) return []
-    return trajectoriesFromData(filteredData)
-  }, [filteredData])
+  const filteredTrajectories = useTrajectoriesFromData(filteredData)
 
   const completeLinks = useMemo(() => {
     return filteredTrajectories.flat()
   }, [filteredTrajectories])
 
-  const filteredSilhouettes = useMemo(() => {
-    if (filteredTrajectories.length === 0) return []
-    return silhouettesFromTrajectories(filteredTrajectories, idealSilhouettes, data)
-  }, [filteredTrajectories, idealSilhouettes, data])
+  const filteredSilhouettes = useSilhouettesFromTrajectories(
+    filteredTrajectories,
+    idealSilhouettes,
+    data,
+  )
 
   // Step 2: derive silhouettes from filtered data
   const silhouettesMap = useMemo(() => {
@@ -211,6 +201,8 @@ export function DerivedDataProvider({ children }) {
       filteredLinks,
       IDsFromSelectedSilhouettes,
       // selectedData,
+      analytics,
+      filters,
     }),
     [
       data,
@@ -225,6 +217,8 @@ export function DerivedDataProvider({ children }) {
       filteredLinks,
       IDsFromSelectedSilhouettes,
       // selectedData,
+      analytics,
+      filters,
     ],
   )
 

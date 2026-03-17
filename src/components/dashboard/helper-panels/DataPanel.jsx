@@ -3,7 +3,7 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import styles from "./DataPanel.module.css"
 
 export function DataPanel({}) {
-  const { silhouettes, statesData } = useData()
+  const { silhouettes, trajectories } = useData()
   const {
     selectedIDs,
     filteredData,
@@ -12,6 +12,8 @@ export function DataPanel({}) {
     filteredLinks,
     analytics,
   } = useDerivedData()
+
+  const links = trajectories.flat()
 
   return (
     <div id="data-panel">
@@ -39,13 +41,13 @@ export function DataPanel({}) {
       </p>
       <h4>Segments</h4>
       <p>
-        {filteredLinks.length !== statesData.links.length && (
+        {filteredLinks.length !== links.length && (
           <span>
             <b>{filteredLinks.length} </b>
             {" of "}
           </span>
         )}
-        {statesData.links.length}
+        {links.length}
       </p>
       <h4>Age Range</h4>
       <p>

@@ -1,7 +1,14 @@
 import { createContext, useState, useContext, useMemo, useEffect, useCallback } from "react"
 import { useRawData } from "./RawDataContext"
 
-import { useDataCleanup, useDataProcessing } from "../components/hooks/useDataProcessing"
+import {
+  useAnalytics,
+  useDataCleanup,
+  useStates,
+  useFiltersSetup,
+  useTrajectoriesFromData,
+  useSilhouettesFromTrajectories,
+} from "../components/hooks/useDataProcessing"
 
 import { tsvJSON } from "../utils/dataHelpers"
 
@@ -48,12 +55,10 @@ export function ProcessedDataProvider({ children }) {
   }, [fileName, clusterStates])
 
   const richData = useDataCleanup(parsedData, statesThresholds)
-
-  // TODO Rename originalSilhouettes
-  const { statesData, analytics, silhouettes, filters } = useDataProcessing(
-    richData,
-    idealSilhouettes,
-  )
+  const statesData = useStates(richData)
+  const trajectories = useTrajectoriesFromData(richData)
+  const silhouettes = useSilhouettesFromTrajectories(trajectories, idealSilhouettes, richData)
+  const analytics = useAnalytics(richData)
 
   const existingIdealSilhouettes = useMemo(
     () =>
@@ -101,8 +106,8 @@ export function ProcessedDataProvider({ children }) {
       clusterStates,
       statesData,
       analytics,
+      trajectories,
       silhouettes,
-      filtersBlueprint: filters,
       statesOrder,
       // Setters
       setIdealSilhouettes,
@@ -123,8 +128,8 @@ export function ProcessedDataProvider({ children }) {
       clusterStates,
       statesData,
       analytics,
+      trajectories,
       silhouettes,
-      filters,
       statesThresholds,
       addStateThreshold,
     ],

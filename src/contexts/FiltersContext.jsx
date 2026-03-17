@@ -10,13 +10,18 @@ const FiltersContext = createContext(null)
 
 export function FiltersProvider({ children }) {
   const { fileName } = useRawData()
-  const { filtersBlueprint, existingIdealSilhouettes, statesData, setStatesOrder } = useData()
+  const { existingIdealSilhouettes, statesData, setStatesOrder } = useData()
 
   //States
   const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
 
   // Sliders
-  const [filters, setFilters] = useState(filtersBlueprint)
+  const [filtersSelection, setFiltersSelection] = useState({
+    date: null,
+    diseaseDuration: null,
+    age: null,
+    speed: null,
+  })
   const [isDragging, setIsDragging] = useState(false)
 
   // Selection Data
@@ -38,13 +43,6 @@ export function FiltersProvider({ children }) {
     setStatesOrder(difference(statesData.statesNames, removedStates))
   }, [statesData.statesNames, removedStates])
 
-  // Sync internal state when the source data changes
-  useEffect(() => {
-    if (filtersBlueprint) {
-      setFilters(filtersBlueprint)
-    }
-  }, [filtersBlueprint])
-
   useEffect(() => {
     if (existingIdealSilhouettes) {
       const names = existingIdealSilhouettes.map((s) => s.name)
@@ -53,28 +51,20 @@ export function FiltersProvider({ children }) {
   }, [existingIdealSilhouettes])
 
   const resetFilter = (key) => {
-    setFilters((prev) => {
-      // Guard clause to prevent errors if filters haven't loaded yet
+    setFiltersSelection((prev) => {
       if (!prev || !prev[key]) return prev
       return {
         ...prev,
-        [key]: { ...prev[key], selection: prev[key].extent, isActive: false },
+        [key]: null,
       }
     })
   }
 
   const updateSelection = useCallback((key, newSelection) => {
-    console.log("Update filters", key)
-    setFilters((prev) => {
-      // Guard clause to prevent errors if filters haven't loaded yet
-      if (!prev || !prev[key]) return prev
-      const isActive = !isEqual(newSelection, prev[key].extent) // ← compare NEW value
-
-      return {
-        ...prev,
-        [key]: { ...prev[key], selection: newSelection, isActive: isActive },
-      }
-    })
+    setFiltersSelection((prev) => ({
+      ...prev,
+      [key]: newSelection, // Just set it. The DerivedData will handle the merging.
+    }))
   }, [])
 
   const toggleSilhouetteFilter = (silhouette) => {
@@ -100,9 +90,9 @@ export function FiltersProvider({ children }) {
   }
 
   const filtersActive = useMemo(() => {
-    if (isEmpty(filters)) return false
-    return filters.date.isActive || filters.diseaseDuration.isActive || filters.speed.isActive
-  }, [filters])
+    if (isEmpty(filtersSelection)) return false
+    return filtersSelection.date || filtersSelection.diseaseDuration || filtersSelection.speed
+  }, [filtersSelection])
 
   const toggleRemovedState = useCallback((state) => {
     setRemovedStates((prev) => xor(prev, [state]))
@@ -110,15 +100,17 @@ export function FiltersProvider({ children }) {
 
   const value = useMemo(
     () => ({
+      filtersSelection,
       updateSelection,
       resetFilter,
+      setFiltersSelection,
 
       // States
       removedStates,
       toggleRemovedState,
       setRemovedStates,
       // Sliders
-      filters,
+
       isDragging,
       setIsDragging,
       // Selection
@@ -134,9 +126,9 @@ export function FiltersProvider({ children }) {
       filtersActive,
     }),
     [
+      filtersSelection,
       updateSelection,
       resetFilter,
-      filters,
       isDragging,
       setIsDragging,
       selectedSilhouettesNames,
@@ -153,7 +145,7 @@ export function FiltersProvider({ children }) {
   )
 
   // Prevent rendering consumers until we actually have filter data
-  if (!filters) return null
+  if (!filtersSelection) return null
 
   return <FiltersContext.Provider value={value}>{children}</FiltersContext.Provider>
 }

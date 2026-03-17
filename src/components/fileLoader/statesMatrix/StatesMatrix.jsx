@@ -17,16 +17,18 @@ import { curveStep, line } from "d3"
 const PADDING = 0
 
 export function StatesMatrix({ width, height, lineChartMode }) {
-  const { statesData, statesOrder } = useData()
+  const { trajectories, statesOrder } = useData()
   const { palette } = useViz()
 
   const [selectedCell, setSelectedCell] = useState(null)
   const [hoveredQuantile, setHoveredQuantile] = useState(null)
 
+  const links = trajectories.flat()
+
   const matrixCouples = useMemo(
     () =>
       map(
-        groupBy(statesData.links, (l) => [l.source.state, l.target.state]),
+        groupBy(links, (l) => [l.source.state, l.target.state]),
         (value, key) => {
           const durations = map(value, (v) => v.target.date - v.source.date)
           const sourceDates = map(value, (v) => v.source.date)
@@ -67,7 +69,7 @@ export function StatesMatrix({ width, height, lineChartMode }) {
           }
         },
       ),
-    [statesData],
+    [links],
   )
 
   const buckets = ["short", "medium", "long", "longest"]
