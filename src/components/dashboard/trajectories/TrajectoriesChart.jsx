@@ -161,16 +161,16 @@ export function TrajectoriesChart() {
                 variant="secondary"
                 data-selected={trajectoriesSelectionMode === "vertical"}
                 onClick={() => setTrajectoriesSelectionMode("vertical")}
-                title="Vertical lines"
+                title="Trajectories that happen at the same moment in time"
               >
-                {"Vertical"}
+                {"||"}
               </Button>
               <Button
                 size="xs"
                 variant="secondary"
                 data-selected={trajectoriesSelectionMode === "all"}
                 onClick={() => setTrajectoriesSelectionMode("all")}
-                title="All lines"
+                title="All trajectories"
               >
                 {"All"}
               </Button>
@@ -179,9 +179,10 @@ export function TrajectoriesChart() {
                 variant="secondary"
                 data-selected={trajectoriesSelectionMode === "diagonal"}
                 onClick={() => setTrajectoriesSelectionMode("diagonal")}
-                title="Diagonal lines"
+                title="Trajectories that happen in different moments"
               >
-                {"Diagonal"}
+                {`\\`}
+                {`\\`}
               </Button>
             </>
           )}
