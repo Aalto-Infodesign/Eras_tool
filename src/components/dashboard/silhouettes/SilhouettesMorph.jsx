@@ -67,7 +67,7 @@ export const SilhouettesMorph = () => {
   const animationDuration = completeSilhouettes.length > 50 ? 0 : 0.2
 
   const orderedSilhouettes = useMemo(() => {
-    console.log("CS", completeSilhouettes)
+    // console.log("CS", completeSilhouettes)
     const sorted = [...completeSilhouettes].sort((a, b) => {
       if (a.isFiltered !== b.isFiltered) return a.isFiltered ? -1 : 1
       const aData = a.filtered ?? a
@@ -75,7 +75,6 @@ export const SilhouettesMorph = () => {
 
       switch (orderMode) {
         case "size":
-          console.log("Size Sort")
           return bData.size - aData.size
         case "distance":
           return bData.levenshteinDistance - aData.levenshteinDistance
@@ -84,7 +83,6 @@ export const SilhouettesMorph = () => {
       }
     })
 
-    console.log("OS", sorted)
     return sorted
   }, [completeSilhouettes, orderMode])
 
@@ -97,7 +95,6 @@ export const SilhouettesMorph = () => {
   }
 
   const handleSilhouetteClick = (id) => {
-    console.log("Click")
     toggleSilhouetteFilter(id)
   }
 
@@ -138,8 +135,6 @@ export const SilhouettesMorph = () => {
       // setExpandSides(false)
     }
   }, [isCmdPressed, hoveredIndex, completeSilhouettes]) // Dependencies: run when these values change
-
-  // console.log(statesNamesLoaded)
 
   const boxVariants = {
     hidden: { opacity: 0 },
@@ -432,10 +427,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
     },
     onClick: () => isTouchDevice && handleSilhouetteClick(s.name),
     threshold: 500,
-    onProgress: (progress) => {
-      // Optional: You can use this for visual feedback
-      // console.log(`Long press progress: ${Math.round(progress * 100)}%`)
-    },
+    onProgress: (progress) => {},
   })
 
   const handleCardClick = () => {

@@ -2,25 +2,21 @@ import { motion } from "motion/react"
 import { SlidersHorizontal, Download } from "lucide-react"
 import styles from "./SidePanel.module.css"
 import { Filters } from "../filters/Filters"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { useModifierKey } from "../../hooks/useModifierKey"
 import { ExportIDs } from "../export/ExportIDs"
 import { useWindowSize } from "../../hooks/useWindowSize"
 import { createPortal } from "react-dom"
+import { useViz } from "../../../contexts/VizContext"
 
 export const SidePanel = () => {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isSidePanelOpen, setSidePanelOpen } = useViz()
   const [panelContent, setPanelContent] = useState("filters")
 
   const { width } = useWindowSize()
 
-  const containerWidth = useMemo(() => {
-    console.log(document.querySelector(".App"))
-    return document.querySelector(".App").getBoundingClientRect().width
-  }, [width])
-
   const handlePanelOpen = (content) => {
-    setIsOpen(isOpen && panelContent === content ? false : true)
+    setSidePanelOpen((prev) => (prev && panelContent === content ? false : true))
     setPanelContent(content)
   }
 
@@ -37,9 +33,9 @@ export const SidePanel = () => {
       id="side-panel"
       variants={panelVariants}
       initial={"closed"}
-      animate={isOpen ? "open" : "closed"}
-      // onMouseEnter={() => setIsOpen(true)}
-      // onMouseLeave={() => setIsOpen(false)}
+      animate={isSidePanelOpen ? "open" : "closed"}
+      // onMouseEnter={() => setSidePanelOpen(true)}
+      // onMouseLeave={() => setSidePanelOpen(false)}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className={styles.sidePanel}
     >

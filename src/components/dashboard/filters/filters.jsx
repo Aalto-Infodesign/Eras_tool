@@ -2,8 +2,6 @@ import { isNil, isEmpty } from "lodash"
 
 import { FilterWrapper } from "./UI/FilterWrapper"
 
-import { useData } from "../../../contexts/ProcessedDataContext"
-import { useFilters } from "../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { min, max, extent } from "d3"
 
@@ -69,7 +67,7 @@ export const Filters = () => {
         {filters.speed && (
           <FilterWrapper
             name={"speed"}
-            title={"Speed"}
+            title={"Segment Duration"}
             sliderDimensions={sliderDimensions}
             filter={filters.speed}
             allPoints={allSpeeds}

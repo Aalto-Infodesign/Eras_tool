@@ -147,9 +147,9 @@ const Dashboard = () => {
                   <div className="carousel-slides-content" data-title="Silhouettes selected">
                     <SilhouettesPie selectedSilhouettesData={selectedSilhouettesData} />
                   </div>
-                  <div className="carousel-slides-content" data-title="Debug Tools">
+                  {/* <div className="carousel-slides-content" data-title="Debug Tools">
                     <DebugPanel />
-                  </div>
+                  </div> */}
                   <div className="carousel-slides-content" data-title="Export">
                     <ExportIDs />
                   </div>

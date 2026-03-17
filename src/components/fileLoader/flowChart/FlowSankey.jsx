@@ -14,7 +14,7 @@ export const Sankey = ({ width, height }) => {
   const [hoveredNode, setHoveredNode] = useState(null)
 
   const { sankeyNodes, sankeyLinks } = useMemo(() => {
-    if (!nodes || !edges) return { sankeyNodes: [], sankeyLinks: [] }
+    if (!nodes || edges.length === 0) return { sankeyNodes: [], sankeyLinks: [] }
 
     const usedNodeIds = new Set(edges.flatMap((e) => [e.source, e.target]))
 
@@ -108,7 +108,7 @@ export const Sankey = ({ width, height }) => {
 
   return (
     <div className="flex-sankey-wrapper">
-      {edges && (
+      {edges.length > 0 && (
         <svg width={width} height={height}>
           {/* Sankey diagram rendering logic goes here */}
           <g className="sankey-nodes">{allNodes}</g>

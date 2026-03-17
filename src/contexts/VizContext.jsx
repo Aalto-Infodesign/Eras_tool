@@ -12,7 +12,7 @@ const VizContext = createContext(null)
 
 export function VizProvider({ children }) {
   const { fileName } = useRawData()
-  const { statesOrder, idealSilhouettes } = useData()
+  const { statesOrder, idealSilhouettes, statesData } = useData()
 
   const [dominanceArrayFromFlow, setDominanceArrayFromFlow] = useState(null)
   const [nodesFromFlow, setNodesFromFlow] = useState(null)
@@ -25,6 +25,8 @@ export function VizProvider({ children }) {
   const [hasFlowChart, setHasFlowChart] = useState(true)
   const [chartType, setChartType] = useState(1)
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
+
+  const [isSidePanelOpen, setSidePanelOpen] = useState(false)
 
   useModifierKey("1", () => setChartType(1))
   useModifierKey("2", () => setChartType(2))
@@ -106,7 +108,8 @@ export function VizProvider({ children }) {
   const { palette } = useMemo(() => {
     if (statesOrder.length === 0) return { palette: {} }
 
-    const states = statesOrder
+    const states = statesData.statesNames
+    // const states = statesOrder
 
     // Priority: Use flowchart dominance if available, otherwise use default
     const dominanceFromStates = getDominancePairsSelfUpper(states)
@@ -124,7 +127,6 @@ export function VizProvider({ children }) {
   }, [
     idealSilhouettes,
     statesOrder,
-
     dominanceArrayFromFlow,
     colorMode,
     generatePaletteFromDominance,
@@ -133,6 +135,7 @@ export function VizProvider({ children }) {
 
   // Function that your FlowChart component can call
   const updatePosetColoring = (dominanceArray, nodes) => {
+    console.log("UPDATE")
     // TODO Check if PO (only unique states)
     if (dominanceArray && nodes && colorMode === "poset") {
       console.log("Updating to flowchart-based POSET coloring")
@@ -164,6 +167,8 @@ export function VizProvider({ children }) {
       setIsHasse,
       colorMode,
       setColorMode,
+      isSidePanelOpen,
+      setSidePanelOpen,
     }),
     [
       palette,
@@ -178,6 +183,7 @@ export function VizProvider({ children }) {
       setChartType,
       colorMode,
       setColorMode,
+      isSidePanelOpen,
     ],
   )
 

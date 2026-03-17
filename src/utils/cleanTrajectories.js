@@ -14,6 +14,8 @@
  * It returns a deep-cloned, cleaned copy of the dataset.
  */
 
+import { snakeCase } from "lodash"
+
 /**
  * @typedef {Object} SwapRule
  * @property {string} sourceState - The state that should come first (e.g. "state 1")
@@ -66,9 +68,8 @@ function applyRuleToPatient(patient, rule) {
   // a swap at index i doesn't affect whether index i+1 needs checking too.
   let i = 0
   while (i < trajectory.length - 1) {
-    console.log("Apply Rule")
-    const currentState = trajectory[i]
-    const nextState = trajectory[i + 1]
+    const currentState = snakeCase(trajectory[i])
+    const nextState = snakeCase(trajectory[i + 1])
 
     // Detect a REVERSAL: we see (target → source) instead of (source → target)
     const isReversed = currentState === targetState && nextState === sourceState
@@ -81,10 +82,9 @@ function applyRuleToPatient(patient, rule) {
         // Swap trajectory labels
         ;[trajectory[i], trajectory[i + 1]] = [trajectory[i + 1], trajectory[i]]
 
-        // For ages and years: transposing the values would keep the wrong
-        // timeline. Instead, anchor both to the smaller value and add a
-        // tiny epsilon to i+1 to preserve strict ordering.
-        const EPSILON = 0.0
+        // Both events get the same age — they're treated as contemporary.
+        // The label order (trajectory) encodes the logical sequence.
+        const EPSILON = 0
 
         const minAge = Math.min(SwitchEventAge[i], SwitchEventAge[i + 1])
         SwitchEventAge[i] = minAge
@@ -95,15 +95,6 @@ function applyRuleToPatient(patient, rule) {
           years[i] = minYear
           years[i + 1] = minYear + EPSILON
         }
-        // ──────────────────────────────────────────────────────────────────
-
-        // After a swap, re-check from i again:
-        // The element now at i+1 might form a new reversible pair with i+2.
-        // We do NOT decrement i here — just don't advance, so the next
-        // iteration will check (i, i+1) again with the new values.
-        // But since trajectory[i] is now sourceState, it can't match
-        // targetState anymore, so advancing is actually safe. We advance
-        // anyway for correctness clarity.
       }
     }
 

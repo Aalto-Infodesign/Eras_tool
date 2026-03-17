@@ -80,12 +80,9 @@ export const FlowChart = () => {
   // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
     const dominanceArray = calculateDominanceArray(nodes, edges)
-    console.log(dominanceArray)
 
     const nodesNames = nodes.map((node) => node.data.value)
-
     updatePosetColoring(dominanceArray, nodesNames)
-    // updatePosetColoring(dominanceArray, statesData.statesNames)
   }, [edges, colorMode])
 
   useEffect(() => {

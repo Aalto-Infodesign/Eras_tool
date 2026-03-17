@@ -36,6 +36,12 @@ export function FiltersProvider({ children }) {
     setSelectedTrajectoriesIDs([])
     setTrajectoriesSelectionMode("all")
     setRemovedStates([])
+    setFiltersSelection({
+      date: null,
+      diseaseDuration: null,
+      age: null,
+      speed: null,
+    })
   }, [fileName])
 
   useEffect(() => {

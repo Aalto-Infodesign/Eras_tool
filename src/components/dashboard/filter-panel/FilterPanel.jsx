@@ -15,7 +15,7 @@ export function FilterPanel() {
   return (
     <div className={styles.filterPanel}>
       {activeFilters.map((filter) => (
-        <div className={styles.filterChip}>
+        <div key={filter.label} className={styles.filterChip}>
           <span>{filter.label}</span>
           <Button size="xs" onClick={filter.onRemove}>
             <X size={12} />

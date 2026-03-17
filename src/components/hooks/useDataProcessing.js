@@ -10,6 +10,7 @@ export function useDataCleanup(sourceData, statesThresholds) {
     if (!sourceData) return []
 
     console.log("sourceData", sourceData)
+    console.log("statesThresholds", statesThresholds)
 
     if (!statesThresholds.length) return sourceData
 
@@ -210,84 +211,76 @@ export const useAnalytics = (data) => {
   return analytics
 }
 
-export const useFiltersSetup = (data, links, selection) => {
-  // Filters
-  const filters = useMemo(() => {
-    if (!data?.length) return {}
-    console.time("Filters")
+export const useFiltersSetup = (data, trajectories, selection) => {
+  // Only re-runs when the source data or links actually change.
+  const dataBounds = useMemo(() => {
+    if (!data?.length) return null
+
+    const links = trajectories.flat()
+    console.time("Data Bounds Calculation")
 
     const columns = Object.keys(data[0])
 
-    // DATE
+    // Pre-calculate all extents here
     const dateActive = columns.includes("years")
     const dateExtent = dateActive
-      ? extent(
-          data
-            .map((e) => e.years)
-            .flat()
-            .map((e) => parseInt(+e)),
-        )
+      ? extent(data.flatMap((e) => e.years).map((e) => Math.floor(+e)))
       : []
-    const dateRange = dateActive ? range(dateExtent[0], dateExtent[1]) : []
 
-    // DISEASE DURATION
     const durationsActive = columns.includes("diseaseDuration")
-    const durationExtent = durationsActive
-      ? // ? extent(data, (d) => (d.diseaseDuration > 0 ? d.diseaseDuration : null))
-        extent(data, (d) => d.diseaseDuration)
-      : []
-    const durationRange = range(durationExtent[0], durationExtent[1])
+    const durationExtent = durationsActive ? extent(data, (d) => Math.floor(d.diseaseDuration)) : []
 
-    // AGE
     const ageActive = columns.includes("SwitchEventAge")
     const ageExtent = ageActive
       ? extent(data, (d) => (d.SwitchEventAge > 0 ? d.SwitchEventAge : null))
       : []
-    const ageRange = range(ageExtent[0], ageExtent[1])
-
-    // SPEED
 
     const speedExtent = extent(links, (d) => d.speed)
 
-    const speedRange = range(speedExtent[0], speedExtent[1])
+    console.timeEnd("Data Bounds Calculation")
 
-    const filters = {
+    return {
+      date: { active: dateActive, extent: dateExtent },
+      duration: { active: durationsActive, extent: durationExtent },
+      age: { active: ageActive, extent: ageExtent },
+      speed: { extent: speedExtent },
+    }
+  }, [data, trajectories])
+
+  // Re-runs on every slider movement (selection change).
+  const filters = useMemo(() => {
+    if (!dataBounds) return {}
+
+    return {
       date: {
-        active: dateActive,
-        range: dateRange,
-        extent: dateExtent,
-        selection: selection.date || dateExtent,
+        ...dataBounds.date,
+        range: range(dataBounds.date.extent[0], dataBounds.date.extent[1]),
+        selection: selection.date || dataBounds.date.extent,
         isActive: !!selection.date,
       },
       diseaseDuration: {
-        active: durationsActive,
-        range: durationRange,
-        extent: durationExtent,
-        selection: selection.diseaseDuration || durationExtent,
+        ...dataBounds.duration,
+        range: range(dataBounds.duration.extent[0], dataBounds.duration.extent[1]),
+        selection: selection.diseaseDuration || dataBounds.duration.extent,
         isActive: !!selection.diseaseDuration,
       },
       age: {
-        active: ageActive,
-        range: ageRange,
-        extent: ageExtent,
-        selection: selection.age || ageExtent,
+        ...dataBounds.age,
+        range: range(dataBounds.age.extent[0], dataBounds.age.extent[1]),
+        selection: selection.age || dataBounds.age.extent,
         isActive: !!selection.age,
       },
       speed: {
-        range: speedRange,
-        extent: speedExtent,
-        selection: selection.speed || speedExtent,
+        ...dataBounds.speed,
+        range: range(dataBounds.speed.extent[0], dataBounds.speed.extent[1]),
+        selection: selection.speed || dataBounds.speed.extent,
         isActive: !!selection.speed,
       },
     }
-
-    console.timeEnd("Filters")
-    return filters
-  }, [data, links, selection])
+  }, [dataBounds, selection])
 
   return filters
 }
-
 function dynamicSortLC(data, conditions) {
   return sort(data, (a, b) => {
     for (const condition of conditions) {

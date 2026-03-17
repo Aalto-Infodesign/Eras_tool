@@ -57,7 +57,8 @@ export function DerivedDataProvider({ children }) {
   const trajectories = useTrajectoriesFromData(data)
   const silhouettes = useSilhouettesFromTrajectories(trajectories, idealSilhouettes, data)
   const analytics = useAnalytics(data)
-  const filters = useFiltersSetup(data, trajectories.flat(), filtersSelection)
+
+  const filters = useFiltersSetup(data, trajectories, filtersSelection)
 
   const filteredData = useMemo(() => {
     if (!isReady) return []

@@ -36,6 +36,8 @@ function SankeyNode({
   setSelectedNode,
   setSelectionDirection,
   setSelectedTrajectoriesIDs,
+  onMouseEnter,
+  onMouseLeave,
 }) {
   const { palette } = useViz()
 
@@ -202,7 +204,7 @@ function SankeyNode({
   }
 
   return (
-    <motion.g key={node.id}>
+    <motion.g key={node.id} onMouseEnter={() => onMouseEnter(node)} onMouseLeave={onMouseLeave}>
       <motion.rect
         initial={{ x: node.x0, y: node.y0, height: nodeHeight, width: NODE_WIDTH }}
         animate={{
@@ -344,6 +346,7 @@ export function Sankey({ width, height, data }) {
   const [selectedNode, setSelectedNode] = useState(null)
   const [selectionDirection, setSelectionDirection] = useState("right") // "left" or "right"
   const [hoveredSilhouette, setHoveredSilhouette] = useState(null)
+  const [hoveredNode, setHoveredNode] = useState(null)
 
   // OPTIMIZATION: Memoize the expensive Sankey layout calculation.
   // This ensures the layout is only re-calculated when data, width, or height change,
@@ -358,13 +361,26 @@ export function Sankey({ width, height, data }) {
       ])
       .nodeId((node) => node.id)
       .nodeAlign(sankeyCenter)
+
     return sankeyGenerator(data)
   }, [data, width, height])
 
   const handleMouseLeave = () => {
     setHoveredLink(null)
     setHoveredSilhouette(null)
+    setHoveredNode(null)
   }
+
+  const handleNodeEnter = (node) => {
+    setHoveredLink(null)
+    setHoveredSilhouette(null)
+    setHoveredNode(node)
+  }
+  const handleNodeLeave = () => {
+    setHoveredNode(null)
+  }
+
+  console.log(hoveredNode)
 
   const columns = keys(groupBy(nodes, "x0"))
     .map((x) => Number(x))
@@ -433,6 +449,8 @@ export function Sankey({ width, height, data }) {
                 setSelectedNode={setSelectedNode}
                 setSelectionDirection={setSelectionDirection}
                 setSelectedTrajectoriesIDs={setSelectedTrajectoriesIDs}
+                onMouseEnter={handleNodeEnter}
+                onMouseLeave={handleNodeLeave}
               />
             ))}
           </g>
@@ -453,8 +471,9 @@ export function Sankey({ width, height, data }) {
         </svg>
       </div>
 
-      <Tooltip isVisible={hoveredLink || hoveredSilhouette}>
+      <Tooltip isVisible={hoveredLink || hoveredSilhouette || hoveredNode}>
         <AnimatePresence>
+          {hoveredNode && <p>{hoveredNode.id.split("-")[0]}</p>}
           {hoveredLink && !hoveredSilhouette && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <p>

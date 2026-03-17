@@ -5,7 +5,6 @@ import {
   useAnalytics,
   useDataCleanup,
   useStates,
-  useFiltersSetup,
   useTrajectoriesFromData,
   useSilhouettesFromTrajectories,
 } from "../components/hooks/useDataProcessing"

@@ -20,7 +20,7 @@ import { ChevronDown, Maximize2 } from "lucide-react"
 export function FileLoader() {
   const { richData, existingIdealSilhouettes, clusterStates, setClusterStates, statesOrder } =
     useData()
-  const { setIsLegend, isLegend, hasFlowChart } = useViz()
+  const { setIsLegend, isLegend, hasFlowChart, isSidePanelOpen } = useViz()
 
   const [isOpen, setIsOpen] = useState(true)
 
@@ -32,11 +32,11 @@ export function FileLoader() {
 
   //TODO When sankey data changes, update useViz state and recreate palette using poset
 
-  const legendClass = isLegend ? "corner" : "center"
+  const legendClass = isLegend ? (isSidePanelOpen ? "corner-side" : "corner") : "center"
   const openClass = isOpen ? "open" : "closed"
 
   return (
-    <section
+    <motion.section
       className={`loader-wrapper ${legendClass} accordion ${openClass}
     `}
       style={{
@@ -117,6 +117,6 @@ export function FileLoader() {
       {statesOrder.length > 0 && richData.length > 0 && !isLegend && (
         <ProcessButton setIsOpen={setIsOpen} />
       )}
-    </section>
+    </motion.section>
   )
 }
