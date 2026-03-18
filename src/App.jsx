@@ -1,6 +1,6 @@
 import "./App.css"
 import Dashboard from "./components/Dash"
-import { FileLoader } from "./components/fileLoader/FileLoader"
+import { FileLoader } from "./components/fileLoader/Loader"
 import { AnimatePresence } from "motion/react"
 import { motion } from "motion/react"
 import { RawDataProvider, useRawData } from "./contexts/RawDataContext"
