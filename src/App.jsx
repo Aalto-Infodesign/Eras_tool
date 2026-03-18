@@ -1,5 +1,5 @@
 import "./App.css"
-import Dashboard from "./components/Dash"
+import Dashboard from "./components/Dashboard"
 import { FileLoader } from "./components/fileLoader/FileLoader"
 import { AnimatePresence } from "motion/react"
 import { motion } from "motion/react"
