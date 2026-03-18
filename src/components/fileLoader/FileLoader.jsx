@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import LoadDataset from "./FileUpload"
+import LoadDataset from "./LoadDataset"
 import { StateSelection } from "./StateSelection"
 import { ProcessButton } from "./ProcessButton"
 
