@@ -1,7 +1,7 @@
 import { motion } from "motion/react"
 import { SlidersHorizontal, Download } from "lucide-react"
 import styles from "./SidePanel.module.css"
-import { Filters } from "../filters/Filters"
+import { Filters } from "../filters/FiltersWrapper"
 import { useState } from "react"
 import { useModifierKey } from "../../hooks/useModifierKey"
 import { ExportIDs } from "../export/ExportIDs"
