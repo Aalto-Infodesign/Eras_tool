@@ -7,7 +7,6 @@ import { motion } from "framer-motion"
  */
 const Button = ({
   children,
-  onClick,
   type = "button",
   variant = "primary",
   size = "medium",
@@ -28,11 +27,8 @@ const Button = ({
   return (
     <motion.button
       className={buttonClassName}
-      onClick={onClick}
       type={type}
       disabled={disabled}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
       {...rest} // Applica qualsiasi altra prop (es. aria-label)
     >
       {children}

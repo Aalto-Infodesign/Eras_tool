@@ -24,6 +24,5 @@
   display: flex;
   align-items: center;
   place-content: center;
-  color: var(--text-lighter);
-  fill: var(--text-lighter);
+  fill: var(--text-primary);
 }

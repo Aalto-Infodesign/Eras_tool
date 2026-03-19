@@ -1,5 +1,6 @@
 import { motion } from "motion/react"
 import { X } from "lucide-react"
+import styles from "./Button.module.css"
 
 export function CloseButton({ isVisible, onClick }) {
   const closeBtnVariants = {
@@ -9,7 +10,7 @@ export function CloseButton({ isVisible, onClick }) {
 
   return (
     <motion.button
-      className="close-btn"
+      className={styles.close}
       variants={closeBtnVariants}
       initial={"hidden"}
       animate={isVisible ? "visible" : "hidden"}

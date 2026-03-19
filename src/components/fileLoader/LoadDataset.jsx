@@ -3,10 +3,19 @@ import { useRawData } from "../../contexts/RawDataContext.jsx"
 import { Upload } from "lucide-react"
 import { motion } from "motion/react"
 import { useMemo } from "react"
+import { useModifierKey } from "../hooks/useModifierKey.js"
 
 const LoadDataset = () => {
   const { loadData, fileName, fileExtention, status } = useRawData()
+
   const isUploading = status === "loading"
+
+  useModifierKey(
+    "1",
+    () => !fileName && loadData("../data/json/data_semilinear_dates_20250716_154750.json"),
+  )
+  useModifierKey("2", () => !fileName && loadData("../data/json/data_semilinear_dates.json"))
+  useModifierKey("3", () => !fileName && loadData("../data/json/data_25k.json"))
 
   const templateVariants = {
     hidden: {

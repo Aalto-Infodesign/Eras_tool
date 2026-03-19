@@ -183,128 +183,131 @@ export function StateSelection() {
   )
 
   const transition = {
-    duration: 0.2,
+    duration: 0.3,
     delay: 0,
-    ease: [0, 0.71, 0.2, 1.01],
+    ease: "easeOut",
   }
 
   const gap = 4
-  const itemHeight = 26
+  const itemHeight = 34
   const statesLength = statesOrder.length
   const divHeight = statesLength > 0 ? statesLength * itemHeight + statesLength * gap : 0
   const removedDivHeight =
     removedStates.length > 0 ? removedStates.length * itemHeight + removedStates.length * gap : 0
 
   return (
-    <motion.section className="accordion-content" layout>
+    <section className="accordion-content">
       <p className="era-header">
         <span> i </span>
         <span>era</span>
         {/* <span>population</span> */}
       </p>
-      <motion.div
-        layout
-        className="list-wrapper scroll-shadows"
-        initial={{
-          borderBottom: removedStates.length === 0 ? "none" : "0.5px solid var(--surface-light)",
-          height: divHeight < 250 ? divHeight : 250,
-        }}
-        animate={{
-          borderBottom: removedStates.length === 0 ? "none" : "0.5px solid var(--surface-light)",
-          height: divHeight < 250 ? divHeight : 250,
-        }}
-      >
-        <Reorder.Group
-          className="states-list"
-          axis="y"
-          onReorder={setStatesOrder}
-          values={statesOrder}
-        >
-          <AnimatePresence mode="popLayout">
-            {statesOrder.map((item, i) => (
-              <Reorder.Item
-                key={item}
-                value={item}
-                id={`reorder-${item}`}
-                as="div"
-                className="state-item drag"
-                whileTap={{ scale: 1.02 }}
-                whileHover={{
-                  backgroundColor: "#" + tinycolor(palette[item]).toHex() + "33",
-                  transition: { duration: 0.1 },
-                }}
-                whileDrag={{ zIndex: 100 }}
-                drag
-                layout
-                transition={transition}
-                onDragEnd={(event) => onDragEnd(event, "default", item)}
-              >
-                <EraLabel
-                  index={i}
-                  text={item}
-                  population={statesData.statesObject[item]?.population_size}
-                  color={palette[item]}
-                />
-
-                <div className="buttons-wrapper">
-                  {!isLegend && hasFlowChart && (
-                    <Button
-                      size="xs"
-                      className="center"
-                      onClick={() => addNodetoFlow("default", item)}
-                    >
-                      <Workflow size={14} />
-                    </Button>
-                  )}
-                  {statesOrder.length > 1 && (
-                    <Button size="xs" className="center" onClick={() => toggleRemovedState(item)}>
-                      <X size={14} />
-                    </Button>
-                  )}
-                </div>
-              </Reorder.Item>
-            ))}
-          </AnimatePresence>
-        </Reorder.Group>
-      </motion.div>
-
-      {removedStates.length > 0 && (
+      <motion.div layout="size" className="your-parent-container" transition={transition}>
+        {/* Top list */}
         <motion.div
-          layout
-          className="list-wrapper scroll-shadows"
-          initial={{
-            height: 0,
-            padding: "0",
-            border: "none",
-          }}
-          animate={{
-            height: removedDivHeight < 150 ? removedDivHeight : 150,
-            padding: removedStates.length === 0 ? "0" : "",
-            border: removedStates.length > 0 ? "" : "none",
-          }}
-          exit={{
-            height: 0,
-            padding: "0",
-            border: "none",
-          }}
+          layout="size"
+          key={"top-list"}
+          className="list-wrapper"
+          layoutDependency={removedStates}
+          // animate={{
+          //   borderBottom:
+          //     removedStates.length === 0 ? "none" : "0.5px solid var(--surface-tertiary)",
+          // }}
+          transition={transition}
         >
-          <motion.ul layout className="removed-states">
-            <AnimatePresence mode="popLayout">
-              {removedStates.map((s, i) => (
-                <motion.li key={s} layout className="state-item">
-                  <EraLabel index={i} text={s} color={"#fff"} />
-                  <Button size="xs" className="center" onClick={() => toggleRemovedState(s)}>
-                    <Plus size={14} />
-                  </Button>
-                </motion.li>
+          <Reorder.Group
+            className="states-list"
+            axis="y"
+            onReorder={setStatesOrder}
+            values={statesOrder}
+          >
+            <AnimatePresence>
+              {statesOrder.map((item, i) => (
+                <Reorder.Item
+                  key={item}
+                  value={item}
+                  // layoutId={item}
+                  id={`reorder-${item}`}
+                  as="div"
+                  className="state-item drag"
+                  whileTap={{ scale: 1.02 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ backgroundColor: "var(--surface-secondary)", opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  whileHover={{
+                    backgroundColor: "#" + tinycolor(palette[item]).toHex() + "33",
+                    transition: { duration: 0.2 },
+                  }}
+                  whileDrag={{ zIndex: 100 }}
+                  drag
+                  layout
+                  transition={transition}
+                  onDragEnd={(event) => onDragEnd(event, "default", item)}
+                >
+                  <EraLabel
+                    index={i}
+                    text={item}
+                    population={statesData.statesObject[item]?.population_size}
+                    color={palette[item]}
+                  />
+                  <div className="buttons-wrapper">
+                    {!isLegend && hasFlowChart && (
+                      <Button
+                        size="xs"
+                        className="center"
+                        onClick={() => addNodetoFlow("default", item)}
+                      >
+                        <Workflow size={14} />
+                      </Button>
+                    )}
+                    {statesOrder.length > 1 && (
+                      <Button size="xs" className="center" onClick={() => toggleRemovedState(item)}>
+                        <X size={14} />
+                      </Button>
+                    )}
+                  </div>
+                </Reorder.Item>
               ))}
             </AnimatePresence>
-          </motion.ul>
+          </Reorder.Group>
         </motion.div>
-      )}
+
+        {/* Bottom list */}
+        <AnimatePresence mode="popLayout">
+          {removedStates.length > 0 && (
+            <motion.div
+              key="removed-wrapper"
+              layoutDependency={removedStates}
+              layout="size"
+              className="list-wrapper "
+              transition={transition}
+            >
+              <ul className="removed-states">
+                {removedStates.map((s, i) => (
+                  <motion.li
+                    key={s}
+                    // layoutId={s}
+                    layout
+                    className="state-item"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={transition}
+                  >
+                    <EraLabel index={i} text={s} color={"#fff"} />
+                    <Button size="xs" className="center" onClick={() => toggleRemovedState(s)}>
+                      <Plus size={14} />
+                    </Button>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {isLegend && <ResetStatesOrder />}
-    </motion.section>
+    </section>
   )
 }
 

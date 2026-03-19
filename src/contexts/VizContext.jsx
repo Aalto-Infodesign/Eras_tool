@@ -7,10 +7,12 @@ import { max } from "d3"
 import { po } from "../utils/po"
 import { getDominancePairsSelfUpper } from "../utils/POHelperFunctions"
 import { useModifierKey } from "../components/hooks/useModifierKey"
+import { useTheme } from "../components/hooks/useTheme"
 
 const VizContext = createContext(null)
 
 export function VizProvider({ children }) {
+  const { toggle } = useTheme()
   const { fileName } = useRawData()
   const { statesOrder, idealSilhouettes, statesData } = useData()
 
@@ -30,6 +32,7 @@ export function VizProvider({ children }) {
 
   useModifierKey("1", () => setChartType(1))
   useModifierKey("2", () => setChartType(2))
+  useModifierKey(".", toggle)
 
   // useModifierKey("p", () => setColorMode("poset"))
   useModifierKey("s", () =>

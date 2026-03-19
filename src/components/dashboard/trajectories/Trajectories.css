@@ -21,7 +21,7 @@
 
 .marker-circle {
   /* transition: 0.3s ease-out; */
-  stroke: var(--surface-light);
+  stroke: var(--surface-tertiary);
   stroke-width: 0.5px;
   opacity: 1;
   /* z-index: 1; */
@@ -37,7 +37,6 @@
 
 .marker-label {
   font-size: 5px;
-  /* fill: var(--surface-light); */
   text-anchor: middle;
   pointer-events: none;
   /* opacity: 0;
@@ -55,7 +54,7 @@
   rx: 4px;
 }
 .singleStateSwitch:hover {
-  stroke: var(--surface-light);
+  stroke: var(--surface-tertiary);
   z-index: 10;
 }
 /* .marker-circle.active {

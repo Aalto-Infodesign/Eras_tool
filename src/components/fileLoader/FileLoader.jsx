@@ -16,6 +16,7 @@ import { useData } from "../../contexts/ProcessedDataContext"
 import { useViz } from "../../contexts/VizContext"
 
 import { ChevronDown, Maximize2 } from "lucide-react"
+import { useModifierKey } from "../hooks/useModifierKey"
 
 export function FileLoader() {
   const { richData, existingIdealSilhouettes, clusterStates, setClusterStates, statesOrder } =
@@ -23,6 +24,8 @@ export function FileLoader() {
   const { setIsLegend, isLegend, hasFlowChart, isSidePanelOpen } = useViz()
 
   const [isOpen, setIsOpen] = useState(true)
+
+  useModifierKey("c", () => setIsOpen((prev) => !prev))
 
   useEffect(() => {
     if (!isLegend) {

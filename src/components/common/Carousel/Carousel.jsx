@@ -8,6 +8,7 @@ import { forwardRef, useState } from "react"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import "./Carousel.css"
+import Button from "../Button/Button"
 export function CarouselWrapper({ children, hasPagination = true }) {
   // console.log(children)
   const slides = Array.isArray(children) ? children : [children]
@@ -118,17 +119,18 @@ function Pagination({ numSlides, selectedIndex, setSelectedIndex, setDirection }
 function ArrowNavigation({ direction, setSlide }) {
   const isPrevious = direction === "left"
   return (
-    <motion.button
+    <Button
+      size="small"
+      variant="transparent"
       className={`carousel-arrow ${direction}`}
       aria-label={isPrevious ? "Previous" : "Next"}
-      whileHover={{ scale: 1.1, cursor: "pointer" }}
       whileTap={{ scale: 0.95 }}
       onClick={() => {
         setSlide(isPrevious ? -1 : 1)
       }}
     >
       {isPrevious ? <ArrowLeft size={20} /> : <ArrowRight size={20} />}
-    </motion.button>
+    </Button>
   )
 }
 

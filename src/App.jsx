@@ -13,8 +13,11 @@ import { SidePanel } from "./components/dashboard/side-panel/SidePanel"
 import { Loader } from "lucide-react"
 import { TitleAnimation } from "./components/landing/TitleAnimation"
 import { Header } from "./components/Header/Header"
+import { useTheme } from "./components/hooks/useTheme"
+import { ThemeToggle } from "./components/common/Button/ThemeToggle"
 
 function App() {
+  // useTheme()
   return (
     <RawDataProvider>
       <ProcessedDataProvider>
@@ -41,6 +44,7 @@ function AppContent() {
 
   return (
     <div className="App">
+      {/* <ThemeToggle /> */}
       <AnimatePresence>{!richData?.length && <TitleAnimation />}</AnimatePresence>
       {(isLoading || status === "loading") && (
         <div

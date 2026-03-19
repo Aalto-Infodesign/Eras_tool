@@ -1,10 +1,10 @@
 .loader-wrapper {
   display: flex;
   flex-direction: column;
-  /* border: 0.5px solid var(--surface-light); */
-  color: var(--text-light);
+  color: var(--text-primary);
   border-radius: var(--radius-xl);
-  background-color: var(--surface-contrast-70);
+  background-color: var(--surface-primary-transparent);
+
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
 
@@ -16,6 +16,8 @@
 }
 
 .loader-wrapper.center {
+  gap: var(--spacing-sm);
+
   place-self: center;
   align-self: center;
   /* margin: 0 auto; */
@@ -33,6 +35,8 @@
   padding: var(--spacing-md);
 }
 .loader-wrapper.corner {
+  gap: 0;
+
   top: var(--spacing-md);
   right: var(--spacing-xl);
   transform: translate(0, 0);
@@ -70,7 +74,7 @@
   transition: all 100ms ease-out;
 }
 .file-input-label:hover {
-  background-color: var(--surface-secondary);
+  background-color: var(--surface-primary-hover);
   scale: 1.02;
 }
 .file-input-label:focus {
@@ -103,7 +107,7 @@
   flex-direction: column;
   min-width: 300px;
   transition: all 0.4s ease-in-out;
-  border-top: 0.5px solid var(--surface-light);
+  border-top: 0.5px solid var(--surface-tertiary);
   padding: var(--spacing-sm) 0;
 
   /* background-color: #ffffff; */
@@ -142,10 +146,8 @@
 .list-wrapper {
   /* overflow: hidden; */
   max-height: 400px;
-  /* overflow-y: auto;
-  overflow-x: visible; */
-
-  /* border-bottom: 0.5px solid var(--surface-light); */
+  /* overflow-y: auto; */
+  /* overflow-x: hidden; */
 
   /* hide native scrollbars while preserving scrolling */
   scrollbar-width: none; /* Firefox */
@@ -170,19 +172,21 @@
   gap: 4px;
 }
 
-.list-wrapper > .states-list {
+/* .list-wrapper > .states-list {
   max-height: 250px;
+  overflow-y: auto;
 }
 .list-wrapper > .removed-states {
   max-height: 150px;
-}
+  overflow-y: auto;
+} */
 
 .scroll-shadows {
   background:
     /* Shadow Cover TOP */
-    linear-gradient(var(--surface-contrast-70) 30%, rgba(255, 255, 255, 0)) center top,
+    linear-gradient(var(--surface-tertiary-transparent) 30%, rgba(255, 255, 255, 0)) center top,
     /* Shadow Cover BOTTOM */
-    linear-gradient(rgba(255, 255, 255, 0), var(--surface-contrast-70) 70%) center bottom,
+    linear-gradient(rgba(255, 255, 255, 0), var(--surface-tertiary-transparent) 70%) center bottom,
     /* Shadow TOP */
     radial-gradient(farthest-side at 50% 0, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0)) center top,
     /* Shadow BOTTOM */
@@ -200,13 +204,17 @@
 
 .state-item {
   background-color: #ffffff00;
-  width: 100%;
+  /* width: 100%; */
+  max-width: 300px;
   min-height: 26px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
   transition: background-color 150ms ease-out;
+  padding: var(--spacing-xs);
+  background-color: var(--surface-primary-transparent);
+  border-radius: var(--radius-sm);
   /* padding: 0 0.var(--spacing-md); */
 }
 

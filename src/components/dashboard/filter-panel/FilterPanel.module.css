@@ -8,7 +8,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   border-radius: var(--radius-md);
-  border: 1px solid var(--surface-light);
+  border: 1px solid var(--surface-tertiary);
   padding: 5px var(--spacing-sm);
   max-height: 36px;
 }

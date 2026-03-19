@@ -146,7 +146,7 @@ export function HasseDiagram({
               animate={{ opacity: 1, y: -6 }}
               transition={{ duration: 0.3, delay, ease: "easeInOut" }}
               fontSize={12}
-              fill="var(--text-light)"
+              fill="var(--text-primary)"
             >
               L{statesNumber}
             </motion.text>
@@ -154,7 +154,7 @@ export function HasseDiagram({
               animate={{ opacity: 1, y: 15 }}
               transition={{ duration: 0.3, delay, ease: "easeInOut" }}
               fontSize={12}
-              fill="var(--text-light)"
+              fill="var(--text-primary)"
             >
               {value.length !== included.length
                 ? `${included.length}/${value.length} lines`

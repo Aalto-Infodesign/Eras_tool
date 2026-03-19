@@ -4,6 +4,7 @@ import "./ExportPanel.css"
 import { Download } from "lucide-react"
 import { toPng, toSvg } from "html-to-image"
 import { downloadImage } from "../../../utils/downloadImage"
+import Button from "../Button/Button"
 
 export function DownloadPanel() {
   const [isHover, setIsHover] = useState(false)
@@ -103,34 +104,32 @@ export function DownloadPanel() {
       onMouseLeave={() => setIsHover(false)}
     >
       <motion.div className="wrapper" variants={buttonWrapperVariants}>
-        {/* Bottoni che appaiono all'hover */}
-        <motion.button
+        <Button
+          size="xs"
           key={"PNG-btn"}
           className="active"
           variants={buttonVariants}
           whileHover={{ scale: 1.05 }}
-          //   transition={{ duration: 0.2 }}
           onClick={() => handleExport("png")}
         >
           PNG
-        </motion.button>
+        </Button>
 
-        <motion.button
+        <Button
+          size="xs"
           key={"SVG-btn"}
           className="active"
           variants={buttonVariants}
           whileHover={{ scale: 1.05 }}
-          //   transition={{ duration: 0.2 }}
           onClick={() => handleExport("svg")}
         >
           SVG
-        </motion.button>
+        </Button>
       </motion.div>
 
-      {/* Bottone principale sempre visibile */}
-      <button>
+      <Button size="xs">
         <Download size={12} />
-      </button>
+      </Button>
     </motion.div>
   )
 }

@@ -1,4 +1,25 @@
 /* Stile di base del bottone */
+
+.close {
+  display: flex;
+  place-content: center;
+  align-items: center;
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+
+  right: -0.5rem;
+  top: -0.5rem;
+
+  color: var(--text-primary);
+
+  background-color: var(--surface-primary);
+  border: 0.5px solid var(--surface-tertiary);
+  cursor: pointer;
+
+  border-radius: 999px;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -17,50 +38,65 @@
 
 /* Varianti */
 .primary {
+  color: var(--text-primary);
   background-color: var(--surface-primary);
-  color: white;
 }
 .primary:hover:not(:disabled) {
-  color: white;
-  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+  background-color: var(--surface-primary-hover);
 }
 
 .primary[data-selected="true"] {
-  color: var(--text-dark);
-  background-color: var(--surface-light);
+  color: var(--text-primary);
+  background-color: var(--surface-primary-selected);
 }
 .primary[data-selected="true"]:hover {
-  color: var(--text-dark);
-  background-color: var(--surface-accent);
+  color: var(--text-primary);
+  background-color: var(--surface-primary-selected-hover);
 }
 
 .secondary {
-  background-color: var(--surface-primary);
-  color: white;
+  color: var(--text-secondary);
+  background-color: var(--surface-secondary);
   opacity: 0.8;
 }
+.secondary:hover:not(:disabled) {
+  color: var(--text-primary);
+  background-color: var(--surface-primary-hover);
+}
+
 .secondary[data-selected="true"] {
-  color: var(--text-dark);
-  background-color: var(--surface-light);
+  color: var(--text-secondary);
+  background-color: var(--surface-primary);
   opacity: 0.8;
 }
 .secondary[data-selected="true"]:hover {
-  color: var(--text-dark);
+  color: var(--text-on-surface);
   background-color: var(--surface-accent);
   opacity: 0.8;
 }
 
-/* .secondary {
-  background-color: var(--surface-primary);
-  color: var(--surface-light);
-} */
-/* .secondary:hover:not(:disabled) {
-  background-color: var(--surface-tertiary);
-} */
+.transparent {
+  color: var(--text-primary);
+  background-color: var(--surface-transparent);
+}
+.transparent:hover:not(:disabled) {
+  color: var(--text-primary);
+  background-color: var(--surface-primary-hover);
+}
+
+.transparent[data-selected="true"] {
+  color: var(--text-primary);
+  background-color: var(--surface-transparent);
+}
+.transparent[data-selected="true"]:hover {
+  color: var(--text-primary);
+  background-color: var(--surface-transparent);
+}
 
 .tertiary[data-selected="false"] {
   background-color: transparent;
-  color: var(--text-light);
+  color: var(--text-primary);
   border-color: transparent;
   font-weight: 500;
   padding: 0px;

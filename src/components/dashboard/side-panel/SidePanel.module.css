@@ -22,30 +22,23 @@
   border-radius: var(--radius-md) 0 0 var(--radius-md);
   padding: var(--spacing-xs);
 
-  background-color: var(--surface-contrast);
-  color: var(--surface-accent);
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
   box-shadow: 0 4px 5px rgba(0, 0, 22, 0.4);
+  border: 0px solid;
+  cursor: pointer;
 }
 .selected {
-  background-color: var(--surface-secondary);
-  color: var(--surface-accent);
-  /* background-color: var(--surface-tertiary);
-  color: var(--surface-primary); */
-  /* border: 1px solid var(--surface-light); */
+  background-color: var(--surface-primary-selected);
+  color: var(--text-primary);
 }
-/* .panelBtn.selected {
-  display: flex;
-  place-items: center;
-} */
 
 .panelContent {
   padding: var(--spacing-sm);
   width: 200px;
   min-height: 400px;
-  background-color: var(--surface-secondary);
+  background-color: var(--surface-primary-selected);
   box-shadow: 0 4px 5px rgba(0, 0, 22, 0.4);
-
-  /* background-color: color-mix(in hsl, var(--surface-accent) 20%, var(--surface-primary) 80%); */
 
   border-radius: 0 0 0 var(--radius-md);
 }

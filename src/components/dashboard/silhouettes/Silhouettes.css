@@ -47,25 +47,6 @@
     background-color 300ms ease-out;
 }
 
-.action-button {
-  font-size: var(--text-xs);
-}
-
-.action-button.download {
-  opacity: 1;
-}
-.action-button.expand {
-  position: absolute;
-  opacity: 1;
-  width: 4rem;
-  bottom: var(--spacing-xs);
-  left: var(--spacing-xs);
-}
-.action-button.expand .btn {
-  opacity: 1;
-  width: 4rem;
-}
-
 .progress-bar {
   border-radius: var(--radius-md);
   height: 100%;
@@ -83,7 +64,7 @@
 
 .typology-perc-text {
   font-size: var(--text-xs);
-  color: var(--text-light);
+  color: var(--text-primary);
   font-weight: 500;
   transition: font-size 200ms ease-out;
 }
@@ -99,7 +80,7 @@
   text-align: center;
 
   font-size: var(--text-xs);
-  color: var(--text-light);
+  color: var(--text-primary);
   background-color: none;
   border-radius: 999px;
   overflow: hidden;
@@ -147,9 +128,16 @@
   width: 2rem;
 } */
 
+/* .typology:has(button:hover) {
+  background: var(--surface-contrast); 
+  outline: 0px solid var(--surface-accent); 
+  pointer-events: none;
+} */
+
 .silhouette-chip:hover {
   background-color: var(--surface-primary);
 }
+
 .subset-chip:hover,
 .subset-chip.selected,
 .typology:hover,

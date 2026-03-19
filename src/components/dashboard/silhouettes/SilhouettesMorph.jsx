@@ -7,7 +7,7 @@ import { HasseDiagram } from "./Hasse/HasseDiagram"
 import { ClearButton } from "../../common/Button/ClearButton"
 import { Download, Shuffle, X } from "lucide-react"
 
-import { AnimatePresence, motion } from "motion/react"
+import { AnimatePresence, motion, scale } from "motion/react"
 
 import { useModifierKey } from "../../hooks/useModifierKey"
 import { useLongPressWithProgress } from "../../hooks/useLongPress"
@@ -173,18 +173,11 @@ export const SilhouettesMorph = () => {
         <h3>Silhouettes filters</h3>
         <div className="header-section">
           <div className="chart-modes">
-            <Button
-              size="xs"
-              whileHover={{ scale: 0.95 }}
-              onClick={() => setIsHasse(false)}
-              data-selected={!isHasse}
-            >
+            <Button size="xs" onClick={() => setIsHasse(false)} data-selected={!isHasse}>
               <ShortcutSpan>T</ShortcutSpan>rajectories
             </Button>
             <Button
               size="xs"
-              className="secondary"
-              whileHover={{ scale: 0.95 }}
               onClick={() => setIsHasse(true)}
               data-selected={isHasse}
               disabled={!posetData}
@@ -332,7 +325,7 @@ export const SilhouettesMorph = () => {
                       exit={"hidden"}
                       // exit={{ opacity: 0, scale: 0.5, transition: { duration: 1 } }}
                       whileHover={{
-                        backgroundColor: isSideVisible ? "var(--surface-light)" : "none",
+                        backgroundColor: isSideVisible ? "var(--surface-tertiary)" : "none",
                         // padding: isSideVisible ? "var(--spacing-xs)" : "0 16px 0 0",
                       }}
                       // whileTap={{ scale: !isCmdPressed || !expandSides ? 0.95 : 1 }}
@@ -471,14 +464,28 @@ function SilhouetteCardMain({ s, i, ...props }) {
       <div className="card-btn-wrapper">
         {/* TODO In hover su typology mostra DW btn */}
         {s.trajectories[0].length !== 0 && (
-          <button className="action-button download" onClick={(e) => downloadIDs(e, ids)}>
+          <Button
+            size="xs"
+            variant="secondary"
+            className="download"
+            whileHover={{ scale: 1.2 }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => downloadIDs(e, ids)}
+          >
             <Download size={9} />
-          </button>
+          </Button>
         )}
         {/* TODO In hover su typology mostra DW btn */}
-        <button className="action-button order" onClick={(e) => handleOrderClick(e, s)}>
+        <Button
+          size="xs"
+          variant="secondary"
+          className="order"
+          whileHover={{ scale: 1.2 }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => handleOrderClick(e, s)}
+        >
           <Shuffle size={9} />
-        </button>
+        </Button>
       </div>
 
       <span className="typology-perc-wrapper">
@@ -527,7 +534,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
       </div>
       <AnimatePresence>
         {isHovered && isSelected && !isCmdPressed && isExpandible && (
-          <div className="action-button expand">
+          <div className="expand">
             <AnimatePresence>
               {isTouchDevice && longPressProps?.isPressed && (
                 <motion.div

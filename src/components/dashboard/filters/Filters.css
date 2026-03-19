@@ -9,19 +9,9 @@ p {
   gap: var(--spacing-sm);
   place-content: space-between;
   align-items: center;
-  color: var(--text-lighter);
+  color: var(--text-primary);
   font-size: var(--text-sm);
 }
-
-/* #filters rect {
-  fill: var(--surface-light);
-} */
-/* #filters rect.min.color {
-  fill: blue;
-}
-#filters rect.max.color {
-  fill: red;
-} */
 
 #filters .filter-wrapper {
   display: flex;
