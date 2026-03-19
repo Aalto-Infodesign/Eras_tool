@@ -20,17 +20,9 @@
 
   place-self: center;
   align-self: center;
-  /* margin: 0 auto; */
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-
-  /* top: 0;
-  left: 0; */
-  /* transform: translate(-50%, -50%); */
-  /* place-self: center;
-  width: clamp(250px, 33vw, 600px);
-  height:  500px); */
 
   padding: var(--spacing-md);
 }
@@ -75,7 +67,6 @@
 }
 .file-input-label:hover {
   background-color: var(--surface-primary-hover);
-  scale: 1.02;
 }
 .file-input-label:focus {
   outline: 0.5px solid var(--violet-700);
@@ -109,6 +100,7 @@
   transition: all 0.4s ease-in-out;
   border-top: 0.5px solid var(--surface-tertiary);
   padding: var(--spacing-sm) 0;
+  gap: var(--spacing-sm);
 
   /* background-color: #ffffff; */
   /* padding-bottom: var(--spacing-sm); */

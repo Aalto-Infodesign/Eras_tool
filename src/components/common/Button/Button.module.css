@@ -58,21 +58,20 @@
 .secondary {
   color: var(--text-secondary);
   background-color: var(--surface-secondary);
-  opacity: 0.8;
 }
 .secondary:hover:not(:disabled) {
-  color: var(--text-primary);
-  background-color: var(--surface-primary-hover);
+  color: var(--text-secondary);
+  background-color: var(--surface-secondary-hover);
 }
 
 .secondary[data-selected="true"] {
   color: var(--text-secondary);
-  background-color: var(--surface-primary);
+  background-color: var(--surface-secondary-selected);
   opacity: 0.8;
 }
 .secondary[data-selected="true"]:hover {
   color: var(--text-on-surface);
-  background-color: var(--surface-accent);
+  background-color: var(--surface-secondary-selected-hover);
   opacity: 0.8;
 }
 
@@ -133,6 +132,6 @@
 
 /* Stato disabilitato */
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }

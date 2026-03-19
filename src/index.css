@@ -37,7 +37,9 @@
   --neutral-500: rgb(146, 146, 155);
   --neutral-400: rgb(165, 165, 175);
   --neutral-300: rgb(193, 193, 202); /* was --neutral-200 */
+  --neutral-300-70: rgba(193, 193, 202, 0.7); /* was --neutral-200 */
   --neutral-200: rgb(220, 220, 226);
+  --neutral-200-70: rgb(220, 220, 226, 0.7);
   --neutral-100: rgb(240, 240, 244);
   --neutral-0: rgb(255, 255, 255);
   --neutral-0-0: rgba(255, 255, 255, 0);
@@ -93,7 +95,9 @@
   --surface-primary-transparent: var(--blue-800-70);
 
   --surface-secondary: var(--blue-500);
-  --surface-secondary-hover: var(--blue-400);
+  --surface-secondary-hover: var(--blue-600);
+  --surface-secondary-selected: var(--blue-400);
+  --surface-secondary-selected-hover: var(--blue-500);
 
   --surface-tertiary: var(--blue-300);
   --surface-tertiary-transparent: var(--blue-300-10);
@@ -104,6 +108,7 @@
   --surface-accent: var(--violet-700);
   --surface-accent-dark: var(--violet-900);
 
+  --surface-chart: var(--blue-800);
   --text-primary: var(--neutral-200);
 
   --text-secondary: var(--neutral-300);
@@ -130,12 +135,17 @@
   --surface-primary-hover: var(--neutral-400);
   --surface-primary-selected: var(--neutral-200);
   --surface-primary-selected-hover: var(--neutral-500);
-  --surface-primary-transparent: var(--neutral-400);
+  --surface-primary-transparent: var(--neutral-200-70);
 
-  --surface-secondary: var(--neutral-500);
+  --surface-secondary: var(--neutral-400);
+  --surface-secondary-hover: var(--neutral-500);
+  --surface-secondary-selected: var(--neutral-300);
+  --surface-secondary-selected-hover: var(--neutral-500);
 
   --surface-tertiary: var(--blue-700);
   --surface-tertiary-transparent: var(--blue-800-30);
+
+  --surface-chart: var(var(--blue-800));
 
   --surface-transparent: var(--neutral-0-0);
 

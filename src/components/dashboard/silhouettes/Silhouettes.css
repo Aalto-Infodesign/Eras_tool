@@ -122,6 +122,12 @@
   max-height: 6rem;
   min-height: 4rem;
   cursor: pointer;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-chart);
+}
+
+.hasse-node rect {
+  fill: var(--surface-chart);
 }
 
 /* .silhouette-chip{
@@ -153,7 +159,7 @@
   outline: 0px;
   max-height: 1.8rem;
   min-width: 1.8rem;
-  background-color: var(--surface-contrast);
+  background-color: var(--surface-chart);
 }
 
 .subset-chip {

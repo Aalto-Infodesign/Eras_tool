@@ -4,6 +4,8 @@ import { Upload } from "lucide-react"
 import { motion } from "motion/react"
 import { useMemo } from "react"
 import { useModifierKey } from "../hooks/useModifierKey.js"
+import { useViz } from "../../contexts/VizContext.jsx"
+import { ShortcutSpan } from "../common/ShortcutSpan/ShortcutSpan.jsx"
 
 const LoadDataset = () => {
   const { loadData, fileName, fileExtention, status } = useRawData()
@@ -64,21 +66,38 @@ const LoadDataset = () => {
       </div>
 
       <motion.div className="template-buttons" variants={templateVariants}>
-        <Button
+        <TemplateButton
           onClick={() => loadData("../data/json/data_semilinear_dates_20250716_154750.json")}
-          size="small"
+          shortcut={1}
         >
           Clusters
-        </Button>
-        <Button onClick={() => loadData("../data/json/data_semilinear_dates.json")} size="small">
+        </TemplateButton>
+        <TemplateButton
+          onClick={() => loadData("../data/json/data_semilinear_dates.json")}
+          shortcut={2}
+        >
           Dates
-        </Button>
-
-        <Button onClick={() => loadData("../data/json/data_25k.json")} size="small">
+        </TemplateButton>
+        <TemplateButton onClick={() => loadData("../data/json/data_25k.json")} shortcut={3}>
           25K
-        </Button>
+        </TemplateButton>
       </motion.div>
     </motion.section>
+  )
+}
+
+const TemplateButton = ({ children, onClick, shortcut }) => {
+  const { fileName } = useRawData()
+
+  return (
+    <Button onClick={onClick} size="small" variant="primary">
+      {!fileName && (
+        <span>
+          <ShortcutSpan>{shortcut}</ShortcutSpan>–
+        </span>
+      )}
+      {children}
+    </Button>
   )
 }
 

@@ -46,6 +46,8 @@ export function FilterDistribution({
     hoveredSvg,
   }
 
+  console.log(width)
+
   return (
     <div className="filter-distribution-wrapper">
       <svg className={"filter-distribution"} width={width} height={height}>

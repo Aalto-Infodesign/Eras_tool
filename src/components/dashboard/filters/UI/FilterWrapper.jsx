@@ -64,6 +64,7 @@ export const FilterWrapper = ({
         mode={mode}
         lineX={lineX}
         hoveredSvg={hoveredSvg}
+        width={sliderDimensions.x}
       />
       <FilterSlider
         min={min}

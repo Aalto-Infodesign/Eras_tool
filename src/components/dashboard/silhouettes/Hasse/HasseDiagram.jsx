@@ -290,6 +290,7 @@ const HasseNode = memo(function HasseNode({
   return (
     <motion.g
       id={`node-wrapper-${name}`}
+      className={"hasse-node"}
       initial={false}
       animate={{
         x: node.xPosition,
@@ -315,7 +316,7 @@ const HasseNode = memo(function HasseNode({
           <motion.circle
             animate={{ r: 5 }}
             transition={{ duration: 1 }}
-            fill={palette[silhouetteNames.at(-1)] ?? "var(--surface-contrast)"}
+            fill={palette[silhouetteNames.at(-1)] ?? "var(--surface-chart)"}
             whileTap={{ scale: 0.95 }}
           />
         )}
@@ -332,7 +333,7 @@ const HasseNode = memo(function HasseNode({
                 transition={{ duration: 1 }}
                 x={-rectWidth / 2}
                 y={-rectWidth / 2}
-                fill="var(--surface-contrast)"
+                fill="var(--surface-chart)"
                 stroke={
                   isSelected ? "var(--surface-accent)" : (palette[silhouetteNames[0]] ?? "#ccc")
                 }
