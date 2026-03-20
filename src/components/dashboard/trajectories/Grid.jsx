@@ -18,10 +18,9 @@ export function Grid(props) {
     //  analytics,
     setStatesOrder,
     statesOrder,
-    trajectories,
   } = useData()
   const { palette } = useViz()
-  const { filteredTrajectories, analytics } = useDerivedData()
+  const { filteredTrajectories, analytics, trajectories } = useDerivedData()
   const trajectoriesContext = useContext(TrajectoriesContext)
   const { w, h, marginTop, chartScales } = trajectoriesContext
 
@@ -33,32 +32,49 @@ export function Grid(props) {
   const xScale = chartScales.x
   const yScale = chartScales.y
 
+  console.log(statesOrder)
+
   const minMaxStates = getMinMaxStateFromTrajectories(flattenDeep(t))
 
-  const verticalLines = ticks(1, ageRange[1], ageRange[1] / 10)
+  const DIV_INCREMENT = 10
+  const verticalLines = ticks(
+    Math.max(1, ageRange[0] - DIV_INCREMENT),
+    ageRange[1],
+    ageRange[1] / DIV_INCREMENT,
+  )
 
   return (
     <g id="grid">
       {verticalLines.map((l) => {
         return (
-          <line
+          <motion.g
             key={`v-line-${l}`}
-            x1={xScale(l)}
-            x2={xScale(l)}
-            y1={0}
-            y2={h}
-            stroke="white"
-            strokeWidth={0.1}
-            opacity={0.3}
-            strokeDasharray={"1 1"}
-          />
+            initial={{ x: xScale(l) }}
+            animate={{ x: xScale(l) }}
+            transition={{ duration: 0.2 }}
+          >
+            <line
+              y1={0}
+              y2={h}
+              stroke="var(--text-primary)"
+              strokeWidth={0.1}
+              opacity={0.3}
+              strokeDasharray={"1 1"}
+            />
+            <text y={h} fill={"var(--text-primary)"} fontSize={3} opacity={0.3} textAnchor="middle">
+              {l}
+            </text>
+          </motion.g>
         )
       })}
       {statesOrder.map((name) => {
         return (
           <motion.g
-            exit={{ opacity: 0 }}
             key={name}
+            initial={{ y: yScale(name) + marginTop }}
+            animate={{ y: yScale(name) + marginTop }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             id={`grid-line-group-${name}`}
             className="grid-line"
           >
@@ -68,16 +84,11 @@ export function Grid(props) {
               initial={{
                 x1: 0,
                 x2: w,
-                y1: yScale(name) + marginTop,
-                y2: yScale(name) + marginTop,
                 strokeWidth: 0,
                 stroke: palette[name],
               }}
               animate={{
-                y1: yScale(name) + marginTop,
-                y2: yScale(name) + marginTop,
                 stroke: palette[name],
-
                 strokeWidth: 0.5,
               }}
               exit={{ strokeWidth: 0 }}
@@ -90,7 +101,7 @@ export function Grid(props) {
               id={`grid-label-group-${name}`}
               className="gird-label"
               initial={{ x: w + 5 }}
-              animate={{ y: yScale(name) + marginTop - 3 }}
+              animate={{ y: -3 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onMouseOver={() => setHoveredStateLabel(name)}
@@ -133,28 +144,39 @@ export function Grid(props) {
           </motion.g>
         )
       })}
-
-      {minMaxStates.map((d) => {
-        const y = yScale(d.state) + marginTop
-        return (
-          <motion.line
-            key={d.state}
-            id={`active-line-${d.state}`}
-            className="active-line"
-            initial={{
-              x1: xScale(d.x[0]),
-              x2: xScale(d.x[1]),
-              y1: y,
-              y2: y,
-            }}
-            animate={{ y1: y, y2: y }}
-            transition={{ duration: 0.2 }}
-            strokeWidth={0.5}
-            strokeLinecap="round"
-            stroke={palette[d.state]}
-          />
-        )
-      })}
+      <AnimatePresence mode="wait">
+        {minMaxStates.map((d) => {
+          const y = yScale(d.state) + marginTop
+          console.log(d.state, y)
+          return (
+            <motion.g
+              key={`active-line-${d.state}`}
+              initial={{ y: y, opacity: 0 }}
+              animate={{ y: y, opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.line
+                key={d.state}
+                id={`active-line-${d.state}`}
+                className="active-line"
+                initial={{
+                  x1: xScale(d.x[0]),
+                  x2: xScale(d.x[0]),
+                }}
+                animate={{
+                  x1: xScale(d.x[0]),
+                  x2: xScale(d.x[1]),
+                }}
+                transition={{ duration: 0.2 }}
+                strokeWidth={0.5}
+                strokeLinecap="round"
+                stroke={palette[d.state]}
+              />
+            </motion.g>
+          )
+        })}
+      </AnimatePresence>
     </g>
   )
 }

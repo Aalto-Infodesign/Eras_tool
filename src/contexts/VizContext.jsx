@@ -108,33 +108,23 @@ export function VizProvider({ children }) {
   }
 
   // Calculate palette (combines data-derived and flowchart-derived dominance)
-  const { palette } = useMemo(() => {
-    if (statesOrder.length === 0) return { palette: {} }
+  const { palette_discrete, palette_poset } = useMemo(() => {
+    if (statesOrder.length === 0) return { palette_discrete: {}, palette_poset: {} }
 
     const states = statesData.statesNames
-    // const states = statesOrder
-
-    // Priority: Use flowchart dominance if available, otherwise use default
     const dominanceFromStates = getDominancePairsSelfUpper(states)
-
     const dominanceArray = dominanceArrayFromFlow || dominanceFromStates
-    // console.log("dominanceArray", dominanceArray)
     const nodes = nodesFromFlow || states
 
-    const palette =
-      colorMode === "poset"
-        ? generatePaletteFromDominance(dominanceArray, nodes)
-        : generatePaletteFromDominance(dominanceFromStates, states)
+    const palette_discrete = generatePaletteFromDominance(dominanceFromStates, states)
+    const palette_poset = generatePaletteFromDominance(dominanceArray, nodes)
 
-    return { palette }
-  }, [
-    idealSilhouettes,
-    statesOrder,
-    dominanceArrayFromFlow,
-    colorMode,
-    generatePaletteFromDominance,
-    nodesFromFlow,
-  ])
+    return { palette_discrete, palette_poset }
+  }, [statesOrder, dominanceArrayFromFlow, generatePaletteFromDominance, nodesFromFlow])
+
+  const palette = useMemo(() => {
+    return colorMode === "poset" ? { ...palette_discrete, ...palette_poset } : palette_discrete
+  }, [colorMode, palette_discrete, palette_poset])
 
   // Function that your FlowChart component can call
   const updatePosetColoring = (dominanceArray, nodes) => {

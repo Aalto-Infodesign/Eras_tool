@@ -118,7 +118,7 @@ export function TrajectoriesExplorerChart(props) {
 
   const chartScales = useMemo(
     () => ({
-      x: scaleLinear([0, ageRange[1]], [0, w]),
+      x: scaleLinear(ageRange, [0, w]),
       y: scaleBand(statesOrder, [0, h]),
     }),
     [ageRange, statesOrder, w, h],

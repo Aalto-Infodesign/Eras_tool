@@ -206,15 +206,21 @@ function SankeyNode({
   return (
     <motion.g key={node.id} onMouseEnter={() => onMouseEnter(node)} onMouseLeave={onMouseLeave}>
       <motion.rect
-        initial={{ x: node.x0, y: node.y0, height: nodeHeight, width: NODE_WIDTH }}
-        animate={{
-          // fillOpacity: hoveredTrajectory ? 0.2 : 0.5,
-          fillOpacity: isSelected ? 1 : 0.5,
-
+        initial={{
           x: node.x0,
           y: node.y0,
           height: nodeHeight,
           width: NODE_WIDTH,
+          fill: palette[name],
+        }}
+        animate={{
+          // fillOpacity: hoveredTrajectory ? 0.2 : 0.5,
+          fillOpacity: isSelected ? 1 : 0.5,
+          x: node.x0,
+          y: node.y0,
+          height: nodeHeight,
+          width: NODE_WIDTH,
+          fill: palette[name],
         }}
         // exit={{
         //   fillOpacity: 0,
@@ -225,7 +231,6 @@ function SankeyNode({
         onClick={() => handleNodeClick(node)}
         transition={DEFAULT_TRANSITION}
         stroke={isSelected ? "white" : "black"}
-        fill={palette[name]}
         rx={1}
       />
       {/* <motion.text
@@ -306,8 +311,18 @@ function SankeyLink({
   return (
     <>
       <linearGradient key={`grad-${link.id}`} id={`grad-${state_S}-${state_F}`}>
-        <stop offset="0%" stopColor={palette[state_S]} />
-        <stop offset="100%" stopColor={palette[state_F]} />
+        <motion.stop
+          offset="0%"
+          initial={{ stopColor: palette[state_S] }}
+          animate={{ stopColor: palette[state_S] }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+        />
+        <motion.stop
+          offset="100%"
+          initial={{ stopColor: palette[state_F] }}
+          animate={{ stopColor: palette[state_F] }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+        />
       </linearGradient>
       <motion.path
         key={`link-${link.source.id}-${link.target.id}`}

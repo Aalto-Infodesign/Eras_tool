@@ -13,11 +13,13 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { Tooltip } from "../../common/Tooltip/Tooltip"
 
 import { curveStep, line } from "d3"
+import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 const PADDING = 0
 
 export function StatesMatrix({ width, height, lineChartMode }) {
-  const { trajectories, statesOrder } = useData()
+  const { statesOrder } = useData()
+  const { trajectories } = useDerivedData()
   const { palette } = useViz()
 
   const [selectedCell, setSelectedCell] = useState(null)
@@ -125,6 +127,19 @@ export function StatesMatrix({ width, height, lineChartMode }) {
             )
           })}
         </g> */}
+        <motion.g id="header" animate={{ y: 0 }}>
+          {statesOrder.map((s) => (
+            <motion.text
+              animate={{ x: xScale(s) + xScale.bandwidth() / 2 }}
+              key={s}
+              fill={palette[s]}
+              fontSize={5}
+              textAnchor="middle"
+            >
+              {s}
+            </motion.text>
+          ))}
+        </motion.g>
         <g id="cells">
           {matrixCouples.map((s, i) => {
             const dataMap = {

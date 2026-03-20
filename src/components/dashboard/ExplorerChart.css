@@ -52,6 +52,10 @@
   overflow: scroll;
 }
 
+.chart-container svg {
+  overflow: visible;
+}
+
 #distributions-chart {
   grid-column: span 1;
 }
@@ -61,8 +65,8 @@
 }
 #matrix-chart {
   grid-column: span 2;
-  overflow: visible;
 }
+
 #sankey-chart {
   grid-column: span 4;
 }

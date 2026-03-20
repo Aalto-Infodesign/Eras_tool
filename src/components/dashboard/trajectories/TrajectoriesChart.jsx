@@ -211,7 +211,7 @@ export function TrajectoriesChart() {
           </Button>
         </div>
 
-        {/* <div id="matrix-controls">
+        <div id="matrix-controls">
           <ListFilter size={16} />
           <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
             <option value="duration">Duration</option>
@@ -220,7 +220,7 @@ export function TrajectoriesChart() {
             <option value="sourceAge">Source Age</option>
             <option value="targetAge">Target Age</option>
           </select>
-        </div> */}
+        </div>
       </div>
 
       <div className="chart-container">
@@ -296,8 +296,8 @@ export function TrajectoriesChart() {
             <p>{hoveredStateLabel}</p>
           </Tooltip>
         </div>
-        <Legend />
-        {/* <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} /> */}
+        {/* <Legend /> */}
+        <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} />
       </div>
     </>
   )
