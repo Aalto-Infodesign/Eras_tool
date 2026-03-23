@@ -26,6 +26,7 @@ export const Filters = () => {
 
   const allYears = { all: [...allMinYears, ...allMaxYears], min: allMinYears, max: allMaxYears }
 
+  console.log(data)
   const allDurations = data
     .map((d) => d.diseaseDuration)
     .filter((duration) => !isNil(duration))

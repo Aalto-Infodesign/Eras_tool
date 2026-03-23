@@ -17,6 +17,7 @@ import { useViz } from "../../contexts/VizContext"
 
 import { ChevronDown, Maximize2 } from "lucide-react"
 import { useModifierKey } from "../hooks/useModifierKey"
+import Button from "../common/Button/Button"
 
 export function FileLoader() {
   const { richData, existingIdealSilhouettes, clusterStates, setClusterStates, statesOrder } =
@@ -64,13 +65,17 @@ export function FileLoader() {
 
         {isLegend && (
           <div className="accordion-controls">
-            <ChevronDown
-              size={16}
-              className="animated"
-              onClick={() => setIsOpen(!isOpen)}
-              transform={isOpen ? "rotate(180)" : "rotate(0)"}
-            />
-            <Maximize2 size={16} onClick={() => setIsLegend(false)} />
+            <Button size="sm" variant="transparent" onClick={() => setIsOpen(!isOpen)}>
+              <ChevronDown
+                size={16}
+                className="animated"
+                transform={isOpen ? "rotate(180)" : "rotate(0)"}
+              />
+            </Button>
+
+            <Button size="sm" variant="transparent" onClick={() => setIsLegend(false)}>
+              <Maximize2 size={16} />
+            </Button>
           </div>
         )}
       </div>

@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react"
 import { includes, isNil, xor, uniq } from "lodash"
-import { scaleLinear, scaleBand, max } from "d3"
 
 import { SilhouettePathSvg } from "./shared/SilhouettePathSvg"
 import { HasseDiagram } from "./Hasse/HasseDiagram"
@@ -53,16 +52,7 @@ export const SilhouettesMorph = () => {
 
   const containerRef = useRef()
 
-  const w = 100, // Target R3F world width (10 units)
-    h = 100 // Target R3F world height (10 units)
-  const svgPadding = 10
   const isActive = selectedSilhouettesNames.length > 0
-
-  const y = scaleBand(statesOrder, [svgPadding, h - svgPadding]).padding(0)
-  const x = scaleLinear(
-    [0, max(completeSilhouettes.map((d) => d.states.length - 1))],
-    [svgPadding, w - svgPadding], // Map from the left side of the world to the right side
-  )
 
   const animationDuration = completeSilhouettes.length > 50 ? 0 : 0.2
 
@@ -219,8 +209,6 @@ export const SilhouettesMorph = () => {
                 <SilhouetteChip
                   key={s}
                   s={s}
-                  x={x}
-                  y={y}
                   animationDuration={animationDuration}
                   toggleSilhouetteFilter={toggleSilhouetteFilter}
                 />
@@ -230,11 +218,7 @@ export const SilhouettesMorph = () => {
         </motion.div>
       </motion.div>
 
-      <div
-        style={{
-          position: "relative",
-        }}
-      >
+      <motion.div key="silhouettes-main" className="silhouettes-main" layout>
         <AnimatePresence mode="popLayout">
           {isHasse ? (
             <motion.section
@@ -251,8 +235,6 @@ export const SilhouettesMorph = () => {
                   posetData={posetData}
                   selectedSilhouettes={selectedSilhouettesNames}
                   toggleSilhouetteFilter={toggleSilhouetteFilter}
-                  x={x}
-                  y={y}
                   statesNamesLoaded={statesOrder}
                 />
               ) : (
@@ -260,7 +242,7 @@ export const SilhouettesMorph = () => {
               )}
             </motion.section>
           ) : (
-            <motion.div
+            <motion.section
               layout
               key="scroller-wrapper"
               variants={chartVariants}
@@ -343,8 +325,6 @@ export const SilhouettesMorph = () => {
                               subset={derivedSilhouettes.previous}
                               selectedSilhouettes={selectedSilhouettesNames}
                               toggleSilhouetteFilter={toggleSilhouetteFilter}
-                              x={x}
-                              y={y}
                               animationDuration={animationDuration}
                             />
                           )}
@@ -353,8 +333,6 @@ export const SilhouettesMorph = () => {
                       <SilhouetteCardMain
                         s={s}
                         i={i}
-                        x={x}
-                        y={y}
                         animationDuration={animationDuration}
                         isSelected={isSelected}
                         handleSilhouetteClick={handleSilhouetteClick}
@@ -376,8 +354,6 @@ export const SilhouettesMorph = () => {
                             subset={derivedSilhouettes.next}
                             selectedSilhouettes={selectedSilhouettesNames}
                             toggleSilhouetteFilter={toggleSilhouetteFilter}
-                            x={x}
-                            y={y}
                             animationDuration={animationDuration}
                           />
                         )}
@@ -386,18 +362,16 @@ export const SilhouettesMorph = () => {
                   )
                 }}
               />
-            </motion.div>
+            </motion.section>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </motion.section>
   )
 }
 
 function SilhouetteCardMain({ s, i, ...props }) {
   const {
-    x,
-    y,
     isSelected,
     handleSilhouetteClick,
     downloadIDs,
@@ -524,15 +498,13 @@ function SilhouetteCardMain({ s, i, ...props }) {
         <SilhouettePathSvg
           keyName="card"
           silhouetteName={s.name}
-          xScale={x}
-          yScale={y}
           animationDuration={0.2}
           useAsSize={true}
           strokeWidth={9}
           radius={9}
         />
       </div>
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {isHovered && isSelected && !isCmdPressed && isExpandible && (
           <div className="expand">
             <AnimatePresence>
@@ -555,21 +527,21 @@ function SilhouetteCardMain({ s, i, ...props }) {
                 />
               )}
             </AnimatePresence>
-            {/* <motion.button
+            <motion.button
               className="btn"
               onClick={(e) => handleExpandClick(e, s.name)}
               whileTap={{ scale: 0.9, transition: { duration: 0.2, delay: 0 } }}
             >
               {expandSides ? "Hide" : "Expand"}
-            </motion.button> */}
+            </motion.button>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </motion.div>
   )
 }
 
-export function SubsetSelection({ subset, selectedSilhouettes, toggleSilhouetteFilter, x, y }) {
+export function SubsetSelection({ subset, selectedSilhouettes, toggleSilhouetteFilter }) {
   const subsetNames = subset.map((s) => s.name)
 
   return (
@@ -590,8 +562,6 @@ export function SubsetSelection({ subset, selectedSilhouettes, toggleSilhouetteF
               silhouetteName={s}
               isSelected={isSelected}
               toggleSilhouetteFilter={toggleSilhouetteFilter}
-              x={x}
-              y={y}
             />
           )
         })}
@@ -600,13 +570,7 @@ export function SubsetSelection({ subset, selectedSilhouettes, toggleSilhouetteF
   )
 }
 
-export function SilhouetteToggleButton({
-  silhouetteName,
-  isSelected,
-  toggleSilhouetteFilter,
-  x,
-  y,
-}) {
+export function SilhouetteToggleButton({ silhouetteName, isSelected, toggleSilhouetteFilter }) {
   // const viewRef = useRef(null)
   return (
     <motion.div
@@ -616,22 +580,16 @@ export function SilhouetteToggleButton({
       whileTap={{ scale: 0.9 }}
       onClick={() => toggleSilhouetteFilter(silhouetteName)}
     >
-      <SmallSilhouette silhouetteName={silhouetteName} x={x} y={y} />
+      <SmallSilhouette silhouetteName={silhouetteName} />
     </motion.div>
   )
 }
 
-export function SmallSilhouette({ silhouetteName, x, y }) {
+export function SmallSilhouette({ silhouetteName }) {
   if (silhouetteName.length > 1)
     return (
       <motion.div layout transition={{ duration: 0.2 }} className="chip-svg-wrapper">
-        <SilhouettePathSvg
-          keyName="chip"
-          silhouetteName={silhouetteName}
-          xScale={x}
-          yScale={y}
-          isChip={true}
-        />
+        <SilhouettePathSvg keyName="chip" silhouetteName={silhouetteName} isChip={true} />
       </motion.div>
     )
   else return <span>{silhouetteName}</span>
@@ -642,7 +600,7 @@ const chipVariants = {
   visible: { opacity: 1, y: 0 },
 }
 
-function SilhouetteChip({ s, x, y, animationDuration, toggleSilhouetteFilter }) {
+function SilhouetteChip({ s, animationDuration, toggleSilhouetteFilter }) {
   const [isHovered, setIsHovered] = useState(false)
   return (
     <motion.div
@@ -659,7 +617,7 @@ function SilhouetteChip({ s, x, y, animationDuration, toggleSilhouetteFilter }) 
     >
       <CloseButton isVisible={isHovered} onClick={() => toggleSilhouetteFilter(s)} />
 
-      <SmallSilhouette silhouetteName={s} x={x} y={y} animationDuration={animationDuration} />
+      <SmallSilhouette silhouetteName={s} animationDuration={animationDuration} />
     </motion.div>
   )
 }

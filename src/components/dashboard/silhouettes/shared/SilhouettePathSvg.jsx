@@ -1,16 +1,28 @@
+import { scaleLinear, scaleBand, max } from "d3"
 import { motion } from "framer-motion"
 import { useViz } from "../../../../contexts/VizContext"
+import { useData } from "../../../../contexts/ProcessedDataContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 export function SilhouettePathSvg({
   keyName = "",
   silhouetteName,
-  xScale,
-  yScale,
   animationDuration = 0.2,
   strokeWidth = 5,
   isChip = false,
+  w = 100,
+  h = 100,
 }) {
+  const { statesOrder } = useData()
+  const { completeSilhouettes } = useDerivedData()
   const { palette, isHasse } = useViz()
+
+  const svgPadding = 12
+  const yScale = scaleBand(statesOrder, [0, h]).padding(0.8)
+  const xScale = scaleLinear(
+    [0, max(completeSilhouettes.map((d) => d.states.length - 1))],
+    [svgPadding, w - svgPadding], // Map from the left side of the world to the right side
+  )
 
   const size = isChip ? 32 : isHasse ? 30 : 64
 

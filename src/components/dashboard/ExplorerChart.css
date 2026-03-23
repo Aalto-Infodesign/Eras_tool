@@ -37,7 +37,7 @@
 }
 
 .chart-container {
-  padding: var(--spacing-md);
+  padding: var(--spacing-xl) var(--spacing-md);
   border-radius: var(--radius-md);
   /* background-color: var(--surface-contrast); */
   background-color: var(--surface-chart);

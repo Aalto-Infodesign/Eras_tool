@@ -31,6 +31,7 @@
   overflow: visible;
   display: flex;
   flex-direction: column;
+  place-content: space-between;
   gap: var(--spacing-xs);
   background-color: var(--surface-contrast);
   border-radius: var(--radius-md);

@@ -38,20 +38,22 @@ export function DerivedDataProvider({ children }) {
   const data = useMemo(() => {
     if (!richData) return []
     if (removedStates.length === 0) return richData
-    return richData.map((d) => {
-      // Find all indexes to remove
-      const indexesToRemove = d.trajectory
-        .map((state, idx) => (removedStates.includes(state) ? idx : -1))
-        .filter((idx) => idx !== -1)
-      if (indexesToRemove.length > 0) {
-        const newTrajectory = d.trajectory.filter((_, idx) => !indexesToRemove.includes(idx))
-        const newSWA = d.SwitchEventAge.filter((_, idx) => !indexesToRemove.includes(idx))
-        const newYears = d.years.filter((_, idx) => !indexesToRemove.includes(idx))
-        return { ...d, trajectory: newTrajectory, SwitchEventAge: newSWA, years: newYears }
-      } else {
-        return d
-      }
-    })
+    return richData
+      .map((d) => {
+        // Find all indexes to remove
+        const indexesToRemove = d.trajectory
+          .map((state, idx) => (removedStates.includes(state) ? idx : -1))
+          .filter((idx) => idx !== -1)
+        if (indexesToRemove.length > 0) {
+          const newTrajectory = d.trajectory.filter((_, idx) => !indexesToRemove.includes(idx))
+          const newSWA = d.SwitchEventAge.filter((_, idx) => !indexesToRemove.includes(idx))
+          const newYears = d.years.filter((_, idx) => !indexesToRemove.includes(idx))
+          return { ...d, trajectory: newTrajectory, SwitchEventAge: newSWA, years: newYears }
+        } else {
+          return d
+        }
+      })
+      .filter((d) => d.trajectory.length > 0)
   }, [richData, removedStates])
 
   const trajectories = useTrajectoriesFromData(data)

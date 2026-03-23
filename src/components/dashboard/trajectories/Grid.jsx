@@ -32,8 +32,6 @@ export function Grid(props) {
   const xScale = chartScales.x
   const yScale = chartScales.y
 
-  console.log(statesOrder)
-
   const minMaxStates = getMinMaxStateFromTrajectories(flattenDeep(t))
 
   const DIV_INCREMENT = 10
@@ -147,7 +145,6 @@ export function Grid(props) {
       <AnimatePresence mode="wait">
         {minMaxStates.map((d) => {
           const y = yScale(d.state) + marginTop
-          console.log(d.state, y)
           return (
             <motion.g
               key={`active-line-${d.state}`}

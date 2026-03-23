@@ -3,6 +3,7 @@ import { useData } from "./ProcessedDataContext"
 import { isEqual, isEmpty } from "lodash"
 import { useRawData } from "./RawDataContext"
 import { xor, difference } from "lodash"
+import { useViz } from "./VizContext"
 
 const FiltersContext = createContext(null)
 
@@ -11,6 +12,7 @@ const FiltersContext = createContext(null)
 export function FiltersProvider({ children }) {
   const { fileName } = useRawData()
   const { existingIdealSilhouettes, statesData, setStatesOrder } = useData()
+  const { chartType } = useViz()
 
   //States
   const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
@@ -43,6 +45,10 @@ export function FiltersProvider({ children }) {
       speed: null,
     })
   }, [fileName])
+
+  useEffect(() => {
+    setTrajectoriesSelectionMode("all")
+  }, [chartType])
 
   useEffect(() => {
     if (!statesData.statesNames) return

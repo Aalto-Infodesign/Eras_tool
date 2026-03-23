@@ -1,8 +1,3 @@
-// Creates a matrix coupling the STATES (From - To)
-// We need
-// Per each couple,
-// - the speed / duration (time between the two states
-// - the number of times this couple appears in the silhouettes
 import { useState, useMemo } from "react"
 import { motion } from "motion/react"
 import { extent, scaleBand, scaleLinear, scaleQuantile, range } from "d3"
@@ -130,10 +125,11 @@ export function StatesMatrix({ width, height, lineChartMode }) {
         <motion.g id="header" animate={{ y: 0 }}>
           {statesOrder.map((s) => (
             <motion.text
+              initial={{ x: xScale(s) + xScale.bandwidth() / 2 }}
               animate={{ x: xScale(s) + xScale.bandwidth() / 2 }}
               key={s}
               fill={palette[s]}
-              fontSize={5}
+              fontSize={4}
               textAnchor="middle"
             >
               {s}
@@ -278,6 +274,7 @@ function Quantiles({ width, height, points, buckets, quantileScale, setHoveredQu
             // opacity={(1 / segments) * i + 1 / segments}
             whileHover={{ opacity: 0.5 }}
             transition={{ duration: 0.1, ease: "easeOut" }}
+            onClick={() => console.log(counts)}
             onMouseEnter={() =>
               setHoveredQuantile({
                 bucketValue: b,

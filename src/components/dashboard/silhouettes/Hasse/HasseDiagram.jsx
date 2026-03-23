@@ -14,7 +14,7 @@ import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const TRANSITION_DEFAULT = { duration: 0.2, ease: "easeInOut" }
-const TRANSITION_MORPH = { duration: 0.3, ease: "easeInOut" }
+const TRANSITION_MORPH = { duration: 0.2, ease: "easeInOut" }
 
 // ─── HasseDiagram ─────────────────────────────────────────────────────────────
 
@@ -23,8 +23,6 @@ export function HasseDiagram({
   statesNamesLoaded,
   selectedSilhouettes,
   toggleSilhouetteFilter,
-  x,
-  y,
 }) {
   // const { silhouettes } = useData()
   const { isHasse } = useViz()
@@ -121,100 +119,106 @@ export function HasseDiagram({
   return (
     <motion.svg animate={{ height, width }} transition={{ duration: 0.5, ease: "easeInOut" }}>
       {/* Grid lines */}
-      {layersByLength.map(([key, value], i) => {
-        const statesNumber = Number(key)
-        const delay = 0.3 + 0.1 * i
+      <AnimatePresence>
+        {layersByLength.map(([key, value], i) => {
+          const statesNumber = Number(key)
+          const delay = 0 + 0.1 * i
 
-        const included = value.map((s) => poset.features[s].included).filter((inc) => inc === true)
-
-        return (
-          <motion.g
-            key={`grid-line-${key}`}
-            initial={{ y: yScale(statesNumber) }}
-            animate={{ y: yScale(statesNumber) }}
-            transition={{ duration: 0.5, delay, ease: "easeInOut" }}
-          >
-            <motion.line
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.5, delay, ease: "easeInOut" }}
-              x1={0}
-              x2={width}
-              strokeWidth={0.5}
-              stroke="#717171aa"
-            />
-            <motion.text
-              animate={{ opacity: 1, y: -6 }}
-              transition={{ duration: 0.3, delay, ease: "easeInOut" }}
-              fontSize={12}
-              fill="var(--text-primary)"
-            >
-              L{statesNumber}
-            </motion.text>
-            <motion.text
-              animate={{ opacity: 1, y: 15 }}
-              transition={{ duration: 0.3, delay, ease: "easeInOut" }}
-              fontSize={12}
-              fill="var(--text-primary)"
-            >
-              {value.length !== included.length
-                ? `${included.length}/${value.length} lines`
-                : `${value.length} lines`}
-            </motion.text>
-          </motion.g>
-        )
-      })}
-
-      {/* Cover relations */}
-      {covers.map((cover) => {
-        const src = poset.features[cover.source]
-        const tgt = poset.features[cover.target]
-        if (!src || !tgt) return null
-
-        const isSelected =
-          selectedSilhouettes.includes(cover.source) && selectedSilhouettes.includes(cover.target)
-
-        return (
-          <HasseLink
-            key={`cover-${cover.source}-${cover.target}`}
-            cover={cover}
-            src={src}
-            tgt={tgt}
-            isHasse={isHasse}
-            isSelected={isSelected}
-            toggleSilhouetteFilter={toggleSilhouetteFilter}
-          />
-        )
-      })}
-
-      {/* Nodes */}
-      <g className="nodes">
-        {nodesForRender.map((name) => {
-          const node = poset.features[name]
-          if (!node) return null
+          const included = value
+            .map((s) => poset.features[s].included)
+            .filter((inc) => inc === true)
 
           return (
-            <HasseNode
-              key={`node-${name}`}
-              name={name}
-              node={node}
-              isSelected={selectedSilhouettes.includes(name)}
-              nodeStyle={styles[name] ?? { opacity: 1, scale: 1 }}
-              isInFirstLayers={!lastLayerSet.has(name)}
+            <motion.g
+              key={`grid-line-${key}`}
+              initial={{ y: yScale(statesNumber), opacity: 0 }}
+              animate={{ y: yScale(statesNumber), opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, delay, ease: "easeInOut" }}
+            >
+              <motion.line
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.2, delay, ease: "easeInOut" }}
+                x1={0}
+                x2={width}
+                strokeWidth={0.5}
+                stroke="#717171aa"
+              />
+              <motion.text
+                animate={{ opacity: 1, y: -6 }}
+                transition={{ duration: 0.2, delay, ease: "easeInOut" }}
+                fontSize={12}
+                fill="var(--text-primary)"
+              >
+                L{statesNumber}
+              </motion.text>
+              <motion.text
+                animate={{ opacity: 1, y: 15 }}
+                transition={{ duration: 0.2, delay, ease: "easeInOut" }}
+                fontSize={12}
+                fill="var(--text-primary)"
+              >
+                {value.length !== included.length
+                  ? `${included.length}/${value.length} lines`
+                  : `${value.length} lines`}
+              </motion.text>
+            </motion.g>
+          )
+        })}
+      </AnimatePresence>
+      <AnimatePresence>
+        {/* Cover relations */}
+        {covers.map((cover) => {
+          const src = poset.features[cover.source]
+          const tgt = poset.features[cover.target]
+          if (!src || !tgt) return null
+
+          const isSelected =
+            selectedSilhouettes.includes(cover.source) && selectedSilhouettes.includes(cover.target)
+
+          return (
+            <HasseLink
+              key={`cover-${cover.source}-${cover.target}`}
+              cover={cover}
+              src={src}
+              tgt={tgt}
               isHasse={isHasse}
-              rectHeight={rectHeight}
-              rectWidth={rectWidth}
-              isHovered={hoveredNode?.name === name}
-              nodeLabel={nodeLabels[name] ?? ""}
+              isSelected={isSelected}
               toggleSilhouetteFilter={toggleSilhouetteFilter}
-              handleMouseEnter={handleMouseEnter}
-              handleMouseLeave={handleMouseLeave}
-              selectChildren={selectChildren}
-              selectAllChildren={selectAllChildren}
-              x={x}
-              y={y}
             />
           )
         })}
+      </AnimatePresence>
+
+      {/* Nodes */}
+      <g className="nodes">
+        <AnimatePresence>
+          {nodesForRender.map((name) => {
+            const node = poset.features[name]
+            if (!node) return null
+
+            return (
+              <HasseNode
+                key={`node-${name}`}
+                name={name}
+                node={node}
+                isSelected={selectedSilhouettes.includes(name)}
+                nodeStyle={styles[name] ?? { opacity: 1, scale: 1 }}
+                isInFirstLayers={!lastLayerSet.has(name)}
+                isHasse={isHasse}
+                rectHeight={rectHeight}
+                rectWidth={rectWidth}
+                isHovered={hoveredNode?.name === name}
+                nodeLabel={nodeLabels[name] ?? ""}
+                toggleSilhouetteFilter={toggleSilhouetteFilter}
+                handleMouseEnter={handleMouseEnter}
+                handleMouseLeave={handleMouseLeave}
+                selectChildren={selectChildren}
+                selectAllChildren={selectAllChildren}
+              />
+            )
+          })}
+        </AnimatePresence>
       </g>
     </motion.svg>
   )
@@ -246,11 +250,11 @@ const HasseLink = ({ cover, src, tgt, isHasse, isSelected, toggleSilhouetteFilte
         stroke: strokeColor,
         opacity: opacity,
       }}
-      exit={{ pathLength: 0 }}
+      exit={{ pathLength: 0, opacity: 0 }}
       transition={{
         ...TRANSITION_DEFAULT,
         d: TRANSITION_MORPH,
-        pathLength: { duration: isHasse ? 0.5 : 0, delay: 0.7 },
+        pathLength: { duration: isHasse ? 0.2 : 0, delay: 0.2 },
       }}
       strokeWidth={2}
       whileHover={{ strokeWidth: 6, cursor: "pointer" }}
@@ -280,8 +284,6 @@ const HasseNode = memo(function HasseNode({
   handleMouseLeave,
   selectChildren,
   selectAllChildren,
-  x,
-  y,
 }) {
   const { palette } = useViz()
 
@@ -297,6 +299,10 @@ const HasseNode = memo(function HasseNode({
         y: node.yPositionScaled,
         opacity: node.included ? nodeStyle.opacity : 0.2,
         scale: nodeStyle.scale,
+      }}
+      exit={{
+        opacity: 0,
+        scale: 0,
       }}
       transition={{
         ...TRANSITION_DEFAULT,
@@ -346,8 +352,6 @@ const HasseNode = memo(function HasseNode({
                 keyName="hasse"
                 silhouetteName={name}
                 animationDuration={0.2}
-                xScale={x}
-                yScale={y}
                 useAsSize={true}
                 isHasse={isHasse}
               />
@@ -375,14 +379,14 @@ const HasseNode = memo(function HasseNode({
           onDoubleClick={() => selectAllChildren(name)}
           onClick={() => selectChildren(name)}
         >
-          <rect width={10} height={10} rx={2} fill="white" />
+          <rect width={10} height={10} rx={2} fill="var(--surface-primary)" />
           <text
             textAnchor="middle"
             dominantBaseline="middle"
             x={5}
             y={5}
             fontSize={10}
-            fill="black"
+            fill="var(--text-primary)"
           >
             v
           </text>
