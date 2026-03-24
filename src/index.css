@@ -127,7 +127,10 @@
   --screen-small: 720px;
   --screen-medium: 900px;
   --screen-large: 1200px;
-  --screen-xlarge: 1440px;
+  --screen-xl: 80rem;
+  --screen-2xl: 90rem;
+  --screen-3xl: 96rem;
+  --screen-5xl: 110rem;
 }
 
 [data-theme="light"] {
@@ -186,7 +189,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   display: flex;
   min-width: var(--screen-small);
-  max-width: var(--screen-xlarge);
+  max-width: var(--screen-5xl);
   margin: 0 auto;
   background-color: var(--surface-primary);
   color: var(--text-primary);
@@ -370,12 +373,6 @@ h4 {
 
 .material-icons.inactive {
   opacity: 0.5;
-}
-
-.animated,
-.distribution-circle,
-g#grid text {
-  transition: all 0.2s ease-in-out;
 }
 
 .grid-label {

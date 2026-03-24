@@ -66,11 +66,7 @@ export function FileLoader() {
         {isLegend && (
           <div className="accordion-controls">
             <Button size="sm" variant="transparent" onClick={() => setIsOpen(!isOpen)}>
-              <ChevronDown
-                size={16}
-                className="animated"
-                transform={isOpen ? "rotate(180)" : "rotate(0)"}
-              />
+              <ChevronDown size={16} transform={isOpen ? "rotate(180)" : "rotate(0)"} />
             </Button>
 
             <Button size="sm" variant="transparent" onClick={() => setIsLegend(false)}>

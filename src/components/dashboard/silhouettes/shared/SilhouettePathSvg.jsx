@@ -70,14 +70,23 @@ export function SilhouettePathSvg({
                 strokeWidth="1"
               />
               <motion.path
-                initial={{ pathLength: 0, strokeWidth: 0, opacity: 0 }}
-                animate={{ pathLength: 1, strokeWidth: strokeWidth, opacity: 0.5 }}
+                initial={{
+                  d: `M ${xScale(i)} ${yScale(char)} L ${xScale(i + 1)} ${yScale(arr[i + 1])}`,
+                  pathLength: 0,
+                  strokeWidth: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  d: `M ${xScale(i)} ${yScale(char)} L ${xScale(i + 1)} ${yScale(arr[i + 1])}`,
+                  pathLength: 1,
+                  strokeWidth: strokeWidth,
+                  opacity: 0.5,
+                }}
                 transition={{
                   duration: animationDuration,
                   ease: "easeInOut",
                 }}
-                className="flow animated"
-                d={`M ${xScale(i)} ${yScale(char)} L ${xScale(i + 1)} ${yScale(arr[i + 1])}`}
+                className="flow"
                 stroke={palette[char]}
                 strokeLinecap="round"
                 fill="none"

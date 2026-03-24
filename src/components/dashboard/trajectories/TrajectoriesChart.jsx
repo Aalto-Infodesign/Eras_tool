@@ -13,8 +13,6 @@ import { Tooltip } from "../../common/Tooltip/Tooltip"
 
 import { Lumps } from "./Lumps"
 
-import { flattenDeep, groupBy, mapValues, values, merge, unionBy, sortBy } from "lodash"
-
 import { TextureDefs } from "../../common/Textures/TextureDefs"
 
 import { useModifierKey } from "../../hooks/useModifierKey"
@@ -26,12 +24,11 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import Button from "../../common/Button/Button"
 import { StatesMatrix } from "../../fileLoader/statesMatrix/StatesMatrix"
 import { ListFilter } from "lucide-react"
-import { Legend } from "../legend/Legend"
 
 export function TrajectoriesChart() {
   const { selectedTrajectoriesIDs, trajectoriesSelectionMode, setTrajectoriesSelectionMode } =
     useFilters()
-  const { completeLinks, filteredLinks } = useDerivedData()
+  const { filteredLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
 
@@ -61,47 +58,6 @@ export function TrajectoriesChart() {
   const isArrowRight = useModifierKey("ArrowRight")
   const isEnter = useModifierKey("Enter")
 
-  const processedData = useMemo(() => {
-    const linksBySourceState = groupBy(completeLinks, "source.state")
-    const linksByTargetState = groupBy(completeLinks, "target.state")
-    const filteredLinksBySourceState = groupBy(filteredLinks, "source.state")
-    const filteredLinksByTargetState = groupBy(filteredLinks, "target.state")
-
-    const initialAndFinalOGPerStateSource = getInitialAndFinalOGPerState(linksBySourceState)
-    const initialAndFinalOGPerStateTarget = getInitialAndFinalOGPerState(linksByTargetState)
-
-    const initialAndFinalCompletePerStateSource = getInitialAndFinalPerState(linksBySourceState)
-    const initialAndFinalCompletePerStateTarget = getInitialAndFinalPerState(linksByTargetState)
-
-    const initialAndFinalPerStateSource = getInitialAndFinalPerState(filteredLinksBySourceState)
-    const initialAndFinalPerStateTarget = getInitialAndFinalPerState(filteredLinksByTargetState)
-
-    const unitedObjectsOriginal = unionBy(
-      initialAndFinalOGPerStateSource,
-      initialAndFinalOGPerStateTarget,
-      "state",
-    )
-
-    const unitedObjects = unionBy(
-      initialAndFinalPerStateSource,
-      initialAndFinalPerStateTarget,
-      "state",
-    )
-
-    const groupedObjectsByState = groupBy([...unitedObjects, ...unitedObjectsOriginal], "state")
-
-    const mergedObjectsByState = Object.entries(groupedObjectsByState).map(([_state, objects]) => {
-      return objects.reduce((result, obj) => merge(result, obj), {})
-    })
-
-    return {
-      unitedObjectsOriginal,
-      mergedObjectsByState,
-      initialAndFinalCompletePerStateSource,
-      initialAndFinalCompletePerStateTarget,
-    }
-  }, [filteredLinks, completeLinks])
-
   useEffect(() => {
     isEnter &&
       hoveredTrajectoriesIDs.length > 0 &&
@@ -111,8 +67,6 @@ export function TrajectoriesChart() {
   useEffect(() => {
     if (filteredLinks.length > 500) setIsSelectModeLines(false)
   }, [filteredLinks.length])
-
-  // console.timeEnd("Trajectories")
 
   return (
     <>
@@ -227,17 +181,7 @@ export function TrajectoriesChart() {
         {showDistributions && (
           <div className="svg-container" id="distributions-chart">
             <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 70 ${h}`}>
-              <StateTypeDistribution
-                setHoveredDistribution={setHoveredDistribution}
-                unitedObjectsOriginal={processedData.unitedObjectsOriginal}
-                mergedObjectsByState={processedData.mergedObjectsByState}
-                initialAndFinalCompletePerStateSource={
-                  processedData.initialAndFinalCompletePerStateSource
-                }
-                initialAndFinalCompletePerStateTarget={
-                  processedData.initialAndFinalCompletePerStateTarget
-                }
-              />
+              <StateTypeDistribution setHoveredDistribution={setHoveredDistribution} />
             </svg>
           </div>
         )}
@@ -268,16 +212,7 @@ export function TrajectoriesChart() {
                 showLinesOfSelectedLumps={showLinesOfSelectedLumps}
               />
             )}
-            {showStateDensity && (
-              <StateDensity
-                //Extended Context
-                filteredLinks={filteredLinks}
-                //Local State
-                unitedObjectsOriginal={processedData.unitedObjectsOriginal}
-                mergedObjectsByState={processedData.mergedObjectsByState}
-                hoveredDistribution={hoveredDistribution}
-              />
-            )}
+            {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
           </svg>
           <Tooltip isVisible={enableScrub && hoveredTrajectoriesIDs.length > 0}>
             <HoveredTrajectoryPopUp
@@ -402,30 +337,5 @@ function GradientDefs() {
         </linearGradient>
       ))}
     </defs>
-  )
-}
-
-function getInitialAndFinalPerState(linksByState) {
-  return sortBy(
-    values(
-      mapValues(linksByState, (stateItems, stateKey) => ({
-        state: stateKey,
-        initialState: stateItems.filter((d) => d.initialState && d),
-        finalState: stateItems.filter((d) => d.finalState && d),
-      })),
-    ),
-    "state",
-  )
-}
-function getInitialAndFinalOGPerState(linksByState) {
-  return sortBy(
-    values(
-      mapValues(linksByState, (stateItems, stateKey) => ({
-        state: stateKey,
-        initialStateOG: stateItems.filter((d) => d.initialState && d),
-        finalStateOG: stateItems.filter((d) => d.finalState && d),
-      })),
-    ),
-    "state",
   )
 }

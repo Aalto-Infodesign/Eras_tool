@@ -1,7 +1,7 @@
 [
   {
     "FINNGENID": "MOCKID_0",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       24.88543082082334, 53.92214298142703, 77.46198153968749, 98.96200499618277, 112.32107405120507
     ],
@@ -9,11 +9,11 @@
       1969.8854308208233, 2023.8075738022503, 2076.3841245211147, 2121.4239865358704,
       2156.2830790473877
     ],
-    "diseaseDuration": 12317.66962554827
+    "diseaseDuration": 12317.669625548272
   },
   {
     "FINNGENID": "MOCKID_1",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       29.135551112639593, 57.32688011358684, 78.78585989668042, 89.3591335832338, 107.28993530278449
     ],
@@ -25,7 +25,7 @@
   },
   {
     "FINNGENID": "MOCKID_2",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       27.89699381190648, 42.33223692066516, 67.46760711431146, 78.12662216838949, 105.71928547887728
     ],
@@ -37,7 +37,7 @@
   },
   {
     "FINNGENID": "MOCKID_3",
-    "trajectory": ["state 1", "b", "c", "d", "state 1"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "state 1"],
     "SwitchEventAge": [
       11.93545194222779, 23.239398667292022, 37.20181237673252, 51.33855928773604, 78.4585873735899
     ],
@@ -49,7 +49,7 @@
   },
   {
     "FINNGENID": "MOCKID_4",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       29.823583553075757, 53.5160402807812, 74.54641792258471, 102.0967240248108, 121.41392336008086
     ],
@@ -61,7 +61,7 @@
   },
   {
     "FINNGENID": "MOCKID_5",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       23.291115374502134, 50.97662234941207, 73.81437102599168, 100.77368188552681,
       125.68738613356155
@@ -74,7 +74,7 @@
   },
   {
     "FINNGENID": "MOCKID_7",
-    "trajectory": ["state 1", "b", "state 1", "b", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "state 1", "state_b_superlongname", "e"],
     "SwitchEventAge": [
       10.177409009459762, 36.42900512757605, 57.69498344160935, 80.25142069414238, 92.71640014272
     ],
@@ -86,7 +86,7 @@
   },
   {
     "FINNGENID": "MOCKID_8",
-    "trajectory": ["state 1", "b", "c", "d", "state 1"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "state 1"],
     "SwitchEventAge": [
       29.829604138658837, 46.292067246089644, 73.10844287941597, 98.68339702242777,
       127.98880674213612
@@ -112,7 +112,7 @@
   },
   {
     "FINNGENID": "MOCKID_10",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       24.739233625487707, 48.08910965955312, 69.78602312601481, 82.0346984483002, 103.08679008591157
     ],
@@ -124,7 +124,7 @@
   },
   {
     "FINNGENID": "MOCKID_11",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       20.617055832585777, 37.61184674508222, 62.9380033047474, 72.97329257377568, 90.12976547027247
     ],
@@ -136,19 +136,19 @@
   },
   {
     "FINNGENID": "MOCKID_12",
-    "trajectory": ["e", "b"],
+    "trajectory": ["e", "state_b_superlongname"],
     "SwitchEventAge": [22.14355404668506, 51.90182051982831],
     "years": [1952.143554046685, 2004.0453745665134]
   },
   {
     "FINNGENID": "MOCKID_13",
-    "trajectory": ["state 1", "b"],
+    "trajectory": ["state 1", "state_b_superlongname"],
     "SwitchEventAge": [12.340497881606431, 29.849091896697196],
     "years": [1957.3404978816063, 1987.1895897783036]
   },
   {
     "FINNGENID": "MOCKID_15",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       23.25130911685235, 43.67157017769817, 70.92690097356316, 85.53972338271628, 112.2471566529592
     ],
@@ -160,7 +160,7 @@
   },
   {
     "FINNGENID": "MOCKID_16",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       20.25321364888112, 32.6865660079164, 53.33249627477869, 74.11603324354523, 86.43498682430737
     ],
@@ -172,7 +172,7 @@
   },
   {
     "FINNGENID": "MOCKID_17",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       17.27292367402962, 39.967367551214075, 64.97993083967711, 77.03861939029507, 91.97189723757671
     ],
@@ -184,7 +184,7 @@
   },
   {
     "FINNGENID": "MOCKID_18",
-    "trajectory": ["state 1", "b", "d", "state 1", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "d", "state 1", "e"],
     "SwitchEventAge": [
       19.248414615312267, 33.295265850377014, 53.65381055102006, 64.99502142385661,
       79.66774632434591
@@ -197,7 +197,7 @@
   },
   {
     "FINNGENID": "MOCKID_19",
-    "trajectory": ["state 1", "b", "c", "d", "state 1"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "state 1"],
     "SwitchEventAge": [
       22.238926483383185, 51.34694588301368, 70.3783774883652, 96.29644318396956, 123.06023434338766
     ],
@@ -209,7 +209,7 @@
   },
   {
     "FINNGENID": "MOCKID_20",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       29.60147872955379, 47.03147268526161, 62.66341204098303, 77.67744297689251, 102.10990681823353
     ],
@@ -221,7 +221,7 @@
   },
   {
     "FINNGENID": "MOCKID_21",
-    "trajectory": ["state 1", "b", "d", "state 1", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "d", "state 1", "e"],
     "SwitchEventAge": [
       28.371703370131478, 56.51253618029657, 70.24752335428613, 95.06708150207847,
       112.13927174853285
@@ -240,7 +240,7 @@
   },
   {
     "FINNGENID": "MOCKID_23",
-    "trajectory": ["state 1", "b", "c", "d", "b"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "state_b_superlongname"],
     "SwitchEventAge": [
       13.058631807605664, 33.95438228913997, 63.76890531991659, 83.96668388795418,
       107.05154799338555
@@ -253,7 +253,7 @@
   },
   {
     "FINNGENID": "MOCKID_24",
-    "trajectory": ["d", "b", "c", "d", "e"],
+    "trajectory": ["d", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       23.83507856839852, 48.43575089229216, 74.57489021577594, 93.03989126739538, 115.3736781490127
     ],
@@ -265,7 +265,7 @@
   },
   {
     "FINNGENID": "MOCKID_25",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       12.80338402917933, 24.579845891336355, 36.81234392589075, 61.70589330426837, 72.310139804456
     ],
@@ -277,7 +277,7 @@
   },
   {
     "FINNGENID": "MOCKID_26",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       11.530912946597091, 38.976308763781056, 55.78619690715718, 79.55107720028512,
       98.48821573247277
@@ -290,7 +290,7 @@
   },
   {
     "FINNGENID": "MOCKID_27",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       15.654482145143046, 45.29478018626957, 68.91246842331162, 80.654453835169, 98.64455639667185
     ],
@@ -302,13 +302,13 @@
   },
   {
     "FINNGENID": "MOCKID_28",
-    "trajectory": ["state 1", "b"],
+    "trajectory": ["state 1", "state_b_superlongname"],
     "SwitchEventAge": [25.16388727257937, 38.56571998619922],
     "years": [1970.1638872725794, 2008.7296072587785]
   },
   {
     "FINNGENID": "MOCKID_29",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       20.247016845674068, 44.87073783881946, 73.58375597066109, 103.37940681661493,
       123.56322595941572
@@ -321,7 +321,7 @@
   },
   {
     "FINNGENID": "MOCKID_30",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       20.61130185211475, 32.075152868001574, 55.20360346039098, 67.34212918148182, 95.92619170275225
     ],
@@ -333,7 +333,7 @@
   },
   {
     "FINNGENID": "MOCKID_31",
-    "trajectory": ["state 1", "b", "c", "d", "c"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "c"],
     "SwitchEventAge": [
       12.275818636941157, 33.003303751868685, 45.450822538673755, 60.542815643311485,
       78.63307390118817
@@ -346,7 +346,7 @@
   },
   {
     "FINNGENID": "MOCKID_32",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       27.51129889359424, 56.11307393466856, 82.4529138340753, 110.32517835929382, 122.73915251074034
     ],
@@ -358,7 +358,7 @@
   },
   {
     "FINNGENID": "MOCKID_33",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       28.023426196067327, 40.514045928895214, 66.57921688587187, 91.10449190733615, 117.734557182688
     ],
@@ -370,7 +370,7 @@
   },
   {
     "FINNGENID": "MOCKID_34",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       16.228824599475935, 33.3889504588157, 55.27275864647777, 65.4180814996517, 94.20578673100941
     ],
@@ -382,7 +382,7 @@
   },
   {
     "FINNGENID": "MOCKID_35",
-    "trajectory": ["state 1", "b", "e", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "e", "d", "e"],
     "SwitchEventAge": [
       19.553750238255446, 48.404638231557314, 60.437241626788804, 76.14601943179363,
       104.66828864611685
@@ -395,7 +395,7 @@
   },
   {
     "FINNGENID": "MOCKID_36",
-    "trajectory": ["e", "b", "c", "d", "e"],
+    "trajectory": ["e", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       28.662225347715555, 39.63716040904947, 60.34626441230127, 82.80687922146643, 95.48100393619248
     ],
@@ -407,7 +407,7 @@
   },
   {
     "FINNGENID": "MOCKID_37",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       23.45061300589179, 42.87209069461406, 59.332650481843345, 77.14899870304653, 96.56353491847398
     ],
@@ -419,7 +419,7 @@
   },
   {
     "FINNGENID": "MOCKID_38",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       26.151953867751768, 43.892091268591884, 60.491643450703066, 75.80801554478398,
       92.5007838420944
@@ -432,7 +432,7 @@
   },
   {
     "FINNGENID": "MOCKID_39",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       16.46167017714353, 39.53109111552914, 64.56794745668542, 86.42299477992702, 115.97428337275414
     ],
@@ -444,7 +444,7 @@
   },
   {
     "FINNGENID": "MOCKID_40",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       23.08955992806348, 36.892508274473315, 50.66992476924517, 73.6145821990527, 100.02570217695704
     ],
@@ -456,7 +456,7 @@
   },
   {
     "FINNGENID": "MOCKID_41",
-    "trajectory": ["state 1", "b", "d", "state 1", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "d", "state 1", "e"],
     "SwitchEventAge": [
       17.555927351465996, 36.89268527134565, 58.8111123402664, 71.74562551288241, 100.39600175828586
     ],
@@ -468,7 +468,7 @@
   },
   {
     "FINNGENID": "MOCKID_42",
-    "trajectory": ["b", "c", "b", "d", "c"],
+    "trajectory": ["state_b_superlongname", "c", "state_b_superlongname", "d", "c"],
     "SwitchEventAge": [
       11.148350986068142, 23.17898299796398, 41.198999975470585, 67.76845472806983, 81.8798553195404
     ],
@@ -480,7 +480,7 @@
   },
   {
     "FINNGENID": "MOCKID_43",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       21.146344120405928, 39.64364576817623, 52.44012579978207, 78.10972139942989, 100.7829009937625
     ],
@@ -492,7 +492,7 @@
   },
   {
     "FINNGENID": "MOCKID_44",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       19.166196511302026, 29.78252290606475, 46.390163845182684, 61.445312957306456,
       76.41048833474657
@@ -505,7 +505,7 @@
   },
   {
     "FINNGENID": "MOCKID_45",
-    "trajectory": ["state 1", "b", "c", "state 1", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "state 1", "e"],
     "SwitchEventAge": [
       12.846495250695082, 36.66767227463974, 57.73651323289882, 70.75055376449697, 97.49744801147335
     ],
@@ -517,7 +517,7 @@
   },
   {
     "FINNGENID": "MOCKID_47",
-    "trajectory": ["b", "c", "b", "d", "e"],
+    "trajectory": ["state_b_superlongname", "c", "state_b_superlongname", "d", "e"],
     "SwitchEventAge": [
       25.32484841933246, 47.66206915608117, 74.31713281394852, 89.8991860706056, 108.43491173698852
     ],
@@ -528,7 +528,7 @@
   },
   {
     "FINNGENID": "MOCKID_48",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       22.244671384924015, 41.45997269334711, 69.83995414032029, 89.54366212650399,
       102.87300174383292
@@ -540,7 +540,7 @@
   },
   {
     "FINNGENID": "MOCKID_49",
-    "trajectory": ["state 1", "b", "c", "d", "e"],
+    "trajectory": ["state 1", "state_b_superlongname", "c", "d", "e"],
     "SwitchEventAge": [
       16.312909119727752, 39.64623187440962, 66.93845288789484, 92.84733555479548,
       111.71077342087551

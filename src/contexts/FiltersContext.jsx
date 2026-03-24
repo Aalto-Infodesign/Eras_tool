@@ -10,6 +10,8 @@ const FiltersContext = createContext(null)
 // TODO Add toggles
 
 export function FiltersProvider({ children }) {
+  //TODO URL API CALL
+
   const { fileName } = useRawData()
   const { existingIdealSilhouettes, statesData, setStatesOrder } = useData()
   const { chartType } = useViz()
@@ -97,10 +99,10 @@ export function FiltersProvider({ children }) {
 
   const toggleSelectedTrajectory = (trajectoryID) => {
     setSelectedTrajectoriesIDs((prev) => {
-      return xor(prev, [trajectoryID])
+      const ids = Array.isArray(trajectoryID) ? trajectoryID : [trajectoryID]
+      return xor(prev, ids)
     })
   }
-
   const filtersActive = useMemo(() => {
     if (isEmpty(filtersSelection)) return false
     return filtersSelection.date || filtersSelection.diseaseDuration || filtersSelection.speed

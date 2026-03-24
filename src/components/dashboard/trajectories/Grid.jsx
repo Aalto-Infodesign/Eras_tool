@@ -113,7 +113,7 @@ export function Grid(props) {
                 textAnchor="start"
               >
                 {name.length > 15
-                  ? `${statesOrder.indexOf(name)} • ${name.substring(0, 8)}` + "..."
+                  ? `${statesOrder.indexOf(name)} • ${name.substring(0, 8)}` + "…"
                   : `${statesOrder.indexOf(name)} • ${name}`}
               </text>
               <g className="line-controls" transform={`translate(${10}, ${7})`}>
@@ -142,7 +142,7 @@ export function Grid(props) {
           </motion.g>
         )
       })}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {minMaxStates.map((d) => {
           const y = yScale(d.state) + marginTop
           return (

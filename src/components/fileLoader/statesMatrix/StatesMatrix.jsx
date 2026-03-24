@@ -125,14 +125,15 @@ export function StatesMatrix({ width, height, lineChartMode }) {
         <motion.g id="header" animate={{ y: 0 }}>
           {statesOrder.map((s) => (
             <motion.text
-              initial={{ x: xScale(s) + xScale.bandwidth() / 2 }}
-              animate={{ x: xScale(s) + xScale.bandwidth() / 2 }}
+              initial={{ y: -5, x: xScale(s) + xScale.bandwidth() / 2, rotate: "-35deg" }}
+              animate={{ y: -5, x: xScale(s) + xScale.bandwidth() / 2 }}
               key={s}
               fill={palette[s]}
-              fontSize={4}
+              fontSize={3}
               textAnchor="middle"
+              dominantBaseline={"middle"}
             >
-              {s}
+              {s.length > 15 ? `${s.substring(0, 8)}` + "…" : `${s}`}
             </motion.text>
           ))}
         </motion.g>
