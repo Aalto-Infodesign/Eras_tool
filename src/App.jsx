@@ -70,7 +70,7 @@ function AppContent() {
         <>
           <FileLoader />
 
-          {richData && silhouettes && isLegend && (
+          {isLegend && (
             <>
               <Header />
               <Dashboard />

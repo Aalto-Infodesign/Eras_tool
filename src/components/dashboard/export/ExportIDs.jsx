@@ -31,7 +31,9 @@ export function ExportIDs() {
       <Button
         className="btn"
         size="small"
-        variant="secondary"
+        variant="primary"
+        tooltip={"Export IDs as .txt"}
+        tooltipPosition="top"
         disabled={selectedIDs.length === 0}
         style={{ gap: 10 }}
         onClick={(e) => {

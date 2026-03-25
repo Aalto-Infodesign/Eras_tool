@@ -413,7 +413,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
         ease: "easeInOut",
       },
     }),
-    tapped: { scale: 0.95, transition: { duration: 0.2 } },
+    tapped: { scale: 0.96, transition: { duration: 0.2 } },
   }
 
   const ids = s.trajectories.map((d) => d[0]?.id ?? "id not found")
@@ -442,6 +442,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
             size="xs"
             variant="secondary"
             className="download"
+            tooltip={"Export IDs"}
             whileHover={{ scale: 1.2 }}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => downloadIDs(e, ids)}
@@ -454,6 +455,7 @@ function SilhouetteCardMain({ s, i, ...props }) {
           size="xs"
           variant="secondary"
           className="order"
+          tooltip={"Order states"}
           whileHover={{ scale: 1.2 }}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => handleOrderClick(e, s)}
