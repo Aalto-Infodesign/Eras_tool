@@ -26,6 +26,12 @@ export function FiltersProvider({ children }) {
     age: null,
     speed: null,
   })
+  const [filtersInverted, setFiltersInverted] = useState({
+    date: false,
+    diseaseDuration: false,
+    age: false,
+    speed: false,
+  })
   const [isDragging, setIsDragging] = useState(false)
 
   // Selection Data
@@ -46,6 +52,7 @@ export function FiltersProvider({ children }) {
       age: null,
       speed: null,
     })
+    setFiltersInverted({ date: false, diseaseDuration: false, age: false, speed: false })
   }, [fileName])
 
   useEffect(() => {
@@ -72,7 +79,16 @@ export function FiltersProvider({ children }) {
         [key]: null,
       }
     })
+    setFiltersInverted({ date: false, diseaseDuration: false, age: false, speed: false })
   }
+
+  // TODO Invert Filters
+  const toggleInvertFilter = useCallback((key) => {
+    setFiltersInverted((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }))
+  }, [])
 
   const updateSelection = useCallback((key, newSelection) => {
     setFiltersSelection((prev) => ({
@@ -118,6 +134,8 @@ export function FiltersProvider({ children }) {
       updateSelection,
       resetFilter,
       setFiltersSelection,
+      toggleInvertFilter,
+      filtersInverted,
 
       // States
       removedStates,
@@ -155,6 +173,7 @@ export function FiltersProvider({ children }) {
       setTrajectoriesSelectionMode,
       //Flag
       filtersActive,
+      filtersInverted,
     ],
   )
 

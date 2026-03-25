@@ -3,8 +3,9 @@ import { scaleLinear } from "d3"
 import { FilterDistribution } from "./FilterDistribution"
 import { FilterSlider } from "./FilterSlider"
 import { useFilters } from "../../../../contexts/FiltersContext"
-import { RefreshCcw } from "lucide-react"
+import { Contrast, RefreshCcw } from "lucide-react"
 import Button from "../../../common/Button/Button"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 export const FilterWrapper = ({
   name,
@@ -16,7 +17,8 @@ export const FilterWrapper = ({
   hasDoubleHandle = false,
   mode = "single",
 }) => {
-  const { updateSelection, resetFilter } = useFilters()
+  const { updateSelection, resetFilter, toggleInvertFilter } = useFilters()
+  const { filters } = useDerivedData()
   const [lineX, setLineX] = useState(0)
   const [hoveredSvg, setHoveredSvg] = useState(false)
 
@@ -47,11 +49,27 @@ export const FilterWrapper = ({
       <div className="filter-header">
         <p>{title}</p>
 
-        {filter.isActive && (
-          <Button size="small" onClick={() => resetFilter(name)}>
-            <RefreshCcw size={10} />
+        <div>
+          <Button
+            size="xs"
+            tooltip={"Invert Filter"}
+            tooltipPosition="left"
+            onClick={() => toggleInvertFilter(name)}
+            data-selected={filters[name].isInverted}
+          >
+            <Contrast size={10} />
           </Button>
-        )}
+          {filter.isActive && (
+            <Button
+              size="xs"
+              tooltip={"Reset Filter"}
+              tooltipPosition="left"
+              onClick={() => resetFilter(name)}
+            >
+              <RefreshCcw size={10} />
+            </Button>
+          )}
+        </div>
       </div>
 
       <FilterDistribution
@@ -65,6 +83,7 @@ export const FilterWrapper = ({
         lineX={lineX}
         hoveredSvg={hoveredSvg}
         width={sliderDimensions.x}
+        isInverted={filter.isInverted}
       />
       <FilterSlider
         min={min}
@@ -79,6 +98,7 @@ export const FilterWrapper = ({
         setLineX={setLineX}
         hoveredSvg={hoveredSvg}
         setHoveredSvg={setHoveredSvg}
+        isInverted={filter.isInverted}
       />
     </div>
   )

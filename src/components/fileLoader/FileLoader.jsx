@@ -65,11 +65,23 @@ export function FileLoader() {
 
         {isLegend && (
           <div className="accordion-controls">
-            <Button size="sm" variant="transparent" onClick={() => setIsOpen(!isOpen)}>
+            <Button
+              // tooltip={isOpen ? "Collapse Panel" : "Expand Panel"}
+              // tooltipPosition="bottom"
+              size="xs"
+              variant="transparent"
+              onClick={() => setIsOpen(!isOpen)}
+            >
               <ChevronDown size={16} transform={isOpen ? "rotate(180)" : "rotate(0)"} />
             </Button>
 
-            <Button size="sm" variant="transparent" onClick={() => setIsLegend(false)}>
+            <Button
+              // tooltip={"Expand State Manager"}
+              // tooltipPosition="bottom"
+              size="xs"
+              variant="transparent"
+              onClick={() => setIsLegend(false)}
+            >
               <Maximize2 size={16} />
             </Button>
           </div>

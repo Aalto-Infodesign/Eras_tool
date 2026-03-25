@@ -1,8 +1,7 @@
-import { useEffect, useContext } from "react"
+import { useContext } from "react"
 import { TrajectoriesContext } from "../TrajectoriesContext"
 
-import { select, scaleLinear, curveStep, mean, line } from "d3"
-import { isNil } from "lodash"
+import { scaleLinear, curveStep, mean, line } from "d3"
 
 import { useViz } from "../../../contexts/VizContext"
 import { useFilters } from "../../../contexts/FiltersContext"
@@ -37,290 +36,23 @@ export function StateDensity(props) {
     }
   })
 
-  const densityYSource = scaleLinear().range([1, 0]).domain([0, 0.015])
-  const densityYTarget = scaleLinear().range([0, 1]).domain([0, 0.015])
+  const densityYSource = scaleLinear().domain([0, 0.01]).range([1, 0])
+  const densityYTarget = scaleLinear().domain([0, 0.01]).range([0, 1])
   // Compute kernel density estimation
-  const kde = kernelDensityEstimator(kernelEpanechnikov(7), x.ticks(40))
+  const kde = kernelDensityEstimator(kernelEpanechnikov(7), x.ticks(50))
 
-  // useEffect(() => {
-  //   const densityGroup = select("g#density")
-  //   densityGroup
-  //     .selectAll(".density-state-source")
-  //     .data(linksAnalytics.complete, (d) => `density-state-source-${d.state}`)
-  //     .join(
-  //       (enter) => {
-  //         const group = enter
-  //           .append("g")
-  //           .classed("density-state-source", true)
-  //           .attr("id", (d) => `state-density-group-${d.state}`)
-  //           .attr("transform", (d) => `translate(0,${y(d.state) + marginTop - 1})`)
-
-  //         group
-  //           .append("path")
-  //           .attr("class", "mypath")
-  //           .attr("class", "animated")
-  //           .datum((d) => d)
-  //           .attr("fill", (d) => palette[d.state])
-  //           .attr("opacity", (d) =>
-  //             hoveredDistribution.state === d.state && hoveredDistribution.type === "IT"
-  //               ? 0.8
-  //               : 0.4,
-  //           )
-  //           .attr("stroke", "#fff")
-  //           .attr("stroke-width", 0.5)
-  //           .attr("stroke-linejoin", "round")
-  //           .datum((d) => kde(d.initialStateOG.map((d) => d.source.x)))
-  //           .attr(
-  //             "d",
-  //             line()
-  //               .curve(curveStep)
-  //               .x((d) => x(d[0]))
-  //               .y((d) => densityYSource(d[1])),
-  //           )
-  //       },
-  //       (update) => {
-  //         update
-  //           .transition()
-  //           .duration(300)
-  //           .attr("transform", (d) => `translate(0,${y(d.state) + marginTop - 1})`)
-
-  //         // update.select("text").text((d) => y(d.state))
-  //         update
-  //           .select("path")
-  //           .datum((d) => d)
-  //           .attr(
-  //             "opacity",
-  //             (d) => (
-  //               console.log(hoveredDistribution.state, d.state),
-  //               hoveredDistribution.state === d.state && hoveredDistribution.type === "IT"
-  //                 ? 0.8
-  //                 : 0.4
-  //             ),
-  //           )
-  //           .datum((d) =>
-  //             kde(
-  //               d.initialStateOG.map(function (d) {
-  //                 return d.source.x
-  //               }),
-  //             ),
-  //           )
-  //           // .transition()
-  //           // .duration(300)
-  //           .attr(
-  //             "d",
-  //             line()
-  //               .curve(curveStep)
-  //               .x((d) => x(d[0]))
-  //               .y((d) => densityYSource(d[1])),
-  //           )
-  //       },
-
-  //       (exit) => exit.remove(),
-  //     )
-
-  //   densityGroup
-  //     .selectAll(".density-state-source-filtered")
-  //     .data(
-  //       selectedSilhouettesNames.length > 0 && linksAnalytics.filtered,
-  //       (d) => `density-state-source-filtered-${d.state}`,
-  //     )
-  //     .join(
-  //       (enter) => {
-  //         const group = enter
-  //           .append("g")
-  //           .classed("density-state-source-filtered", true)
-  //           .attr("id", (d) => `state-density-group-${d.state}`)
-  //           .attr("transform", (d) => `translate(0,${y(d.state) + marginTop - 1})`)
-
-  //         group
-  //           .append("path")
-  //           .attr("class", "mypath")
-  //           .attr("class", "animated")
-  //           .datum((d) => d)
-  //           .attr("fill", (d) => palette[d.state])
-  //           .attr("opacity", 0.8)
-  //           .attr("stroke", "#fff")
-  //           .attr("stroke-width", 0.5)
-  //           .attr("stroke-linejoin", "round")
-  //           .datum((d) => {
-  //             const data = !isNil(d.initialState) ? d.initialState : d.initialStateOG
-  //             return kde(data.map((d) => d.source.x))
-  //           })
-  //           .attr(
-  //             "d",
-  //             line()
-  //               .curve(curveStep)
-  //               .x((d) => x(d[0]))
-  //               .y((d) => densityYSource(d[1])),
-  //           )
-  //       },
-  //       (update) => {
-  //         update
-  //           .transition()
-  //           .duration(300)
-  //           .attr("transform", (d) => `translate(0,${y(d.state) + marginTop - 1})`)
-
-  //         // update.select("text").text((d) => y(d.state))
-  //         update
-  //           .select("path")
-  //           .datum((d) => {
-  //             const data = !isNil(d.initialState) ? d.initialState : d.initialStateOG
-  //             return kde(data.map((d) => d.source.x))
-  //           })
-  //           // .transition()
-  //           // .duration(300)
-  //           .attr(
-  //             "d",
-  //             line()
-  //               .curve(curveStep)
-  //               .x((d) => x(d[0]))
-  //               .y((d) => densityYSource(d[1])),
-  //           )
-  //       },
-
-  //       (exit) => exit.remove(),
-  //     )
-
-  //   densityGroup
-  //     .selectAll(".density-state-target")
-  //     .data(linksAnalytics.complete, (d) => `density-state-target-${d.state}`)
-  //     .join(
-  //       (enter) => {
-  //         const group = enter
-  //           .append("g")
-  //           .classed("density-state-target", true)
-  //           .attr("id", (d) => `state-density-group-${d.state}`)
-  //           .attr("transform", (d) => `translate(0,${y(d.state) + marginTop})`)
-
-  //         group
-  //           .append("path")
-  //           .attr("class", "mypath")
-  //           .attr("class", "animated")
-  //           .datum((d) => d)
-  //           .attr("fill", (d) => palette[d.state])
-  //           .attr("opacity", () => (hoveredDistribution.type === "FT" ? 0.8 : 0.4))
-  //           .attr("stroke", "#fff")
-  //           .attr("stroke-width", 0.5)
-  //           .attr("stroke-linejoin", "round")
-  //           .datum((d) => kde(d.finalStateOG.map((d) => d.target.x)))
-  //           .attr(
-  //             "d",
-  //             line()
-  //               .curve(curveStep)
-  //               .x((d) => x(d[0]))
-  //               .y((d) => densityYTarget(d[1])),
-  //           )
-  //       },
-  //       (update) => {
-  //         update
-  //           .transition()
-  //           .duration(300)
-  //           .attr("transform", (d) => `translate(0,${y(d.state) + marginTop})`)
-
-  //         // update.select("text").text((d) => y(d.state))
-  //         update
-  //           .select("path")
-  //           .datum((d) => d)
-  //           .attr(
-  //             "opacity",
-  //             (d) => (
-  //               console.log(hoveredDistribution.state, d.state),
-  //               hoveredDistribution.state === d.state && hoveredDistribution.type === "FT"
-  //                 ? 0.8
-  //                 : 0.4
-  //             ),
-  //           )
-  //           .datum((d) =>
-  //             kde(
-  //               d.finalStateOG.map(function (d) {
-  //                 return d.target.x
-  //               }),
-  //             ),
-  //           )
-  //           // .transition()
-  //           // .duration(300)
-  //           .attr(
-  //             "d",
-  //             line()
-  //               .curve(curveStep)
-  //               .x((d) => x(d[0]))
-  //               .y((d) => densityYTarget(d[1])),
-  //           )
-  //       },
-
-  //       (exit) => exit.remove(),
-  //     )
-
-  //   densityGroup
-  //     .selectAll(".density-state-target-filtered")
-  //     .data(
-  //       selectedSilhouettesNames.length > 0 && linksAnalytics.filtered,
-  //       (d) => `density-state-target-filtered-${d.state}`,
-  //     )
-  //     .join(
-  //       (enter) => {
-  //         const group = enter
-  //           .append("g")
-  //           .classed("density-state-target-filtered", true)
-  //           .attr("id", (d) => `state-density-group-${d.state}`)
-  //           .attr("transform", (d) => `translate(0,${y(d.state) + marginTop})`)
-
-  //         group
-  //           .append("path")
-  //           .attr("class", "mypath")
-  //           .datum((d) => d)
-  //           .attr("fill", (d) => palette[d.state])
-  //           .attr("opacity", 0.8)
-  //           .attr("stroke", "#fff")
-  //           .attr("stroke-width", 0.5)
-  //           .attr("stroke-linejoin", "round")
-  //           .datum((d) => {
-  //             const data = !isNil(d.finalState) ? d.finalState : d.finalStateOG
-  //             return kde(data.map((d) => d.target.x))
-  //           })
-  //           .attr(
-  //             "d",
-  //             line()
-  //               .curve(curveStep)
-  //               .x((d) => x(d[0]))
-  //               .y((d) => densityYTarget(d[1])),
-  //           )
-  //       },
-  //       (update) => {
-  //         update
-  //           .transition()
-  //           .duration(300)
-  //           .attr("transform", (d) => `translate(0,${y(d.state) + marginTop})`)
-
-  //         // update.select("text").text((d) => y(d.state))
-  //         update
-  //           .select("path")
-  //           .datum((d) => {
-  //             const data = !isNil(d.finalState) ? d.finalState : d.finalStateOG
-  //             return kde(data.map((d) => d.target.x))
-  //           })
-  //           // .transition()
-  //           // .duration(300)
-  //           .attr(
-  //             "d",
-  //             line()
-  //               .curve(curveStep)
-  //               .x((d) => x(d[0]))
-  //               .y((d) => densityYTarget(d[1])),
-  //           )
-  //       },
-
-  //       (exit) => exit.remove(),
-  //     )
-  // })
+  const lineGeneratorSource = line()
+    .curve(curveStep)
+    .x((d) => x(d[0]))
+    .y((d) => Math.min(densityYSource(d[1]), 0))
+  const lineGeneratorTarget = line()
+    .curve(curveStep)
+    .x((d) => x(d[0]))
+    .y((d) => Math.max(densityYTarget(d[1]), 0))
 
   return (
     <g id="density">
       {linksAnalytics.map((d) => {
-        const path = line()
-          .curve(curveStep)
-          .x((d) => x(d[0]))
-          .y((d) => densityYSource(d[1]))
         return (
           <motion.g
             key={`density-state-source-${d.state}`}
@@ -331,27 +63,29 @@ export function StateDensity(props) {
             <PathGroup
               name={d.state}
               trajectories={d.complete.initial}
-              lineGenerator={path}
+              lineGenerator={lineGeneratorSource}
+              opacity={d.filtered.initial.length > 0 && 0.2}
               kde={kde}
             />
-            {/* <PathGroup
+            <PathGroup
               name={d.state}
               trajectories={d.complete.final}
-              lineGenerator={path}
+              lineGenerator={lineGeneratorTarget}
+              opacity={d.filtered.final.length > 0 && 0.2}
               kde={kde}
-            /> */}
+            />
             <PathGroup
               name={d.state}
               trajectories={d.filtered.initial}
-              lineGenerator={path}
+              lineGenerator={lineGeneratorSource}
               kde={kde}
             />
-            {/* <PathGroup
+            <PathGroup
               name={d.state}
               trajectories={d.filtered.final}
-              lineGenerator={path}
+              lineGenerator={lineGeneratorTarget}
               kde={kde}
-            /> */}
+            />
           </motion.g>
         )
       })}
@@ -359,8 +93,10 @@ export function StateDensity(props) {
   )
 }
 
-const PathGroup = ({ name, trajectories, lineGenerator, kde }) => {
-  const { palette } = useViz()
+const PathGroup = ({ name, trajectories, lineGenerator, kde, opacity = 1 }) => {
+  // const { palette } = useViz()
+
+  if (trajectories.length === 0) return
 
   const datum = kde(trajectories.map((d) => d.source.x))
 
@@ -371,12 +107,14 @@ const PathGroup = ({ name, trajectories, lineGenerator, kde }) => {
         strokeWidth: 0.5,
         strokeLinejoin: "round",
         d: lineGenerator(datum),
-        fillOpacity: 0.5,
+        strokeOpacity: opacity,
         fill: "none",
       }}
       // fill={palette[name]}
       animate={{
         d: lineGenerator(datum),
+        strokeOpacity: opacity,
+        fill: "none",
       }}
     />
   )

@@ -395,7 +395,7 @@ export function Sankey({ width, height, data }) {
     setHoveredNode(null)
   }
 
-  console.log(hoveredNode)
+  // console.log(hoveredNode)
 
   const columns = keys(groupBy(nodes, "x0"))
     .map((x) => Number(x))

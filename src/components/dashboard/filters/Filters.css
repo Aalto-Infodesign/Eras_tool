@@ -38,6 +38,7 @@ p {
   place-content: space-between;
   align-items: center;
   padding-bottom: var(--spacing-md);
+  font-size: var(--text-xs);
 }
 #filters .slider-wrapper {
   display: flex;

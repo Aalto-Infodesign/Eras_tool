@@ -21,6 +21,7 @@ export function FilterSlider({
   setLineX,
   hoveredSvg,
   setHoveredSvg,
+  isInverted,
 }) {
   const { isDragging, setIsDragging } = useFilters()
   const sliderRef = useRef(null)
@@ -171,14 +172,19 @@ export function FilterSlider({
         {!hasPattern && (
           <g id="normal-bg" transform={`translate(${cursorWidth / 2}, ${height / 2})`}>
             {/* Background track - before min */}
-            <rect width={minCursorPosition} height={height} fill="#fff" fillOpacity={0.5} />
+            <rect
+              width={minCursorPosition}
+              height={height}
+              fill={isInverted ? "#fff" : "rgba(255,255,255,0.3)"}
+              // fillOpacity={0.5}
+            />
 
             {/* Active track - between min and max */}
             <rect
               x={minCursorPosition}
               width={maxCursorPosition - minCursorPosition}
               height={height}
-              fill="rgba(255,255,255,0.8)"
+              fill={isInverted ? "rgba(255,255,255,0.3)" : "#fff"}
             />
 
             {/* Background track - after max */}
@@ -186,8 +192,8 @@ export function FilterSlider({
               x={maxCursorPosition}
               width={sliderWidth - maxCursorPosition}
               height={height}
-              fill="#fff"
-              fillOpacity={0.5}
+              fill={isInverted ? "#fff" : "rgba(255,255,255,0.3)"}
+              // fillOpacity={0.5}
             />
           </g>
         )}

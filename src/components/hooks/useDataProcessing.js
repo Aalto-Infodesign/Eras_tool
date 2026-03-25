@@ -211,7 +211,7 @@ export const useAnalytics = (data) => {
   return analytics
 }
 
-export const useFiltersSetup = (data, trajectories, selection) => {
+export const useFiltersSetup = (data, trajectories, selection, filtersInverted) => {
   // Only re-runs when the source data or links actually change.
   const dataBounds = useMemo(() => {
     if (!data?.length) return null
@@ -257,27 +257,31 @@ export const useFiltersSetup = (data, trajectories, selection) => {
         range: range(dataBounds.date.extent[0], dataBounds.date.extent[1]),
         selection: selection.date || dataBounds.date.extent,
         isActive: !!selection.date,
+        isInverted: filtersInverted.date,
       },
       diseaseDuration: {
         ...dataBounds.duration,
         range: range(dataBounds.duration.extent[0], dataBounds.duration.extent[1]),
         selection: selection.diseaseDuration || dataBounds.duration.extent,
         isActive: !!selection.diseaseDuration,
+        isInverted: filtersInverted.diseaseDuration,
       },
       age: {
         ...dataBounds.age,
         range: range(dataBounds.age.extent[0], dataBounds.age.extent[1]),
         selection: selection.age || dataBounds.age.extent,
         isActive: !!selection.age,
+        isInverted: filtersInverted.age,
       },
       speed: {
         ...dataBounds.speed,
         range: range(dataBounds.speed.extent[0], dataBounds.speed.extent[1]),
         selection: selection.speed || dataBounds.speed.extent,
         isActive: !!selection.speed,
+        isInverted: filtersInverted.speed,
       },
     }
-  }, [dataBounds, selection])
+  }, [dataBounds, selection, filtersInverted])
 
   return filters
 }

@@ -1,12 +1,15 @@
 import { useMemo } from "react"
 import { useFilters } from "../../../contexts/FiltersContext"
 import styles from "./FilterPanel.module.css"
-import { X } from "lucide-react"
+import { X, Contrast } from "lucide-react"
 import Button from "../../common/Button/Button"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 export function FilterPanel() {
   const activeFilters = useActiveFilters()
+  const { filters, filterTimeRef } = useDerivedData()
+
+  console.log(filters.date)
 
   if (activeFilters.length === 0) return null
   {
@@ -16,19 +19,31 @@ export function FilterPanel() {
     <div className={styles.filterPanel}>
       {activeFilters.map((filter) => (
         <div key={filter.label} className={styles.filterChip}>
+          <Button
+            aria-label="Invert filter"
+            tooltip={filters[filter.id].isInverted ? "Inverted Filter" : "Invert Filter"}
+            tooltipPosition="bottom"
+            data-selected={filters[filter.id].isInverted}
+            size="xs"
+            onClick={filter.onToggle}
+          >
+            <Contrast size={12} />
+          </Button>
           <span>{filter.label}</span>
+
           <Button size="xs" onClick={filter.onRemove}>
             <X size={12} />
           </Button>
         </div>
       ))}
+      {/* <span>Filtered in {filterTimeRef.current}ms</span> */}
     </div>
   )
 }
 
 // useActiveFilters.js
 export const useActiveFilters = () => {
-  const { resetFilter } = useFilters()
+  const { resetFilter, toggleInvertFilter } = useFilters()
   const { filters } = useDerivedData()
 
   const activeFilters = useMemo(() => {
@@ -49,6 +64,7 @@ export const useActiveFilters = () => {
         id: "date",
         label: `Date: ${filters.date.selection[0].toFixed(0)}–${filters.date.selection[1].toFixed(0)}`,
         onRemove: () => resetFilter("date"),
+        onToggle: () => toggleInvertFilter("date"),
       })
     }
     // Range filter
@@ -57,6 +73,7 @@ export const useActiveFilters = () => {
         id: "diseaseDuration",
         label: `diseaseDuration: ${filters.diseaseDuration.selection[0].toFixed(0)}–${filters.diseaseDuration.selection[1].toFixed(0)}`,
         onRemove: () => resetFilter("diseaseDuration"),
+        onToggle: () => toggleInvertFilter("diseaseDuration"),
       })
     }
     // Range filter
@@ -65,6 +82,7 @@ export const useActiveFilters = () => {
         id: "speed",
         label: `speed: ${filters.speed.selection[0].toFixed(0)}–${filters.speed.selection[1].toFixed(0)}`,
         onRemove: () => resetFilter("speed"),
+        onToggle: () => toggleInvertFilter("speed"),
       })
     }
 

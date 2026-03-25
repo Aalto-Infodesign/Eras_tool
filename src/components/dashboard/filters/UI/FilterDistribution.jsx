@@ -16,6 +16,7 @@ export function FilterDistribution({
   xScale,
   lineX,
   hoveredSvg,
+  isInverted,
 }) {
   const dataToCount = mode === "double" ? allPoints.all : allPoints
 
@@ -44,6 +45,7 @@ export function FilterDistribution({
     width,
     lineX,
     hoveredSvg,
+    isInverted,
   }
 
   return (
@@ -68,7 +70,7 @@ export function FilterDistribution({
             <g>
               <DistributionPath
                 data={allPoints.min}
-                color={"#fff"}
+                color={"var(--text-primary)"}
                 maskID={maskID + "-min"}
                 {...sharedPathProps}
               />

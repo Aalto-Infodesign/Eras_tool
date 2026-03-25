@@ -115,7 +115,7 @@ export function TrajectoriesChart() {
                 // variant="secondary"
                 data-selected={trajectoriesSelectionMode === "vertical"}
                 onClick={() => setTrajectoriesSelectionMode("vertical")}
-                title="Transitions that happen at the same moment in time"
+                tooltip="Transitions that happen at the same moment in time"
               >
                 {"||"}
               </Button>
@@ -124,7 +124,7 @@ export function TrajectoriesChart() {
                 // variant="secondary"
                 data-selected={trajectoriesSelectionMode === "all"}
                 onClick={() => setTrajectoriesSelectionMode("all")}
-                title="All trajectories"
+                tooltip="All trajectories"
               >
                 {"All"}
               </Button>
@@ -133,7 +133,7 @@ export function TrajectoriesChart() {
                 // variant="secondary"
                 data-selected={trajectoriesSelectionMode === "diagonal"}
                 onClick={() => setTrajectoriesSelectionMode("diagonal")}
-                title="Transitions that happen in different moments"
+                tooltip="Transitions that happen in different moments"
               >
                 {`\\`}
                 {`\\`}

@@ -2,6 +2,7 @@ import { Panel, useReactFlow, getNodesBounds, getViewportForBounds } from "@xyfl
 import { toPng } from "html-to-image"
 import { Download } from "lucide-react"
 import { downloadImage } from "../../../../utils/downloadImage"
+import Button from "../../../common/Button/Button"
 
 const imageWidth = 1024
 const imageHeight = 1024
@@ -29,9 +30,15 @@ function DownloadButton() {
 
   return (
     <Panel position="top-right">
-      <button className="download-btn xy-theme__button" onClick={onClick}>
+      <Button
+        variant="primary"
+        size="small"
+        onClick={onClick}
+        tooltip={"Download"}
+        tooltipPosition="left"
+      >
         <Download size={16} /> .png
-      </button>
+      </Button>
     </Panel>
   )
 }

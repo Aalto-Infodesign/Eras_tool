@@ -16,6 +16,7 @@ export const DistributionPath = ({
   yScale,
   lineX,
   hoveredSvg,
+  isInverted,
 }) => {
   const dataCount = useMemo(
     () =>
@@ -25,6 +26,8 @@ export const DistributionPath = ({
       })),
     [data],
   )
+
+  console.log(isInverted)
 
   const lookup = useMemo(() => new Map(dataCount.map((d) => [+d.x, d])), [dataCount])
 
@@ -52,15 +55,31 @@ export const DistributionPath = ({
     <g className="path-group">
       <defs>
         <mask id={maskID}>
-          <motion.rect
-            initial={{ x: 0, y: -1, height: height + 2 }}
-            fill="white"
-            animate={{
-              x: xScale(selection[0]),
-              width: xScale(selection[1]) - xScale(selection[0]),
-            }}
-            transition={{ duration: 0.1 }}
-          />
+          {isInverted ? (
+            <>
+              <rect width="100%" height="100%" fill="white" />
+
+              <motion.rect
+                initial={{ x: 0, y: -1, height: height + 2 }}
+                fill="black"
+                animate={{
+                  x: xScale(selection[0]),
+                  width: xScale(selection[1]) - xScale(selection[0]),
+                }}
+                transition={{ duration: 0.1 }}
+              />
+            </>
+          ) : (
+            <motion.rect
+              initial={{ x: 0, y: -1, height: height + 2 }}
+              fill="var(--text-primary)"
+              animate={{
+                x: xScale(selection[0]),
+                width: xScale(selection[1]) - xScale(selection[0]),
+              }}
+              transition={{ duration: 0.1 }}
+            />
+          )}
         </mask>
       </defs>
       <motion.path

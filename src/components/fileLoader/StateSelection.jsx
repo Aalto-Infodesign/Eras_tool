@@ -256,12 +256,18 @@ export function StateSelection() {
                         size="xs"
                         className="center"
                         onClick={() => addNodetoFlow("default", item)}
+                        tooltip={"Add to flowchart"}
                       >
                         <Workflow size={14} />
                       </Button>
                     )}
                     {statesOrder.length > 1 && (
-                      <Button size="xs" className="center" onClick={() => toggleRemovedState(item)}>
+                      <Button
+                        size="xs"
+                        className="center"
+                        onClick={() => toggleRemovedState(item)}
+                        tooltip={"Remove state"}
+                      >
                         <X size={14} />
                       </Button>
                     )}

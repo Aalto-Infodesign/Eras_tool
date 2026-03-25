@@ -3,7 +3,7 @@
  * and depend on Filters
  */
 
-import { createContext, useContext, useMemo, useEffect } from "react"
+import { createContext, useContext, useMemo, useRef } from "react"
 import { useData } from "./ProcessedDataContext"
 import { useFilters } from "./FiltersContext"
 import { isEmpty, includes, union, flattenDeep } from "lodash"
@@ -24,12 +24,15 @@ export function DerivedDataProvider({ children }) {
   const {
     filtersSelection,
     filtersActive,
+    filtersInverted,
     selectedSilhouettesNames,
     selectedTrajectoriesIDs,
     trajectoriesSelectionMode,
     removedStates,
   } = useFilters()
   const { chartType } = useViz()
+
+  const filterTimeRef = useRef(null)
 
   // console.log("Silhouettes", silhouettes)
 
@@ -60,27 +63,40 @@ export function DerivedDataProvider({ children }) {
   const silhouettes = useSilhouettesFromTrajectories(trajectories, idealSilhouettes, data)
   const analytics = useAnalytics(data)
 
-  const filters = useFiltersSetup(data, trajectories, filtersSelection)
+  const filters = useFiltersSetup(data, trajectories, filtersSelection, filtersInverted)
+
+  const applyFilter = (isNull, passes, isInverted) => {
+    if (isNull) return true
+    return isInverted ? !passes : passes
+  }
 
   const filteredData = useMemo(() => {
     if (!isReady) return []
 
     if (!filtersActive) return data
 
-    return data
-      .filter(
-        (datum) =>
-          datum.diseaseDuration === null ||
-          (datum.diseaseDuration >= filters.diseaseDuration.selection[0] &&
-            datum.diseaseDuration <= filters.diseaseDuration.selection[1]),
+    const start = performance.now()
+
+    const filteredData = data
+      .filter((datum) =>
+        applyFilter(
+          datum.diseaseDuration === null,
+          datum.diseaseDuration >= filters.diseaseDuration.selection[0] &&
+            datum.diseaseDuration <= filters.diseaseDuration.selection[1],
+          filters.diseaseDuration.isInverted,
+        ),
       )
-      .filter(
-        (datum) =>
-          datum.years === null ||
+      .filter((datum) =>
+        applyFilter(
+          datum.years === null,
           datum.years.length === 0 ||
-          (Math.floor(min(datum.years)) >= filters.date.selection[0] &&
-            Math.floor(max(datum.years)) <= filters.date.selection[1]),
+            (Math.floor(min(datum.years)) >= filters.date.selection[0] &&
+              Math.floor(max(datum.years)) <= filters.date.selection[1]),
+          filters.date.isInverted,
+        ),
       )
+    filterTimeRef.current = (performance.now() - start).toFixed(2)
+    return filteredData
   }, [data, filters, filtersActive])
 
   // console.log("fd", filteredData)
@@ -149,11 +165,13 @@ export function DerivedDataProvider({ children }) {
   }, [selectedSilhouettesData])
 
   const filteredLinks = useMemo(() => {
-    const links = linksBySelectedSilhouettes.filter(
-      (datum) =>
-        datum.speed === null ||
-        (Math.floor(datum.speed) >= filters.speed.selection[0] &&
-          Math.floor(datum.speed) <= filters.speed.selection[1]),
+    const links = linksBySelectedSilhouettes.filter((datum) =>
+      applyFilter(
+        datum.speed === null,
+        Math.floor(datum.speed) >= filters.speed.selection[0] &&
+          Math.floor(datum.speed) <= filters.speed.selection[1],
+        filters.speed.isInverted,
+      ),
     )
 
     if (trajectoriesSelectionMode === "all") return links
@@ -206,6 +224,7 @@ export function DerivedDataProvider({ children }) {
       // selectedData,
       analytics,
       filters,
+      filterTimeRef,
     }),
     [
       data,
@@ -222,6 +241,7 @@ export function DerivedDataProvider({ children }) {
       // selectedData,
       analytics,
       filters,
+      filterTimeRef,
     ],
   )
 

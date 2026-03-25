@@ -137,7 +137,7 @@ export function PartialOrderChart() {
   // Use the custom hook to get memoized, processed data
   console.time("useSankeyData")
   const sankeyData = useSankeyData(silhouettesData, filteredLinks, idealSilhouettes)
-  console.log(sankeyData)
+  // console.log(sankeyData)
   console.timeEnd("useSankeyData")
 
   return (

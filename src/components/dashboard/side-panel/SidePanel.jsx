@@ -8,6 +8,7 @@ import { ExportIDs } from "../export/ExportIDs"
 import { useWindowSize } from "../../hooks/useWindowSize"
 import { createPortal } from "react-dom"
 import { useViz } from "../../../contexts/VizContext"
+import Button from "../../common/Button/Button"
 
 export const SidePanel = () => {
   const { isSidePanelOpen, setSidePanelOpen } = useViz()
@@ -41,12 +42,16 @@ export const SidePanel = () => {
     >
       <div className={styles.panelButtons}>
         <PanelButton
+          tooltip="Toggle filters"
+          tooltipPosition="left"
           isSelected={panelContent === "filters"}
           onClick={() => handlePanelOpen("filters")}
         >
           <SlidersHorizontal size={20} />
         </PanelButton>
         <PanelButton
+          tooltip="Toggle export panel"
+          tooltipPosition="left"
           isSelected={panelContent === "export"}
           onClick={() => handlePanelOpen("export")}
         >
@@ -62,7 +67,7 @@ export const SidePanel = () => {
   )
 }
 
-function PanelButton({ children, isSelected, onClick, className = "" }) {
+function PanelButton({ children, isSelected, onClick, className = "", ...rest }) {
   const buttonClassName = [
     styles.panelBtn,
     isSelected && styles.selected, // es. styles.primary
@@ -72,13 +77,14 @@ function PanelButton({ children, isSelected, onClick, className = "" }) {
     .trim()
 
   return (
-    <motion.button
+    <Button
       className={buttonClassName}
       whileHover={{ scale: 1.05 }}
       onClick={onClick}
+      {...rest}
       //   whileTap={{ scale: 0.95 }}
     >
       {children}
-    </motion.button>
+    </Button>
   )
 }

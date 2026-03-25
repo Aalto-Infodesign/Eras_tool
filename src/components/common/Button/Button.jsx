@@ -1,6 +1,7 @@
 import PropTypes from "prop-types"
 import styles from "./Button.module.css"
 import { motion } from "framer-motion"
+import { useState, useId } from "react"
 
 /**
  * Componente bottone primario riutilizzabile per l'applicazione.
@@ -12,8 +13,14 @@ const Button = ({
   size = "medium",
   disabled = false,
   className = "",
+  tooltip,
+  tooltipPosition = "bottom", // "top" | "bottom" | "left" | "right"
   ...rest
 }) => {
+  const [isTooltipVisible, setTooltipVisible] = useState(false)
+  // useId garantisce un ID univoco anche con più istanze in pagina
+  const tooltipId = useId()
+
   // Unisce le classi CSS: base, varianti, dimensione, e classi custom.
   const buttonClassName = [
     styles.btn,
@@ -24,15 +31,52 @@ const Button = ({
     .join(" ")
     .trim()
 
+  if (!tooltip) {
+    return (
+      <motion.button className={buttonClassName} type={type} disabled={disabled} {...rest}>
+        {children}
+      </motion.button>
+    )
+  }
+
   return (
-    <motion.button
-      className={buttonClassName}
-      type={type}
-      disabled={disabled}
-      {...rest} // Applica qualsiasi altra prop (es. aria-label)
+    <div
+      className={styles.tooltipWrapper}
+      onMouseEnter={() => setTooltipVisible(true)}
+      onMouseLeave={() => setTooltipVisible(false)}
+      // onFocus/onBlur gestiscono la navigazione da tastiera (Tab)
+      onFocus={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(false)}
     >
-      {children}
-    </motion.button>
+      <motion.button
+        className={buttonClassName}
+        type={type}
+        disabled={disabled}
+        // Collega il bottone al tooltip: gli screen reader leggeranno
+        // il testo del tooltip come descrizione aggiuntiva
+        aria-describedby={isTooltipVisible ? tooltipId : undefined}
+        {...rest}
+      >
+        {children}
+      </motion.button>
+
+      {/* role="tooltip" + aria-hidden impedisce la doppia lettura:
+          il contenuto è già letto via aria-describedby */}
+      <span
+        id={tooltipId}
+        role="tooltip"
+        aria-hidden={!isTooltipVisible}
+        className={[
+          styles.tooltip,
+          styles[`tooltip--${tooltipPosition}`],
+          isTooltipVisible ? styles["tooltip--visible"] : "",
+        ]
+          .join(" ")
+          .trim()}
+      >
+        {tooltip}
+      </span>
+    </div>
   )
 }
 
@@ -53,7 +97,7 @@ Button.propTypes = {
   /**
    * Lo stile visivo del bottone.
    */
-  variant: PropTypes.oneOf(["primary", "secondary", "tertiary"]),
+  variant: PropTypes.oneOf(["primary", "secondary", "tertiary", "transparent"]),
   /**
    * La dimensione del bottone.
    */

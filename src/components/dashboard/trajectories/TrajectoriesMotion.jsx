@@ -9,6 +9,7 @@ import { useFilters } from "../../../contexts/FiltersContext"
 import "./Trajectories.css"
 import { union } from "lodash"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
+
 export function TrajectoriesMotion(props) {
   const { selectedTrajectoriesIDs } = useFilters()
   const { palette } = useViz()
@@ -140,7 +141,7 @@ export function TrajectoriesMotion(props) {
                   x2={x(d.target.x)}
                   y1={y(d.source.state) + marginTop}
                   y2={y(d.target.state) + marginTop}
-                  color={palette[d.source.state]}
+                  color={palette[d.target.state]}
                   dash={dash}
                   isSelected={isSelected}
                   animationDuration={lines.length > 1000 ? 0.0 : 0.2}
