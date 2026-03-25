@@ -4,7 +4,6 @@ import { Upload } from "lucide-react"
 import { motion } from "motion/react"
 import { useMemo } from "react"
 import { useModifierKey } from "../hooks/useModifierKey.js"
-import { useViz } from "../../contexts/VizContext.jsx"
 import { ShortcutSpan } from "../common/ShortcutSpan/ShortcutSpan.jsx"
 
 const LoadDataset = () => {
@@ -52,8 +51,12 @@ const LoadDataset = () => {
     >
       <div></div>
       <div>
-        <label htmlFor="fileInput" className={`file-input-label ${isUploading ? "loading" : ""}`}>
-          <Upload size={14} />
+        <label
+          htmlFor="fileInput"
+          className={`file-input-label ${isUploading ? "loading" : ""}`}
+          aria-label="Upload file"
+        >
+          <Upload size={12} />
           <span>{label}</span>
           {fileExtention && <span className="filetype badge">{fileExtention.toUpperCase()}</span>}
         </label>

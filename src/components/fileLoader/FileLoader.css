@@ -8,8 +8,9 @@
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
 
-  transition: all 200ms ease-out;
+  /* transition: all 200ms ease-out; */
   z-index: 20;
+  font-size: var(--text-xs);
 
   /* width: var(--grid-column-width, auto); */
   position: absolute;
@@ -17,6 +18,7 @@
 
 .loader-wrapper.center {
   gap: var(--spacing-sm);
+  font-size: var(--text-sm);
 
   place-self: center;
   align-self: center;
@@ -61,7 +63,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-sm);
   cursor: pointer;
-  font-size: 0.8rem;
+
   background-color: var(--surface-primary);
   transition: all 100ms ease-out;
 }
@@ -70,6 +72,10 @@
 }
 .file-input-label:focus {
   outline: 0.5px solid var(--violet-700);
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
 }
 
 .accordion {

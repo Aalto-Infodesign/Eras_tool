@@ -26,7 +26,7 @@ import { DataPanel } from "./dashboard/helper-panels/DataPanel"
 const Dashboard = () => {
   const { richData, statesOrder } = useData()
   const { isHasse, isLegend } = useViz()
-  const { completeSilhouettes, selectedSilhouettesData, silhouettes } = useDerivedData()
+  const { data, completeSilhouettes, selectedSilhouettesData, silhouettes } = useDerivedData()
 
   const w = 170
   const marginTop = 10

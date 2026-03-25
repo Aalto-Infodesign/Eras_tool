@@ -23,7 +23,7 @@ import { useFilters } from "../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import Button from "../../common/Button/Button"
 import { StatesMatrix } from "../../fileLoader/statesMatrix/StatesMatrix"
-import { ListFilter } from "lucide-react"
+import { ChartArea, ChartLine, ListFilter } from "lucide-react"
 
 export function TrajectoriesChart() {
   const { selectedTrajectoriesIDs, trajectoriesSelectionMode, setTrajectoriesSelectionMode } =
@@ -159,8 +159,9 @@ export function TrajectoriesChart() {
             size="xs"
             data-selected={showStateDensity}
             onClick={() => setShowStateDensity(!showStateDensity)}
+            tooltip={"Toggle Segment Density by State"}
           >
-            {`${showStateDensity ? "Hide" : "Show"} density`}
+            <ChartLine size={12} />
             {/* <span class="material-icons">ssid_chart</span> */}
           </Button>
         </div>

@@ -102,7 +102,10 @@ function Pagination({ numSlides, selectedIndex, setSelectedIndex, setDirection }
         <motion.div
           key={i}
           className={`dot`}
-          animate={{ scale: i === selectedIndex ? 1.5 : 1, opacity: i === selectedIndex ? 1 : 0.5 }}
+          animate={{
+            scale: i === selectedIndex ? 1.5 : 1,
+            opacity: i === selectedIndex ? 1 : 0.5,
+          }}
           whileHover={{ scale: 1.1, opacity: 0.7, cursor: "pointer" }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {

@@ -1,12 +1,15 @@
 import Button from "../common/Button/Button"
 import { useViz } from "../../contexts/VizContext"
+import { useModifierKey } from "../hooks/useModifierKey"
 
 export function ProcessButton({ setIsOpen }) {
-  const { setIsLegend } = useViz()
+  const { isLegend, setIsLegend } = useViz()
   const createVisualization = () => {
     setIsLegend(true)
     setIsOpen(false)
   }
+
+  useModifierKey("Enter", () => !isLegend && createVisualization())
 
   return (
     <Button
