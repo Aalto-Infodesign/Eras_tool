@@ -24,12 +24,12 @@
 
   background-color: var(--surface-primary);
   color: var(--text-primary);
-  box-shadow: 0 4px 5px rgba(0, 0, 22, 0.4);
+  box-shadow: 0 4px 5px rgba(0, 0, 22, 0.6);
   border: 0px solid;
   cursor: pointer;
 }
 .selected {
-  background-color: var(--surface-primary-selected);
+  background-color: color-mix(in srgb, var(--surface-secondary) 80%, var(--surface-accent) 20%);
   color: var(--text-primary);
 }
 
@@ -37,8 +37,8 @@
   padding: var(--spacing-sm);
   width: 200px;
   min-height: 400px;
-  background-color: var(--surface-primary-selected);
-  box-shadow: 0 4px 5px rgba(0, 0, 22, 0.4);
+  background-color: color-mix(in srgb, var(--surface-secondary) 80%, var(--surface-accent) 20%);
+  box-shadow: 0 4px 5px rgba(0, 0, 22, 0.6);
 
   border-radius: 0 0 0 var(--radius-md);
 }
