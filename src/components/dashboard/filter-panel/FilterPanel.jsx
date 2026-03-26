@@ -7,9 +7,7 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 export function FilterPanel() {
   const activeFilters = useActiveFilters()
-  const { filters, filterTimeRef } = useDerivedData()
-
-  console.log(filters.date)
+  const { filters } = useDerivedData()
 
   if (activeFilters.length === 0) return null
   {
@@ -36,7 +34,6 @@ export function FilterPanel() {
           </Button>
         </div>
       ))}
-      {/* <span>Filtered in {filterTimeRef.current}ms</span> */}
     </div>
   )
 }

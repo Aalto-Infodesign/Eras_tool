@@ -4,6 +4,7 @@ import { isEqual, isEmpty } from "lodash"
 import { useRawData } from "./RawDataContext"
 import { xor, difference } from "lodash"
 import { useViz } from "./VizContext"
+import { useDebouncedState } from "hamo"
 
 const FiltersContext = createContext(null)
 
@@ -20,12 +21,15 @@ export function FiltersProvider({ children }) {
   const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
 
   // Sliders
-  const [filtersSelection, setFiltersSelection] = useState({
-    date: null,
-    diseaseDuration: null,
-    age: null,
-    speed: null,
-  })
+  const [filtersSelection, setFiltersSelection] = useDebouncedState(
+    {
+      date: null,
+      diseaseDuration: null,
+      age: null,
+      speed: null,
+    },
+    80,
+  )
   const [filtersInverted, setFiltersInverted] = useState({
     date: false,
     diseaseDuration: false,

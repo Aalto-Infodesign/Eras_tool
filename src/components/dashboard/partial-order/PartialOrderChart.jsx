@@ -14,9 +14,9 @@ import { Legend } from "../legend/Legend"
 
 // TODO Use idealSilhouettes to highlight nodes/links in the sankey diagram
 
-const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
+const useSankeyData = (silhouettes, selectedLinks, idealSilhouettes) => {
   return useMemo(() => {
-    if (!silhouettes || !filteredLinks || silhouettes.length === 0) {
+    if (!silhouettes || !selectedLinks || silhouettes.length === 0) {
       return { nodes: [], links: [] }
     }
 
@@ -36,7 +36,7 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
 
     // console.log("Trajectory to Silhouette Map:", trajectoryToSilhouetteMap)
 
-    // console.log("Filtered Links:", filteredLinks)
+    // console.log("Filtered Links:", selectedLinks)
 
     // Helper function to add sequential order to link states
     const addOrderToStates = (links) => {
@@ -68,7 +68,7 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
       })
     }
 
-    const linksWithOrder = addOrderToStates(filteredLinks).map((l) => ({
+    const linksWithOrder = addOrderToStates(selectedLinks).map((l) => ({
       ...l,
       silhouette: trajectoryToSilhouetteMap.get(l.id) || "unknown",
     }))
@@ -124,19 +124,19 @@ const useSankeyData = (silhouettes, filteredLinks, idealSilhouettes) => {
     const linksNotEmpty = linksWithValue.filter((l) => l.value > 0)
 
     return { nodes: posetNodes, links: linksNotEmpty }
-  }, [silhouettes, filteredLinks])
+  }, [silhouettes, selectedLinks])
 }
 
 export function PartialOrderChart() {
   const { idealSilhouettes } = useData()
-  const { completeSilhouettes, selectedSilhouettesData, filteredLinks } = useDerivedData()
+  const { completeSilhouettes, selectedSilhouettesData, selectedLinks } = useDerivedData()
 
   const silhouettesData =
     selectedSilhouettesData.length === 0 ? completeSilhouettes : selectedSilhouettesData
 
   // Use the custom hook to get memoized, processed data
   console.time("useSankeyData")
-  const sankeyData = useSankeyData(silhouettesData, filteredLinks, idealSilhouettes)
+  const sankeyData = useSankeyData(silhouettesData, selectedLinks, idealSilhouettes)
   // console.log(sankeyData)
   console.timeEnd("useSankeyData")
 

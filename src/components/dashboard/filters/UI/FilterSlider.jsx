@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useMemo } from "react"
+import { useRef, useCallback, useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { TextureDefs } from "../../../common/Textures/TextureDefs"
 import { useFilters } from "../../../../contexts/FiltersContext"
@@ -31,6 +31,17 @@ export function FilterSlider({
   const svgCursorPosition = useMouseMoveSvg(sliderRef)
   const [selectionMin, selectionMax] = value
 
+  // ✅ Local visual state — never debounced, always instant
+  const [localMin, setLocalMin] = useState(selectionMin)
+  const [localMax, setLocalMax] = useState(selectionMax)
+
+  useEffect(() => {
+    if (!isDragging) {
+      setLocalMin(selectionMin)
+      setLocalMax(selectionMax)
+    }
+  }, [selectionMin, selectionMax, isDragging])
+
   useEffect(() => {
     setLineX(svgCursorPosition.x)
   }, [svgCursorPosition])
@@ -60,8 +71,10 @@ export function FilterSlider({
 
   // Calculate positions
   const sliderWidth = width - cursorWidth
-  const minCursorPosition = ((selectionMin - min) / (max - min)) * sliderWidth
-  const maxCursorPosition = ((selectionMax - min) / (max - min)) * sliderWidth
+
+  // Based on local state
+  const minCursorPosition = ((localMin - min) / (max - min)) * sliderWidth
+  const maxCursorPosition = ((localMax - min) / (max - min)) * sliderWidth
 
   // Convert pixel position to value
   const pixelToValue = useCallback(
@@ -79,13 +92,13 @@ export function FilterSlider({
     (e) => {
       e.preventDefault()
       e.stopPropagation()
-
-      console.log(e)
       setIsDragging(true)
 
       const handleMove = (moveEvent) => {
         const clientX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX
         const newValue = Math.min(pixelToValue(clientX), selectionMax)
+
+        setLocalMin(newValue)
         onChange([newValue, selectionMax])
       }
 
@@ -116,6 +129,7 @@ export function FilterSlider({
       const handleMove = (moveEvent) => {
         const clientX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX
         const newValue = Math.max(pixelToValue(clientX), selectionMin)
+        setLocalMax(newValue)
         onChange([selectionMin, newValue])
       }
 

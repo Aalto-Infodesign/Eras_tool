@@ -11,8 +11,7 @@ import { useLinksAnalytics } from "../../hooks/useLinksAnalytics"
 import { motion } from "motion/react"
 
 export function StateDensity(props) {
-  const { selectedSilhouettesNames } = useFilters()
-  const { completeLinks, filteredLinks } = useDerivedData()
+  const { filteredLinks, selectedLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const { marginTop, chartScales } = trajectoriesContext
@@ -21,11 +20,11 @@ export function StateDensity(props) {
 
   const { hoveredDistribution } = props
 
-  const completeLinksAnalytics = useLinksAnalytics(completeLinks)
-  const filteredLinksAnalytics = useLinksAnalytics(filteredLinks)
+  const completeLinksAnalytics = useLinksAnalytics(filteredLinks)
+  const selectedLinksAnalytics = useLinksAnalytics(selectedLinks)
 
   const linksAnalytics = completeLinksAnalytics.map((item) => {
-    const match = filteredLinksAnalytics.find((f) => f.state === item.state)
+    const match = selectedLinksAnalytics.find((f) => f.state === item.state)
     return {
       state: item.state,
       complete: { initial: item.initialTrajectories, final: item.finalTrajectories },

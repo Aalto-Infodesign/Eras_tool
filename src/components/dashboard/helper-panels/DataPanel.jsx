@@ -9,7 +9,7 @@ export function DataPanel({}) {
     filteredData,
     selectedSilhouettesData,
     filteredSilhouettes,
-    filteredLinks,
+    selectedLinks,
     analytics,
   } = useDerivedData()
 
@@ -41,9 +41,9 @@ export function DataPanel({}) {
       </p>
       <h4>Segments</h4>
       <p>
-        {filteredLinks.length !== links.length && (
+        {selectedLinks.length !== links.length && (
           <span>
-            <b>{filteredLinks.length} </b>
+            <b>{selectedLinks.length} </b>
             {" of "}
           </span>
         )}

@@ -10,17 +10,15 @@ import {
 } from "../components/hooks/useDataProcessing"
 
 import { tsvJSON } from "../utils/dataHelpers"
-
-import { difference, xor } from "lodash"
+import { useDebouncedState } from "hamo"
 
 const ProcessedDataContext = createContext(null)
 
 export function ProcessedDataProvider({ children }) {
   const { rawData, fileName } = useRawData()
   const [clusterStates, setClusterStates] = useState(false) // Option in import
-  // const [removedStates, setRemovedStates] = useState([]) // Edited in States Selection
 
-  const [statesOrder, setStatesOrder] = useState([])
+  const [statesOrder, setStatesOrder] = useDebouncedState([], 10)
 
   // from Flowchart
   const [idealSilhouettes, setIdealSilhouettes] = useState([])

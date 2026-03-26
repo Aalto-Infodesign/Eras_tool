@@ -28,7 +28,7 @@ import { ChartArea, ChartLine, ListFilter } from "lucide-react"
 export function TrajectoriesChart() {
   const { selectedTrajectoriesIDs, trajectoriesSelectionMode, setTrajectoriesSelectionMode } =
     useFilters()
-  const { filteredLinks } = useDerivedData()
+  const { selectedLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
 
@@ -65,14 +65,14 @@ export function TrajectoriesChart() {
   }, [isEnter])
 
   useEffect(() => {
-    if (filteredLinks.length > 500) setIsSelectModeLines(false)
-  }, [filteredLinks.length])
+    if (selectedLinks.length > 500) setIsSelectModeLines(false)
+  }, [selectedLinks.length])
 
   return (
     <>
       <div className="chart-controls">
         <div id="lump-controls" className={` ${isSelectModeLines ? "Lines" : "Lumps"}`}>
-          {filteredLinks.length < 500 && (
+          {selectedLinks.length < 500 && (
             <div>
               <Button
                 data-selected={isSelectModeLines}
@@ -205,7 +205,7 @@ export function TrajectoriesChart() {
               svgRef={svgRef}
             />
 
-            {filteredLinks.length < 500 && (
+            {selectedLinks.length < 500 && (
               <TrajectoriesMotion
                 //Extended Context
                 isSelectModeLines={isSelectModeLines}

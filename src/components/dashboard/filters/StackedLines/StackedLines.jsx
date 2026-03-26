@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
-import { scaleLinear, extent, index, sort } from "d3"
+import { scaleLinear, extent } from "d3"
 import { Line } from "@react-three/drei"
 import * as THREE from "three"
 import Button from "../../../common/Button/Button"

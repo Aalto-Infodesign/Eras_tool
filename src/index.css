@@ -357,8 +357,9 @@ h4 {
 
 .key-pop-up {
   position: absolute;
-  top: var(--spacing-4);
-  left: var(--spacing-4);
+  display: flex;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
   background-color: var(--surface-accent);
   padding: var(--spacing-2);
   border-radius: var(--radius-md);

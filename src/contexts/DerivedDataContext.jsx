@@ -3,7 +3,7 @@
  * and depend on Filters
  */
 
-import { createContext, useContext, useMemo, useRef } from "react"
+import { createContext, useContext, useMemo } from "react"
 import { useData } from "./ProcessedDataContext"
 import { useFilters } from "./FiltersContext"
 import { isEmpty, includes, union, flattenDeep } from "lodash"
@@ -31,8 +31,6 @@ export function DerivedDataProvider({ children }) {
     removedStates,
   } = useFilters()
   const { chartType } = useViz()
-
-  const filterTimeRef = useRef(null)
 
   // console.log("Silhouettes", silhouettes)
 
@@ -75,8 +73,6 @@ export function DerivedDataProvider({ children }) {
 
     if (!filtersActive) return data
 
-    const start = performance.now()
-
     const filteredData = data
       .filter((datum) =>
         applyFilter(
@@ -95,7 +91,7 @@ export function DerivedDataProvider({ children }) {
           filters.date.isInverted,
         ),
       )
-    filterTimeRef.current = (performance.now() - start).toFixed(2)
+
     return filteredData
   }, [data, filters, filtersActive])
 
@@ -103,7 +99,7 @@ export function DerivedDataProvider({ children }) {
 
   const filteredTrajectories = useTrajectoriesFromData(filteredData)
 
-  const completeLinks = useMemo(() => {
+  const filteredLinks = useMemo(() => {
     return filteredTrajectories.flat()
   }, [filteredTrajectories])
 
@@ -114,27 +110,20 @@ export function DerivedDataProvider({ children }) {
   )
 
   // Step 2: derive silhouettes from filtered data
-  const silhouettesMap = useMemo(() => {
-    if (filteredSilhouettes.length === 0 || !filtersActive) return new Map()
-
-    const map = new Map()
-    filteredSilhouettes.forEach((s) => map.set(s.name, s))
-    return map
-  }, [filteredSilhouettes, filtersActive])
-
   const completeSilhouettes = useMemo(() => {
-    if (!silhouettesMap) return []
-
-    // console.log(silhouettesMap)
-    return silhouettes.map((s) => {
-      const filteredVersion = silhouettesMap.get(s.name) ?? null
-      return {
+    if (!filtersActive || filteredSilhouettes.length === 0)
+      return silhouettes.map((s) => ({
         ...s,
-        filtered: filteredVersion,
-        isFiltered: filteredVersion !== null,
-      }
+        filtered: null,
+        isFiltered: false,
+      }))
+
+    const map = new Map(filteredSilhouettes.map((s) => [s.name, s]))
+    return silhouettes.map((s) => {
+      const filteredVersion = map.get(s.name) ?? null
+      return { ...s, filtered: filteredVersion, isFiltered: filteredVersion !== null }
     })
-  }, [silhouettes, silhouettesMap])
+  }, [silhouettes, filteredSilhouettes, filtersActive])
 
   const selectedSilhouettesData = useMemo(() => {
     if (selectedSilhouettesNames && selectedSilhouettesNames.length === 0) return []
@@ -147,24 +136,29 @@ export function DerivedDataProvider({ children }) {
     const individuals = new Set(flattenDeep(s.map((s) => s.trajectories)).map((t) => t.id))
 
     console.timeEnd("Selected Links")
-    return completeLinks.filter((l) => {
+    return filteredLinks.filter((l) => {
       // Ricerca O(1) invece di O(n)
       if (!individuals.has(l.id)) return false
       // if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
 
       return true
     })
-  }, [silhouettes, selectedSilhouettesData, completeLinks])
+  }, [silhouettes, selectedSilhouettesData, filteredLinks])
 
   const IDsFromSelectedSilhouettes = useMemo(() => {
-    if (!selectedSilhouettesData) return null
-    return selectedSilhouettesData
-      .flatMap((s) => (s.isFiltered ? s.filtered.trajectories : s.trajectories)) // Modern alternative to .map().flat()
-      .map((t) => t[0]?.id) // Use optional chaining to prevent crashes
-      .filter(Boolean) // Remove any undefined/null values
+    if (!selectedSilhouettesData?.length) return []
+    const ids = []
+    for (const s of selectedSilhouettesData) {
+      const source = s.isFiltered ? s.filtered.trajectories : s.trajectories
+      for (const t of source) {
+        const id = t[0]?.id
+        if (id != null) ids.push(id)
+      }
+    }
+    return ids
   }, [selectedSilhouettesData])
 
-  const filteredLinks = useMemo(() => {
+  const selectedLinks = useMemo(() => {
     const links = linksBySelectedSilhouettes.filter((datum) =>
       applyFilter(
         datum.speed === null,
@@ -203,45 +197,36 @@ export function DerivedDataProvider({ children }) {
     return [...IDsFromSelectedSilhouettes]
   }, [IDsFromSelectedSilhouettes, selectedTrajectoriesIDs, chartType])
 
-  // const selectedData = useMemo(() => {
-  //   if (selectedIDs.length === 0) return filteredData
-  //   return filteredData.filter((d) => selectedIDs.includes(d.FINNGENID))
-  // }, [filteredData, selectedIDs])
-
   const value = useMemo(
     () => ({
       data,
       trajectories,
       silhouettes,
       filteredData,
-      completeLinks,
+      filteredLinks,
       filteredSilhouettes,
       completeSilhouettes,
       selectedSilhouettesData,
       selectedIDs,
-      filteredLinks,
+      selectedLinks,
       IDsFromSelectedSilhouettes,
-      // selectedData,
       analytics,
       filters,
-      filterTimeRef,
     }),
     [
       data,
       trajectories,
       silhouettes,
       filteredData,
-      completeLinks,
+      filteredLinks,
       filteredSilhouettes,
       completeSilhouettes,
       selectedSilhouettesData,
       selectedIDs,
-      filteredLinks,
+      selectedLinks,
       IDsFromSelectedSilhouettes,
-      // selectedData,
       analytics,
       filters,
-      filterTimeRef,
     ],
   )
 

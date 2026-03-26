@@ -45,7 +45,7 @@ export function TrajectoriesExplorerChart(props) {
     toggleSilhouetteFilter,
   } = useFilters()
 
-  const { filteredLinks, silhouettes, analytics } = useDerivedData()
+  const { selectedLinks, silhouettes, analytics } = useDerivedData()
 
   const { w, h, marginTop } = props
   const { ageRange } = analytics
@@ -126,7 +126,7 @@ export function TrajectoriesExplorerChart(props) {
 
   const chartRowSpan = Math.floor(statesOrder.length / 6) + 1
 
-  const enableScrub = filteredLinks.length < 2000
+  const enableScrub = selectedLinks.length < 2000
 
   const contextValue = useMemo(
     () => ({

@@ -20,7 +20,8 @@ export const useModifierKey = (targetKey, onPress) => {
 
   const handleKeyUp = useCallback(
     (event) => {
-      if (event.key === targetKey) {
+      // Fallback: also reset if ANY key is released and Meta is no longer active
+      if (event.key === targetKey || !event.getModifierState(targetKey)) {
         setIsKeyPressed(false)
       }
     },
@@ -36,19 +37,19 @@ export const useModifierKey = (targetKey, onPress) => {
 
   useEffect(() => {
     // Add event listeners when the component mounts
-    window.addEventListener("keydown", handleKeyDown)
-    window.addEventListener("keyup", handleKeyUp)
+    document.addEventListener("keydown", handleKeyDown)
+    document.addEventListener("keyup", handleKeyUp)
 
     // 💡 Add blur listener
-    window.addEventListener("blur", handleWindowBlur)
+    document.addEventListener("blur", handleWindowBlur)
 
     // Clean up event listeners when the component unmounts
     return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-      window.removeEventListener("keyup", handleKeyUp)
+      document.removeEventListener("keydown", handleKeyDown)
+      document.removeEventListener("keyup", handleKeyUp)
 
       // 💡 Remove blur listener
-      window.removeEventListener("blur", handleWindowBlur)
+      document.removeEventListener("blur", handleWindowBlur)
     }
   }, [handleKeyDown, handleKeyUp, handleWindowBlur]) // Include handleWindowBlur in dependencies
 

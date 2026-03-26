@@ -10,11 +10,12 @@ import { FiltersProvider } from "./contexts/FiltersContext"
 import { DerivedDataProvider } from "./contexts/DerivedDataContext"
 import { SidePanel } from "./components/dashboard/side-panel/SidePanel"
 
-import { Loader } from "lucide-react"
+import { Loader, Command } from "lucide-react"
 import { TitleAnimation } from "./components/landing/TitleAnimation"
 import { Header } from "./components/Header/Header"
 import { useTheme } from "./components/hooks/useTheme"
 import { ThemeToggle } from "./components/common/Button/ThemeToggle"
+import { useModifierKey } from "./components/hooks/useModifierKey"
 
 function App() {
   // useTheme()
@@ -37,13 +38,23 @@ export default App
 
 function AppContent() {
   const { status } = useRawData()
-  const { richData, silhouettes } = useData()
+  const { richData } = useData()
   const { isLegend, isLoading } = useViz()
+
+  const isCmdPressed = useModifierKey("Meta")
 
   console.log("Loading", isLoading)
 
   return (
     <div className="App">
+      <AnimatePresence>
+        {isCmdPressed && (
+          <motion.div className="key-pop-up">
+            <Command size={16} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* <ThemeToggle /> */}
       <AnimatePresence>{!richData?.length && <TitleAnimation />}</AnimatePresence>
       {(isLoading || status === "loading") && (

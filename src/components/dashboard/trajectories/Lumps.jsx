@@ -20,7 +20,7 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 
 export const Lumps = (props) => {
   const { palette } = useViz()
-  const { filteredLinks, filters } = useDerivedData()
+  const { selectedLinks, filters } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
@@ -65,14 +65,14 @@ export const Lumps = (props) => {
   }
 
   const highlightedTrajectories = useMemo(() => {
-    if (filteredLinks.length === 0 || hoveredTrajectoriesIDs.length === 0 || selectedIndex === null)
+    if (selectedLinks.length === 0 || hoveredTrajectoriesIDs.length === 0 || selectedIndex === null)
       return []
-    return filteredLinks.filter((d) => hoveredTrajectoriesIDs.includes(d.id))
-  }, [filteredLinks, hoveredTrajectoriesIDs, selectedIndex])
+    return selectedLinks.filter((d) => hoveredTrajectoriesIDs.includes(d.id))
+  }, [selectedLinks, hoveredTrajectoriesIDs, selectedIndex])
 
   const globalLumpData = useMemo(() => {
-    return getMinMaxStateFromTrajectories(filteredLinks)
-  }, [filteredLinks])
+    return getMinMaxStateFromTrajectories(selectedLinks)
+  }, [selectedLinks])
 
   const subsetLumpData = useMemo(() => {
     if (highlightedTrajectories.length === 0) return []
@@ -83,21 +83,21 @@ export const Lumps = (props) => {
   const minDate = dateExtent ? dateExtent[0] : 0 // Fallback to 0 if not present
 
   const allTypes = useMemo(() => {
-    return getMinMaxFromTrajectoriesBetweenTwoStates(filteredLinks).map((t) => t.type)
-  }, [filteredLinks])
+    return getMinMaxFromTrajectoriesBetweenTwoStates(selectedLinks).map((t) => t.type)
+  }, [selectedLinks])
 
   const [presentLumps, lumpLinesExtreme] = useMemo(() => {
     const processLumps = (trajectories) =>
       getMinMaxFromTrajectoriesBetweenTwoStates(trajectories).filter((d) => d.items.length > 1)
 
-    const pLumps = processLumps(filteredLinks)
+    const pLumps = processLumps(selectedLinks)
 
-    const linesExtreme = getMinMaxFromTrajectoriesBetweenTwoStates(filteredLinks).filter(
+    const linesExtreme = getMinMaxFromTrajectoriesBetweenTwoStates(selectedLinks).filter(
       (d) => d.items.length === 1,
     )
 
     return [pLumps, linesExtreme]
-  }, [filteredLinks])
+  }, [selectedLinks])
 
   const allLumps = useMemo(() => {
     return allTypes.map((t) => ({

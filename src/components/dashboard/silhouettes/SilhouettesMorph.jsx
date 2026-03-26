@@ -253,7 +253,7 @@ export const SilhouettesMorph = () => {
             >
               <Virtuoso
                 style={{
-                  height: "120px",
+                  height: "150px",
                   maxHeight: "150px",
                   width: "100%",
                   paddingLeft: "10px",
@@ -296,20 +296,42 @@ export const SilhouettesMorph = () => {
                         opacity: { duration: 0.2 },
                       },
                     },
+                    hover: {
+                      backgroundColor: "var(--surface-tertiary)",
+                    },
                   }
+
+                  const templateVariants = {
+                    hidden: {
+                      visibility: "hidden",
+                      opacity: 0,
+                      height: 0,
+                      transition: { duration: 0.15 },
+                    },
+                    hover: {
+                      visibility: "visible",
+                      opacity: 1,
+                      height: "auto",
+                      transition: { duration: 0.15 },
+                    },
+                  }
+
+                  const ids = s.trajectories.map((d) => d[0]?.id ?? "id not found")
                   return (
                     <motion.div
                       key={`card-${s.name}-${i}`}
                       className="silhouette-card"
                       variants={cardVariants}
                       initial={"hidden"}
-                      animate={isHasse ? "hidden" : "visible"}
+                      animate={"hidden"}
+                      whileHover={"hover"}
+                      // animate={isHasse ? "hidden" : "visible"}
                       exit={"hidden"}
                       // exit={{ opacity: 0, scale: 0.5, transition: { duration: 1 } }}
-                      whileHover={{
-                        backgroundColor: isSideVisible ? "var(--surface-tertiary)" : "none",
-                        // padding: isSideVisible ? "var(--spacing-xs)" : "0 16px 0 0",
-                      }}
+                      // whileHover={{
+                      //   backgroundColor: isSideVisible ? "var(--surface-tertiary)" : "none",
+                      //   // padding: isSideVisible ? "var(--spacing-xs)" : "0 16px 0 0",
+                      // }}
                       // whileTap={{ scale: !isCmdPressed || !expandSides ? 0.95 : 1 }}
                       onHoverStart={() => setHoveredIndex(i)}
                       onHoverEnd={() => {
@@ -318,46 +340,79 @@ export const SilhouettesMorph = () => {
                       }}
                     >
                       <AnimatePresence>
-                        {Array.isArray(derivedSilhouettes?.previous) &&
-                          derivedSilhouettes.previous.length > 0 &&
-                          isSideVisible && (
+                        <motion.div className="card-btn-wrapper" variants={templateVariants}>
+                          {/* TODO In hover su typology mostra DW btn */}
+                          {s.trajectories[0].length !== 0 && (
+                            <Button
+                              size="xs"
+                              variant="secondary"
+                              className="download"
+                              tooltip={"Export IDs"}
+                              whileHover={{ scale: 1.2 }}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onClick={(e) => downloadIDs(e, ids)}
+                            >
+                              <Download size={9} />
+                            </Button>
+                          )}
+                          {/* TODO In hover su typology mostra DW btn */}
+                          <Button
+                            size="xs"
+                            variant="secondary"
+                            className="order"
+                            tooltip={"Order states"}
+                            whileHover={{ scale: 1.2 }}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => handleOrderClick(e, s)}
+                          >
+                            <Shuffle size={9} />
+                          </Button>
+                        </motion.div>
+                      </AnimatePresence>
+
+                      <div>
+                        {/* <AnimatePresence>
+                          {Array.isArray(derivedSilhouettes?.previous) &&
+                            derivedSilhouettes.previous.length > 0 &&
+                            isSideVisible && (
+                              <SubsetSelection
+                                subset={derivedSilhouettes.previous}
+                                selectedSilhouettes={selectedSilhouettesNames}
+                                toggleSilhouetteFilter={toggleSilhouetteFilter}
+                                animationDuration={animationDuration}
+                              />
+                            )}
+                        </AnimatePresence> */}
+
+                        <SilhouetteCardMain
+                          s={s}
+                          i={i}
+                          animationDuration={animationDuration}
+                          isSelected={isSelected}
+                          handleSilhouetteClick={handleSilhouetteClick}
+                          downloadIDs={downloadIDs}
+                          isHovered={isHovered}
+                          handleExpandClick={handleExpandClick}
+                          expandSides={expandSides}
+                          isCmdPressed={isCmdPressed}
+                          isExpandible={isExpandible}
+                          handleLongPress={handleLongPress}
+                          isHasse={isHasse}
+                          handleOrderClick={handleOrderClick}
+                          idealSilhouettes={idealSilhouettes}
+                        />
+
+                        {/* <AnimatePresence>
+                          {derivedSilhouettes?.next.length > 0 && isSideVisible && (
                             <SubsetSelection
-                              subset={derivedSilhouettes.previous}
+                              subset={derivedSilhouettes.next}
                               selectedSilhouettes={selectedSilhouettesNames}
                               toggleSilhouetteFilter={toggleSilhouetteFilter}
                               animationDuration={animationDuration}
                             />
                           )}
-                      </AnimatePresence>
-
-                      <SilhouetteCardMain
-                        s={s}
-                        i={i}
-                        animationDuration={animationDuration}
-                        isSelected={isSelected}
-                        handleSilhouetteClick={handleSilhouetteClick}
-                        downloadIDs={downloadIDs}
-                        isHovered={isHovered}
-                        handleExpandClick={handleExpandClick}
-                        expandSides={expandSides}
-                        isCmdPressed={isCmdPressed}
-                        isExpandible={isExpandible}
-                        handleLongPress={handleLongPress}
-                        isHasse={isHasse}
-                        handleOrderClick={handleOrderClick}
-                        idealSilhouettes={idealSilhouettes}
-                      />
-
-                      <AnimatePresence>
-                        {derivedSilhouettes?.next.length > 0 && isSideVisible && (
-                          <SubsetSelection
-                            subset={derivedSilhouettes.next}
-                            selectedSilhouettes={selectedSilhouettesNames}
-                            toggleSilhouetteFilter={toggleSilhouetteFilter}
-                            animationDuration={animationDuration}
-                          />
-                        )}
-                      </AnimatePresence>
+                        </AnimatePresence> */}
+                      </div>
                     </motion.div>
                   )
                 }}
@@ -416,8 +471,6 @@ function SilhouetteCardMain({ s, i, ...props }) {
     tapped: { scale: 0.96, transition: { duration: 0.2 } },
   }
 
-  const ids = s.trajectories.map((d) => d[0]?.id ?? "id not found")
-
   const showFilterLabel = s.isFiltered && s.percentage !== s.filtered.percentage
 
   return (
@@ -435,35 +488,6 @@ function SilhouetteCardMain({ s, i, ...props }) {
       {...longPressProps}
       // ref={inViewRef}
     >
-      <div className="card-btn-wrapper">
-        {/* TODO In hover su typology mostra DW btn */}
-        {s.trajectories[0].length !== 0 && (
-          <Button
-            size="xs"
-            variant="secondary"
-            className="download"
-            tooltip={"Export IDs"}
-            whileHover={{ scale: 1.2 }}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => downloadIDs(e, ids)}
-          >
-            <Download size={9} />
-          </Button>
-        )}
-        {/* TODO In hover su typology mostra DW btn */}
-        <Button
-          size="xs"
-          variant="secondary"
-          className="order"
-          tooltip={"Order states"}
-          whileHover={{ scale: 1.2 }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => handleOrderClick(e, s)}
-        >
-          <Shuffle size={9} />
-        </Button>
-      </div>
-
       <span className="typology-perc-wrapper">
         <span className={`typology-perc-text ${showFilterLabel && "filtered"}`}>
           {s.percentage > 1

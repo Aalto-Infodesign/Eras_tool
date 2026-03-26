@@ -297,7 +297,9 @@ function dynamicSortLC(data, conditions) {
 
 export const useTrajectoriesFromData = (data) => {
   return useMemo(() => {
-    if (data.length === 0) return []
+    if (!data || data.length === 0) return []
+
+    console.log(data)
     console.time("Trajectories Optimized v1")
 
     const trajectories = data.map((datum) => {
@@ -321,6 +323,7 @@ export const useTrajectoriesFromData = (data) => {
         const sourceDate = years?.[n]
         const targetDate = isLast ? years?.[n] : years?.[n + 1]
 
+        // TODO Should actually be named DURATION
         const speed = targetDate > sourceDate ? targetDate - sourceDate : sourceDate - targetDate
 
         links[n] = {

@@ -13,7 +13,7 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 export function TrajectoriesMotion(props) {
   const { selectedTrajectoriesIDs } = useFilters()
   const { palette } = useViz()
-  const { filteredLinks } = useDerivedData()
+  const { selectedLinks } = useDerivedData()
 
   const trajectoriesContext = useContext(TrajectoriesContext)
   const {
@@ -38,25 +38,25 @@ export function TrajectoriesMotion(props) {
   const rectDimensions = { width: 2, height: 4 }
 
   const selectedTrajectories =
-    filteredLinks.length < 20
-      ? filteredLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
+    selectedLinks.length < 20
+      ? selectedLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
       : []
 
   const highlightedTrajectories = enableScrub
-    ? filteredLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
+    ? selectedLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
     : []
 
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
 
   const lines =
-    (!isSelectModeLines && selectedLumps.length > 0 && showLinesOfSelectedLumps && filteredLinks) ||
+    (!isSelectModeLines && selectedLumps.length > 0 && showLinesOfSelectedLumps && selectedLinks) ||
     (!isSelectModeLines && displayedTrajectories.length > 0 && displayedTrajectories) ||
-    (isSelectModeLines && filteredLinks)
+    (isSelectModeLines && selectedLinks)
 
   // const highlightedTrajectories =
-  //   isSelectModeLines && filteredLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
+  //   isSelectModeLines && selectedLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
 
-  const singleStateSwitches = filteredLinks.filter(
+  const singleStateSwitches = selectedLinks.filter(
     (l) => l.source.state === l.target.state && l.initialState === true && l.finalState === true,
   )
 

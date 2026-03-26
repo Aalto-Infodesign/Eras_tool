@@ -12,21 +12,19 @@ import {
   LayoutGroup,
   AnimatePresence,
 } from "motion/react"
-import { useModifierKey } from "./hooks/useModifierKey"
+
 import { ExportIDs } from "./dashboard/export/ExportIDs"
 
 import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
 import { useDerivedData } from "../contexts/DerivedDataContext"
-import { Command } from "lucide-react"
-import { FilterPanel } from "./dashboard/filter-panel/FilterPanel"
 import { DataPanel } from "./dashboard/helper-panels/DataPanel"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
   const { richData, statesOrder } = useData()
   const { isHasse, isLegend } = useViz()
-  const { data, completeSilhouettes, selectedSilhouettesData, silhouettes } = useDerivedData()
+  const { selectedSilhouettesData, silhouettes } = useDerivedData()
 
   const w = 170
   const marginTop = 10
@@ -47,8 +45,6 @@ const Dashboard = () => {
 
   const [isPresent, safeToRemove] = usePresence()
   const [scope, animate] = useAnimate()
-
-  const isCmdPressed = useModifierKey("Meta")
 
   useEffect(() => {
     if (isPresent && isLegend) {
@@ -97,18 +93,6 @@ const Dashboard = () => {
   const MOTION_TREHSHOLD = 25000
   const reduceMotion = useMemo(() => richData.length > MOTION_TREHSHOLD, [richData.length])
 
-  const countSvgElements = () => {
-    const svgs = document.querySelectorAll("svg")
-    let count = 0
-    svgs.forEach((svg) => {
-      count += svg.querySelectorAll("*").length
-    })
-    // console.log("Total SVG elements:", count)
-  }
-  useEffect(() => {
-    countSvgElements()
-  }, [completeSilhouettes, isCmdPressed])
-
   return (
     <motion.main
       ref={scope}
@@ -119,14 +103,6 @@ const Dashboard = () => {
       className="bento-container"
     >
       <LayoutGroup>
-        <AnimatePresence>
-          {isCmdPressed && (
-            <motion.div className="key-pop-up">
-              <Command size={16} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         <motion.div layout className="top-row">
           <AnimatePresence mode="popLayout">
             {selectedSilhouettesData && !isHasse && (
@@ -147,9 +123,9 @@ const Dashboard = () => {
                   <div className="carousel-slides-content" data-title="Silhouettes selected">
                     <SilhouettesPie selectedSilhouettesData={selectedSilhouettesData} />
                   </div>
-                  {/* <div className="carousel-slides-content" data-title="Debug Tools">
+                  <div className="carousel-slides-content" data-title="Debug Tools">
                     <DebugPanel />
-                  </div> */}
+                  </div>
                   <div className="carousel-slides-content" data-title="Export">
                     <ExportIDs />
                   </div>
