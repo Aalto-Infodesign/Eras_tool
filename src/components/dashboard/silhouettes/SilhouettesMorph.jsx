@@ -297,7 +297,7 @@ export const SilhouettesMorph = () => {
                       },
                     },
                     hover: {
-                      backgroundColor: "var(--surface-tertiary)",
+                      backgroundColor: "var(--surface-primary)",
                     },
                   }
 

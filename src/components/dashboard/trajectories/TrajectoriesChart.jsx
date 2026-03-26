@@ -24,7 +24,8 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import Button from "../../common/Button/Button"
 import { StatesMatrix } from "../../fileLoader/statesMatrix/StatesMatrix"
 import { ChartArea, ChartLine, ListFilter } from "lucide-react"
-
+import { TrajectoriesCanvas } from "./three/TrajectoriesCanvas"
+import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 export function TrajectoriesChart() {
   const { selectedTrajectoriesIDs, trajectoriesSelectionMode, setTrajectoriesSelectionMode } =
     useFilters()
@@ -50,6 +51,8 @@ export function TrajectoriesChart() {
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
   // const [showDistributions, setShowDistributions] = useState(true)
 
+  useModifierKey("l", () => selectedLinks.length < 500 && setIsSelectModeLines((prev) => !prev))
+
   const showDistributions = true
 
   const svgRef = useRef(null)
@@ -72,39 +75,38 @@ export function TrajectoriesChart() {
     <>
       <div className="chart-controls">
         <div id="lump-controls" className={` ${isSelectModeLines ? "Lines" : "Lumps"}`}>
-          {selectedLinks.length < 500 && (
-            <div>
+          <div>
+            <Button
+              data-selected={isSelectModeLines}
+              size="xs"
+              // variant="secondary"
+              onClick={() => setIsSelectModeLines(true)}
+              tooltip="Individual Trajectories"
+              disabled={selectedLinks.length > 500}
+            >
+              <ShortcutSpan>L</ShortcutSpan>ines
+            </Button>
+            <Button
+              data-selected={!isSelectModeLines}
+              size="xs"
+              // variant="secondary"
+              onClick={() => setIsSelectModeLines(false)}
+              tooltip="Cluster Trajectories"
+            >
+              <ShortcutSpan>L</ShortcutSpan>umps
+            </Button>
+            {!isSelectModeLines && selectedLumps.length > 0 && (
               <Button
-                data-selected={isSelectModeLines}
                 size="xs"
                 // variant="secondary"
-                onClick={() => setIsSelectModeLines(!isSelectModeLines)}
-                title="Toggle from Lumps to lines"
+                data-selected={showLinesOfSelectedLumps}
+                onClick={() => setShowLinesOfSelectedLumps(!showLinesOfSelectedLumps)}
+                title="When lumps are selected, show the lines"
               >
-                {"Lines"}
+                {showLinesOfSelectedLumps ? "Hide" : "Show"}
               </Button>
-              <Button
-                data-selected={!isSelectModeLines}
-                size="xs"
-                // variant="secondary"
-                onClick={() => setIsSelectModeLines(!isSelectModeLines)}
-                title="Toggle from Lumps to lines"
-              >
-                {"Lumps"}
-              </Button>
-              {!isSelectModeLines && selectedLumps.length > 0 && (
-                <Button
-                  size="xs"
-                  // variant="secondary"
-                  data-selected={showLinesOfSelectedLumps}
-                  onClick={() => setShowLinesOfSelectedLumps(!showLinesOfSelectedLumps)}
-                  title="When lumps are selected, show the lines"
-                >
-                  {showLinesOfSelectedLumps ? "Hide" : "Show"}
-                </Button>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <div id="line-controls">
@@ -187,34 +189,33 @@ export function TrajectoriesChart() {
           </div>
         )}
         <div id="trajectories-chart" className="svg-container">
-          <svg ref={svgRef} preserveAspectRatio="xMidYMid meet" viewBox={`0 0 210 ${h}`}>
-            <TextureDefs />
-            <GradientDefs />
+          <div style={{ position: "relative" }}>
+            <svg ref={svgRef} preserveAspectRatio="xMidYMid meet" viewBox={`0 0 210 ${h}`}>
+              <TextureDefs />
+              <GradientDefs />
 
-            <Grid
-              isSelectModeLines={isSelectModeLines}
-              setHoveredStateLabel={setHoveredStateLabel}
-            />
+              <Grid setHoveredStateLabel={setHoveredStateLabel} />
 
-            <Lumps
-              //Extended Context
-              isSelectModeLines={isSelectModeLines}
-              //Local State
-              hoveredLump={hoveredLump}
-              setHoveredLump={setHoveredLump}
-              svgRef={svgRef}
-            />
-
-            {selectedLinks.length < 500 && (
-              <TrajectoriesMotion
+              <Lumps
                 //Extended Context
                 isSelectModeLines={isSelectModeLines}
                 //Local State
-                showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+                hoveredLump={hoveredLump}
+                setHoveredLump={setHoveredLump}
+                svgRef={svgRef}
               />
-            )}
-            {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
-          </svg>
+
+              {selectedLinks.length < 500 && (
+                <TrajectoriesMotion
+                  //Extended Context
+                  isSelectModeLines={isSelectModeLines}
+                  //Local State
+                  showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+                />
+              )}
+              {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
+            </svg>
+          </div>
           <Tooltip isVisible={enableScrub && hoveredTrajectoriesIDs.length > 0}>
             <HoveredTrajectoryPopUp
               selectedIndex={selectedIndex}

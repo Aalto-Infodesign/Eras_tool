@@ -14,11 +14,7 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { flattenDeep } from "lodash"
 
 export function Grid(props) {
-  const {
-    //  analytics,
-    setStatesOrder,
-    statesOrder,
-  } = useData()
+  const { setStatesOrder, statesOrder } = useData()
   const { palette } = useViz()
   const { filteredTrajectories, analytics, trajectories } = useDerivedData()
   const trajectoriesContext = useContext(TrajectoriesContext)

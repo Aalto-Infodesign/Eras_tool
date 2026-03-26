@@ -8,6 +8,8 @@ import { useState, useEffect, useCallback } from "react"
 export const useModifierKey = (targetKey, onPress) => {
   const [isKeyPressed, setIsKeyPressed] = useState(false)
 
+  console.log(targetKey)
+
   const handleKeyDown = useCallback(
     (event) => {
       if (event.key === targetKey) {
