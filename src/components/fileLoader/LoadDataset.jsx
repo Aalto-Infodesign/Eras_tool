@@ -3,20 +3,12 @@ import { useRawData } from "../../contexts/RawDataContext.jsx"
 import { Upload } from "lucide-react"
 import { motion } from "motion/react"
 import { useMemo } from "react"
-import { useModifierKey } from "../hooks/useModifierKey.js"
 import { ShortcutSpan } from "../common/ShortcutSpan/ShortcutSpan.jsx"
 
 const LoadDataset = () => {
   const { loadData, fileName, fileExtention, status } = useRawData()
 
   const isUploading = status === "loading"
-
-  useModifierKey(
-    "1",
-    () => !fileName && loadData("../data/json/data_semilinear_dates_20250716_154750.json"),
-  )
-  useModifierKey("2", () => !fileName && loadData("../data/json/data_semilinear_dates.json"))
-  useModifierKey("3", () => !fileName && loadData("../data/json/data_25k.json"))
 
   const templateVariants = {
     hidden: {
@@ -70,18 +62,23 @@ const LoadDataset = () => {
 
       <motion.div className="template-buttons" variants={templateVariants}>
         <TemplateButton
-          onClick={() => loadData("../data/json/data_semilinear_dates_20250716_154750.json")}
+          onClick={() =>
+            !fileName && loadData("../data/json/data_semilinear_dates_20250716_154750.json")
+          }
           shortcut={1}
         >
           Clusters
         </TemplateButton>
         <TemplateButton
-          onClick={() => loadData("../data/json/data_semilinear_dates.json")}
+          onClick={() => !fileName && loadData("../data/json/data_semilinear_dates.json")}
           shortcut={2}
         >
           Dates
         </TemplateButton>
-        <TemplateButton onClick={() => loadData("../data/json/data_25k.json")} shortcut={3}>
+        <TemplateButton
+          onClick={() => !fileName && loadData("../data/json/data_25k.json")}
+          shortcut={3}
+        >
           25K
         </TemplateButton>
       </motion.div>
@@ -93,7 +90,7 @@ const TemplateButton = ({ children, onClick, shortcut }) => {
   const { fileName } = useRawData()
 
   return (
-    <Button onClick={onClick} size="small" variant="primary">
+    <Button onClick={onClick} size="small" variant="primary" keystroke={String(shortcut)}>
       {!fileName && (
         <span>
           <ShortcutSpan>{shortcut}</ShortcutSpan>–

@@ -56,7 +56,7 @@ export function CarouselWrapper({ children, hasPagination = true }) {
       </div>
 
       <div className="carousel-controls">
-        <ArrowNavigation direction="left" setSlide={setSlide} />
+        <ArrowNavigation direction="left" setSlide={setSlide} keystroke="" />
         {hasPagination && (
           <Pagination
             numSlides={slides.length}
@@ -65,7 +65,7 @@ export function CarouselWrapper({ children, hasPagination = true }) {
             setDirection={setDirection}
           />
         )}
-        <ArrowNavigation direction="right" setSlide={setSlide} />
+        <ArrowNavigation direction="right" setSlide={setSlide} keystroke=" " />
       </div>
     </div>
   )
@@ -119,7 +119,7 @@ function Pagination({ numSlides, selectedIndex, setSelectedIndex, setDirection }
   )
 }
 
-function ArrowNavigation({ direction, setSlide }) {
+function ArrowNavigation({ direction, setSlide, keystroke = "" }) {
   const isPrevious = direction === "left"
   return (
     <Button
@@ -131,38 +131,9 @@ function ArrowNavigation({ direction, setSlide }) {
       onClick={() => {
         setSlide(isPrevious ? -1 : 1)
       }}
+      keystroke={keystroke}
     >
       {isPrevious ? <ArrowLeft size={20} /> : <ArrowRight size={20} />}
     </Button>
   )
 }
-
-const iconsProps = {
-  xmlns: "http://www.w3.org/2000/svg",
-  width: "18",
-  height: "18",
-  viewBox: "0 0 22 22",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: "2",
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-}
-
-// function ArrowLeft() {
-//   return (
-//     <svg {...iconsProps}>
-//       <path d="m12 19-7-7 7-7" />
-//       <path d="M19 12H5" />
-//     </svg>
-//   )
-// }
-
-// function ArrowRight() {
-//   return (
-//     <svg {...iconsProps}>
-//       <path d="M5 12h14" />
-//       <path d="m12 5 7 7-7 7" />
-//     </svg>
-//   )
-// }

@@ -6,7 +6,7 @@ import { useModifierKey } from "../../hooks/useModifierKey"
 
 const ChartsContext = createContext(null)
 
-const MOTION_THRESHOLD = 25000
+const MOTION_THRESHOLD = 20000
 
 export function ChartsProvider({ children }) {
   const { statesOrder } = useData()

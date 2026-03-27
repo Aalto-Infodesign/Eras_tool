@@ -3,7 +3,6 @@ import { SlidersHorizontal, Download } from "lucide-react"
 import styles from "./SidePanel.module.css"
 import { Filters } from "../filters/Filters"
 import { useState } from "react"
-import { useModifierKey } from "../../hooks/useModifierKey"
 import { ExportIDs } from "../export/ExportIDs"
 import { useWindowSize } from "../../hooks/useWindowSize"
 import { createPortal } from "react-dom"
@@ -21,9 +20,6 @@ export const SidePanel = () => {
     setPanelContent(content)
   }
 
-  useModifierKey("f", () => handlePanelOpen("filters"))
-  useModifierKey("e", () => handlePanelOpen("export"))
-
   const panelVariants = {
     closed: { x: width < 1840 ? width - 28 : width - 220 },
     open: { x: width - 220 },
@@ -35,8 +31,6 @@ export const SidePanel = () => {
       variants={panelVariants}
       initial={"closed"}
       animate={isSidePanelOpen ? "open" : "closed"}
-      // onMouseEnter={() => setSidePanelOpen(true)}
-      // onMouseLeave={() => setSidePanelOpen(false)}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className={styles.sidePanel}
     >
@@ -46,6 +40,7 @@ export const SidePanel = () => {
           tooltipPosition="left"
           isSelected={panelContent === "filters"}
           onClick={() => handlePanelOpen("filters")}
+          keystroke="f"
         >
           <SlidersHorizontal size={20} />
         </PanelButton>
@@ -54,6 +49,7 @@ export const SidePanel = () => {
           tooltipPosition="left"
           isSelected={panelContent === "export"}
           onClick={() => handlePanelOpen("export")}
+          keystroke="e"
         >
           <Download size={20} />
         </PanelButton>
@@ -68,22 +64,12 @@ export const SidePanel = () => {
 }
 
 function PanelButton({ children, isSelected, onClick, className = "", ...rest }) {
-  const buttonClassName = [
-    styles.panelBtn,
-    isSelected && styles.selected, // es. styles.primary
-    className, // Qualsiasi classe passata dall'esterno
-  ]
+  const buttonClassName = [styles.panelBtn, isSelected && styles.selected, className]
     .join(" ")
     .trim()
 
   return (
-    <Button
-      className={buttonClassName}
-      whileHover={{ scale: 1.05 }}
-      onClick={onClick}
-      {...rest}
-      //   whileTap={{ scale: 0.95 }}
-    >
+    <Button className={buttonClassName} whileHover={{ scale: 1.05 }} onClick={onClick} {...rest}>
       {children}
     </Button>
   )

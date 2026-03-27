@@ -2,6 +2,7 @@ import PropTypes from "prop-types"
 import styles from "./Button.module.css"
 import { motion } from "framer-motion"
 import { useState, useId } from "react"
+import { useModifierKey } from "../../hooks/useModifierKey"
 
 /**
  * Componente bottone primario riutilizzabile per l'applicazione.
@@ -15,11 +16,14 @@ const Button = ({
   className = "",
   tooltip,
   tooltipPosition = "bottom", // "top" | "bottom" | "left" | "right"
+  keystroke = "",
   ...rest
 }) => {
   const [isTooltipVisible, setTooltipVisible] = useState(false)
   // useId garantisce un ID univoco anche con più istanze in pagina
   const tooltipId = useId()
+
+  useModifierKey(keystroke, { ...rest }.onClick)
 
   // Unisce le classi CSS: base, varianti, dimensione, e classi custom.
   const buttonClassName = [
@@ -52,8 +56,6 @@ const Button = ({
         className={buttonClassName}
         type={type}
         disabled={disabled}
-        // Collega il bottone al tooltip: gli screen reader leggeranno
-        // il testo del tooltip come descrizione aggiuntiva
         aria-describedby={isTooltipVisible ? tooltipId : undefined}
         {...rest}
       >

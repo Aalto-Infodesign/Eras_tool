@@ -27,8 +27,6 @@ export const DistributionPath = ({
     [data],
   )
 
-  console.log(isInverted)
-
   const lookup = useMemo(() => new Map(dataCount.map((d) => [+d.x, d])), [dataCount])
 
   const filledData = useMemo(() => range.map((xVal) => lookup.get(xVal) ?? null), [range, lookup])

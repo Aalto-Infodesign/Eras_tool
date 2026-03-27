@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { includes } from "lodash"
 
 import { ClearButton } from "../../common/Button/ClearButton"
@@ -6,8 +6,6 @@ import { ClearButton } from "../../common/Button/ClearButton"
 import { motion, AnimatePresence } from "motion/react"
 
 import "./SelectionPanel.css"
-
-import { useModifierKey } from "../../hooks/useModifierKey"
 
 import { SilhouetteToggleButton } from "../silhouettes/SilhouettesMorph"
 
@@ -20,8 +18,6 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { CloseButton } from "../../common/Button/CloseButton"
 
 export function SelectionPanel() {
-  console.time("Explorer Chart")
-
   const { palette } = useViz()
   const {
     selectedTrajectoriesIDs,
@@ -36,32 +32,7 @@ export function SelectionPanel() {
 
   const { silhouettes } = useDerivedData()
 
-  const [hoveredTrajectoriesIDs, setHoveredTrajectoriesIDs] = useState([])
-
-  const [selectedIndex, setSelectedIndex] = useState(0)
-
   const [chipHoveredId, setChipHoveredId] = useState(null)
-
-  const isArrowLeft = useModifierKey("ArrowLeft")
-  const isArrowRight = useModifierKey("ArrowRight")
-
-  // clamp selectedIndex when hoveredTrajectoriesIDs length changes
-  useEffect(() => {
-    const maxIndex = Math.max(0, hoveredTrajectoriesIDs.length - 1)
-    setSelectedIndex((prev) => Math.min(prev, maxIndex))
-  }, [hoveredTrajectoriesIDs.length])
-
-  // navigate selectedIndex with Left/Right arrows while modifier key is pressed
-  useEffect(() => {
-    if (isArrowRight) {
-      setSelectedIndex((prev) => {
-        const max = Math.max(0, hoveredTrajectoriesIDs.length - 1)
-        return Math.min(prev + 1, max)
-      })
-    } else if (isArrowLeft) {
-      setSelectedIndex((prev) => Math.max(prev - 1, 0))
-    }
-  }, [isArrowLeft, isArrowRight, hoveredTrajectoriesIDs.length])
 
   const isTrajectoriesFilterActive = selectedTrajectoriesIDs.length > 0
 
@@ -98,8 +69,6 @@ export function SelectionPanel() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
     hovered: { scale: 0.95 },
   }
-
-  console.timeEnd("Explorer Chart")
 
   return (
     <motion.section

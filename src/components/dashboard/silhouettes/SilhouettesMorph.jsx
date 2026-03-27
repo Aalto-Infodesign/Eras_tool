@@ -163,11 +163,17 @@ export const SilhouettesMorph = () => {
         <h3>Silhouettes filters</h3>
         <div className="header-section">
           <div className="chart-modes">
-            <Button size="xs" onClick={() => setIsHasse(false)} data-selected={!isHasse}>
+            <Button
+              size="xs"
+              keystroke="t"
+              onClick={() => setIsHasse(false)}
+              data-selected={!isHasse}
+            >
               <ShortcutSpan>T</ShortcutSpan>rajectories
             </Button>
             <Button
               size="xs"
+              keystroke="h"
               onClick={() => setIsHasse(true)}
               data-selected={isHasse}
               disabled={!posetData}

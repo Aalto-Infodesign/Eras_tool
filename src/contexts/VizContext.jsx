@@ -30,19 +30,14 @@ export function VizProvider({ children }) {
 
   const [isSidePanelOpen, setSidePanelOpen] = useState(false)
 
-  useModifierKey("1", () => setChartType(1))
-  useModifierKey("2", () => setChartType(2))
+  // TODO Add key to button funcs
   useModifierKey(".", toggle)
 
-  // useModifierKey("p", () => setColorMode("poset"))
   useModifierKey("s", () =>
     setColorMode(
       (prev) => idealSilhouettes.length !== 0 && (prev === "standard" ? "poset" : "standard"),
     ),
   )
-
-  useModifierKey("t", () => setIsHasse(false))
-  useModifierKey("h", () => setIsHasse(true))
 
   const startLoading = useCallback(() => setLoadingCount((c) => c + 1), [])
   const stopLoading = useCallback(() => setLoadingCount((c) => Math.max(0, c - 1)), [])

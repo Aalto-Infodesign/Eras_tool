@@ -10,9 +10,10 @@ import { useViz } from "../../../contexts/VizContext"
 
 import Button from "../../common/Button/Button"
 import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
+import { ArcChart } from "./arc-chart/ArcChart"
 
 export function ChartsContainer() {
-  console.time("Explorer Chart")
+  console.time("Charts Container")
   // Props
 
   const { statesOrder } = useData()
@@ -20,8 +21,13 @@ export function ChartsContainer() {
 
   const chartRowSpan = Math.floor(statesOrder.length / 6) + 1
 
-  console.timeEnd("Explorer Chart")
+  const controlButtons = [
+    { label: "Parallel", code: 1 },
+    { label: "Linear", code: 2 },
+    { label: "Arc", code: 3 },
+  ]
 
+  console.timeEnd("Charts Container")
   return (
     <motion.section
       layout
@@ -32,12 +38,16 @@ export function ChartsContainer() {
       {/* TODO! Toggle between chart types */}
       <motion.div layout className="function-row">
         <div className="chart-modes">
-          <Button size="xs" onClick={() => setChartType(1)} data-selected={chartType === 1}>
-            <ShortcutSpan separator={"–"}>1</ShortcutSpan> Parallel
-          </Button>
-          <Button size="xs" onClick={() => setChartType(2)} data-selected={chartType === 2}>
-            <ShortcutSpan separator={"–"}>2</ShortcutSpan> Linear
-          </Button>
+          {controlButtons.map((b) => (
+            <Button
+              size="xs"
+              keystroke={String(b.code)}
+              onClick={() => setChartType(b.code)}
+              data-selected={chartType === b.code}
+            >
+              <ShortcutSpan separator={"–"}>{b.code}</ShortcutSpan> {b.label}
+            </Button>
+          ))}
         </div>
         <DownloadPanel />
       </motion.div>
@@ -55,6 +65,7 @@ export function ChartsContainer() {
           >
             {chartType === 1 && <PartialOrderChart />}
             {chartType === 2 && <TrajectoriesChart />}
+            {chartType === 3 && <ArcChart />}
           </motion.section>
         </ChartsProvider>
       </div>

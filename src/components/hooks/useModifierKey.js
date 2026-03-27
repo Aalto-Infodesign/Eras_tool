@@ -1,59 +1,95 @@
 import { useState, useEffect, useCallback } from "react"
 
 /**
- * A custom hook to track if a modifier key is being pressed.
- * @param {string} targetKey The key to track (e.g., 'Meta', 'Control', 'Shift', 'Alt').
- * @returns {boolean} True if the key is currently pressed, false otherwise.
+ * Normalizes a key combo string into a consistent format for comparison.
+ * e.g. "shift+K" → "shift+k", "meta+shift+z" stays "meta+shift+z"
+ */
+const normalizeCombo = (combo) =>
+  combo
+    .toLowerCase()
+    .split("+")
+    .map((k) => k.trim())
+    .sort()
+    .join("+")
+
+/**
+ * Builds a combo string from a live KeyboardEvent.
+ * e.g. pressing Shift+K produces "shift+k"
+ */
+const comboFromEvent = (event) => {
+  const parts = []
+  if (event.metaKey) parts.push("meta")
+  if (event.ctrlKey) parts.push("ctrl")
+  if (event.altKey) parts.push("alt")
+  if (event.shiftKey) parts.push("shift")
+
+  const key = event.key.toLowerCase()
+  // Avoid double-adding the modifier itself (e.g. pressing Shift alone)
+  const isModifier = ["meta", "control", "ctrl", "alt", "shift"].includes(key)
+  if (!isModifier) parts.push(key)
+
+  return parts.sort().join("+")
+}
+
+/**
+ * A custom hook to track if a key or key combo is being pressed.
+ *
+ * @param {string} targetKey - A single key ("Shift") or a combo ("shift+k", "meta+z", "ctrl+shift+t").
+ *                             Case-insensitive. Modifier order doesn't matter.
+ * @param {function} [onPress] - Optional callback fired when the key/combo is activated.
+ * @returns {boolean} True if the key/combo is currently active.
+ *
+ * @example
+ * const isSaving = useModifierKey("meta+s", () => save())
+ * const isBold   = useModifierKey("ctrl+b")
+ * const isShifted = useModifierKey("Shift")
  */
 export const useModifierKey = (targetKey, onPress) => {
   const [isKeyPressed, setIsKeyPressed] = useState(false)
 
-  console.log(targetKey)
+  const normalizedTarget = normalizeCombo(targetKey)
+  const isCombo = normalizedTarget.includes("+")
 
   const handleKeyDown = useCallback(
     (event) => {
-      if (event.key === targetKey) {
+      const matched = isCombo ? comboFromEvent(event) === normalizedTarget : event.key === targetKey // preserve original casing for single keys
+
+      if (matched) {
         onPress?.()
         setIsKeyPressed(true)
       }
     },
-    [targetKey, onPress],
+    [normalizedTarget, isCombo, targetKey, onPress],
   )
 
   const handleKeyUp = useCallback(
     (event) => {
-      // Fallback: also reset if ANY key is released and Meta is no longer active
-      if (event.key === targetKey || !event.getModifierState(targetKey)) {
+      if (isCombo) {
+        // Any key release breaks the combo
         setIsKeyPressed(false)
+      } else {
+        if (event.key === targetKey || !event.getModifierState(targetKey)) {
+          setIsKeyPressed(false)
+        }
       }
     },
-    [targetKey],
+    [normalizedTarget, isCombo, targetKey],
   )
 
-  // 🐛 FIX: Add handler for window blur event 🐛
   const handleWindowBlur = useCallback(() => {
-    // When the window loses focus (e.g., cmd+tab, alt+tab),
-    // we assume all keys, especially modifiers, are released.
     setIsKeyPressed(false)
   }, [])
 
   useEffect(() => {
-    // Add event listeners when the component mounts
     document.addEventListener("keydown", handleKeyDown)
     document.addEventListener("keyup", handleKeyUp)
-
-    // 💡 Add blur listener
-    document.addEventListener("blur", handleWindowBlur)
-
-    // Clean up event listeners when the component unmounts
+    window.addEventListener("blur", handleWindowBlur) // 👈 window, not document
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
       document.removeEventListener("keyup", handleKeyUp)
-
-      // 💡 Remove blur listener
-      document.removeEventListener("blur", handleWindowBlur)
+      window.removeEventListener("blur", handleWindowBlur)
     }
-  }, [handleKeyDown, handleKeyUp, handleWindowBlur]) // Include handleWindowBlur in dependencies
+  }, [handleKeyDown, handleKeyUp, handleWindowBlur])
 
   return isKeyPressed
 }

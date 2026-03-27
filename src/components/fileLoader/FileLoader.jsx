@@ -6,8 +6,6 @@ import { ProcessButton } from "./ProcessButton"
 import "./FileLoader.css"
 import { FlowChart } from "./flowChart/FlowChart"
 import { Sankey } from "./flowChart/FlowSankey"
-import { ScatterPlot } from "./scatterPlot/ScatterPlot"
-import { StatesMatrix } from "./statesMatrix/StatesMatrix"
 
 import { ReactFlowProvider } from "@xyflow/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -16,7 +14,6 @@ import { useData } from "../../contexts/ProcessedDataContext"
 import { useViz } from "../../contexts/VizContext"
 
 import { ChevronDown, Maximize2 } from "lucide-react"
-import { useModifierKey } from "../hooks/useModifierKey"
 import Button from "../common/Button/Button"
 
 export function FileLoader() {
@@ -25,8 +22,6 @@ export function FileLoader() {
   const { setIsLegend, isLegend, hasFlowChart, isSidePanelOpen } = useViz()
 
   const [isOpen, setIsOpen] = useState(true)
-
-  useModifierKey("c", () => setIsOpen((prev) => !prev))
 
   useEffect(() => {
     if (!isLegend) {
@@ -70,7 +65,8 @@ export function FileLoader() {
               // tooltipPosition="bottom"
               size="xs"
               variant="transparent"
-              onClick={() => setIsOpen(!isOpen)}
+              keystroke="c"
+              onClick={() => setIsOpen((prev) => !prev)}
             >
               <ChevronDown size={16} transform={isOpen ? "rotate(180)" : "rotate(0)"} />
             </Button>
