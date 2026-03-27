@@ -1,5 +1,4 @@
-import { useEffect, useMemo } from "react"
-import { TrajectoriesExplorerChart } from "./dashboard/ExplorerChart"
+import { useEffect } from "react"
 import { SilhouettesMorph } from "./dashboard/silhouettes/SilhouettesMorph"
 import { CarouselWrapper } from "./common/Carousel/Carousel"
 import { SilhouettesPie } from "./dashboard/silhouettes/SilhouettesPie"
@@ -19,29 +18,13 @@ import { useData } from "../contexts/ProcessedDataContext"
 import { useViz } from "../contexts/VizContext"
 import { useDerivedData } from "../contexts/DerivedDataContext"
 import { DataPanel } from "./dashboard/helper-panels/DataPanel"
+import { ChartsContainer } from "./dashboard/main-charts/ChartsContainer"
+import { SelectionPanel } from "./dashboard/selection-panel/SelectionPanel"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
-  const { richData, statesOrder } = useData()
   const { isHasse, isLegend } = useViz()
   const { selectedSilhouettesData, silhouettes } = useDerivedData()
-
-  const w = 170
-  const marginTop = 10
-  //For File Loader
-  const minHeight = 100
-  let stateIncrement = 0
-
-  if (statesOrder.length > 0 && statesOrder.length < 5) {
-    stateIncrement = minHeight / statesOrder.length
-  } else if (statesOrder.length >= 5 && statesOrder.length <= 10) {
-    stateIncrement = 20
-  } else if (statesOrder.length > 10) {
-    stateIncrement = 15
-  }
-
-  // const h = document.querySelector(".chart-container").
-  const h = statesOrder.length * stateIncrement
 
   const [isPresent, safeToRemove] = usePresence()
   const [scope, animate] = useAnimate()
@@ -90,9 +73,6 @@ const Dashboard = () => {
     },
   }
 
-  const MOTION_TREHSHOLD = 25000
-  const reduceMotion = useMemo(() => richData.length > MOTION_TREHSHOLD, [richData.length])
-
   return (
     <motion.main
       ref={scope}
@@ -136,13 +116,8 @@ const Dashboard = () => {
           <AnimatePresence>{silhouettes && <SilhouettesMorph />}</AnimatePresence>
         </motion.div>
 
-        <TrajectoriesExplorerChart
-          w={w}
-          h={h}
-          marginTop={marginTop}
-          // Other stuff
-          reduceMotion={reduceMotion}
-        />
+        <ChartsContainer />
+        <SelectionPanel />
       </LayoutGroup>
     </motion.main>
   )

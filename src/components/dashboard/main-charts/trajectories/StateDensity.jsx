@@ -1,20 +1,16 @@
-import { useContext } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { useCharts } from "../ChartsContext"
 
 import { scaleLinear, curveStep, mean, line } from "d3"
 
-import { useViz } from "../../../contexts/VizContext"
-import { useFilters } from "../../../contexts/FiltersContext"
-import { useDerivedData } from "../../../contexts/DerivedDataContext"
-import { useLinksAnalytics } from "../../hooks/useLinksAnalytics"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
+import { useLinksAnalytics } from "../../../hooks/useLinksAnalytics"
 
 import { motion } from "motion/react"
 
 export function StateDensity(props) {
   const { filteredLinks, selectedLinks } = useDerivedData()
 
-  const trajectoriesContext = useContext(TrajectoriesContext)
-  const { marginTop, chartScales } = trajectoriesContext
+  const { marginTop, chartScales } = useCharts()
 
   const { x, y } = chartScales
 

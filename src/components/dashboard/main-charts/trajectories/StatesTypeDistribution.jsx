@@ -1,20 +1,18 @@
-import { useContext } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { useCharts } from "../ChartsContext"
 
 import { scaleLinear, scaleRadial, extent } from "d3"
 import { values, flatten, isNil } from "lodash"
 import { AnimatePresence, motion } from "motion/react"
 
-import { useViz } from "../../../contexts/VizContext"
+import { useViz } from "../../../../contexts/VizContext"
 
-import { useLinksAnalytics } from "../../hooks/useLinksAnalytics"
-import { useDerivedData } from "../../../contexts/DerivedDataContext"
-import { useFilters } from "../../../contexts/FiltersContext"
+import { useLinksAnalytics } from "../../../hooks/useLinksAnalytics"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
+import { useFilters } from "../../../../contexts/FiltersContext"
 
 export function StateTypeDistribution(props) {
   const { filteredLinks, selectedLinks } = useDerivedData()
-  const trajectoriesContext = useContext(TrajectoriesContext)
-  const { h, marginTop, chartScales } = trajectoriesContext
+  const { h, marginTop, chartScales } = useCharts()
 
   const { y } = chartScales
 

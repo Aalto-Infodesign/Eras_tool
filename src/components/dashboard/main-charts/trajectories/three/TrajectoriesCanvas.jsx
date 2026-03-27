@@ -1,10 +1,10 @@
 import { useContext, useRef } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Text, Line } from "@react-three/drei"
-import { useData } from "../../../../contexts/ProcessedDataContext"
-import { useViz } from "../../../../contexts/VizContext"
-import { useDerivedData } from "../../../../contexts/DerivedDataContext"
-import { getMinMaxStateFromTrajectories } from "../../../../utils/getMinMax"
+import { useData } from "../../../../../contexts/ProcessedDataContext"
+import { useViz } from "../../../../../contexts/VizContext"
+import { useDerivedData } from "../../../../../contexts/DerivedDataContext"
+import { getMinMaxStateFromTrajectories } from "../../../../../utils/getMinMax"
 import { flattenDeep } from "lodash"
 
 export const TrajectoriesCanvas = ({ width, height }) => {

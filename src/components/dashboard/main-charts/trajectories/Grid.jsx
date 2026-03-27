@@ -1,24 +1,22 @@
-import { useContext } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { useCharts } from "../ChartsContext"
 import { ticks } from "d3"
 
-import { getMinMaxStateFromTrajectories } from "../../../utils/getMinMax"
+import { getMinMaxStateFromTrajectories } from "../../../../utils/getMinMax"
 
 import { AnimatePresence, motion } from "motion/react"
 
-import { moveElementInArray } from "../../../utils/moveChar"
+import { moveElementInArray } from "../../../../utils/moveChar"
 
-import { useData } from "../../../contexts/ProcessedDataContext"
-import { useViz } from "../../../contexts/VizContext"
-import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { useData } from "../../../../contexts/ProcessedDataContext"
+import { useViz } from "../../../../contexts/VizContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import { flattenDeep } from "lodash"
 
 export function Grid(props) {
   const { setStatesOrder, statesOrder } = useData()
   const { palette } = useViz()
   const { filteredTrajectories, analytics, trajectories } = useDerivedData()
-  const trajectoriesContext = useContext(TrajectoriesContext)
-  const { w, h, marginTop, chartScales } = trajectoriesContext
+  const { w, h, marginTop, chartScales } = useCharts()
 
   const t = !filteredTrajectories ? trajectories : filteredTrajectories
   const { setHoveredStateLabel = () => {} } = props

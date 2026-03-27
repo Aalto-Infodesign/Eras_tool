@@ -1,16 +1,16 @@
-import { useContext, useMemo } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
-import { po } from "../../../utils/po"
+import { useMemo } from "react"
+import { po } from "../../../../utils/po"
 import { flatten } from "lodash"
-import { getDominancePairs } from "../../../utils/POHelperFunctions"
+import { getDominancePairs } from "../../../../utils/POHelperFunctions"
 import { Sankey } from "./OptimizedSankey"
 
-import { useData } from "../../../contexts/ProcessedDataContext"
-import { CircleAlert, CircleSlash } from "lucide-react"
+import { CircleAlert } from "lucide-react"
 
 import "./PartialOrderChart.css"
-import { useDerivedData } from "../../../contexts/DerivedDataContext"
-import { Legend } from "../legend/Legend"
+
+import { useData } from "../../../../contexts/ProcessedDataContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
+import { Legend } from "../../legend/Legend"
 
 // TODO Use idealSilhouettes to highlight nodes/links in the sankey diagram
 

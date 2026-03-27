@@ -1,31 +1,28 @@
-import { useState, useContext } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { useState } from "react"
+import { useCharts } from "../ChartsContext"
 import { motion, AnimatePresence } from "motion/react"
-import { isColorDark } from "../../../utils/colorHelpers"
+import { isColorDark } from "../../../../utils/colorHelpers"
 
-import { useViz } from "../../../contexts/VizContext"
-import { useFilters } from "../../../contexts/FiltersContext"
+import { useViz } from "../../../../contexts/VizContext"
+import { useFilters } from "../../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
 import { union } from "lodash"
-import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 export function TrajectoriesMotion(props) {
-  const { selectedTrajectoriesIDs } = useFilters()
+  const { selectedTrajectoriesIDs, selectedLumps, toggleSelectedTrajectory } = useFilters()
   const { palette } = useViz()
   const { selectedLinks } = useDerivedData()
 
-  const trajectoriesContext = useContext(TrajectoriesContext)
   const {
     marginTop,
     chartScales,
-    selectedLumps,
-    toggleSelectedTrajectory,
 
     hoveredTrajectoriesIDs,
     selectedIndex,
     enableScrub,
-  } = trajectoriesContext
+  } = useCharts()
 
   const { showLinesOfSelectedLumps } = props
   const { isSelectModeLines } = props

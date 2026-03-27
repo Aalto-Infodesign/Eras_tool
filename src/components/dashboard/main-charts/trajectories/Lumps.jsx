@@ -1,40 +1,38 @@
-import { useContext, useMemo, useState, useEffect } from "react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { useMemo, useState, useEffect } from "react"
+import { useCharts } from "../ChartsContext"
 
 import { includes, map } from "lodash"
 import {
   getMinMaxStateFromTrajectories,
   getMinMaxFromTrajectoriesBetweenTwoStates,
-} from "../../../utils/getMinMax"
+} from "../../../../utils/getMinMax"
 
 import { AnimatePresence, motion } from "motion/react"
 
-import { useMouseMoveSvg } from "../../hooks/useMouseMove"
+import { useMouseMoveSvg } from "../../../hooks/useMouseMove"
 
-import { useViz } from "../../../contexts/VizContext"
-import { useFilters } from "../../../contexts/FiltersContext"
+import { useViz } from "../../../../contexts/VizContext"
+import { useFilters } from "../../../../contexts/FiltersContext"
 import "./Lumps.css"
 
 import { scaleLinear, extent } from "d3"
-import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 export const Lumps = (props) => {
   const { palette } = useViz()
+  const { selectedLumps, toggleSelectedLumps, toggleSelectedTrajectory } = useFilters()
   const { selectedLinks, filters } = useDerivedData()
 
-  const trajectoriesContext = useContext(TrajectoriesContext)
   const {
     marginTop,
     chartScales,
-    selectedLumps,
-    toggleSelectedLumps,
-    toggleSelectedTrajectory,
+
     hoveredTrajectoriesIDs,
     setHoveredTrajectoriesIDs,
     selectedIndex,
     reduceMotion,
     enableScrub,
-  } = trajectoriesContext
+  } = useCharts()
 
   const animationDuration = reduceMotion ? 0 : 0.2
 
@@ -572,7 +570,7 @@ const LumpLine = ({
   selectedIndex = 0,
   animationDuration,
 }) => {
-  const { enableScrub } = useContext(TrajectoriesContext)
+  const { enableScrub } = useCharts()
   const handleClick = () => {
     console.log("click")
     hoveredTrajectoriesIDs.length > 0 &&

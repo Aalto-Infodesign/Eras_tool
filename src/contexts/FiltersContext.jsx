@@ -1,8 +1,8 @@
 import { createContext, useState, useContext, useMemo, useCallback, useEffect } from "react"
 import { useData } from "./ProcessedDataContext"
-import { isEqual, isEmpty } from "lodash"
+import { isEmpty } from "lodash"
 import { useRawData } from "./RawDataContext"
-import { xor, difference } from "lodash"
+import { xor, difference, xorBy } from "lodash"
 import { useViz } from "./VizContext"
 import { useDebouncedState } from "hamo"
 
@@ -41,6 +41,7 @@ export function FiltersProvider({ children }) {
   // Selection Data
   const [selectedSilhouettesNames, setSelectedSilhouettesNames] = useState([]) // Main filter
   const [selectedTrajectoriesIDs, setSelectedTrajectoriesIDs] = useState([])
+  const [selectedLumps, setSelectedLumps] = useState([])
 
   const [trajectoriesSelectionMode, setTrajectoriesSelectionMode] = useState("all") // all, diagonal, parallel
 
@@ -48,6 +49,7 @@ export function FiltersProvider({ children }) {
   useEffect(() => {
     setSelectedSilhouettesNames([])
     setSelectedTrajectoriesIDs([])
+    setSelectedLumps([])
     setTrajectoriesSelectionMode("all")
     setRemovedStates([])
     setFiltersSelection({
@@ -132,6 +134,11 @@ export function FiltersProvider({ children }) {
     setRemovedStates((prev) => xor(prev, [state]))
   }, [])
 
+  const toggleSelectedLumps = (lump) => {
+    const newSelection = xorBy(selectedLumps, [lump], "type")
+    setSelectedLumps(newSelection)
+  }
+
   const value = useMemo(
     () => ({
       filtersSelection,
@@ -150,14 +157,21 @@ export function FiltersProvider({ children }) {
       isDragging,
       setIsDragging,
       // Selection
+      //->Silhouettes
       selectedSilhouettesNames,
       setSelectedSilhouettesNames,
       toggleSilhouetteFilter,
+      //->Trajectries
       selectedTrajectoriesIDs,
       setSelectedTrajectoriesIDs,
       toggleSelectedTrajectory,
+      //->Lumps
+      selectedLumps,
+      setSelectedLumps,
+      toggleSelectedLumps,
       trajectoriesSelectionMode,
       setTrajectoriesSelectionMode,
+
       //Flag
       filtersActive,
     }),
@@ -175,6 +189,7 @@ export function FiltersProvider({ children }) {
       toggleSelectedTrajectory,
       trajectoriesSelectionMode,
       setTrajectoriesSelectionMode,
+      selectedLumps,
       //Flag
       filtersActive,
       filtersInverted,

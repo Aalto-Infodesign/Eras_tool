@@ -1,6 +1,6 @@
-import { useContext, useState, useRef, useEffect, useMemo } from "react"
+import { useState, useRef, useEffect } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { TrajectoriesContext } from "../TrajectoriesContext"
+import { useCharts } from "../ChartsContext"
 
 import { StateTypeDistribution } from "./StatesTypeDistribution"
 import { Grid } from "./Grid"
@@ -9,38 +9,40 @@ import { Grid } from "./Grid"
 import { TrajectoriesMotion } from "./TrajectoriesMotion"
 // import { Trajectories } from "./Trajectories"
 import { StateDensity } from "./StateDensity"
-import { Tooltip } from "../../common/Tooltip/Tooltip"
+import { Tooltip } from "../../../common/Tooltip/Tooltip"
 
 import { Lumps } from "./Lumps"
 
-import { TextureDefs } from "../../common/Textures/TextureDefs"
+import { TextureDefs } from "../../../common/Textures/TextureDefs"
 
-import { useModifierKey } from "../../hooks/useModifierKey"
+import { useModifierKey } from "../../../hooks/useModifierKey"
 
-import { useData } from "../../../contexts/ProcessedDataContext"
-import { useViz } from "../../../contexts/VizContext"
-import { useFilters } from "../../../contexts/FiltersContext"
-import { useDerivedData } from "../../../contexts/DerivedDataContext"
-import Button from "../../common/Button/Button"
-import { StatesMatrix } from "../../fileLoader/statesMatrix/StatesMatrix"
+import { useData } from "../../../../contexts/ProcessedDataContext"
+import { useViz } from "../../../../contexts/VizContext"
+import { useFilters } from "../../../../contexts/FiltersContext"
+import { useDerivedData } from "../../../../contexts/DerivedDataContext"
+import Button from "../../../common/Button/Button"
+import { StatesMatrix } from "../../../fileLoader/statesMatrix/StatesMatrix"
 import { ChartArea, ChartLine, ListFilter } from "lucide-react"
 import { TrajectoriesCanvas } from "./three/TrajectoriesCanvas"
-import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
+import { ShortcutSpan } from "../../../common/ShortcutSpan/ShortcutSpan"
 export function TrajectoriesChart() {
-  const { selectedTrajectoriesIDs, trajectoriesSelectionMode, setTrajectoriesSelectionMode } =
-    useFilters()
+  const {
+    selectedTrajectoriesIDs,
+    trajectoriesSelectionMode,
+    setTrajectoriesSelectionMode,
+    toggleSelectedTrajectory,
+    selectedLumps,
+  } = useFilters()
   const { selectedLinks } = useDerivedData()
-
-  const trajectoriesContext = useContext(TrajectoriesContext)
 
   const {
     h,
     hoveredTrajectoriesIDs,
     selectedIndex,
-    selectedLumps,
-    toggleSelectedTrajectory,
+
     enableScrub,
-  } = trajectoriesContext
+  } = useCharts()
 
   const [isSelectModeLines, setIsSelectModeLines] = useState(false)
   const [hoveredDistribution, setHoveredDistribution] = useState({ type: "", text: "", state: "" })
