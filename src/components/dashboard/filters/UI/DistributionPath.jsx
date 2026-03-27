@@ -8,7 +8,8 @@ import { MotionText } from "../../../common/SVG/MotionText"
 export const DistributionPath = ({
   data,
   range,
-  selection,
+  localMin,
+  localMax,
   color,
   maskID = "defaultID",
   height = 150,
@@ -61,8 +62,8 @@ export const DistributionPath = ({
                 initial={{ x: 0, y: -1, height: height + 2 }}
                 fill="black"
                 animate={{
-                  x: xScale(selection[0]),
-                  width: xScale(selection[1]) - xScale(selection[0]),
+                  x: xScale(localMin),
+                  width: xScale(localMax) - xScale(localMin),
                 }}
                 transition={{ duration: 0.1 }}
               />
@@ -72,8 +73,8 @@ export const DistributionPath = ({
               initial={{ x: 0, y: -1, height: height + 2 }}
               fill="var(--text-primary)"
               animate={{
-                x: xScale(selection[0]),
-                width: xScale(selection[1]) - xScale(selection[0]),
+                x: xScale(localMin),
+                width: xScale(localMax) - xScale(localMin),
               }}
               transition={{ duration: 0.1 }}
             />

@@ -8,6 +8,10 @@ import { MotionText } from "../../../common/SVG/MotionText"
 export function FilterSlider({
   min = 0,
   max = 100,
+  localMin,
+  setLocalMin,
+  localMax,
+  setLocalMax,
   value = [0, 100], // [min, max] for range
   onChange,
   width = 300,
@@ -31,16 +35,10 @@ export function FilterSlider({
   const svgCursorPosition = useMouseMoveSvg(sliderRef)
   const [selectionMin, selectionMax] = value
 
-  // ✅ Local visual state — never debounced, always instant
-  const [localMin, setLocalMin] = useState(selectionMin)
-  const [localMax, setLocalMax] = useState(selectionMax)
-
   useEffect(() => {
-    if (!isDragging) {
-      setLocalMin(selectionMin)
-      setLocalMax(selectionMax)
-    }
-  }, [selectionMin, selectionMax, isDragging])
+    setLocalMin(selectionMin)
+    setLocalMax(selectionMax)
+  }, [selectionMin, selectionMax])
 
   useEffect(() => {
     setLineX(svgCursorPosition.x)

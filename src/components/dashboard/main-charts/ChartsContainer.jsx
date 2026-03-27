@@ -40,6 +40,7 @@ export function ChartsContainer() {
         <div className="chart-modes">
           {controlButtons.map((b) => (
             <Button
+              key={"button-" + b.label}
               size="xs"
               keystroke={String(b.code)}
               onClick={() => setChartType(b.code)}

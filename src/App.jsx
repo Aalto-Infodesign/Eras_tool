@@ -18,7 +18,6 @@ import { ThemeToggle } from "./components/common/Button/ThemeToggle"
 import { useModifierKey } from "./components/hooks/useModifierKey"
 
 function App() {
-  // useTheme()
   return (
     <RawDataProvider>
       <ProcessedDataProvider>

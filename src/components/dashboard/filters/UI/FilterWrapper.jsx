@@ -22,6 +22,15 @@ export const FilterWrapper = ({
   const [lineX, setLineX] = useState(0)
   const [hoveredSvg, setHoveredSvg] = useState(false)
 
+  const selection = [
+    Math.max(filter.selection[0], filter.extent[0]),
+    Math.min(filter.selection[1], filter.extent[1]),
+  ]
+
+  // ✅ Local visual state — never debounced, always instant
+  const [localMin, setLocalMin] = useState(selection[0])
+  const [localMax, setLocalMax] = useState(selection[1])
+
   const handleRangeChange = (value) => {
     console.log(name)
     updateSelection(name, value)
@@ -34,11 +43,6 @@ export const FilterWrapper = ({
     () => scaleLinear(filter.extent, [0, sliderDimensions.x]),
     [filter, sliderDimensions],
   )
-
-  const selection = [
-    Math.max(filter.selection[0], filter.extent[0]),
-    Math.min(filter.selection[1], filter.extent[1]),
-  ]
 
   return (
     <div
@@ -77,7 +81,8 @@ export const FilterWrapper = ({
         height={50}
         xScale={xScale}
         range={filter.range}
-        selection={selection}
+        localMin={localMin}
+        localMax={localMax}
         maskID={`mask-${name}`}
         mode={mode}
         lineX={lineX}
@@ -87,7 +92,11 @@ export const FilterWrapper = ({
       />
       <FilterSlider
         min={min}
+        localMin={localMin}
+        setLocalMin={setLocalMin}
         max={max}
+        localMax={localMax}
+        setLocalMax={setLocalMax}
         value={selection}
         onChange={handleRangeChange}
         width={sliderDimensions.x}

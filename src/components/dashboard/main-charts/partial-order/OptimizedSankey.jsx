@@ -362,9 +362,6 @@ export function Sankey({ width, height, data }) {
   const [hoveredSilhouette, setHoveredSilhouette] = useState(null)
   const [hoveredNode, setHoveredNode] = useState(null)
 
-  // OPTIMIZATION: Memoize the expensive Sankey layout calculation.
-  // This ensures the layout is only re-calculated when data, width, or height change,
-  // not on every re-render (e.g., when hovering).
   const { nodes, links } = useMemo(() => {
     const sankeyGenerator = sankey()
       .nodeWidth(NODE_WIDTH)
@@ -376,7 +373,13 @@ export function Sankey({ width, height, data }) {
       .nodeId((node) => node.id)
       .nodeAlign(sankeyCenter)
 
-    return sankeyGenerator(data)
+    const { nodes, links } = sankeyGenerator(data)
+
+    // TODO Not ideal, find a better way to show smaller entities DO NOT HIDE THEM
+    const visibleNodes = nodes.filter((n) => n.x1 - n.x0 > 1)
+    const visibleLinks = links.filter((l) => l.width > 1)
+
+    return { nodes: visibleNodes, links: visibleLinks }
   }, [data, width, height])
 
   const handleMouseLeave = () => {
@@ -393,8 +396,6 @@ export function Sankey({ width, height, data }) {
   const handleNodeLeave = () => {
     setHoveredNode(null)
   }
-
-  // console.log(hoveredNode)
 
   const columns = keys(groupBy(nodes, "x0"))
     .map((x) => Number(x))

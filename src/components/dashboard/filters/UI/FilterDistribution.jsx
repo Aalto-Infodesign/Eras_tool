@@ -9,7 +9,8 @@ export function FilterDistribution({
   width,
   height,
   range,
-  selection,
+  localMin,
+  localMax,
   maskID,
   color = "#fff",
   mode = "single",
@@ -38,7 +39,8 @@ export function FilterDistribution({
 
   const sharedPathProps = {
     range,
-    selection,
+    localMin,
+    localMax,
     height,
     xScale,
     yScale,
