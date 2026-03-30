@@ -24,7 +24,7 @@ export function ChartsContainer() {
   const controlButtons = [
     { label: "Parallel", code: 1 },
     { label: "Linear", code: 2 },
-    { label: "Arc", code: 3 },
+    // { label: "Arc", code: 3 },
   ]
 
   console.timeEnd("Charts Container")
@@ -66,7 +66,7 @@ export function ChartsContainer() {
           >
             {chartType === 1 && <PartialOrderChart />}
             {chartType === 2 && <TrajectoriesChart />}
-            {chartType === 3 && <ArcContainer />}
+            {/* {chartType === 3 && <ArcContainer />} */}
           </motion.section>
         </ChartsProvider>
       </div>

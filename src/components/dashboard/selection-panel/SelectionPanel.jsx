@@ -99,22 +99,24 @@ export function SelectionPanel() {
             <div className="filter-bar padded">
               <AnimatePresence>
                 {selectedLumps.map((l, i) => {
+                  const s = l.source.state ?? l.source
+                  const t = l.target.state ?? l.target
                   return (
                     <motion.div
                       layout
-                      key={`${l.source.state}-${l.target.state}`}
+                      key={`${l.type}`}
                       variants={childrenVariants}
                       className="chip"
-                      onHoverStart={() => setChipHoveredId(`${l.source.state}-${l.target.state}`)}
+                      onHoverStart={() => setChipHoveredId(`${s}-${t}`)}
                       onHoverEnd={() => setChipHoveredId(null)}
                     >
                       <p>
-                        <span style={{ color: palette[l.source.state] }}>{l.source.state}</span>
+                        <span style={{ color: palette[s] }}>{s}</span>
                         <span>-</span>
-                        <span style={{ color: palette[l.target.state] }}>{l.target.state}</span>
+                        <span style={{ color: palette[t] }}>{t}</span>
                       </p>
                       <CloseButton
-                        isVisible={chipHoveredId === `${l.source.state}-${l.target.state}`}
+                        isVisible={chipHoveredId === `${s}-${t}`}
                         onClick={() => toggleSelectedLumps(l)}
                       />
                     </motion.div>

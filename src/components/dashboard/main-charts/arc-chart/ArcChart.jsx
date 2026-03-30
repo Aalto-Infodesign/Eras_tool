@@ -7,6 +7,7 @@ import { useViz } from "../../../../contexts/VizContext"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
+import { useFilters } from "../../../../contexts/FiltersContext"
 
 export const ArcContainer = () => {
   const { h } = useCharts()
@@ -27,6 +28,7 @@ export const ArcChart = () => {
   const { palette } = useViz()
   const { chartScales, marginTop, w } = useCharts()
   const { selectedLinks } = useDerivedData()
+  const { toggleSelectedLumps, selectedLumps } = useFilters()
 
   const { y } = chartScales
 
@@ -39,6 +41,7 @@ export const ArcChart = () => {
       // TODO Left or Right based if it is going DOWN or UP
 
       return {
+        type: `${source}-${target}`,
         source: source,
         target: target,
         value: value,
@@ -56,35 +59,42 @@ export const ArcChart = () => {
     <motion.g id={"arc-chart"} initial={{ x: w / 2 }} animate={{ x: w / 2 }}>
       <g id="links">
         <AnimatePresence>
-          {links.map((l) => (
-            <motion.path
-              key={`segment-${l.source}–${l.target}`}
-              initial={{
-                strokeOpacity: opacityScale(l.value),
-                strokeWidth: 0,
-                pathLength: 0,
-              }}
-              animate={{
-                strokeOpacity: opacityScale(l.value),
-                strokeWidth: 1,
-                pathLength: 1,
-                stroke: `url(#gradient-${l.source}-${l.target})`,
-              }}
-              whileHover={{ strokeWidth: 1.5, strokeOpacity: 1, cursor: "pointer" }}
-              exit={{
-                strokeWidth: 1,
-                pathLength: 0,
-              }}
-              transition={{
-                duration: 0.2,
-                ease: "easeInOut",
-              }}
-              d={verticalArcGenerator(0, y(l.source) + marginTop, 0, y(l.target) + marginTop)}
-              fill="none"
-              onMouseEnter={() => setHoveredLink(l)}
-              onMouseLeave={() => setHoveredLink(null)}
-            />
-          ))}
+          {links.map((l) => {
+            const isSelected = selectedLumps.map((s) => s.type).includes(l.type)
+
+            return (
+              <motion.path
+                key={`segment-${l.source}–${l.target}`}
+                initial={{
+                  strokeOpacity: opacityScale(l.value),
+                  strokeWidth: 0,
+                  pathLength: 0,
+                }}
+                animate={{
+                  d: verticalArcGenerator(0, y(l.source) + marginTop, 0, y(l.target) + marginTop),
+                  strokeOpacity: isSelected ? 1 : opacityScale(l.value),
+                  strokeWidth: isSelected ? 2 : 1,
+                  pathLength: 1,
+                  stroke: `url(#gradient-${l.source}-${l.target})`,
+                }}
+                whileHover={{ strokeWidth: 1.5, strokeOpacity: 1, cursor: "pointer" }}
+                exit={{
+                  strokeWidth: 1,
+                  pathLength: 0,
+                }}
+                transition={{
+                  duration: 0.2,
+                  ease: "easeInOut",
+                }}
+                d={verticalArcGenerator(0, y(l.source) + marginTop, 0, y(l.target) + marginTop)}
+                fill="none"
+                strokeLinecap={"round"}
+                onClick={() => toggleSelectedLumps(l)}
+                onMouseEnter={() => setHoveredLink(l)}
+                onMouseLeave={() => setHoveredLink(null)}
+              />
+            )
+          })}
         </AnimatePresence>
       </g>
 
@@ -92,9 +102,10 @@ export const ArcChart = () => {
         {statesOrder.map((s) => (
           <motion.circle
             key={s}
-            animate={{ cy: y(s) + marginTop, fill: palette[s] }}
+            initial={{ r: 0 }}
+            animate={{ cy: y(s) + marginTop, fill: palette[s], r: 3 }}
+            exit={{ r: 0 }}
             cx={0}
-            r={3}
             transition={{ duration: 0.2 }}
           />
         ))}

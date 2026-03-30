@@ -9,6 +9,7 @@ import { Tooltip } from "../../common/Tooltip/Tooltip"
 
 import { curveStep, line } from "d3"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { useFilters } from "../../../contexts/FiltersContext"
 
 const PADDING = 0
 
@@ -16,8 +17,9 @@ export function StatesMatrix({ width, height, lineChartMode }) {
   const { statesOrder } = useData()
   const { trajectories } = useDerivedData()
   const { palette } = useViz()
+  const { selectedLumps, toggleSelectedLumps } = useFilters()
 
-  const [selectedCell, setSelectedCell] = useState(null)
+  // const [selectedCell, setSelectedCell] = useState(null)
   const [hoveredQuantile, setHoveredQuantile] = useState(null)
 
   const links = trajectories.flat()
@@ -34,6 +36,7 @@ export function StatesMatrix({ width, height, lineChartMode }) {
           const targetAges = map(value, (v) => v.target.age)
           return {
             id: key,
+            type: key.split(",").join("-"),
             source: key.split(",")[0],
             target: key.split(",")[1],
             segments: value,
@@ -149,7 +152,7 @@ export function StatesMatrix({ width, height, lineChartMode }) {
 
             const activePoints = dataMap[lineChartMode]
 
-            const isSelected = selectedCell === s.id
+            const isSelected = selectedLumps.map((l) => l.type).includes(s.type)
             return (
               <motion.g
                 key={s.id}
@@ -163,14 +166,15 @@ export function StatesMatrix({ width, height, lineChartMode }) {
                   y: yScale(s.source),
                   // scale: isSelected ? 1.1 : 1,
                 }}
-                onClick={() => setSelectedCell(isSelected ? null : s.id)}
+                onClick={() => toggleSelectedLumps(s)}
               >
                 <rect
                   width={xScale.bandwidth()}
                   height={yScale.bandwidth()}
                   fill="white"
                   fillOpacity={opacityScale(s.count)}
-                  stroke="none"
+                  stroke="white"
+                  strokeWidth={isSelected ? 1 : 0}
                 />
                 <Quantiles
                   width={xScale.bandwidth()}

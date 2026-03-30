@@ -45,7 +45,7 @@ export function TrajectoriesChart() {
     enableScrub,
   } = useCharts()
 
-  const [chartMode, setChartMode] = useState("lines") // lines || lumps || arc
+  const [chartMode, setChartMode] = useState("arc") // lines || lumps || arc
   const [hoveredDistribution, setHoveredDistribution] = useState({ type: "", text: "", state: "" })
   const [hoveredStateLabel, setHoveredStateLabel] = useState()
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
@@ -212,9 +212,9 @@ export function TrajectoriesChart() {
               <TextureDefs />
               <GradientDefs />
 
+              <Grid setHoveredStateLabel={setHoveredStateLabel} />
               {chartMode !== "arc" && (
                 <g>
-                  <Grid setHoveredStateLabel={setHoveredStateLabel} />
                   <Lumps
                     //Extended Context
                     isSelectModeLines={chartMode === "lines"}
