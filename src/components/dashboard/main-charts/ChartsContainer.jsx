@@ -10,7 +10,7 @@ import { useViz } from "../../../contexts/VizContext"
 
 import Button from "../../common/Button/Button"
 import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
-import { ArcChart } from "./arc-chart/ArcChart"
+import { ArcContainer } from "./arc-chart/ArcChart"
 
 export function ChartsContainer() {
   console.time("Charts Container")
@@ -66,7 +66,7 @@ export function ChartsContainer() {
           >
             {chartType === 1 && <PartialOrderChart />}
             {chartType === 2 && <TrajectoriesChart />}
-            {chartType === 3 && <ArcChart />}
+            {chartType === 3 && <ArcContainer />}
           </motion.section>
         </ChartsProvider>
       </div>

@@ -26,6 +26,7 @@ import { StatesMatrix } from "../../../fileLoader/statesMatrix/StatesMatrix"
 import { ChartArea, ChartLine, ListFilter } from "lucide-react"
 import { TrajectoriesCanvas } from "./three/TrajectoriesCanvas"
 import { ShortcutSpan } from "../../../common/ShortcutSpan/ShortcutSpan"
+import { ArcChart } from "../arc-chart/ArcChart"
 export function TrajectoriesChart() {
   const {
     selectedTrajectoriesIDs,
@@ -44,7 +45,7 @@ export function TrajectoriesChart() {
     enableScrub,
   } = useCharts()
 
-  const [isSelectModeLines, setIsSelectModeLines] = useState(false)
+  const [chartMode, setChartMode] = useState("lines") // lines || lumps || arc
   const [hoveredDistribution, setHoveredDistribution] = useState({ type: "", text: "", state: "" })
   const [hoveredStateLabel, setHoveredStateLabel] = useState()
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
@@ -53,7 +54,11 @@ export function TrajectoriesChart() {
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
   // const [showDistributions, setShowDistributions] = useState(true)
 
-  useModifierKey("l", () => selectedLinks.length < 500 && setIsSelectModeLines((prev) => !prev))
+  // useModifierKey(
+  //   "l",
+  //   () =>
+  //     selectedLinks.length < 500 && setChartMode((prev) => (prev === "lines" ? "lumps" : "lines")),
+  // )
 
   const showDistributions = true
 
@@ -69,35 +74,46 @@ export function TrajectoriesChart() {
       toggleSelectedTrajectory(hoveredTrajectoriesIDs[selectedIndex])
   }, [isEnter])
 
-  useEffect(() => {
-    if (selectedLinks.length > 500) setIsSelectModeLines(false)
-  }, [selectedLinks.length])
+  // useEffect(() => {
+  //   if (selectedLinks.length > 500) setChartMode(false)
+  // }, [selectedLinks.length])
 
   return (
     <>
       <div className="chart-controls">
-        <div id="lump-controls" className={` ${isSelectModeLines ? "Lines" : "Lumps"}`}>
+        <div id="lump-controls" className={` ${chartMode}`}>
           <div>
             <Button
-              data-selected={isSelectModeLines}
+              data-selected={chartMode === "lines"}
               size="xs"
               // variant="secondary"
-              onClick={() => setIsSelectModeLines(true)}
+              onClick={() => setChartMode("lines")}
               tooltip="Individual Trajectories"
               disabled={selectedLinks.length > 500}
             >
               <ShortcutSpan>L</ShortcutSpan>ines
             </Button>
             <Button
-              data-selected={!isSelectModeLines}
+              data-selected={chartMode === "lumps"}
               size="xs"
               // variant="secondary"
-              onClick={() => setIsSelectModeLines(false)}
+              keystroke="l"
+              onClick={() => setChartMode("lumps")}
               tooltip="Cluster Trajectories"
             >
               <ShortcutSpan>L</ShortcutSpan>umps
             </Button>
-            {!isSelectModeLines && selectedLumps.length > 0 && (
+            <Button
+              data-selected={chartMode === "arc"}
+              size="xs"
+              // variant="secondary"
+              keystroke="a"
+              onClick={() => setChartMode("arc")}
+              tooltip="Direction of Source and Target pairs"
+            >
+              <ShortcutSpan>A</ShortcutSpan>rcs
+            </Button>
+            {!chartMode && selectedLumps.length > 0 && (
               <Button
                 size="xs"
                 // variant="secondary"
@@ -112,7 +128,7 @@ export function TrajectoriesChart() {
         </div>
 
         <div id="line-controls">
-          {(isSelectModeLines || showLinesOfSelectedLumps) && (
+          {(chartMode === "lines" || showLinesOfSelectedLumps) && (
             <>
               <Button
                 size="xs"
@@ -196,26 +212,30 @@ export function TrajectoriesChart() {
               <TextureDefs />
               <GradientDefs />
 
-              <Grid setHoveredStateLabel={setHoveredStateLabel} />
+              {chartMode !== "arc" && (
+                <g>
+                  <Grid setHoveredStateLabel={setHoveredStateLabel} />
+                  <Lumps
+                    //Extended Context
+                    isSelectModeLines={chartMode === "lines"}
+                    //Local State
+                    hoveredLump={hoveredLump}
+                    setHoveredLump={setHoveredLump}
+                    svgRef={svgRef}
+                  />
 
-              <Lumps
-                //Extended Context
-                isSelectModeLines={isSelectModeLines}
-                //Local State
-                hoveredLump={hoveredLump}
-                setHoveredLump={setHoveredLump}
-                svgRef={svgRef}
-              />
-
-              {selectedLinks.length < 500 && (
-                <TrajectoriesMotion
-                  //Extended Context
-                  isSelectModeLines={isSelectModeLines}
-                  //Local State
-                  showLinesOfSelectedLumps={showLinesOfSelectedLumps}
-                />
+                  {selectedLinks.length < 500 && (
+                    <TrajectoriesMotion
+                      //Extended Context
+                      isSelectModeLines={chartMode === "lines"}
+                      //Local State
+                      showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+                    />
+                  )}
+                  {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
+                </g>
               )}
-              {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
+              {chartMode === "arc" && <ArcChart />}
             </svg>
           </div>
           <Tooltip isVisible={enableScrub && hoveredTrajectoriesIDs.length > 0}>
