@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
 import { useFilters } from "../../../../contexts/FiltersContext"
+import { useStatesDataFromLinks } from "../../../../utils/lumpsHelpers"
 
 export const ArcContainer = () => {
   const { h } = useCharts()
@@ -26,10 +27,12 @@ export const ArcChart = () => {
   const { statesOrder } = useData()
   const { palette } = useViz()
   const { chartScales, marginTop, w } = useCharts()
-  const { lumps } = useDerivedData()
+  const { lumps, selectedLinks } = useDerivedData()
   const { toggleSelectedLumps, selectedLumps } = useFilters()
 
-  const { y } = chartScales
+  const { x, y } = chartScales
+
+  const statesData = useStatesDataFromLinks(selectedLinks)
 
   const [hoveredLump, setHoveredLump] = useState(null)
 
@@ -39,7 +42,7 @@ export const ArcChart = () => {
   const opacityScale = scaleLinear(valuesExtent, [0.1, 1])
 
   return (
-    <motion.g id={"arc-chart"} initial={{ x: w / 2 }} animate={{ x: w / 2 }}>
+    <motion.g id={"arc-chart"} initial={{ x: 0 }} animate={{ x: w / 2 - 1 }}>
       <g id="links">
         <AnimatePresence>
           {lumps.map((l) => {
@@ -81,18 +84,20 @@ export const ArcChart = () => {
         </AnimatePresence>
       </g>
 
-      <g id="nodes">
-        {statesOrder.map((s) => (
-          <motion.circle
-            key={s}
-            initial={{ r: 0 }}
-            animate={{ cy: y(s) + marginTop, fill: palette[s], r: 2 }}
-            exit={{ r: 0 }}
-            cx={0}
-            transition={{ duration: 0.2 }}
-          />
-        ))}
-      </g>
+      <AnimatePresence>
+        <g id="nodes">
+          {statesData.map((s) => (
+            <motion.circle
+              key={s}
+              initial={{ r: 0, cx: x(s.median) }}
+              animate={{ cx: 0, cy: y(s.state) + marginTop, fill: palette[s.state], r: 2 }}
+              exit={{ r: 0, cx: x(s.median) }}
+              cx={0}
+              transition={{ duration: 0.2 }}
+            />
+          ))}
+        </g>
+      </AnimatePresence>
 
       {hoveredLump && (
         <Tooltip isVisible={hoveredLump}>
