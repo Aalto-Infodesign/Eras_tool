@@ -103,7 +103,7 @@ export const ArcChart = () => {
           <motion.circle
             key={s}
             initial={{ r: 0 }}
-            animate={{ cy: y(s) + marginTop, fill: palette[s], r: 3 }}
+            animate={{ cy: y(s) + marginTop, fill: palette[s], r: 2 }}
             exit={{ r: 0 }}
             cx={0}
             transition={{ duration: 0.2 }}

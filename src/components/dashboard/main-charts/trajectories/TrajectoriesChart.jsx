@@ -47,7 +47,6 @@ export function TrajectoriesChart() {
 
   const [chartMode, setChartMode] = useState("arc") // lines || lumps || arc
   const [hoveredDistribution, setHoveredDistribution] = useState({ type: "", text: "", state: "" })
-  const [hoveredStateLabel, setHoveredStateLabel] = useState()
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
   const [showStateDensity, setShowStateDensity] = useState(false)
   const [hoveredLump, setHoveredLump] = useState(null)
@@ -212,7 +211,7 @@ export function TrajectoriesChart() {
               <TextureDefs />
               <GradientDefs />
 
-              <Grid setHoveredStateLabel={setHoveredStateLabel} />
+              <Grid chartMode={chartMode} />
               {chartMode !== "arc" && (
                 <g>
                   <Lumps
@@ -250,9 +249,6 @@ export function TrajectoriesChart() {
 
           <Tooltip isVisible={hoveredDistribution.type !== ""}>
             <p>{hoveredDistribution.text}</p>
-          </Tooltip>
-          <Tooltip isVisible={hoveredStateLabel}>
-            <p>{hoveredStateLabel}</p>
           </Tooltip>
         </div>
         {/* <Legend /> */}

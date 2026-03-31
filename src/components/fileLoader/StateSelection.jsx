@@ -188,13 +188,6 @@ export function StateSelection() {
     ease: "easeOut",
   }
 
-  const gap = 4
-  const itemHeight = 34
-  const statesLength = statesOrder.length
-  const divHeight = statesLength > 0 ? statesLength * itemHeight + statesLength * gap : 0
-  const removedDivHeight =
-    removedStates.length > 0 ? removedStates.length * itemHeight + removedStates.length * gap : 0
-
   return (
     <section className="accordion-content">
       <p className="era-header">
@@ -232,11 +225,12 @@ export function StateSelection() {
                   className="state-item drag"
                   whileTap={{ scale: 1.02 }}
                   initial={{ opacity: 0 }}
-                  animate={{ backgroundColor: "var(--surface-secondary)", opacity: 1 }}
+                  animate={{ backgroundColor: "var(--surface-primary)", opacity: 1 }}
                   exit={{ opacity: 0 }}
                   whileHover={{
-                    backgroundColor: "#" + tinycolor(palette[item]).toHex() + "33",
-                    transition: { duration: 0.2 },
+                    // backgroundColor: "#" + tinycolor(palette[item]).toHex() + "33",
+                    backgroundColor: "var(--surface-secondary)",
+                    transition: { duration: 0.1 },
                   }}
                   whileDrag={{ zIndex: 100 }}
                   drag

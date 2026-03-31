@@ -11,15 +11,18 @@ import { useData } from "../../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../../contexts/VizContext"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import { flattenDeep } from "lodash"
+import { useState } from "react"
+import { Tooltip } from "../../../common/Tooltip/Tooltip"
 
-export function Grid(props) {
+export function Grid({ chartMode }) {
   const { setStatesOrder, statesOrder } = useData()
   const { palette } = useViz()
   const { filteredTrajectories, analytics, trajectories } = useDerivedData()
   const { w, h, marginTop, chartScales } = useCharts()
 
+  const [hoveredStateLabel, setHoveredStateLabel] = useState()
+
   const t = !filteredTrajectories ? trajectories : filteredTrajectories
-  const { setHoveredStateLabel = () => {} } = props
 
   const { ageRange } = analytics
 
@@ -37,28 +40,35 @@ export function Grid(props) {
 
   return (
     <g id="grid">
-      {verticalLines.map((l) => {
-        return (
-          <motion.g
-            key={`v-line-${l}`}
-            initial={{ x: xScale(l) }}
-            animate={{ x: xScale(l) }}
-            transition={{ duration: 0.2 }}
-          >
-            <line
-              y1={0}
-              y2={h}
-              stroke="var(--text-primary)"
-              strokeWidth={0.1}
-              opacity={0.3}
-              strokeDasharray={"1 1"}
-            />
-            <text y={h} fill={"var(--text-primary)"} fontSize={3} opacity={0.3} textAnchor="middle">
-              {l}
-            </text>
-          </motion.g>
-        )
-      })}
+      {chartMode !== "arc" &&
+        verticalLines.map((l) => {
+          return (
+            <motion.g
+              key={`v-line-${l}`}
+              initial={{ x: xScale(l) }}
+              animate={{ x: xScale(l) }}
+              transition={{ duration: 0.2 }}
+            >
+              <line
+                y1={0}
+                y2={h}
+                stroke="var(--text-primary)"
+                strokeWidth={0.1}
+                opacity={0.3}
+                strokeDasharray={"1 1"}
+              />
+              <text
+                y={h}
+                fill={"var(--text-primary)"}
+                fontSize={3}
+                opacity={0.3}
+                textAnchor="middle"
+              >
+                {l}
+              </text>
+            </motion.g>
+          )
+        })}
       {statesOrder.map((name) => {
         return (
           <motion.g
@@ -168,6 +178,10 @@ export function Grid(props) {
           )
         })}
       </AnimatePresence>
+
+      <Tooltip isVisible={hoveredStateLabel}>
+        <p>{hoveredStateLabel}</p>
+      </Tooltip>
     </g>
   )
 }

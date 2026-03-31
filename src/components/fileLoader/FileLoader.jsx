@@ -13,7 +13,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useData } from "../../contexts/ProcessedDataContext"
 import { useViz } from "../../contexts/VizContext"
 
-import { ChevronDown, Maximize2 } from "lucide-react"
+import { ChevronDown, Maximize2, User } from "lucide-react"
 import Button from "../common/Button/Button"
 
 export function FileLoader() {
@@ -100,6 +100,13 @@ export function FileLoader() {
                   >
                     {/* <StatesMatrix width={300} height={300} /> */}
 
+                    <p>
+                      There are
+                      <b>{richData.length}</b>
+                      <User size={14} />
+                      in the dataset
+                    </p>
+
                     {hasFlowChart && <Sankey width={300} height={100} />}
                     {existingIdealSilhouettes.length > 0 && (
                       <div className="ideal-silhouette-info">
@@ -107,7 +114,8 @@ export function FileLoader() {
                         {existingIdealSilhouettes.map((s) => (
                           <p key={s.name}>
                             <strong>{s.name}</strong>
-                            <span> : {s.size}</span>
+                            <span> : {s.size} </span>
+                            <User size={12} />
                           </p>
                         ))}
                       </div>

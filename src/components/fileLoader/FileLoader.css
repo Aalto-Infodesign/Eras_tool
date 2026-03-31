@@ -48,8 +48,20 @@
 
 .loader-main {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-sm);
   padding: 0 var(--spacing-sm);
+}
+
+.flow-data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.loader-main p {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 #fileInput {
