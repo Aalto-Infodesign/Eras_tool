@@ -2,10 +2,7 @@ import { useMemo, useState, useEffect } from "react"
 import { useCharts } from "../ChartsContext"
 
 import { includes, map } from "lodash"
-import {
-  getMinMaxStateFromTrajectories,
-  getMinMaxFromTrajectoriesBetweenTwoStates,
-} from "../../../../utils/getMinMax"
+import { useLumpsData, useStatesDataFromLinks } from "../../../../utils/lumpsHelpers"
 
 import { AnimatePresence, motion } from "motion/react"
 
@@ -21,7 +18,7 @@ import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 export const Lumps = (props) => {
   const { palette } = useViz()
   const { selectedLumps, toggleSelectedLumps, toggleSelectedTrajectory } = useFilters()
-  const { selectedLinks, filters } = useDerivedData()
+  const { lumps, selectedLinks } = useDerivedData()
 
   const {
     marginTop,
@@ -62,40 +59,21 @@ export const Lumps = (props) => {
     }
   }
 
-  const highlightedTrajectories = useMemo(() => {
+  const highlightedLinks = useMemo(() => {
     if (selectedLinks.length === 0 || hoveredTrajectoriesIDs.length === 0 || selectedIndex === null)
       return []
     return selectedLinks.filter((d) => hoveredTrajectoriesIDs.includes(d.id))
   }, [selectedLinks, hoveredTrajectoriesIDs, selectedIndex])
 
-  const globalLumpData = useMemo(() => {
-    return getMinMaxStateFromTrajectories(selectedLinks)
-  }, [selectedLinks])
+  const globalLumpData = useStatesDataFromLinks(selectedLinks)
 
-  const subsetLumpData = useMemo(() => {
-    if (highlightedTrajectories.length === 0) return []
-    return getMinMaxStateFromTrajectories(highlightedTrajectories)
-  }, [highlightedTrajectories])
+  const subsetLumpData = useStatesDataFromLinks(highlightedLinks)
 
-  const dateExtent = filters.date.extent // Safely get dateExtent
-  const minDate = dateExtent ? dateExtent[0] : 0 // Fallback to 0 if not present
+  const allTypes = lumps.map((t) => t.type)
 
-  const allTypes = useMemo(() => {
-    return getMinMaxFromTrajectoriesBetweenTwoStates(selectedLinks).map((t) => t.type)
-  }, [selectedLinks])
-
-  const [presentLumps, lumpLinesExtreme] = useMemo(() => {
-    const processLumps = (trajectories) =>
-      getMinMaxFromTrajectoriesBetweenTwoStates(trajectories).filter((d) => d.items.length > 1)
-
-    const pLumps = processLumps(selectedLinks)
-
-    const linesExtreme = getMinMaxFromTrajectoriesBetweenTwoStates(selectedLinks).filter(
-      (d) => d.items.length === 1,
-    )
-
-    return [pLumps, linesExtreme]
-  }, [selectedLinks])
+  const lumpData = useLumpsData(lumps)
+  const presentLumps = lumpData.filter((d) => d.links.length > 1)
+  const lumpLinesExtreme = lumpData.filter((d) => d.links.length === 1)
 
   const allLumps = useMemo(() => {
     return allTypes.map((t) => ({
@@ -173,7 +151,7 @@ export const Lumps = (props) => {
   ])
 
   const opacityScale = useMemo(() => {
-    const allLumpItemsLengths = extent(presentLumps.map((l) => l.items.length))
+    const allLumpItemsLengths = extent(presentLumps.map((l) => l.links.length))
 
     const scale = scaleLinear(allLumpItemsLengths, [0.5, 0.8])
 
@@ -218,15 +196,15 @@ export const Lumps = (props) => {
                 stroke: `url(#gradient-${d.source.state}-${d.target.state})`,
                 strokeLinecap: "round",
                 pathLength: 0,
-                x1: x(d.source.x[0]),
-                x2: x(d.target.x[0]),
+                x1: x(d.source.xExtent[0]),
+                x2: x(d.target.xExtent[0]),
                 y1: y(d.source.state) + marginTop,
                 y2: y(d.target.state) + marginTop,
               }}
               animate={{
                 opacity: isSelected ? 1 : 0.3,
-                x1: x(d.source.x[0]),
-                x2: x(d.target.x[0]),
+                x1: x(d.source.xExtent[0]),
+                x2: x(d.target.xExtent[0]),
                 y1: y(d.source.state) + marginTop,
                 y2: y(d.target.state) + marginTop,
                 pathLength: 1,
@@ -258,8 +236,8 @@ export const Lumps = (props) => {
           >
             {/* Transparent rect for interaction */}
             <rect
-              x={x(d.x[0])}
-              width={x(d.x[1]) - x(d.x[0])}
+              x={x(d.xExtent[0])}
+              width={x(d.xExtent[1]) - x(d.xExtent[0])}
               height={5}
               fill="transparent"
               opacity={0.5}
@@ -312,23 +290,23 @@ export const Lumps = (props) => {
                 id={`lump-label-start-${d.state}`}
                 className={`lump-label-start`}
                 fontSize={3}
-                initial={{ x: x(d.x[0]), y: 0, opacity: 0 }}
-                animate={{ x: x(d.x[0]), y: 0, opacity: 1 }}
+                initial={{ x: x(d.xExtent[0]), y: 0, opacity: 0 }}
+                animate={{ x: x(d.xExtent[0]), y: 0, opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: animationDuration }}
               >
-                {d.x[0].toFixed(0) + "y"}
+                {d.xExtent[0].toFixed(0) + "y"}
               </motion.text>
               <motion.text
                 id={`lump-label-end-${d.state}`}
                 className={`lump-label-end`}
                 fontSize={3}
-                initial={{ x: x(d.x[1]), y: 0, opacity: 0 }}
-                animate={{ x: x(d.x[1]), y: 0, opacity: 1 }}
+                initial={{ x: x(d.xExtent[1]), y: 0, opacity: 0 }}
+                animate={{ x: x(d.xExtent[1]), y: 0, opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: animationDuration }}
               >
-                {d.x[1].toFixed(0) + "y"}
+                {d.xExtent[1].toFixed(0) + "y"}
               </motion.text>
             </motion.g>
 
@@ -461,10 +439,10 @@ const LumpPolygon = ({
       const targetPadding = targetY > sourceY ? -lumpPadding : lumpPadding
       const offsetX = targetY > sourceY ? -lumpOffsetX : lumpOffsetX
 
-      return `${x(data.source.x[0]) - offsetX},${sourceY + sourcePadding} ${
-        x(data.source.x[1]) - offsetX
-      },${sourceY + sourcePadding} ${x(data.target.x[1]) + offsetX},${targetY + targetPadding} ${
-        x(data.target.x[0]) + offsetX
+      return `${x(data.source.xExtent[0]) - offsetX},${sourceY + sourcePadding} ${
+        x(data.source.xExtent[1]) - offsetX
+      },${sourceY + sourcePadding} ${x(data.target.xExtent[1]) + offsetX},${targetY + targetPadding} ${
+        x(data.target.xExtent[0]) + offsetX
       },${targetY + targetPadding}`
     }
 
@@ -475,10 +453,10 @@ const LumpPolygon = ({
       const targetPadding = targetY > sourceY ? -lumpPadding : lumpPadding
       const offsetX = targetY > sourceY ? -lumpOffsetX : lumpOffsetX
 
-      return `${x(data.source.x[0]) - offsetX},${sourceY + sourcePadding} ${
-        x(data.source.x[0]) - offsetX
-      },${sourceY + sourcePadding} ${x(data.target.x[0]) + offsetX},${targetY + targetPadding} ${
-        x(data.target.x[0]) + offsetX
+      return `${x(data.source.xExtent[0]) - offsetX},${sourceY + sourcePadding} ${
+        x(data.source.xExtent[0]) - offsetX
+      },${sourceY + sourcePadding} ${x(data.target.xExtent[0]) + offsetX},${targetY + targetPadding} ${
+        x(data.target.xExtent[0]) + offsetX
       },${targetY + targetPadding}`
     }
 
@@ -507,7 +485,7 @@ const LumpPolygon = ({
 
   // --- Calculate opacity based on hover and selection state ---
   const opacity = useMemo(() => {
-    const baseOpacity = opacityScale(data.items.length)
+    const baseOpacity = opacityScale(data.links.length)
 
     if (isSelected) {
       // This lump is selected but not hovered: use base opacity
@@ -520,12 +498,12 @@ const LumpPolygon = ({
 
     if (isHovered) {
       // This lump is hovered: boost opacity further if selected
-      return isSelected ? 1 : opacityScale(data.items.length)
+      return isSelected ? 1 : opacityScale(data.links.length)
     }
 
     // Something else is hovered: decrease opacity
     return 0.1
-  }, [hoveredLump, isHovered, isSelected, opacityScale, data.items.length])
+  }, [hoveredLump, isHovered, isSelected, opacityScale, data.links.length])
 
   // console.log(opacity)
 
@@ -583,8 +561,8 @@ const LumpLine = ({
       id={`${name}-lump-line-${d.state}`}
       className={"lump-line"}
       initial={{
-        x1: x(d.x[0]),
-        x2: x(d.x[1]),
+        x1: x(d.xExtent[0]),
+        x2: x(d.xExtent[1]),
         y1: y,
         y2: y,
         strokeWidth: 0,
@@ -593,8 +571,8 @@ const LumpLine = ({
         pathLength: 0,
       }}
       animate={{
-        x1: x(d.x[0]),
-        x2: x(d.x[1]),
+        x1: x(d.xExtent[0]),
+        x2: x(d.xExtent[1]),
         y1: y,
         y2: y,
         strokeWidth: strokeWidth,

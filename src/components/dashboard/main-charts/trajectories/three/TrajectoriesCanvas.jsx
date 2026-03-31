@@ -4,7 +4,7 @@ import { Text, Line } from "@react-three/drei"
 import { useData } from "../../../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../../../contexts/VizContext"
 import { useDerivedData } from "../../../../../contexts/DerivedDataContext"
-import { getMinMaxStateFromTrajectories } from "../../../../../utils/getMinMax"
+import { getMinMaxStateFromTrajectories } from "../../../../../utils/lumpsHelpers"
 import { flattenDeep } from "lodash"
 
 export const TrajectoriesCanvas = ({ width, height }) => {
@@ -299,26 +299,23 @@ export function GridScene({
 // If you already have a <Canvas> higher up in your tree, use <GridScene> directly
 // and delete this wrapper.
 export function Grid({ setHoveredStateLabel }) {
-  // ── swap these mocks for your real context hooks ──
-  const { setStatesOrder, statesOrder } = useData()
-  const { palette } = useViz()
-  const { filteredTrajectories, analytics, trajectories } = useDerivedData()
-
-  const { ageRange } = analytics
-  const t = !filteredTrajectories ? trajectories : filteredTrajectories
-  //   const xScale = chartScales.x
-  //   const yScale = chartScales.y
-
-  const minMaxStates = getMinMaxStateFromTrajectories(flattenDeep(t))
-
-  return (
-    <GridScene
-      statesOrder={statesOrder}
-      setStatesOrder={setStatesOrder}
-      palette={palette}
-      ageRange={ageRange}
-      minMaxStates={minMaxStates}
-      setHoveredStateLabel={setHoveredStateLabel}
-    />
-  )
+  // // ── swap these mocks for your real context hooks ──
+  // const { setStatesOrder, statesOrder } = useData()
+  // const { palette } = useViz()
+  // const { filteredTrajectories, analytics, trajectories } = useDerivedData()
+  // const { ageRange } = analytics
+  // const t = !filteredTrajectories ? trajectories : filteredTrajectories
+  // //   const xScale = chartScales.x
+  // //   const yScale = chartScales.y
+  // const minMaxStates = getMinMaxStateFromTrajectories(flattenDeep(t))
+  // return (
+  //   <GridScene
+  //     statesOrder={statesOrder}
+  //     setStatesOrder={setStatesOrder}
+  //     palette={palette}
+  //     ageRange={ageRange}
+  //     minMaxStates={minMaxStates}
+  //     setHoveredStateLabel={setHoveredStateLabel}
+  //   />
+  // )
 }

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react"
-import { motion } from "motion/react"
-import { extent, scaleBand, scaleLinear, scaleQuantile, range } from "d3"
-import { groupBy, map, countBy, uniq, flatten, max, values, sum } from "lodash"
+import { AnimatePresence, motion } from "motion/react"
+import { extent, scaleBand, scaleLinear, scaleQuantile } from "d3"
+import { map, countBy, uniq, flatten, values, sum } from "lodash"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
 
@@ -15,61 +15,52 @@ const PADDING = 0
 
 export function StatesMatrix({ width, height, lineChartMode }) {
   const { statesOrder } = useData()
-  const { trajectories } = useDerivedData()
+  const { lumps } = useDerivedData()
   const { palette } = useViz()
   const { selectedLumps, toggleSelectedLumps } = useFilters()
 
   // const [selectedCell, setSelectedCell] = useState(null)
   const [hoveredQuantile, setHoveredQuantile] = useState(null)
 
-  const links = trajectories.flat()
-
+  // THESE ARE LUMPS -> useLumps(links)
   const matrixCouples = useMemo(
     () =>
-      map(
-        groupBy(links, (l) => [l.source.state, l.target.state]),
-        (value, key) => {
-          const durations = map(value, (v) => v.target.date - v.source.date)
-          const sourceDates = map(value, (v) => v.source.date)
-          const targetDates = map(value, (v) => v.source.date)
-          const sourceAges = map(value, (v) => v.source.age)
-          const targetAges = map(value, (v) => v.target.age)
-          return {
-            id: key,
-            type: key.split(",").join("-"),
-            source: key.split(",")[0],
-            target: key.split(",")[1],
-            segments: value,
-            duration: durations,
-            countedDurations: map(countBy(durations, Math.floor), (v, k) => ({
-              x: Number(k),
-              y: v,
-            })),
-            sourceD: sourceDates,
-            countedSourceDates: map(countBy(sourceDates, Math.floor), (v, k) => ({
-              x: Number(k),
-              y: v,
-            })),
-            targetD: targetDates,
-            countedTargetDates: map(countBy(targetDates, Math.floor), (v, k) => ({
-              x: Number(k),
-              y: v,
-            })),
-            sourceAge: sourceAges,
-            countedSourceAges: map(countBy(sourceAges, Math.floor), (v, k) => ({
-              x: Number(k),
-              y: v,
-            })),
-            targetAge: targetAges,
-            countedTargetAges: map(countBy(targetAges, Math.floor), (v, k) => ({
-              x: Number(k),
-              y: v,
-            })),
-            count: value.length,
-          }
-        },
-      ),
-    [links],
+      lumps.map((l) => {
+        const durations = map(l.links, (l) => l.target.date - l.source.date)
+        const sourceDates = map(l.links, (l) => l.source.date)
+        const targetDates = map(l.links, (l) => l.source.date)
+        const sourceAges = map(l.links, (l) => l.source.age)
+        const targetAges = map(l.links, (l) => l.target.age)
+        return {
+          ...l,
+          duration: durations,
+          countedDurations: map(countBy(durations, Math.floor), (v, k) => ({
+            x: Number(k),
+            y: v,
+          })),
+          sourceD: sourceDates,
+          countedSourceDates: map(countBy(sourceDates, Math.floor), (v, k) => ({
+            x: Number(k),
+            y: v,
+          })),
+          targetD: targetDates,
+          countedTargetDates: map(countBy(targetDates, Math.floor), (v, k) => ({
+            x: Number(k),
+            y: v,
+          })),
+          sourceAge: sourceAges,
+          countedSourceAges: map(countBy(sourceAges, Math.floor), (v, k) => ({
+            x: Number(k),
+            y: v,
+          })),
+          targetAge: targetAges,
+          countedTargetAges: map(countBy(targetAges, Math.floor), (v, k) => ({
+            x: Number(k),
+            y: v,
+          })),
+        }
+      }),
+    [lumps],
   )
 
   const buckets = ["short", "medium", "long", "longest"]
@@ -141,60 +132,65 @@ export function StatesMatrix({ width, height, lineChartMode }) {
           ))}
         </motion.g>
         <g id="cells">
-          {matrixCouples.map((s, i) => {
-            const dataMap = {
-              duration: s.countedDurations,
-              sourceD: s.countedSourceDates,
-              targetD: s.countedTargetDates,
-              sourceAge: s.countedSourceAges,
-              targetAge: s.countedTargetAges,
-            }
+          <AnimatePresence>
+            {matrixCouples.map((s, i) => {
+              const dataMap = {
+                duration: s.countedDurations,
+                sourceD: s.countedSourceDates,
+                targetD: s.countedTargetDates,
+                sourceAge: s.countedSourceAges,
+                targetAge: s.countedTargetAges,
+              }
 
-            const activePoints = dataMap[lineChartMode]
+              const activePoints = dataMap[lineChartMode]
 
-            const isSelected = selectedLumps.map((l) => l.type).includes(s.type)
-            return (
-              <motion.g
-                key={s.id}
-                initial={{
-                  x: xScale(s.target),
-                  y: yScale(s.source),
-                  scale: 1,
-                }}
-                animate={{
-                  x: xScale(s.target),
-                  y: yScale(s.source),
-                  // scale: isSelected ? 1.1 : 1,
-                }}
-                onClick={() => toggleSelectedLumps(s)}
-              >
-                <rect
-                  width={xScale.bandwidth()}
-                  height={yScale.bandwidth()}
-                  fill="white"
-                  fillOpacity={opacityScale(s.count)}
-                  stroke="white"
-                  strokeWidth={isSelected ? 1 : 0}
-                />
-                <Quantiles
-                  width={xScale.bandwidth()}
-                  height={yScale.bandwidth()}
-                  points={s[lineChartMode]}
-                  buckets={buckets}
-                  quantileScale={quantileScale}
-                  setHoveredQuantile={setHoveredQuantile}
-                />
-                {/* <LineChart
+              const isSelected = selectedLumps.map((l) => l.type).includes(s.type)
+              return (
+                <motion.g
+                  key={s.type}
+                  initial={{
+                    x: xScale(s.target),
+                    y: yScale(s.source),
+                    scale: 1,
+                    opacity: 0,
+                  }}
+                  animate={{
+                    x: xScale(s.target),
+                    y: yScale(s.source),
+                    opacity: 1,
+                    // scale: isSelected ? 1.1 : 1,
+                  }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => toggleSelectedLumps(s)}
+                >
+                  <motion.rect
+                    width={xScale.bandwidth()}
+                    height={yScale.bandwidth()}
+                    fill="white"
+                    animate={{ fillOpacity: opacityScale(s.count) }}
+                    stroke="white"
+                    strokeWidth={isSelected ? 1 : 0}
+                  />
+                  <Quantiles
+                    width={xScale.bandwidth()}
+                    height={yScale.bandwidth()}
+                    points={s[lineChartMode]}
+                    buckets={buckets}
+                    quantileScale={quantileScale}
+                    setHoveredQuantile={setHoveredQuantile}
+                  />
+                  {/* <LineChart
                   width={xScale.bandwidth()}
                   height={yScale.bandwidth()}
                   points={activePoints}
                 /> */}
-                <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.source]} strokeWidth={0.5} />
-                <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.target]} strokeWidth={0.5} />
-                <title>{`From ${s.source} to ${s.target} – ${s.count} `}</title>
-              </motion.g>
-            )
-          })}
+                  <line x1={0} x2={0} y1={0} y2={5} stroke={palette[s.source]} strokeWidth={0.5} />
+                  <line y1={0} y2={0} x1={0} x2={5} stroke={palette[s.target]} strokeWidth={0.5} />
+                  <title>{`From ${s.source} to ${s.target} – ${s.count} `}</title>
+                </motion.g>
+              )
+            })}
+          </AnimatePresence>
         </g>
       </svg>
       <Tooltip isVisible={hoveredQuantile}>
@@ -276,7 +272,6 @@ function Quantiles({ width, height, points, buckets, quantileScale, setHoveredQu
             animate={{ opacity: 1, fill: `oklch(from currentColor calc(l - ${i * 0.08}) c h)` }}
             width={barWidth}
             height={barHeight}
-            // opacity={(1 / segments) * i + 1 / segments}
             whileHover={{ opacity: 0.5 }}
             transition={{ duration: 0.1, ease: "easeOut" }}
             onClick={() => console.log(counts)}

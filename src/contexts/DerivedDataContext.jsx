@@ -14,6 +14,7 @@ import {
   useSilhouettesFromTrajectories,
   useAnalytics,
   useFiltersSetup,
+  useLumps,
 } from "../components/hooks/useDataProcessing"
 import { useViz } from "./VizContext"
 
@@ -173,6 +174,8 @@ export function DerivedDataProvider({ children }) {
     else return links.filter((l) => l.speed !== 0)
   }, [linksBySelectedSilhouettes, trajectoriesSelectionMode, filters, filtersActive])
 
+  const lumps = useLumps(selectedLinks)
+
   const selectedIDs = useMemo(() => {
     if (!IDsFromSelectedSilhouettes) return []
 
@@ -204,6 +207,7 @@ export function DerivedDataProvider({ children }) {
       silhouettes,
       filteredData,
       filteredLinks,
+      lumps,
       filteredSilhouettes,
       completeSilhouettes,
       selectedSilhouettesData,
@@ -219,6 +223,7 @@ export function DerivedDataProvider({ children }) {
       silhouettes,
       filteredData,
       filteredLinks,
+      lumps,
       filteredSilhouettes,
       completeSilhouettes,
       selectedSilhouettesData,

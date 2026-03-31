@@ -3,7 +3,7 @@ import { useMemo } from "react"
 import { max, range, quantile, groups, extent, descending, sort } from "d3"
 import { similarity } from "../../utils/levenshteinDistance"
 import { cleanTrajectories } from "../../utils/cleanTrajectories"
-import { keyBy, snakeCase } from "lodash"
+import { keyBy, snakeCase, groupBy, map } from "lodash"
 
 export function useDataCleanup(sourceData, statesThresholds) {
   const cleanData = useMemo(() => {
@@ -393,4 +393,27 @@ export const useSilhouettesFromTrajectories = (trajectories, idealSilhouettes, d
     console.timeEnd("Silhouettes")
     return silhouettes
   }, [trajectories, idealSilhouettes, data])
+}
+
+export const useLumps = (links) => {
+  return useMemo(() => {
+    console.time("Lumps")
+
+    const lumps = map(
+      groupBy(links, (l) => [l.source.state, l.target.state]),
+      (value, key) => {
+        return {
+          type: key.split(",").join("-"),
+          source: key.split(",")[0],
+          target: key.split(",")[1],
+          links: value,
+          count: value.length,
+        }
+      },
+    )
+
+    console.timeEnd("Lumps")
+
+    return lumps
+  }, [links])
 }

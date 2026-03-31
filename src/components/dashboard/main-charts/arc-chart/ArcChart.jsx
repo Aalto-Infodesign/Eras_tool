@@ -1,7 +1,6 @@
 import { extent, scaleLinear } from "d3"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import { useCharts } from "../ChartsContext"
-import { countBy, map } from "lodash"
 import { useData } from "../../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../../contexts/VizContext"
 import { AnimatePresence, motion } from "motion/react"
@@ -27,52 +26,36 @@ export const ArcChart = () => {
   const { statesOrder } = useData()
   const { palette } = useViz()
   const { chartScales, marginTop, w } = useCharts()
-  const { selectedLinks } = useDerivedData()
+  const { lumps } = useDerivedData()
   const { toggleSelectedLumps, selectedLumps } = useFilters()
 
   const { y } = chartScales
 
-  const [hoveredLink, setHoveredLink] = useState(null)
+  const [hoveredLump, setHoveredLump] = useState(null)
 
-  const links = map(
-    countBy(selectedLinks, (l) => [l.source.state, l.target.state]),
-    (value, key) => {
-      const [source, target] = key.split(",")
-      // TODO Left or Right based if it is going DOWN or UP
-
-      return {
-        type: `${source}-${target}`,
-        source: source,
-        target: target,
-        value: value,
-      }
-    },
-  )
-
-  const valuesExtent = extent(links.map((l) => l.value))
+  const valuesExtent = extent(lumps.map((l) => l.count))
+  console.log("valuesExtent", valuesExtent)
   // const strokeScale = scaleLinear(valuesExtent, [0.5, 5])
   const opacityScale = scaleLinear(valuesExtent, [0.1, 1])
-
-  console.log(links)
 
   return (
     <motion.g id={"arc-chart"} initial={{ x: w / 2 }} animate={{ x: w / 2 }}>
       <g id="links">
         <AnimatePresence>
-          {links.map((l) => {
+          {lumps.map((l) => {
             const isSelected = selectedLumps.map((s) => s.type).includes(l.type)
 
             return (
               <motion.path
                 key={`segment-${l.source}–${l.target}`}
                 initial={{
-                  strokeOpacity: opacityScale(l.value),
+                  strokeOpacity: opacityScale(l.count),
                   strokeWidth: 0,
                   pathLength: 0,
                 }}
                 animate={{
                   d: verticalArcGenerator(0, y(l.source) + marginTop, 0, y(l.target) + marginTop),
-                  strokeOpacity: isSelected ? 1 : opacityScale(l.value),
+                  strokeOpacity: isSelected ? 1 : opacityScale(l.count),
                   strokeWidth: isSelected ? 2 : 1,
                   pathLength: 1,
                   stroke: `url(#gradient-${l.source}-${l.target})`,
@@ -90,8 +73,8 @@ export const ArcChart = () => {
                 fill="none"
                 strokeLinecap={"round"}
                 onClick={() => toggleSelectedLumps(l)}
-                onMouseEnter={() => setHoveredLink(l)}
-                onMouseLeave={() => setHoveredLink(null)}
+                onMouseEnter={() => setHoveredLump(l)}
+                onMouseLeave={() => setHoveredLump(null)}
               />
             )
           })}
@@ -111,16 +94,16 @@ export const ArcChart = () => {
         ))}
       </g>
 
-      {hoveredLink && (
-        <Tooltip isVisible={hoveredLink}>
+      {hoveredLump && (
+        <Tooltip isVisible={hoveredLump}>
           <p>
-            From <span>{hoveredLink.source}</span>
+            From <span>{hoveredLump.source}</span>
           </p>
           <p>
-            to <span>{hoveredLink.target}</span>
+            to <span>{hoveredLump.target}</span>
           </p>
           <p>
-            <span>{hoveredLink.value}</span> individuals
+            <span>{hoveredLump.value}</span> individuals
           </p>
         </Tooltip>
       )}

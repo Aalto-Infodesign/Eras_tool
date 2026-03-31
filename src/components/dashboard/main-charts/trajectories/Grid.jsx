@@ -1,7 +1,10 @@
 import { useCharts } from "../ChartsContext"
 import { ticks } from "d3"
 
-import { getMinMaxStateFromTrajectories } from "../../../../utils/getMinMax"
+import {
+  getMinMaxStateFromTrajectories,
+  useStatesDataFromLinks,
+} from "../../../../utils/lumpsHelpers"
 
 import { AnimatePresence, motion } from "motion/react"
 
@@ -17,19 +20,17 @@ import { Tooltip } from "../../../common/Tooltip/Tooltip"
 export function Grid({ chartMode }) {
   const { setStatesOrder, statesOrder } = useData()
   const { palette } = useViz()
-  const { filteredTrajectories, analytics, trajectories } = useDerivedData()
+  const { filteredLinks, analytics } = useDerivedData()
   const { w, h, marginTop, chartScales } = useCharts()
 
   const [hoveredStateLabel, setHoveredStateLabel] = useState()
-
-  const t = !filteredTrajectories ? trajectories : filteredTrajectories
 
   const { ageRange } = analytics
 
   const xScale = chartScales.x
   const yScale = chartScales.y
 
-  const minMaxStates = getMinMaxStateFromTrajectories(flattenDeep(t))
+  const statesData = useStatesDataFromLinks(filteredLinks)
 
   const DIV_INCREMENT = 10
   const verticalLines = ticks(
@@ -147,7 +148,7 @@ export function Grid({ chartMode }) {
         )
       })}
       <AnimatePresence>
-        {minMaxStates.map((d) => {
+        {statesData.map((d) => {
           const y = yScale(d.state) + marginTop
           return (
             <motion.g
@@ -162,12 +163,12 @@ export function Grid({ chartMode }) {
                 id={`active-line-${d.state}`}
                 className="active-line"
                 initial={{
-                  x1: xScale(d.x[0]),
-                  x2: xScale(d.x[0]),
+                  x1: xScale(d.xExtent[0]),
+                  x2: xScale(d.xExtent[0]),
                 }}
                 animate={{
-                  x1: xScale(d.x[0]),
-                  x2: xScale(d.x[1]),
+                  x1: xScale(d.xExtent[0]),
+                  x2: xScale(d.xExtent[1]),
                 }}
                 transition={{ duration: 0.2 }}
                 strokeWidth={0.5}
