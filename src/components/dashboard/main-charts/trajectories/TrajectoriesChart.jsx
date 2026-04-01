@@ -13,12 +13,10 @@ import { Tooltip } from "../../../common/Tooltip/Tooltip"
 
 import { Lumps } from "./Lumps"
 
-import { TextureDefs } from "../../../common/Textures/TextureDefs"
+import { TextureDefs } from "../../../common/defs/Textures/TextureDefs"
 
 import { useModifierKey } from "../../../hooks/useModifierKey"
 
-import { useData } from "../../../../contexts/ProcessedDataContext"
-import { useViz } from "../../../../contexts/VizContext"
 import { useFilters } from "../../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import Button from "../../../common/Button/Button"
@@ -27,6 +25,9 @@ import { ChartArea, ChartLine, ListFilter } from "lucide-react"
 import { TrajectoriesCanvas } from "./three/TrajectoriesCanvas"
 import { ShortcutSpan } from "../../../common/ShortcutSpan/ShortcutSpan"
 import { ArcChart } from "../arc-chart/ArcChart"
+import { GradientDefs } from "../../../common/defs/Gradients/GradientDefs"
+import { useDebouncedState } from "hamo"
+
 export function TrajectoriesChart() {
   const {
     selectedTrajectoriesIDs,
@@ -49,8 +50,8 @@ export function TrajectoriesChart() {
   const [hoveredDistribution, setHoveredDistribution] = useState({ type: "", text: "", state: "" })
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
   const [showStateDensity, setShowStateDensity] = useState(false)
-  const [hoveredLump, setHoveredLump] = useState(null)
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
+  const [hoveredLump, setHoveredLump] = useDebouncedState(null, 250)
   // const [showDistributions, setShowDistributions] = useState(true)
 
   // useModifierKey(
@@ -77,87 +78,109 @@ export function TrajectoriesChart() {
   //   if (selectedLinks.length > 500) setChartMode(false)
   // }, [selectedLinks.length])
 
+  const chartButtons = [
+    {
+      name: "Arc",
+      value: "arc",
+      keystroke: "a",
+      tooltip: "Direction of Source and Target pairs",
+      disabled: false,
+    },
+    {
+      name: "Lumps",
+      value: "lumps",
+      keystroke: "l",
+      tooltip: "Clusters of Trajectories",
+      disabled: false,
+    },
+    {
+      name: "Lines",
+      value: "lines",
+      keystroke: null,
+      tooltip: "Individual Trajectories",
+      disabled: selectedLinks.length > 500,
+    },
+  ]
+
+  const linesControlButtons = [
+    {
+      name: "||",
+      value: "vertical",
+      keystroke: null,
+      tooltip: "Transitions that happen at the same moment in time",
+    },
+    { name: "All", value: "all", keystroke: null, tooltip: "All trajectories" },
+    {
+      name: "\\\\",
+      value: "diagonal",
+      keystroke: null,
+      tooltip: "Transitions that happen in different moments",
+    },
+  ]
+
   return (
     <>
       <div className="chart-controls">
         <div id="lump-controls" className={` ${chartMode}`}>
           <div>
-            <Button
-              data-selected={chartMode === "lines"}
-              size="xs"
-              // variant="secondary"
-              onClick={() => setChartMode("lines")}
-              tooltip="Individual Trajectories"
-              disabled={selectedLinks.length > 500}
-            >
-              <ShortcutSpan>L</ShortcutSpan>ines
-            </Button>
-            <Button
-              data-selected={chartMode === "lumps"}
-              size="xs"
-              // variant="secondary"
-              keystroke="l"
-              onClick={() => setChartMode("lumps")}
-              tooltip="Cluster Trajectories"
-            >
-              <ShortcutSpan>L</ShortcutSpan>umps
-            </Button>
-            <Button
-              data-selected={chartMode === "arc"}
-              size="xs"
-              // variant="secondary"
-              keystroke="a"
-              onClick={() => setChartMode("arc")}
-              tooltip="Direction of Source and Target pairs"
-            >
-              <ShortcutSpan>A</ShortcutSpan>rcs
-            </Button>
-            {!chartMode && selectedLumps.length > 0 && (
+            {chartButtons.map((b) => (
               <Button
+                key={b.name}
+                data-selected={chartMode === b.value}
                 size="xs"
-                // variant="secondary"
-                data-selected={showLinesOfSelectedLumps}
-                onClick={() => setShowLinesOfSelectedLumps(!showLinesOfSelectedLumps)}
-                title="When lumps are selected, show the lines"
+                keystroke={b.keystroke ?? ""}
+                onClick={() => setChartMode(b.value)}
+                tooltip={b.tooltip}
+                disabled={b.disabled}
               >
-                {showLinesOfSelectedLumps ? "Hide" : "Show"}
+                {b.keystroke ? (
+                  <>
+                    <ShortcutSpan>{b.name[0]}</ShortcutSpan>
+                    {b.name.slice(1)}
+                  </>
+                ) : (
+                  <>{b.name}</>
+                )}
               </Button>
-            )}
+            ))}
           </div>
         </div>
 
         <div id="line-controls">
+          {chartMode === "lumps" && selectedLumps.length > 0 && (
+            <div>
+              <Button
+                size="xs"
+                data-selected={showLinesOfSelectedLumps}
+                onClick={() => setShowLinesOfSelectedLumps(!showLinesOfSelectedLumps)}
+                tooltip="Show the segments within the selected lumps"
+              >
+                {showLinesOfSelectedLumps ? "Hide" : "Show"}
+              </Button>
+            </div>
+          )}
           {(chartMode === "lines" || showLinesOfSelectedLumps) && (
-            <>
-              <Button
-                size="xs"
-                // variant="secondary"
-                data-selected={trajectoriesSelectionMode === "vertical"}
-                onClick={() => setTrajectoriesSelectionMode("vertical")}
-                tooltip="Transitions that happen at the same moment in time"
-              >
-                {"||"}
-              </Button>
-              <Button
-                size="xs"
-                // variant="secondary"
-                data-selected={trajectoriesSelectionMode === "all"}
-                onClick={() => setTrajectoriesSelectionMode("all")}
-                tooltip="All trajectories"
-              >
-                {"All"}
-              </Button>
-              <Button
-                size="xs"
-                // variant="secondary"
-                data-selected={trajectoriesSelectionMode === "diagonal"}
-                onClick={() => setTrajectoriesSelectionMode("diagonal")}
-                tooltip="Transitions that happen in different moments"
-              >
-                {`\\`}
-                {`\\`}
-              </Button>
-            </>
+            <div>
+              {linesControlButtons.map((b) => (
+                <Button
+                  key={b.name}
+                  data-selected={trajectoriesSelectionMode === b.value}
+                  size="xs"
+                  keystroke={b.keystroke ?? ""}
+                  onClick={() => setTrajectoriesSelectionMode(b.value)}
+                  tooltip={b.tooltip}
+                >
+                  {b.keystroke ? (
+                    <>
+                      <ShortcutSpan>{b.name[0]}</ShortcutSpan>
+                      {b.name.slice(1)}
+                    </>
+                  ) : (
+                    <>{b.name}</>
+                  )}
+                </Button>
+              ))}
+            </div>
           )}
         </div>
 
@@ -212,29 +235,32 @@ export function TrajectoriesChart() {
               <GradientDefs />
 
               <Grid chartMode={chartMode} />
-              {chartMode !== "arc" && (
-                <g>
-                  <Lumps
-                    //Extended Context
-                    isSelectModeLines={chartMode === "lines"}
-                    //Local State
-                    hoveredLump={hoveredLump}
-                    setHoveredLump={setHoveredLump}
-                    svgRef={svgRef}
-                  />
-
-                  {selectedLinks.length < 500 && (
-                    <TrajectoriesMotion
+              <AnimatePresence mode="wait">
+                {chartMode !== "arc" && (
+                  <g>
+                    <Lumps
                       //Extended Context
                       isSelectModeLines={chartMode === "lines"}
-                      //Local State
                       showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+                      //Local State
+                      hoveredLump={hoveredLump}
+                      setHoveredLump={setHoveredLump}
+                      svgRef={svgRef}
                     />
-                  )}
-                  {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
-                </g>
-              )}
-              {chartMode === "arc" && <ArcChart />}
+
+                    {selectedLinks.length < 500 && (
+                      <TrajectoriesMotion
+                        //Extended Context
+                        isSelectModeLines={chartMode === "lines"}
+                        //Local State
+                        showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+                      />
+                    )}
+                    {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
+                  </g>
+                )}
+                {chartMode === "arc" && <ArcChart />}
+              </AnimatePresence>
             </svg>
           </div>
           <Tooltip isVisible={enableScrub && hoveredTrajectoriesIDs.length > 0}>
@@ -298,64 +324,5 @@ const HoveredTrajectoryPopUp = ({
         </motion.p>
       )}
     </motion.div>
-  )
-}
-
-// Create gradient definitions based on the statesNamesLoaded order
-function GradientDefs() {
-  const { statesOrder } = useData()
-  const { palette } = useViz()
-  // // Get the state positions based on their order
-  // const statePositions = {}
-  // statesOrder.forEach((state, index) => {
-  //   statePositions[state] = index
-  // })
-
-  // Generate all necessary gradient data
-  const gradients = []
-  // Create gradients for all possible state combinations based on the order
-  for (let i = 0; i < statesOrder.length; i++) {
-    for (let j = 0; j < statesOrder.length; j++) {
-      if (i !== j) {
-        // Skip creating gradients for the same state
-        const sourceState = statesOrder[i]
-        const targetState = statesOrder[j]
-
-        // Determine gradient direction based on visual position
-        const sourcePos = statesOrder.indexOf(sourceState)
-        const targetPos = statesOrder.indexOf(targetState)
-
-        // If source is below target (higher index), gradient goes bottom to top
-        // If source is above target (lower index), gradient goes top to bottom
-        const y1 = sourcePos > targetPos ? "100%" : "0%"
-        const y2 = sourcePos > targetPos ? "0%" : "100%"
-
-        gradients.push({
-          id: `gradient-${sourceState}-${targetState}`,
-          y1,
-          y2,
-          stops: [
-            { offset: "0%", color: palette[sourceState], opacity: 1 },
-            { offset: "100%", color: palette[targetState], opacity: 1 },
-          ],
-        })
-      }
-    }
-  }
-  return (
-    <defs>
-      {gradients.map((grad) => (
-        <linearGradient key={grad.id} id={grad.id} x1="0%" y1={grad.y1} x2="0%" y2={grad.y2}>
-          {grad.stops.map((stop) => (
-            <stop
-              key={stop.offset}
-              offset={stop.offset}
-              stopColor={stop.color}
-              stopOpacity={stop.opacity}
-            />
-          ))}
-        </linearGradient>
-      ))}
-    </defs>
   )
 }

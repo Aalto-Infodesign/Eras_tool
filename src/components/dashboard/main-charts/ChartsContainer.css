@@ -28,6 +28,8 @@
 }
 #line-controls {
   grid-column: span 2;
+  display: flex;
+  gap: var(--spacing-sm);
 }
 #matrix-controls {
   grid-column: span 1;

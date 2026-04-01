@@ -150,39 +150,54 @@ export function Grid({ chartMode }) {
             </motion.g>
           )
         })}
-        <AnimatePresence>
-          {statesData.map((d) => {
-            const y = yScale(d.state) + marginTop
-            return (
-              <motion.g
-                key={`active-line-${d.state}`}
-                initial={{ y: y, opacity: 0 }}
-                animate={{ y: y, opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <motion.line
-                  key={d.state}
-                  id={`active-line-${d.state}`}
-                  className="active-line"
-                  initial={{
-                    x1: xScale(d.xExtent[0]),
-                    x2: xScale(d.xExtent[0]),
-                  }}
-                  animate={{
-                    x1: xScale(d.xExtent[0]),
-                    x2: xScale(d.xExtent[1]),
-                  }}
-                  transition={{ duration: 0.2 }}
-                  strokeWidth={0.5}
-                  strokeLinecap="round"
-                  stroke={palette[d.state]}
-                />
-              </motion.g>
-            )
-          })}
-        </AnimatePresence>
       </motion.g>
+
+      <AnimatePresence>
+        {statesData.map((d) => {
+          const y = yScale(d.state) + marginTop
+          return (
+            <motion.g
+              key={`active-line-${d.state}`}
+              initial={{ y: y, opacity: 0 }}
+              animate={{ y: y, opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.circle
+                key={d}
+                initial={{ r: 0, cx: xScale(d.median) }}
+                animate={{
+                  cx: chartMode === "arc" ? w / 2 : xScale(d.median),
+                  // cy: yScale(d.state) + marginTop,
+                  fill: palette[d.state],
+                  r: chartMode === "arc" ? 2 : 0.5,
+                }}
+                exit={{ r: 0, cx: xScale(d.median) }}
+                cx={0}
+                transition={{ duration: 0.2 }}
+              />
+              <motion.line
+                key={d.state}
+                id={`active-line-${d.state}`}
+                className="active-line"
+                initial={{
+                  x1: xScale(d.xExtent[0]),
+                  x2: xScale(d.xExtent[0]),
+                }}
+                animate={{
+                  x1: xScale(d.xExtent[0]),
+                  x2: xScale(d.xExtent[1]),
+                }}
+                transition={{ duration: 0.2 }}
+                strokeWidth={0.5}
+                strokeLinecap="round"
+                stroke={palette[d.state]}
+              />
+            </motion.g>
+          )
+        })}
+      </AnimatePresence>
+
       <Tooltip isVisible={hoveredStateLabel}>
         <p>{hoveredStateLabel}</p>
       </Tooltip>

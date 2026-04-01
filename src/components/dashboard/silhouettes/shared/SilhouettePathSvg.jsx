@@ -45,10 +45,7 @@ export function SilhouettePathSvg({
       animate={isChip ? "chip" : isHasse ? "hasse" : "trajectory"}
       transition={{ duration: 0.8, ease: "easeInOut" }}
     >
-      <g
-        className="silhouetteGroup
-    "
-      >
+      <g className="silhouetteGroup">
         {silhouetteName.split("-").map((char, i, arr) => {
           const circleVariants = {
             hidden: { opacity: 0, r: 5, cx: xScale(i), cy: yScale(char), fill: palette[char] },

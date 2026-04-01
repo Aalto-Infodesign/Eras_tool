@@ -15,7 +15,8 @@ export function ChartsProvider({ children }) {
   const [hoveredTrajectoriesIDs, setHoveredTrajectoriesIDs] = useState([])
   const [selectedIndex, setSelectedIndex] = useState(0)
 
-  const reduceMotion = useMemo(() => data.length > MOTION_THRESHOLD, [data.length])
+  // const reduceMotion = useMemo(() => data.length > MOTION_THRESHOLD, [data.length])
+  const reduceMotion = false
 
   const isArrowLeft = useModifierKey("ArrowLeft")
   const isArrowRight = useModifierKey("ArrowRight")

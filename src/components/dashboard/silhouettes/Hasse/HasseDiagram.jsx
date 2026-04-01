@@ -1,14 +1,12 @@
 import { useState, useMemo, useRef, useCallback, memo } from "react"
 import { AnimatePresence, motion } from "motion/react"
 
-import { useData } from "../../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../../contexts/VizContext"
 
 import { usePosetLayout, useSilhouettesPoset } from "../hooks/usePosetLayout"
 import { useNodeStyling } from "../hooks/useNodeStyling"
 
 import { SilhouettePathSvg } from "../shared/SilhouettePathSvg"
-import { useFilters } from "../../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -230,10 +228,12 @@ export function HasseDiagram({
 const HasseLink = ({ cover, src, tgt, isHasse, isSelected, toggleSilhouetteFilter }) => {
   const { palette } = useViz()
   const d = `M${src.xPosition},${src.yPositionScaled} L${tgt.xPosition},${tgt.yPositionScaled}`
+  const sourceName = cover.target.split("-")[0]
   const targetName = cover.target.split("-").at(-1)
 
   const opacity = src.included && tgt.included ? 1 : 0.2
   const strokeColor = isSelected ? "#ccc" : palette[targetName]
+  // const strokeColor = `url(#gradient-${sourceName}-${targetName})`
 
   return (
     <motion.path

@@ -1,6 +1,6 @@
 import { useRef, useCallback, useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { TextureDefs } from "../../../common/Textures/TextureDefs"
+import { TextureDefs } from "../../../common/defs/Textures/TextureDefs"
 import { useFilters } from "../../../../contexts/FiltersContext"
 import { useMouseMoveSvg } from "../../../hooks/useMouseMove"
 import { MotionText } from "../../../common/SVG/MotionText"

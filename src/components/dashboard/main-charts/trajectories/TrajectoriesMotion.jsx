@@ -7,13 +7,13 @@ import { useViz } from "../../../../contexts/VizContext"
 import { useFilters } from "../../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
-import { union } from "lodash"
+import { flattenDeep, union } from "lodash"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 
 export function TrajectoriesMotion(props) {
   const { selectedTrajectoriesIDs, selectedLumps, toggleSelectedTrajectory } = useFilters()
   const { palette } = useViz()
-  const { selectedLinks } = useDerivedData()
+  const { selectedLinks, lumps } = useDerivedData()
 
   const {
     marginTop,
@@ -44,9 +44,12 @@ export function TrajectoriesMotion(props) {
     : []
 
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
-
+  console.log("selectedLumps", selectedLumps)
   const lines =
-    (!isSelectModeLines && selectedLumps.length > 0 && showLinesOfSelectedLumps && selectedLinks) ||
+    (!isSelectModeLines &&
+      selectedLumps.length > 0 &&
+      showLinesOfSelectedLumps &&
+      flattenDeep(selectedLumps.map((l) => l.links))) ||
     (!isSelectModeLines && displayedTrajectories.length > 0 && displayedTrajectories) ||
     (isSelectModeLines && selectedLinks)
 
@@ -138,7 +141,7 @@ export function TrajectoriesMotion(props) {
                   x2={x(d.target.x)}
                   y1={y(d.source.state) + marginTop}
                   y2={y(d.target.state) + marginTop}
-                  color={palette[d.target.state]}
+                  color={`url(#gradient-${d.source.state}-${d.target.state})`}
                   dash={dash}
                   isSelected={isSelected}
                   animationDuration={lines.length > 1000 ? 0.0 : 0.2}
@@ -160,7 +163,8 @@ export function TrajectoriesMotion(props) {
                     x2={x(d.target.x)}
                     y1={y(d.source.state) + marginTop}
                     y2={y(d.target.state) + marginTop}
-                    color={palette[d.source.state]}
+                    color={`url(#gradient-${d.source.state}-${d.target.state})`}
+                    // color={palette[d.source.state]}
                     dash={dash1}
                     dashOffset={of1}
                     // strokeWidth={0.5}
@@ -176,7 +180,7 @@ export function TrajectoriesMotion(props) {
                     x2={x(d.target.x)}
                     y1={y(d.source.state) + marginTop}
                     y2={y(d.target.state) + marginTop}
-                    color={palette[d.target.state]}
+                    color={`url(#gradient-${d.source.state}-${d.target.state})`}
                     dash={dash2}
                     dashOffset={of2}
                     // strokeWidth={0.5}

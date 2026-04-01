@@ -7,6 +7,7 @@ import { romanize } from "../../../../utils/numberHelpers"
 import { useViz } from "../../../../contexts/VizContext"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
 import { useFilters } from "../../../../contexts/FiltersContext"
+import { useDebouncedState } from "hamo"
 
 // --- Constants for better maintainability ---
 const MARGIN_Y = 25
@@ -355,12 +356,12 @@ export function Sankey({ width, height, data }) {
   const { palette } = useViz()
   const { setSelectedTrajectoriesIDs } = useFilters()
 
-  const [hoveredLink, setHoveredLink] = useState(null)
   const [selectedLinks, setSelectedLinks] = useState([])
   const [selectedNode, setSelectedNode] = useState(null)
   const [selectionDirection, setSelectionDirection] = useState("right") // "left" or "right"
   const [hoveredSilhouette, setHoveredSilhouette] = useState(null)
-  const [hoveredNode, setHoveredNode] = useState(null)
+  const [hoveredLink, setHoveredLink] = useDebouncedState(null, 200)
+  const [hoveredNode, setHoveredNode] = useDebouncedState(null, 200)
 
   const { nodes, links } = useMemo(() => {
     const sankeyGenerator = sankey()
@@ -409,19 +410,6 @@ export function Sankey({ width, height, data }) {
           preserveAspectRatio="xMidYMid meet"
           onMouseLeave={handleMouseLeave}
         >
-          <defs>
-            {links.map((link) => {
-              const [state_S] = link.source.id.split("-")
-              const [state_F] = link.target.id.split("-")
-              return (
-                <linearGradient key={`grad-def-${link.index}`} id={`grad-${state_S}-${state_F}`}>
-                  <stop offset="0%" stopColor={palette[state_S]} />
-                  <stop offset="100%" stopColor={palette[state_F]} />
-                </linearGradient>
-              )
-            })}
-          </defs>
-
           <g id="sankey-grid">
             {columns.map((x, i) => (
               <text

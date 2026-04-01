@@ -1,13 +1,10 @@
 import { extent, scaleLinear } from "d3"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import { useCharts } from "../ChartsContext"
-import { useData } from "../../../../contexts/ProcessedDataContext"
-import { useViz } from "../../../../contexts/VizContext"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
 import { useFilters } from "../../../../contexts/FiltersContext"
-import { useStatesDataFromLinks } from "../../../../utils/lumpsHelpers"
 
 export const ArcContainer = () => {
   const { h } = useCharts()
@@ -24,25 +21,19 @@ export const ArcContainer = () => {
 }
 
 export const ArcChart = () => {
-  const { statesOrder } = useData()
-  const { palette } = useViz()
   const { chartScales, marginTop, w } = useCharts()
-  const { lumps, selectedLinks } = useDerivedData()
+  const { lumps } = useDerivedData()
   const { toggleSelectedLumps, selectedLumps } = useFilters()
 
-  const { x, y } = chartScales
-
-  const statesData = useStatesDataFromLinks(selectedLinks)
+  const { y } = chartScales
 
   const [hoveredLump, setHoveredLump] = useState(null)
 
   const valuesExtent = extent(lumps.map((l) => l.count))
-  console.log("valuesExtent", valuesExtent)
-  // const strokeScale = scaleLinear(valuesExtent, [0.5, 5])
   const opacityScale = scaleLinear(valuesExtent, [0.1, 1])
 
   return (
-    <motion.g id={"arc-chart"} initial={{ x: 0 }} animate={{ x: w / 2 - 1 }}>
+    <motion.g id={"arc-chart"} initial={{ x: w / 2 - 1 }}>
       <g id="links">
         <AnimatePresence>
           {lumps.map((l) => {
@@ -83,21 +74,6 @@ export const ArcChart = () => {
           })}
         </AnimatePresence>
       </g>
-
-      <AnimatePresence>
-        <g id="nodes">
-          {statesData.map((s) => (
-            <motion.circle
-              key={s}
-              initial={{ r: 0, cx: x(s.median) }}
-              animate={{ cx: 0, cy: y(s.state) + marginTop, fill: palette[s.state], r: 2 }}
-              exit={{ r: 0, cx: x(s.median) }}
-              cx={0}
-              transition={{ duration: 0.2 }}
-            />
-          ))}
-        </g>
-      </AnimatePresence>
 
       {hoveredLump && (
         <Tooltip isVisible={hoveredLump}>
