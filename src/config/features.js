@@ -9,6 +9,7 @@ export const features = {
   dashboard: true,
 
   //Carousel
+  carousel: true,
   debugPanel: !isProd,
 
   //Silhouettes Panel
