@@ -11,7 +11,9 @@ import "./Carousel.css"
 import Button from "../Button/Button"
 export function CarouselWrapper({ children, hasPagination = true }) {
   // console.log(children)
-  const slides = Array.isArray(children) ? children : [children]
+  const cleanChildren = children.filter((c) => c !== false)
+  const slides = Array.isArray(cleanChildren) ? cleanChildren : [cleanChildren]
+  console.log(slides)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [direction, setDirection] = useState(1)
 
@@ -47,7 +49,7 @@ export function CarouselWrapper({ children, hasPagination = true }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: direction * 10 }}
           >
-            {children[selectedIndex].props["data-title"]}
+            {cleanChildren[selectedIndex].props["data-title"]}
           </motion.h3>
           <CarouselItem key={selectedIndex} onDragEnd={handleDragEnd}>
             {slides[selectedIndex]}
