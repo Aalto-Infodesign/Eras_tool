@@ -358,6 +358,10 @@ export function calculateDominanceArray(nodes, edges) {
     }
   }
 
+  edges.forEach((e) => {
+    dominancePairs.push([e.data.source.value, e.data.target.value])
+  })
+
   // 5. Add φ nodes for roots (nodes with no incoming edges)
   const targets = new Set(edges.map((e) => e.target))
   let phiCount = 0

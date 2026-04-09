@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react"
+import { useRef, useCallback, useEffect, useMemo } from "react"
 import {
   ReactFlow,
   addEdge,
@@ -38,6 +38,21 @@ export const FlowChart = () => {
 
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
+
+  const allNodes = useMemo(
+    () =>
+      statesOrder.map((stateName, i) => ({
+        id: `node_${Date.now()}_${Math.random()}`, // More unique ID
+        className: "dnd-node",
+        data: {
+          label: `${i} – ${stateName}`,
+          index: i,
+          value: stateName,
+          category: "category",
+        },
+      })),
+    [statesOrder],
+  )
 
   const onConnect = useCallback(
     (params) => {
@@ -79,10 +94,16 @@ export const FlowChart = () => {
 
   // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
-    const dominanceArray = calculateDominanceArray(nodes, edges)
+    console.log(allNodes)
+    // TODO ALL NODES INSTEAD
+    const dominanceArray = calculateDominanceArray(allNodes, edges)
+    console.log(edges)
+    console.log(dominanceArray)
 
-    const nodesNames = nodes.map((node) => node.data.value)
-    updatePosetColoring(dominanceArray, nodesNames)
+    // const nodesNames = allNodes.map((node) => node.data.value)
+    // console.log(nodesNames)
+    // console.log(statesOrder)
+    updatePosetColoring(dominanceArray, statesOrder)
   }, [edges, colorMode])
 
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { useEffect, useCallback } from "react"
-import { xor } from "lodash"
 import { AnimatePresence, motion } from "motion/react"
 import { Reorder } from "motion/react"
 import { resolveCollisions } from "./flowChart/resolveCollisions"
