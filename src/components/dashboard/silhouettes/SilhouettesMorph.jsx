@@ -26,6 +26,7 @@ import { usePosetWorker } from "./hooks/usePosetWorker"
 import Button from "../../common/Button/Button"
 import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 import { CloseButton } from "../../common/Button/CloseButton"
+import { features } from "../../../config/features"
 
 // ! TODO Refactor completo
 
@@ -171,22 +172,24 @@ export const SilhouettesMorph = () => {
             >
               <ShortcutSpan>T</ShortcutSpan>rajectories
             </Button>
-            <Button
-              size="xs"
-              keystroke="h"
-              onClick={() => setIsHasse(true)}
-              data-selected={isHasse}
-              disabled={!posetData}
-            >
-              {!posetData ? (
-                <span>Loading...</span>
-              ) : (
-                <span>
-                  <ShortcutSpan>H</ShortcutSpan>
-                  asse
-                </span>
-              )}
-            </Button>
+            {features.hasseDiagram && (
+              <Button
+                size="xs"
+                keystroke="h"
+                onClick={() => setIsHasse(true)}
+                data-selected={isHasse}
+                disabled={!posetData}
+              >
+                {!posetData ? (
+                  <span>Loading...</span>
+                ) : (
+                  <span>
+                    <ShortcutSpan>H</ShortcutSpan>
+                    asse
+                  </span>
+                )}
+              </Button>
+            )}
           </div>
           {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}
           {idealSilhouettes.length > 0 && (
@@ -226,7 +229,7 @@ export const SilhouettesMorph = () => {
 
       <motion.div key="silhouettes-main" className="silhouettes-main" layout>
         <AnimatePresence mode="popLayout">
-          {isHasse ? (
+          {features.hasseDiagram && isHasse ? (
             <motion.section
               layout
               key="hasse-wrapper"

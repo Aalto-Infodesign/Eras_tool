@@ -4,10 +4,8 @@ import { useCharts } from "../ChartsContext"
 
 import { StateTypeDistribution } from "./StatesTypeDistribution"
 import { Grid } from "./Grid"
-// import { TrajectoriesLumped } from "./TrajectoriesLumped"
 
 import { TrajectoriesMotion } from "./TrajectoriesMotion"
-// import { Trajectories } from "./Trajectories"
 import { StateDensity } from "./StateDensity"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
 
@@ -21,12 +19,12 @@ import { useFilters } from "../../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import Button from "../../../common/Button/Button"
 import { StatesMatrix } from "../../../fileLoader/statesMatrix/StatesMatrix"
-import { ChartArea, ChartLine, ListFilter } from "lucide-react"
-import { TrajectoriesCanvas } from "./three/TrajectoriesCanvas"
+import { ChartLine, ListFilter } from "lucide-react"
 import { ShortcutSpan } from "../../../common/ShortcutSpan/ShortcutSpan"
 import { ArcChart } from "../arc-chart/ArcChart"
 import { GradientDefs } from "../../../common/defs/Gradients/GradientDefs"
 import { useDebouncedState } from "hamo"
+import { features } from "../../../../config/features"
 
 export function TrajectoriesChart() {
   const {
@@ -52,13 +50,6 @@ export function TrajectoriesChart() {
   const [showStateDensity, setShowStateDensity] = useState(false)
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
   const [hoveredLump, setHoveredLump] = useDebouncedState(null, 250)
-  // const [showDistributions, setShowDistributions] = useState(true)
-
-  // useModifierKey(
-  //   "l",
-  //   () =>
-  //     selectedLinks.length < 500 && setChartMode((prev) => (prev === "lines" ? "lumps" : "lines")),
-  // )
 
   const showDistributions = true
 
@@ -208,16 +199,18 @@ export function TrajectoriesChart() {
           </Button>
         </div>
 
-        <div id="matrix-controls">
-          <ListFilter size={16} />
-          <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
-            <option value="duration">Duration</option>
-            <option value="sourceD">Source</option>
-            <option value="targetD">Target</option>
-            <option value="sourceAge">Source Age</option>
-            <option value="targetAge">Target Age</option>
-          </select>
-        </div>
+        {features.matrix && (
+          <div id="matrix-controls">
+            <ListFilter size={16} />
+            <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
+              <option value="duration">Duration</option>
+              <option value="sourceD">Source</option>
+              <option value="targetD">Target</option>
+              <option value="sourceAge">Source Age</option>
+              <option value="targetAge">Target Age</option>
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="chart-container">
@@ -278,7 +271,7 @@ export function TrajectoriesChart() {
           </Tooltip>
         </div>
         {/* <Legend /> */}
-        <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} />
+        {features.matrix && <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} />}
       </div>
     </>
   )

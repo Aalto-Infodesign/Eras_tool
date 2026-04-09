@@ -20,11 +20,12 @@ import { useDerivedData } from "../contexts/DerivedDataContext"
 import { DataPanel } from "./dashboard/helper-panels/DataPanel"
 import { ChartsContainer } from "./dashboard/main-charts/ChartsContainer"
 import { SelectionPanel } from "./dashboard/selection-panel/SelectionPanel"
+import { features } from "../config/features"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
   const { isHasse, isLegend } = useViz()
-  const { selectedSilhouettesData, silhouettes } = useDerivedData()
+  const { selectedSilhouettesData } = useDerivedData()
 
   const [isPresent, safeToRemove] = usePresence()
   const [scope, animate] = useAnimate()
@@ -103,17 +104,19 @@ const Dashboard = () => {
                   <div className="carousel-slides-content" data-title="Silhouettes selected">
                     <SilhouettesPie selectedSilhouettesData={selectedSilhouettesData} />
                   </div>
-                  <div className="carousel-slides-content" data-title="Debug Tools">
-                    <DebugPanel />
-                  </div>
+                  {features.debugPanel && (
+                    <div className="carousel-slides-content" data-title="Debug Tools">
+                      <DebugPanel />
+                    </div>
+                  )}
                   <div className="carousel-slides-content" data-title="Export">
                     <ExportIDs />
                   </div>
                 </CarouselWrapper>
               </motion.section>
             )}
+            {features.silhouettes && <SilhouettesMorph />}
           </AnimatePresence>
-          <AnimatePresence>{silhouettes && <SilhouettesMorph />}</AnimatePresence>
         </motion.div>
 
         <ChartsContainer />

@@ -13,9 +13,9 @@ import { SidePanel } from "./components/dashboard/side-panel/SidePanel"
 import { Loader, Command } from "lucide-react"
 import { TitleAnimation } from "./components/landing/TitleAnimation"
 import { Header } from "./components/Header/Header"
-import { useTheme } from "./components/hooks/useTheme"
-import { ThemeToggle } from "./components/common/Button/ThemeToggle"
+
 import { useModifierKey } from "./components/hooks/useModifierKey"
+import { features } from "./config/features"
 
 function App() {
   return (
@@ -78,12 +78,12 @@ function AppContent() {
 
       <AnimatePresence>
         <>
-          <FileLoader />
+          {features.fileLoader && <FileLoader />}
 
           {isLegend && (
             <>
               <Header />
-              <Dashboard />
+              {features.dashboard && <Dashboard />}
             </>
           )}
         </>
