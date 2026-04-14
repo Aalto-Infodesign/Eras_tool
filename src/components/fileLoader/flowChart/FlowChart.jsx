@@ -15,7 +15,7 @@ import "./flowchart.css"
 
 import { resolveCollisions } from "./resolveCollisions"
 
-import { calculateDominanceArray } from "../../../utils/POHelperFunctions"
+import { calculateDominanceArray, validateRelations } from "../../../utils/POHelperFunctions"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
@@ -94,15 +94,13 @@ export const FlowChart = () => {
 
   // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
-    console.log(allNodes)
-    // TODO ALL NODES INSTEAD
-    const dominanceArray = calculateDominanceArray(allNodes, edges)
-    console.log(edges)
-    console.log(dominanceArray)
+    const profiles = allNodes.map((n) => n.data.value)
 
-    // const nodesNames = allNodes.map((node) => node.data.value)
-    // console.log(nodesNames)
-    // console.log(statesOrder)
+    const relations = edges.map((e) => [e.data.source.value, e.data.target.value])
+
+    const dominanceArray = validateRelations(profiles, relations)
+    // console.log(dominanceArray)
+
     updatePosetColoring(dominanceArray, statesOrder)
   }, [edges, colorMode])
 

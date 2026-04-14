@@ -374,3 +374,24 @@ export function calculateDominanceArray(nodes, edges) {
 
   return dominancePairs
 }
+
+// TODO FIX!!!
+export const validateRelations = (profiles, relations) => {
+  const sources = relations.map(([s]) => s) // left side / dominators
+  const targets = relations.map(([, t]) => t) // right side / dominated
+
+  const rel = [...relations.map((r) => [...r])]
+
+  profiles
+    .filter((p) => !targets.includes(p)) // exclude dominated profiles
+    .filter((p) => !sources.includes(p)) // exclude already-related sources
+    .forEach((p, n) => rel.push(["Θ" + n, p]))
+
+  // wrap sources with Θ
+  sources.forEach((s, n) => {
+    const pair = rel.find(([, child]) => child === s)
+    if (!pair) rel.push(["Θ" + n, s])
+  })
+
+  return rel
+}

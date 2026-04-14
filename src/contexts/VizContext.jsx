@@ -92,7 +92,7 @@ export function VizProvider({ children }) {
 
     const { min, max } = getColorSpace(20, 90, 65, 10, maxChainLength)
 
-    poset.color(20, min, max, false) // Based on Layer length
+    poset.color(40, min, max, false) // Based on Layer length
 
     const posetFeatures = poset.features
 

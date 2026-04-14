@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { extent, scaleBand, scaleLinear, scaleQuantile } from "d3"
-import { map, countBy, uniq, flatten, values, sum } from "lodash"
+import { extent, range, scaleBand, scaleLinear, scaleQuantile, ticks } from "d3"
+import { map, countBy, uniq, flatten, values, sum, max, min } from "lodash"
 import { useViz } from "../../../contexts/VizContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
 
@@ -10,8 +10,11 @@ import { Tooltip } from "../../common/Tooltip/Tooltip"
 import { curveStep, line } from "d3"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
+import { ZoomIn, ZoomOut } from "lucide-react"
+import Button from "../../common/Button/Button"
 
 const PADDING = 0
+const ZOOM_STEPS = 5
 
 export function StatesMatrix({ width, height, lineChartMode }) {
   const { statesOrder } = useData()
@@ -91,12 +94,40 @@ export function StatesMatrix({ width, height, lineChartMode }) {
         .padding(0.15),
     [statesOrder],
   )
+  console.log("matrixCouples", matrixCouples)
+
+  const countExtent = extent(matrixCouples.map((c) => c.count))
+  const zoomLevels = ticks(countExtent[0], countExtent[1] + 1, ZOOM_STEPS)
+
+  console.log(zoomLevels)
+
+  const [zoomStep, setZoomStep] = useState(zoomLevels.length - 1) // start at max
+
+  const cellWidth = useMemo(
+    () => scaleLinear([0, zoomLevels[zoomStep]], [0, xScale.bandwidth()]),
+    [countExtent, xScale],
+  )
+
+  const handleZoomIn = () => {
+    // cycle: max → mean → min → max
+    setZoomStep((prev) => (prev === 0 ? zoomLevels.length - 1 : prev - 1))
+  }
+
+  const handleZoomOut = () => {
+    // cycle: min → mean → max → min
+    setZoomStep((prev) => (prev === zoomLevels.length - 1 ? 0 : prev + 1))
+  }
 
   return (
     <div className="svg-container" id="matrix-chart">
       {/* <h4>StatesMatrix</h4> */}
 
       <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 140 ${height}`}>
+        <defs>
+          <mask id="cell-mask">
+            <rect width={xScale.bandwidth()} height={yScale.bandwidth()} fill="white" />
+          </mask>
+        </defs>
         {/* <g id="grid">
           {statesOrder.map((s) => {
             return (
@@ -162,6 +193,7 @@ export function StatesMatrix({ width, height, lineChartMode }) {
                   }}
                   exit={{ opacity: 0 }}
                   onClick={() => toggleSelectedLumps(s)}
+                  mask={`url(#cell-mask)`}
                 >
                   <motion.rect
                     width={xScale.bandwidth()}
@@ -172,7 +204,8 @@ export function StatesMatrix({ width, height, lineChartMode }) {
                     strokeWidth={isSelected ? 1 : 0}
                   />
                   <Quantiles
-                    width={xScale.bandwidth()}
+                    width={cellWidth(s.count)}
+                    //width={xScale.bandwidth()}
                     height={yScale.bandwidth()}
                     points={s[lineChartMode]}
                     buckets={buckets}
@@ -203,6 +236,17 @@ export function StatesMatrix({ width, height, lineChartMode }) {
         <p>{hoveredQuantile?.uniqueBucketPoints} un ind.</p>
         <p>{hoveredQuantile?.bucketPoints} ind.</p>
       </Tooltip>
+
+      <div>
+        <Button size="xs" onClick={handleZoomIn}>
+          <ZoomIn size={16} />
+        </Button>
+        <Button size="xs" onClick={handleZoomOut}>
+          <ZoomOut size={16} />
+        </Button>
+        <h4>Cell width: {zoomLevels[zoomStep]} individual</h4>
+        <h4>{zoomStep} zoom</h4>
+      </div>
     </div>
   )
 }
@@ -237,6 +281,7 @@ function LineChart({ width, height, points }) {
 }
 
 function Quantiles({ width, height, points, buckets, quantileScale, setHoveredQuantile }) {
+  console.log(width)
   const xScale = scaleLinear([0, 1], [0, width])
   const yScale = scaleLinear([0, 1], [0, height])
 
