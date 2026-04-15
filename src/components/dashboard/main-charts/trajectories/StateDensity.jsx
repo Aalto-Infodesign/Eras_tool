@@ -15,6 +15,8 @@ export function StateDensity(props) {
   const { x, y } = chartScales
 
   const { hoveredDistribution } = props
+  console.log(filteredLinks)
+  console.log(selectedLinks)
 
   const completeLinksAnalytics = useLinksAnalytics(filteredLinks)
   const selectedLinksAnalytics = useLinksAnalytics(selectedLinks)
@@ -55,32 +57,39 @@ export function StateDensity(props) {
             initial={{ y: y(d.state) + marginTop }}
             animate={{ y: y(d.state) + marginTop }}
           >
-            <PathGroup
-              name={d.state}
-              trajectories={d.complete.initial}
-              lineGenerator={lineGeneratorSource}
-              opacity={d.filtered.initial.length > 0 && 0.2}
-              kde={kde}
-            />
-            <PathGroup
-              name={d.state}
-              trajectories={d.complete.final}
-              lineGenerator={lineGeneratorTarget}
-              opacity={d.filtered.final.length > 0 && 0.2}
-              kde={kde}
-            />
-            <PathGroup
-              name={d.state}
-              trajectories={d.filtered.initial}
-              lineGenerator={lineGeneratorSource}
-              kde={kde}
-            />
-            <PathGroup
-              name={d.state}
-              trajectories={d.filtered.final}
-              lineGenerator={lineGeneratorTarget}
-              kde={kde}
-            />
+            {filteredLinks.length === selectedLinks.length ? (
+              <g>
+                <PathGroup
+                  name={d.state}
+                  trajectories={d.complete.initial}
+                  lineGenerator={lineGeneratorSource}
+                  // opacity={d.filtered.initial.length > 0 && 0.2}
+                  kde={kde}
+                />
+                <PathGroup
+                  name={d.state}
+                  trajectories={d.complete.final}
+                  lineGenerator={lineGeneratorTarget}
+                  // opacity={d.filtered.final.length > 0 && 0.2}
+                  kde={kde}
+                />
+              </g>
+            ) : (
+              <g>
+                <PathGroup
+                  name={d.state}
+                  trajectories={d.filtered.initial}
+                  lineGenerator={lineGeneratorSource}
+                  kde={kde}
+                />
+                <PathGroup
+                  name={d.state}
+                  trajectories={d.filtered.final}
+                  lineGenerator={lineGeneratorTarget}
+                  kde={kde}
+                />
+              </g>
+            )}
           </motion.g>
         )
       })}

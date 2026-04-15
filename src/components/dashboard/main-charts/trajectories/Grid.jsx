@@ -43,35 +43,38 @@ export function Grid({ chartMode }) {
 
   return (
     <g id="grid">
-      {chartMode !== "arc" &&
-        verticalLines.map((l) => {
-          return (
-            <motion.g
-              key={`v-line-${l}`}
-              initial={{ x: xScale(l) }}
-              animate={{ x: xScale(l) }}
-              transition={{ duration: 0.2 }}
-            >
-              <line
-                y1={0}
-                y2={h}
-                stroke="var(--text-primary)"
-                strokeWidth={0.1}
-                opacity={0.3}
-                strokeDasharray={"1 1"}
-              />
-              <text
-                y={h}
-                fill={"var(--text-primary)"}
-                fontSize={3}
-                opacity={0.3}
-                textAnchor="middle"
+      {chartMode !== "arc" && (
+        <g id="vertical-lines">
+          {verticalLines.map((l) => {
+            return (
+              <motion.g
+                key={`v-line-${l}`}
+                initial={{ x: xScale(l) }}
+                animate={{ x: xScale(l) }}
+                transition={{ duration: 0.2 }}
               >
-                {l}
-              </text>
-            </motion.g>
-          )
-        })}
+                <line
+                  y1={0}
+                  y2={h}
+                  stroke="var(--text-primary)"
+                  strokeWidth={0.1}
+                  opacity={0.3}
+                  strokeDasharray={"1 1"}
+                />
+                <text
+                  y={h}
+                  fill={"var(--text-primary)"}
+                  fontSize={3}
+                  opacity={0.3}
+                  textAnchor="middle"
+                >
+                  {l}
+                </text>
+              </motion.g>
+            )
+          })}
+        </g>
+      )}
 
       <motion.g animate={{ opacity: opacity }}>
         {statesOrder.map((name) => {
@@ -151,7 +154,6 @@ export function Grid({ chartMode }) {
           )
         })}
       </motion.g>
-
       <AnimatePresence>
         {statesData.map((d) => {
           const y = yScale(d.state) + marginTop
@@ -187,6 +189,7 @@ export function Grid({ chartMode }) {
                 animate={{
                   x1: xScale(d.xExtent[0]),
                   x2: xScale(d.xExtent[1]),
+                  opacity: opacity,
                 }}
                 transition={{ duration: 0.2 }}
                 strokeWidth={0.5}

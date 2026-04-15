@@ -1,8 +1,3 @@
-/** A Carousel component that allows me to add multiple components in a horizontal scrollable view.
- * Powered by Framer Mortion and AnimatePresence
- * Needs to have pagination, as dots, arrows and  custom labels for each slide.
- */
-
 import { AnimatePresence, motion, usePresenceData, wrap } from "motion/react"
 import { forwardRef, useState } from "react"
 import { ArrowLeft, ArrowRight } from "lucide-react"
@@ -10,10 +5,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 import "./Carousel.css"
 import Button from "../Button/Button"
 export function CarouselWrapper({ children, hasPagination = true }) {
-  // console.log(children)
   const cleanChildren = children.filter((c) => c !== false)
   const slides = Array.isArray(cleanChildren) ? cleanChildren : [cleanChildren]
-  console.log(slides)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [direction, setDirection] = useState(1)
 

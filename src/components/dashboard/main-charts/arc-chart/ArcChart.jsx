@@ -29,6 +29,8 @@ export const ArcChart = () => {
 
   const [hoveredLump, setHoveredLump] = useState(null)
 
+  console.log(hoveredLump)
+
   const valuesExtent = extent(lumps.map((l) => l.count))
   const opacityScale = scaleLinear(valuesExtent, [0.1, 1])
 
@@ -84,7 +86,7 @@ export const ArcChart = () => {
             to <span>{hoveredLump.target}</span>
           </p>
           <p>
-            <span>{hoveredLump.value}</span> individuals
+            <span>{hoveredLump.count}</span> individuals
           </p>
         </Tooltip>
       )}
