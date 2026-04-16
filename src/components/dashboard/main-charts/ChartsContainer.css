@@ -19,6 +19,8 @@
 .chart-controls {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
+  gap: var(--spacing-sm);
+
   /* place-content: space-between; */
   /* gap: var(--spacing-md); */
 }
@@ -45,8 +47,8 @@
   background-color: var(--surface-chart);
 
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  /* gap: var(--spacing-sm); */
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--spacing-sm);
   max-width: 1440px;
   /* width: 100%; */
   /* min-height: 500px; */
@@ -59,18 +61,21 @@
 }
 
 #distributions-chart {
+  grid-column: span 2;
+}
+#state-labels {
   grid-column: span 1;
 }
 
 #trajectories-chart {
-  grid-column: span 3;
+  grid-column: span 5;
 }
 #matrix-chart {
-  grid-column: span 2;
+  grid-column: span 4;
 }
 
 #sankey-chart {
-  grid-column: span 4;
+  grid-column: span 9;
 }
 
 .no-data-panel {

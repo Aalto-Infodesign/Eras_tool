@@ -10,7 +10,7 @@ const MOTION_THRESHOLD = 20000
 
 export function ChartsProvider({ children }) {
   const { statesOrder } = useData()
-  const { data, analytics, selectedLinks } = useDerivedData()
+  const { analytics, selectedLinks } = useDerivedData()
 
   const [hoveredTrajectoriesIDs, setHoveredTrajectoriesIDs] = useState([])
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -39,7 +39,7 @@ export function ChartsProvider({ children }) {
     }
   }, [isArrowLeft, isArrowRight, hoveredTrajectoriesIDs.length])
 
-  const w = 170
+  const w = 175
   const marginTop = 10
   //For File Loader
   const minHeight = 100

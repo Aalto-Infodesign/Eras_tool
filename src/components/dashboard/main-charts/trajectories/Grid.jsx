@@ -1,29 +1,19 @@
 import { useCharts } from "../ChartsContext"
 import { ticks } from "d3"
 
-import {
-  getMinMaxStateFromTrajectories,
-  useStatesDataFromLinks,
-} from "../../../../utils/lumpsHelpers"
+import { useStatesDataFromLinks } from "../../../../utils/lumpsHelpers"
 
 import { AnimatePresence, motion } from "motion/react"
-
-import { moveElementInArray } from "../../../../utils/moveChar"
 
 import { useData } from "../../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../../contexts/VizContext"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
-import { flattenDeep } from "lodash"
-import { useState } from "react"
-import { Tooltip } from "../../../common/Tooltip/Tooltip"
 
 export function Grid({ chartMode }) {
-  const { setStatesOrder, statesOrder } = useData()
+  const { statesOrder } = useData()
   const { palette } = useViz()
   const { filteredLinks, analytics } = useDerivedData()
   const { w, h, marginTop, chartScales } = useCharts()
-
-  const [hoveredStateLabel, setHoveredStateLabel] = useState()
 
   const { ageRange } = analytics
 
@@ -106,50 +96,6 @@ export function Grid({ chartMode }) {
                 cursor={"pointer"}
                 opacity={0.5}
               />
-              <motion.g
-                id={`grid-label-group-${name}`}
-                className="gird-label"
-                initial={{ x: w + 5 }}
-                animate={{ y: -3 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                onMouseOver={() => setHoveredStateLabel(name)}
-                onMouseLeave={() => setHoveredStateLabel()}
-              >
-                <text
-                  className="stateLabel-text"
-                  y={4}
-                  fill={palette[name]}
-                  fontSize={4}
-                  textAnchor="start"
-                >
-                  {name.length > 15
-                    ? `${statesOrder.indexOf(name)} • ${name.substring(0, 8)}` + "…"
-                    : `${statesOrder.indexOf(name)} • ${name}`}
-                </text>
-                <g className="line-controls" transform={`translate(${10}, ${7})`}>
-                  <motion.path
-                    className={`stateLabel-control-up material-icons small ${
-                      statesOrder.indexOf(name) === 0 ? "inactive" : ""
-                    }`}
-                    transform={`translate(0, -9)`}
-                    d="M-1.5,0 L1.5,0 L0,-2 Z"
-                    // whileHover={{ scale: 0.95 }}
-                    fill={palette[name]}
-                    onClick={() => moveElementInArray(statesOrder, name, "up", setStatesOrder)}
-                  />
-                  <motion.path
-                    className={`stateLabel-control-down material-icons small ${
-                      statesOrder.indexOf(name) === statesOrder.length - 1 ? "inactive" : ""
-                    }`}
-                    transform={`translate(0, 0)`}
-                    // whileHover={{ scale: 0.95 }}
-                    d="M-1.5,0 L1.5,0 L0,2 Z"
-                    fill={palette[name]}
-                    onClick={() => moveElementInArray(statesOrder, name, "down", setStatesOrder)}
-                  />
-                </g>
-              </motion.g>
             </motion.g>
           )
         })}
@@ -200,10 +146,6 @@ export function Grid({ chartMode }) {
           )
         })}
       </AnimatePresence>
-
-      <Tooltip isVisible={hoveredStateLabel}>
-        <p>{hoveredStateLabel}</p>
-      </Tooltip>
     </g>
   )
 }

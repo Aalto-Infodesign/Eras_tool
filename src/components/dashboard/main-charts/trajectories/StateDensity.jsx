@@ -56,6 +56,7 @@ export function StateDensity(props) {
             className="density-state-source"
             initial={{ y: y(d.state) + marginTop }}
             animate={{ y: y(d.state) + marginTop }}
+            transition={{ duration: 0.2 }}
           >
             {filteredLinks.length === selectedLinks.length ? (
               <g>

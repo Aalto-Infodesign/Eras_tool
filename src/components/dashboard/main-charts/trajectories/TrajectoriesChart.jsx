@@ -25,6 +25,7 @@ import { ArcChart } from "../arc-chart/ArcChart"
 import { GradientDefs } from "../../../common/defs/Gradients/GradientDefs"
 import { useDebouncedState } from "hamo"
 import { features } from "../../../../config/features"
+import { StateLabels } from "./StateLabels"
 
 export function TrajectoriesChart() {
   const {
@@ -221,12 +222,18 @@ export function TrajectoriesChart() {
             </svg>
           </div>
         )}
+
+        <div className="svg-container" id="state-labels">
+          <svg id="state-labels" preserveAspectRatio="xMidYMid meet" viewBox={`0 0 35 ${h}`}>
+            <StateLabels />
+          </svg>
+        </div>
+
         <div id="trajectories-chart" className="svg-container">
           <div style={{ position: "relative" }}>
-            <svg ref={svgRef} preserveAspectRatio="xMidYMid meet" viewBox={`0 0 210 ${h}`}>
+            <svg ref={svgRef} preserveAspectRatio="xMidYMid meet" viewBox={`0 0 175 ${h}`}>
               <TextureDefs />
               <GradientDefs />
-
               <Grid chartMode={chartMode} />
               <AnimatePresence mode="wait">
                 {chartMode !== "arc" && (
