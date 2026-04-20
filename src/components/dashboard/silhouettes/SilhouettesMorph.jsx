@@ -162,44 +162,71 @@ export const SilhouettesMorph = () => {
     >
       <motion.div layout>
         <h3>Silhouettes filters</h3>
-        <div className="header-section">
-          <div className="chart-modes">
-            <Button
-              size="xs"
-              keystroke="t"
-              onClick={() => setIsHasse(false)}
-              data-selected={!isHasse}
-            >
-              <ShortcutSpan>T</ShortcutSpan>rajectories
-            </Button>
-            {features.hasseDiagram && (
+
+        <div id="silhouettes-header">
+          <div id="header-labels">
+            <p>Chart mode</p>
+            {idealSilhouettes.length > 0 && <p>Order by</p>}
+            <p>Quick select</p>
+          </div>
+          <div id="header-content">
+            <div className="chart-modes">
               <Button
                 size="xs"
-                keystroke="h"
-                onClick={() => setIsHasse(true)}
-                data-selected={isHasse}
-                disabled={!posetData}
+                keystroke="l"
+                onClick={() => setIsHasse(false)}
+                data-selected={!isHasse}
+                tooltip={"All the Silhouettes in a ordered list"}
               >
-                {!posetData ? (
-                  <span>Loading...</span>
-                ) : (
-                  <span>
-                    <ShortcutSpan>H</ShortcutSpan>
-                    asse
-                  </span>
-                )}
+                <p>
+                  <ShortcutSpan>L</ShortcutSpan>ist
+                </p>
               </Button>
-            )}
-          </div>
-          {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}
-          {idealSilhouettes.length > 0 && (
-            <div className="order-dropdown">
-              <select value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
-                <option value="size">Size</option>
-                <option value="distance">Distance</option>
-              </select>
+              {features.hasseDiagram && (
+                <Button
+                  size="xs"
+                  keystroke="t"
+                  onClick={() => setIsHasse(true)}
+                  data-selected={isHasse}
+                  disabled={!posetData}
+                  tooltip={"Tree map showing the relations and evolution of the Silhouettes"}
+                >
+                  <p>
+                    {!posetData ? (
+                      <span>Loading...</span>
+                    ) : (
+                      <span>
+                        <ShortcutSpan>T</ShortcutSpan>
+                        ree
+                      </span>
+                    )}
+                  </p>
+                </Button>
+              )}
             </div>
-          )}
+            {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}
+            {idealSilhouettes.length > 0 && (
+              <div id="order-dropdown">
+                <select value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
+                  <option value="size">Size</option>
+                  <option value="distance">Distance</option>
+                </select>
+              </div>
+            )}
+
+            <div id="selection-presets">
+              {/* <p>Selection Presets</p> */}
+
+              {idealSilhouettes.length > 0 && (
+                <Button size="xs" onClick={() => {}} data-selected={false}>
+                  <p>Matching Expectations</p>
+                </Button>
+              )}
+              <Button size="xs" onClick={() => {}} data-selected={false}>
+                <p>None</p>
+              </Button>
+            </div>
+          </div>
         </div>
       </motion.div>
 

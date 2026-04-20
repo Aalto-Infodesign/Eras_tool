@@ -248,6 +248,12 @@ h1 {
   color: var(--text-primary);
 }
 
+p.text-with-icon {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 /* .spotlight-bg {
   transition: 0.2s ease-out;
   pointer-events: none;
@@ -276,7 +282,7 @@ h1 {
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
   background-color: var(--surface-secondary);
-  overflow: hidden;
+  /* overflow: hidden; */
 
   /* Inital state for animation */
   opacity: 0;

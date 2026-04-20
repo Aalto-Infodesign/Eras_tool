@@ -2,20 +2,20 @@ import { useEffect, useCallback } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { Reorder } from "motion/react"
 import { resolveCollisions } from "./flowChart/resolveCollisions"
-import tinycolor from "tinycolor2"
+// import tinycolor from "tinycolor2"
 import { useReactFlow } from "@xyflow/react"
 import { useRawData } from "../../contexts/RawDataContext"
 import { useData } from "../../contexts/ProcessedDataContext"
 import { useViz } from "../../contexts/VizContext"
 import { ResetStatesOrder } from "./ResetStatesOrder"
-import { X, Workflow, Plus } from "lucide-react"
+import { X, Workflow, Plus, PlusIcon, Trash } from "lucide-react"
 import Button from "../common/Button/Button"
 import { useFilters } from "../../contexts/FiltersContext"
 
 export function StateSelection() {
   const { fileName } = useRawData()
 
-  const { statesData, statesOrder, setStatesOrder } = useData()
+  const { statesOrder, setStatesOrder } = useData()
   const { palette, isLegend, hasFlowChart } = useViz()
   const { removedStates, toggleRemovedState } = useFilters()
   const {
@@ -27,6 +27,8 @@ export function StateSelection() {
     deleteElements,
     fitView,
   } = useReactFlow()
+
+  const nodes = getNodes()
 
   // Centralized node creation function
   const createNode = useCallback(
@@ -52,47 +54,52 @@ export function StateSelection() {
     [statesOrder, palette],
   )
 
-  // Auto-populate flowchart on first load or RawData change
   useEffect(() => {
     // RESET
+    resetFlowChart()
+  }, [fileName])
+
+  const resetFlowChart = useCallback(() => {
     setNodes([])
     setEdges([])
+  }, [])
 
-    // if (statesData.statesNames.length === 0) return
+  const populateFlowChart = useCallback(() => {
+    if (statesOrder.length === 0) return
 
-    // const states = statesData.statesNames
+    const states = statesOrder
 
-    // const flowCenter = document.querySelector(".react-flow__viewport")?.getBoundingClientRect()
-    // if (!flowCenter) return
+    const flowCenter = document.querySelector(".react-flow__viewport")?.getBoundingClientRect()
+    if (!flowCenter) return
 
-    // const centerPosition = screenToFlowPosition({
-    //   x: flowCenter.left + flowCenter.width / 2,
-    //   y: flowCenter.top + flowCenter.height / 2,
-    // })
+    const centerPosition = screenToFlowPosition({
+      x: flowCenter.left + flowCenter.width / 2,
+      y: flowCenter.top + flowCenter.height / 2,
+    })
 
-    // const newNodes = states.map((stateName, i) => {
-    //   // Offset nodes in a grid pattern or stacked
-    //   const offset = {
-    //     x: (i % 3) * 150 - 150, // 3 columns
-    //     y: Math.floor(i / 3) * 100 - 100, // Rows
-    //   }
+    const newNodes = states.map((stateName, i) => {
+      // Offset nodes in a grid pattern or stacked
+      const offset = {
+        x: (i % 3) * 150 - 150, // 3 columns
+        y: Math.floor(i / 3) * 100 - 100, // Rows
+      }
 
-    //   return createNode(stateName, {
-    //     x: centerPosition.x + offset.x,
-    //     y: centerPosition.y + offset.y,
-    //   })
-    // })
+      return createNode(stateName, {
+        x: centerPosition.x + offset.x,
+        y: centerPosition.y + offset.y,
+      })
+    })
 
-    // setNodes((nds) =>
-    //   resolveCollisions([...nds, ...newNodes], {
-    //     maxIterations: Infinity,
-    //     overlapThreshold: 0.5,
-    //     margin: 10,
-    //   }),
-    // )
+    setNodes((nds) =>
+      resolveCollisions([...nds, ...newNodes], {
+        maxIterations: Infinity,
+        overlapThreshold: 0.5,
+        margin: 10,
+      }),
+    )
 
     fitView()
-  }, [fileName])
+  }, [statesOrder])
 
   // Sync node labels when statesOrder changes
   useEffect(() => {
@@ -189,12 +196,29 @@ export function StateSelection() {
 
   return (
     <section className="accordion-content">
-      <p className="era-header">
-        <span> i </span>
-        <span>era</span>
-        {/* <span>population</span> */}
-      </p>
-      <motion.div layout="size" className="your-parent-container" transition={transition}>
+      <div className="era-header">
+        <Button
+          size="small"
+          onClick={populateFlowChart}
+          disabled={nodes.length > 0}
+          tooltip={"Add all states in the Expectation Flowchart"}
+          tooltipPosition="right"
+        >
+          <PlusIcon size={16} />
+          Add all
+        </Button>
+        <Button
+          size="small"
+          onClick={resetFlowChart}
+          disabled={nodes.length === 0}
+          tooltip={"Clear Expectation Flowchart"}
+          tooltipPosition="right"
+        >
+          <Trash size={16} />
+          Clear flowchart
+        </Button>
+      </div>
+      <motion.div layout="size" transition={transition}>
         {/* Top list */}
         <motion.div
           layout="size"
@@ -240,7 +264,7 @@ export function StateSelection() {
                   <EraLabel
                     index={i}
                     text={item}
-                    population={statesData.statesObject[item]?.population_size}
+                    // population={statesData.statesObject[item]?.population_size}
                     color={palette[item]}
                   />
                   <div className="buttons-wrapper">
@@ -250,6 +274,7 @@ export function StateSelection() {
                         className="center"
                         onClick={() => addNodetoFlow("default", item)}
                         tooltip={"Add to flowchart"}
+                        tooltipPosition="left"
                       >
                         <Workflow size={14} />
                       </Button>
@@ -260,6 +285,7 @@ export function StateSelection() {
                         className="center"
                         onClick={() => toggleRemovedState(item)}
                         tooltip={"Remove state"}
+                        tooltipPosition="left"
                       >
                         <X size={14} />
                       </Button>

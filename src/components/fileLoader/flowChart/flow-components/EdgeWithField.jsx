@@ -108,7 +108,11 @@ function ThresholdPanel({ props }) {
       )}
       {!showInput && <p className="value">{edgeThres?.threshold ?? 0}</p>}
       <motion.div variants={templateVariants}>
-        <Button size="xs" onClick={handleAddClick}>
+        <Button
+          size="xs"
+          onClick={handleAddClick}
+          tooltip={"To prevent errors in the dataset, set a Threshold Value that by which..."}
+        >
           {buttonLabel}
         </Button>
       </motion.div>

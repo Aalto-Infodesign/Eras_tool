@@ -22,6 +22,7 @@
 
 .btn {
   display: inline-flex;
+  gap: var(--spacing-sm);
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
@@ -35,6 +36,9 @@
   font-family: inherit; /* Eredita il font dal body */
   -webkit-font-smoothing: antialiased;
 }
+/* .btn svg {
+  margin-right: var(--spacing-sm);
+} */
 
 /* Varianti */
 .primary {
@@ -149,6 +153,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
+  /* max-width: 100px; NON FUNZIONA */
 
   /* Stile visivo — adatta ai tuoi token */
   background-color: var(--surface-secondary, #1a1a1a);

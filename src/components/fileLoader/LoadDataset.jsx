@@ -91,12 +91,14 @@ const TemplateButton = ({ children, onClick, shortcut }) => {
 
   return (
     <Button onClick={onClick} size="small" variant="primary" keystroke={String(shortcut)}>
-      {!fileName && (
-        <span>
-          <ShortcutSpan>{shortcut}</ShortcutSpan>–
-        </span>
-      )}
-      {children}
+      <p>
+        {!fileName && (
+          <span>
+            <ShortcutSpan>{shortcut}</ShortcutSpan>–
+          </span>
+        )}
+        {children}
+      </p>
     </Button>
   )
 }

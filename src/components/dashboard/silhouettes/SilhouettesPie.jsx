@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue, animate, useTransform } from "
 import { useEffect } from "react"
 import "./Pie.css"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { User } from "lucide-react"
 
 export function SilhouettesPie() {
   const { selectedSilhouettesData } = useDerivedData()
@@ -33,7 +34,7 @@ export function SilhouettesPie() {
     const decimalPlaces = latest > 1 || latest === 0 ? 1 : 3
     return `${latest.toFixed(decimalPlaces)}%`
   })
-  const displaySizes = useTransform(summedSizesMotion, (latest) => {
+  const displaySize = useTransform(summedSizesMotion, (latest) => {
     return `${Math.round(latest)}`
   })
 
@@ -123,7 +124,11 @@ export function SilhouettesPie() {
           </motion.g>
         </svg>
       </div>
-      <motion.p key={"size-text"}>{displaySizes}</motion.p>
+      <p className="text-with-icon">
+        <motion.span key={"size-text"}>{displaySize}</motion.span>
+        {/* <span> IDs</span> */}
+        <User size={16} />
+      </p>
     </div>
   )
 }

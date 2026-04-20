@@ -46,7 +46,9 @@ export function ChartsContainer() {
               onClick={() => setChartType(b.code)}
               data-selected={chartType === b.code}
             >
-              <ShortcutSpan separator={"–"}>{b.code}</ShortcutSpan> {b.label}
+              <p>
+                <ShortcutSpan separator={"–"}>{b.code}</ShortcutSpan> {b.label}
+              </p>
             </Button>
           ))}
         </div>

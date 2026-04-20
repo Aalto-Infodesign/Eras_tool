@@ -58,28 +58,34 @@ export function FileLoader() {
           </div>
         )}
 
-        {isLegend && (
+        {richData.length > 0 && (
           <div className="accordion-controls">
-            <Button
-              // tooltip={isOpen ? "Collapse Panel" : "Expand Panel"}
-              // tooltipPosition="bottom"
-              size="xs"
-              variant="transparent"
-              keystroke="c"
-              onClick={() => setIsOpen((prev) => !prev)}
-            >
-              <ChevronDown size={16} transform={isOpen ? "rotate(180)" : "rotate(0)"} />
-            </Button>
+            {isLegend && (
+              <Button
+                tooltip={isOpen ? "Collapse Panel" : "Expand Panel"}
+                tooltipPosition="left"
+                size="xs"
+                variant="transparent"
+                keystroke="c"
+                onClick={() => setIsOpen((prev) => !prev)}
+              >
+                <ChevronDown size={16} transform={isOpen ? "rotate(180)" : "rotate(0)"} />
+              </Button>
+            )}
 
-            <Button
-              // tooltip={"Expand State Manager"}
-              // tooltipPosition="bottom"
-              size="xs"
-              variant="transparent"
-              onClick={() => setIsLegend(false)}
-            >
-              <Maximize2 size={16} />
-            </Button>
+            {isLegend ? (
+              <Button
+                tooltip={"Expand State Manager"}
+                tooltipPosition="left"
+                size="xs"
+                variant="transparent"
+                onClick={() => setIsLegend(false)}
+              >
+                <Maximize2 size={16} />
+              </Button>
+            ) : (
+              <ProcessButton setIsOpen={setIsOpen} />
+            )}
           </div>
         )}
       </div>
@@ -87,7 +93,7 @@ export function FileLoader() {
       {richData.length > 0 && (
         <div className="loader-main">
           <ReactFlowProvider>
-            <div>
+            <div className="states-selection">
               <StateSelection />
               <AnimatePresence>
                 {/* <ScatterPlot data={silhouettes} width={300} height={300} /> */}
@@ -132,10 +138,6 @@ export function FileLoader() {
             <FlowChart />
           </ReactFlowProvider>
         </div>
-      )}
-
-      {statesOrder.length > 0 && richData.length > 0 && !isLegend && (
-        <ProcessButton setIsOpen={setIsOpen} />
       )}
     </motion.section>
   )

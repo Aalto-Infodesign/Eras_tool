@@ -32,12 +32,14 @@ function DownloadButton() {
     <Panel position="top-right">
       <Button
         variant="primary"
-        size="small"
+        size="xs"
         onClick={onClick}
-        tooltip={"Download"}
+        tooltip={"Download a PNG image of the Expectation Flowchart"}
         tooltipPosition="left"
       >
-        <Download size={16} /> .png
+        <p>
+          <Download size={14} />
+        </p>
       </Button>
     </Panel>
   )

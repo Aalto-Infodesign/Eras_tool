@@ -15,7 +15,7 @@ import "./flowchart.css"
 
 import { resolveCollisions } from "./resolveCollisions"
 
-import { calculateDominanceArray, validateRelations } from "../../../utils/POHelperFunctions"
+import { validateRelations } from "../../../utils/POHelperFunctions"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
@@ -139,7 +139,9 @@ export const FlowChart = () => {
             data-selected={colorMode === "standard"}
             onClick={() => setColorMode("standard")}
           >
-            <ShortcutSpan keyCode="s">S</ShortcutSpan>tate
+            <p>
+              <ShortcutSpan keyCode="s">S</ShortcutSpan>tate
+            </p>
           </Button>
           <Button
             size="xs"
@@ -147,7 +149,9 @@ export const FlowChart = () => {
             onClick={() => setColorMode("poset")}
             disabled={idealSilhouettes.length === 0}
           >
-            Tran<ShortcutSpan keyCode="s">s</ShortcutSpan>ition
+            <p>
+              Tran<ShortcutSpan keyCode="s">s</ShortcutSpan>ition
+            </p>
           </Button>
         </div>
         <div className="dndflow">

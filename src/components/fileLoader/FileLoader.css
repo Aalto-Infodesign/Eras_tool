@@ -58,7 +58,7 @@
   gap: var(--spacing-sm);
 }
 
-.loader-main p {
+.states-selection p {
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -237,7 +237,10 @@ li p {
   padding: 0;
 }
 
-.era-header,
+.era-header {
+  display: flex;
+  gap: var(--spacing-md);
+}
 .era-label {
   font-size: var(--text-sm);
   display: grid;
