@@ -237,10 +237,6 @@ li p {
   padding: 0;
 }
 
-.era-header {
-  display: flex;
-  gap: var(--spacing-md);
-}
 .era-label {
   font-size: var(--text-sm);
   display: grid;

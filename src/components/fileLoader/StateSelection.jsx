@@ -196,28 +196,30 @@ export function StateSelection() {
 
   return (
     <section className="accordion-content">
-      <div className="era-header">
-        <Button
-          size="small"
-          onClick={populateFlowChart}
-          disabled={nodes.length > 0}
-          tooltip={"Add all states in the Expectation Flowchart"}
-          tooltipPosition="right"
-        >
-          <PlusIcon size={16} />
-          Add all
-        </Button>
-        <Button
-          size="small"
-          onClick={resetFlowChart}
-          disabled={nodes.length === 0}
-          tooltip={"Clear Expectation Flowchart"}
-          tooltipPosition="right"
-        >
-          <Trash size={16} />
-          Clear flowchart
-        </Button>
-      </div>
+      {!isLegend && (
+        <div className="buttons-wrapper">
+          <Button
+            size="xs"
+            onClick={populateFlowChart}
+            disabled={nodes.length > 0}
+            tooltip={"Add all states in the Expectation Flowchart"}
+            tooltipPosition="right"
+          >
+            <PlusIcon size={16} />
+            Add all
+          </Button>
+          <Button
+            size="xs"
+            onClick={resetFlowChart}
+            disabled={nodes.length === 0}
+            tooltip={"Clear Expectation Flowchart"}
+            tooltipPosition="right"
+          >
+            <Trash size={16} />
+            Clear flowchart
+          </Button>
+        </div>
+      )}
       <motion.div layout="size" transition={transition}>
         {/* Top list */}
         <motion.div

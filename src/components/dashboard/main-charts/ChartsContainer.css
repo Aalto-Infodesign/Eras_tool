@@ -11,11 +11,6 @@
   place-content: space-between;
 }
 
-.chart-modes {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
 .chart-controls {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

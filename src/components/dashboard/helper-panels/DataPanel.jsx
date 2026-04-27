@@ -14,6 +14,9 @@ export function DataPanel({}) {
   } = useDerivedData()
 
   const links = trajectories.flat()
+  // .filter((l) => l.speed > 0)
+
+  console.log("links", selectedLinks)
 
   return (
     <div id="data-panel">

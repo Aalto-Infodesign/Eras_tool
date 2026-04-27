@@ -37,7 +37,7 @@ export function ChartsContainer() {
     >
       {/* TODO! Toggle between chart types */}
       <motion.div layout className="function-row">
-        <div className="chart-modes">
+        <div id="charts-modes" className="buttons-wrapper">
           {controlButtons.map((b) => (
             <Button
               key={"button-" + b.label}

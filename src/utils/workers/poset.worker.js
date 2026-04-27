@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
-import { getDominancePairsSelf } from "../../../../../utils/POHelperFunctions"
-import { po } from "../../../../../utils/po"
+import { getDominancePairsSelf } from "../POHelperFunctions"
+import { po } from "../po"
 
 self.onmessage = ({ data: { silhouettes } }) => {
   const result = computePoset(silhouettes)

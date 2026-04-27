@@ -2,7 +2,7 @@ import { useState, useMemo } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { motion, AnimatePresence } from "motion/react"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
-import { groupBy, keys } from "lodash"
+import { groupBy, keys, union } from "lodash"
 import { romanize } from "../../../../utils/numberHelpers"
 import { useViz } from "../../../../contexts/VizContext"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
@@ -32,6 +32,7 @@ function SankeyNode({
   node,
   hoveredTrajectory,
   setSelectedLinks,
+  addSelectedLinks,
   selectedNode,
   setSelectedNode,
   setSelectionDirection,
@@ -68,6 +69,8 @@ function SankeyNode({
     setSelectionDirection("left")
     const targetSegments = getTargetSegments(node)
     setSelectedTrajectoriesIDs(targetSegments)
+
+    // addSelectedLinks(data.links)
     setSelectedLinks(data.links)
   }
 
@@ -85,6 +88,7 @@ function SankeyNode({
     setSelectionDirection("right")
     const sourceSegments = getSourceSegments(node)
     setSelectedTrajectoriesIDs(sourceSegments)
+    // addSelectedLinks(data.links)
     setSelectedLinks(data.links)
   }
 
@@ -363,6 +367,10 @@ export function Sankey({ width, height, data }) {
   const [hoveredLink, setHoveredLink] = useDebouncedState(null, 200)
   const [hoveredNode, setHoveredNode] = useDebouncedState(null, 200)
 
+  const addSelectedLinks = (links) => {
+    setSelectedLinks((prev) => union(prev, links))
+  }
+
   const { nodes, links } = useMemo(() => {
     const sankeyGenerator = sankey()
       .nodeWidth(NODE_WIDTH)
@@ -448,6 +456,7 @@ export function Sankey({ width, height, data }) {
                 node={node}
                 hoveredTrajectory={hoveredSilhouette} // Dim nodes if a silhouette is hovered
                 setSelectedLinks={setSelectedLinks}
+                addSelectedLinks={addSelectedLinks}
                 selectedNode={selectedNode}
                 setSelectedNode={setSelectedNode}
                 setSelectionDirection={setSelectionDirection}

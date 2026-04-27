@@ -113,18 +113,18 @@ export function TrajectoriesChart() {
   return (
     <>
       <div className="chart-controls">
-        <div id="lump-controls" className={` ${chartMode}`}>
-          <div>
-            {chartButtons.map((b) => (
-              <Button
-                key={b.name}
-                data-selected={chartMode === b.value}
-                size="xs"
-                keystroke={b.keystroke ?? ""}
-                onClick={() => setChartMode(b.value)}
-                tooltip={b.tooltip}
-                disabled={b.disabled}
-              >
+        <div id="lump-controls" className={`buttons-wrapper  ${chartMode}`}>
+          {chartButtons.map((b) => (
+            <Button
+              key={b.name}
+              data-selected={chartMode === b.value}
+              size="xs"
+              keystroke={b.keystroke ?? ""}
+              onClick={() => setChartMode(b.value)}
+              tooltip={b.tooltip}
+              disabled={b.disabled}
+            >
+              <p>
                 {b.keystroke ? (
                   <>
                     <ShortcutSpan>{b.name[0]}</ShortcutSpan>
@@ -133,9 +133,9 @@ export function TrajectoriesChart() {
                 ) : (
                   <>{b.name}</>
                 )}
-              </Button>
-            ))}
-          </div>
+              </p>
+            </Button>
+          ))}
         </div>
 
         <div id="line-controls">
@@ -152,7 +152,7 @@ export function TrajectoriesChart() {
             </div>
           )}
           {(chartMode === "lines" || showLinesOfSelectedLumps) && (
-            <div>
+            <div className="buttons-wrapper">
               {linesControlButtons.map((b) => (
                 <Button
                   key={b.name}

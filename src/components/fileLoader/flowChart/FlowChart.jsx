@@ -138,6 +138,7 @@ export const FlowChart = () => {
             size="xs"
             data-selected={colorMode === "standard"}
             onClick={() => setColorMode("standard")}
+            tooltip={"Discrete coloring: each state has a different color"}
           >
             <p>
               <ShortcutSpan keyCode="s">S</ShortcutSpan>tate
@@ -148,6 +149,7 @@ export const FlowChart = () => {
             data-selected={colorMode === "poset"}
             onClick={() => setColorMode("poset")}
             disabled={idealSilhouettes.length === 0}
+            tooltip={`Coloring based on flowchart connection ${idealSilhouettes.length === 0 ? "(Create flowchart to unlock)" : ""}`}
           >
             <p>
               Tran<ShortcutSpan keyCode="s">s</ShortcutSpan>ition

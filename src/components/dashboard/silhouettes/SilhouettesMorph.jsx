@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from "react"
-import { includes, isNil, xor, uniq } from "lodash"
+import { includes, isNil, xor, uniq, isEqual } from "lodash"
 
 import { SilhouettePathSvg } from "./shared/SilhouettePathSvg"
 import { HasseDiagram } from "./Hasse/HasseDiagram"
 import { ClearButton } from "../../common/Button/ClearButton"
-import { Download, Shuffle, X } from "lucide-react"
+import { Download, Shuffle, Star, X } from "lucide-react"
 
 import { AnimatePresence, motion, scale } from "motion/react"
 
@@ -22,7 +22,7 @@ import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
-import { usePosetWorker } from "./hooks/usePosetWorker"
+import { usePosetWorker } from "../../hooks/workerHooks/usePosetWorker"
 import Button from "../../common/Button/Button"
 import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 import { CloseButton } from "../../common/Button/CloseButton"
@@ -31,7 +31,7 @@ import { features } from "../../../config/features"
 // ! TODO Refactor completo
 
 export const SilhouettesMorph = () => {
-  const { idealSilhouettes, statesOrder, setStatesOrder } = useData()
+  const { existingIdealSilhouettes, statesOrder, setStatesOrder } = useData()
   const { isHasse, setIsHasse } = useViz()
   const {
     filtersActive,
@@ -39,7 +39,6 @@ export const SilhouettesMorph = () => {
     setSelectedSilhouettesNames,
     selectedSilhouettesNames,
   } = useFilters()
-
   const { completeSilhouettes } = useDerivedData()
 
   const posetData = usePosetWorker().result
@@ -49,7 +48,12 @@ export const SilhouettesMorph = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null)
   const [derivedSilhouettes, setDerivedSilhouettes] = useState(null)
   const [expandSides, setExpandSides] = useState(false)
-  const [orderMode, setOrderMode] = useState(idealSilhouettes.length ? "distance" : "size")
+  const [orderMode, setOrderMode] = useState(existingIdealSilhouettes.length ? "distance" : "size")
+
+  const existingIdealSilhouettesNames = useMemo(
+    () => existingIdealSilhouettes.map((s) => s.name),
+    [existingIdealSilhouettes],
+  )
 
   const containerRef = useRef()
 
@@ -165,12 +169,12 @@ export const SilhouettesMorph = () => {
 
         <div id="silhouettes-header">
           <div id="header-labels">
-            <p>Chart mode</p>
-            {idealSilhouettes.length > 0 && <p>Order by</p>}
+            <p>Mode</p>
+            {existingIdealSilhouettes.length > 0 && <p>Order by</p>}
             <p>Quick select</p>
           </div>
           <div id="header-content">
-            <div className="chart-modes">
+            <div id="silhouettes-modes" className="buttons-wrapper">
               <Button
                 size="xs"
                 keystroke="l"
@@ -205,7 +209,7 @@ export const SilhouettesMorph = () => {
               )}
             </div>
             {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}
-            {idealSilhouettes.length > 0 && (
+            {existingIdealSilhouettes.length > 0 && (
               <div id="order-dropdown">
                 <select value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
                   <option value="size">Size</option>
@@ -214,15 +218,27 @@ export const SilhouettesMorph = () => {
               </div>
             )}
 
-            <div id="selection-presets">
-              {/* <p>Selection Presets</p> */}
-
-              {idealSilhouettes.length > 0 && (
-                <Button size="xs" onClick={() => {}} data-selected={false}>
-                  <p>Matching Expectations</p>
+            <div id="selection-presets" className="buttons-wrapper">
+              {existingIdealSilhouettes.length > 0 && (
+                <Button
+                  size="xs"
+                  onClick={() => setSelectedSilhouettesNames(existingIdealSilhouettesNames)}
+                  data-selected={isEqual(selectedSilhouettesNames, existingIdealSilhouettesNames)}
+                  tooltip={
+                    "Select all the Silhouettes matching the expectation flow (L. Distance of 1)"
+                  }
+                >
+                  <p>
+                    ★ <span>Matching Expectations</span>
+                  </p>
                 </Button>
               )}
-              <Button size="xs" onClick={() => {}} data-selected={false}>
+              <Button
+                size="xs"
+                onClick={() => setSelectedSilhouettesNames([])}
+                data-selected={selectedSilhouettesNames.length === 0}
+                tooltip={"Clear the Silhouette selection"}
+              >
                 <p>None</p>
               </Button>
             </div>
@@ -435,7 +451,7 @@ export const SilhouettesMorph = () => {
                           handleLongPress={handleLongPress}
                           isHasse={isHasse}
                           handleOrderClick={handleOrderClick}
-                          idealSilhouettes={idealSilhouettes}
+                          idealSilhouettes={existingIdealSilhouettes}
                         />
 
                         {/* <AnimatePresence>

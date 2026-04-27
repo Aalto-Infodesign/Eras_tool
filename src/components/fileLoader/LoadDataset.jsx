@@ -60,7 +60,7 @@ const LoadDataset = () => {
         />
       </div>
 
-      <motion.div className="template-buttons" variants={templateVariants}>
+      <motion.div className="buttons-wrapper" variants={templateVariants}>
         <TemplateButton
           onClick={() =>
             !fileName && loadData("../data/json/data_semilinear_dates_20250716_154750.json")
