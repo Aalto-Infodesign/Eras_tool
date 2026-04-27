@@ -50,7 +50,17 @@ export function DerivedDataProvider({ children }) {
           const newTrajectory = d.trajectory.filter((_, idx) => !indexesToRemove.includes(idx))
           const newSWA = d.SwitchEventAge.filter((_, idx) => !indexesToRemove.includes(idx))
           const newYears = d.years.filter((_, idx) => !indexesToRemove.includes(idx))
-          return { ...d, trajectory: newTrajectory, SwitchEventAge: newSWA, years: newYears }
+          const segmentDurations = d.SwitchEventAge.map((age, idx) => {
+            if (idx === d.SwitchEventAge.length - 1) return 0
+            return d.SwitchEventAge[idx + 1] - age
+          })
+          return {
+            ...d,
+            trajectory: newTrajectory,
+            SwitchEventAge: newSWA,
+            years: newYears,
+            segmentDurations: segmentDurations,
+          }
         } else {
           return d
         }

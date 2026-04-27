@@ -25,16 +25,20 @@ export function useDataCleanup(sourceData, statesThresholds) {
 
     const richData = cleanData
       .filter((datum) => datum.trajectory.length > 0)
-      .map((datum) => ({
-        ...datum,
-        // trajectoryOG: datum.trajectory,
-        years: datum.years.map((y) => +y),
-        trajectory: datum.trajectory.map((t) => snakeCase(t)),
-        // trajectory: datum.trajectory.map((t) => scales.nameToIndex(t)),
-        diseaseDuration: datum.diseaseDuration ?? 0,
-        // trajectoryIndexes: datum.trajectory.map((t) => statesScaleIndexes(t)),
-        // years: datum.SwitchEventAge.map((age) => age + startYear),
-      }))
+      .map((datum) => {
+        const { FINNGENID, personSourceValue, ...rest } = datum
+        return {
+          ...rest,
+          FINNGENID: FINNGENID ?? personSourceValue,
+          years: datum.years.map((y) => +y),
+          trajectory: datum.trajectory.map((t) => snakeCase(t)),
+          diseaseDuration: datum.diseaseDuration ?? 0,
+          segmentDurations: datum.SwitchEventAge.map((age, idx) => {
+            if (idx === datum.SwitchEventAge.length - 1) return 0
+            return datum.SwitchEventAge[idx + 1] - age
+          }),
+        }
+      })
 
     // Edit based on Couple of States Thresholds
 
