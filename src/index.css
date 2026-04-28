@@ -149,13 +149,10 @@
   --surface-tertiary-transparent: var(--blue-800-30);
 
   --surface-chart: var(var(--blue-800));
-
   --surface-transparent: var(--neutral-0-0);
-
   --surface-contrast: var(--neutral-600);
 
   --text-primary: var(--blue-700);
-
   --text-secondary: var(--blue-400);
   --text-accent: var(--violet-900);
   --text-on-surface: var(--neutral-200);

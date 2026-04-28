@@ -2,7 +2,7 @@ import { useState, useMemo } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { motion, AnimatePresence } from "motion/react"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
-import { groupBy, keys, union } from "lodash"
+import { groupBy, keys, union, xor } from "lodash"
 import { romanize } from "../../../../utils/numberHelpers"
 import { useViz } from "../../../../contexts/VizContext"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
@@ -14,12 +14,8 @@ const MARGIN_Y = 25
 const MARGIN_X = 5
 const NODE_WIDTH = 26
 const NODE_PADDING = 15
-// const SILHOUETTE_HOVER_STROKE_WIDTH = 10
 const DEFAULT_TRANSITION = { duration: 0.3, ease: "easeInOut" }
 
-// --- Helper Function ---
-// This function slightly adjusts the SVG path data to prevent rendering artifacts
-// where paths with the same coordinates might overlap perfectly.
 function addPathOffset(path, offset = 0.001) {
   const pathParts = path.split(",")
   const lastNum = Number(pathParts.at(-1)) + offset
@@ -27,259 +23,201 @@ function addPathOffset(path, offset = 0.001) {
   return pathParts.join(",")
 }
 
-// --- Sub-component for rendering a single Sankey Node ---
-function SankeyNode({
-  node,
-  hoveredTrajectory,
-  setSelectedLinks,
-  addSelectedLinks,
-  selectedNode,
-  setSelectedNode,
-  setSelectionDirection,
-  setSelectedTrajectoriesIDs,
-  onMouseEnter,
-  onMouseLeave,
-}) {
-  const { palette } = useViz()
+function getTargetSegments(node) {
+  return node.targetLinks
+    .map((link) => link.segments)
+    .flat()
+    .map((s) => s.id)
+}
 
-  const [name, _index] = node.id.split("-")
+function getSourceSegments(node) {
+  return node.sourceLinks
+    .map((link) => link.segments)
+    .flat()
+    .map((s) => s.id)
+}
+
+// SVG icon: arrow pointing left with a vertical stop line on the right
+// Represents "trace upstream / collapse left"
+function UpstreamIcon({ size = 14 }) {
+  const mid = size / 2
+  return (
+    <g pointerEvents="none">
+      {/* Arrow shaft */}
+      <line
+        x1={size * 0.7}
+        y1={mid}
+        x2={size * 0.1}
+        y2={mid}
+        stroke="black"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+      {/* Arrowhead */}
+      <polyline
+        points={`${size * 0.3},${mid - size * 0.2} ${size * 0.1},${mid} ${size * 0.3},${mid + size * 0.2}`}
+        stroke="black"
+        strokeWidth={1.5}
+        fill="none"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      {/* Stop line */}
+      <line
+        x1={size * 0.85}
+        y1={size * 0.2}
+        x2={size * 0.85}
+        y2={size * 0.8}
+        stroke="black"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+    </g>
+  )
+}
+
+// SVG icon: vertical stop line on the left, arrow pointing right
+// Represents "trace downstream / expand right"
+function DownstreamIcon({ size = 14 }) {
+  const mid = size / 2
+  return (
+    <g pointerEvents="none">
+      {/* Stop line */}
+      <line
+        x1={size * 0.15}
+        y1={size * 0.2}
+        x2={size * 0.15}
+        y2={size * 0.8}
+        stroke="black"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+      {/* Arrow shaft */}
+      <line
+        x1={size * 0.3}
+        y1={mid}
+        x2={size * 0.9}
+        y2={mid}
+        stroke="black"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+      {/* Arrowhead */}
+      <polyline
+        points={`${size * 0.7},${mid - size * 0.2} ${size * 0.9},${mid} ${size * 0.7},${mid + size * 0.2}`}
+        stroke="black"
+        strokeWidth={1.5}
+        fill="none"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </g>
+  )
+}
+
+function SelectionButton({ onClick, node, Icon, xOffset }) {
+  const SIZE = 20
+  return (
+    <motion.g
+      className="select"
+      initial={{ x: xOffset, y: 0, scale: 1 }}
+      whileHover={{ scale: 1.1 }}
+      style={{ cursor: "pointer" }}
+      onClick={() => onClick(node)}
+    >
+      <motion.rect width={SIZE} height={SIZE} fill="white" rx={5} />
+      <g transform={`translate(${(SIZE - 14) / 2}, ${(SIZE - 14) / 2})`}>
+        <Icon size={14} />
+      </g>
+    </motion.g>
+  )
+}
+
+// --- Sub-component for rendering a single Sankey Node ---
+function SankeyNode({ node, selectedNode, setSelectedNode, onMouseEnter, onMouseLeave }) {
+  const { palette } = useViz()
+  const { selectedTrajectoriesIDs, setSelectedTrajectoriesIDs } = useFilters()
+
+  const [name] = node.id.split("-")
   const nodeHeight = node.y1 - node.y0
 
-  if (nodeHeight <= 0) {
-    return null
+  if (nodeHeight <= 0) return null
+
+  const isSelected = selectedNode?.id === node.id
+
+  function handleClickLeft() {
+    const ids = getTargetSegments(node)
+
+    setSelectedTrajectoriesIDs((prev) => union(prev, ids)) // additive
   }
 
-  function handleNodeClick(node) {
-    if (selectedNode && selectedNode.id === node.id) {
-      // Deselect if clicking the same node
+  function handleClickRight() {
+    const ids = getSourceSegments(node)
+    setSelectedTrajectoriesIDs((prev) => union(prev, ids)) // additive
+    //TODO Use array ops to make difference
+  }
+
+  function handleNodeClick() {
+    if (isSelected) {
       setSelectedNode(null)
-      setSelectedLinks([])
-      return
-    }
-    setSelectedNode(node)
-  }
-
-  const isSelected = selectedNode && selectedNode.id === node.id
-
-  function handleClickLeft(node) {
-    console.log("Node clicked:", node)
-
-    const data = traceUpstream(node)
-
-    setSelectionDirection("left")
-    const targetSegments = getTargetSegments(node)
-    setSelectedTrajectoriesIDs(targetSegments)
-
-    // addSelectedLinks(data.links)
-    setSelectedLinks(data.links)
-  }
-
-  function getTargetSegments(node) {
-    const targetSegments = node.targetLinks
-      .map((link) => link.segments)
-      .flat()
-      .map((s) => s.id)
-    return targetSegments
-  }
-
-  function handleClickRight(node) {
-    const data = traceDownstream(node)
-
-    setSelectionDirection("right")
-    const sourceSegments = getSourceSegments(node)
-    setSelectedTrajectoriesIDs(sourceSegments)
-    // addSelectedLinks(data.links)
-    setSelectedLinks(data.links)
-  }
-
-  function getSourceSegments(node) {
-    const sourceSegments = node.sourceLinks
-      .map((link) => link.segments)
-      .flat()
-      .map((s) => s.id)
-    return sourceSegments
-  }
-
-  /**
-   * Traces all upstream (left) nodes and links starting from a specific node.
-   * @param {Object} startNode - The node to start the search from.
-   * @returns {Object} An object containing Sets of visited nodes and links.
-   */
-  function traceUpstream(startNode) {
-    console.time("Upstream")
-    const visitedNodes = new Set()
-    const visitedLinks = new Set()
-
-    function traverse(node) {
-      // 1. Mark this node as visited to avoid cycles/duplicates
-      visitedNodes.add(node)
-
-      // 2. If there are no more targetLinks, we've reached the "far left"
-      if (!node.targetLinks || node.targetLinks.length === 0) {
-        return
-      }
-
-      // 3. Iterate through links coming into this node (from the left)
-      node.targetLinks.forEach((link) => {
-        visitedLinks.add(link)
-
-        // The 'source' of a targetLink is the node to its left
-        const sourceNode = link.source
-
-        // Only recurse if we haven't seen this node yet
-        if (!visitedNodes.has(sourceNode)) {
-          traverse(sourceNode)
-        }
-      })
-    }
-
-    traverse(startNode)
-
-    console.timeEnd("Upstream")
-
-    return {
-      nodes: Array.from(visitedNodes),
-      links: Array.from(visitedLinks),
+      setSelectedTrajectoriesIDs([]) // only full reset happens here
+    } else {
+      setSelectedNode(node)
     }
   }
-
-  function traceDownstream(startNode) {
-    console.time("Downstream")
-
-    const visitedNodes = new Set()
-    const visitedLinks = new Set()
-
-    function traverse(node) {
-      visitedNodes.add(node)
-
-      if (!node.sourceLinks || node.sourceLinks.length === 0) {
-        return
-      }
-
-      node.sourceLinks.forEach((link) => {
-        visitedLinks.add(link)
-
-        const targetNode = link.target
-
-        if (!visitedNodes.has(targetNode)) {
-          traverse(targetNode)
-        }
-      })
-    }
-
-    traverse(startNode)
-    console.timeEnd("Downstream")
-
-    return {
-      nodes: Array.from(visitedNodes),
-      links: Array.from(visitedLinks),
-    }
-  }
-
-  function SelectionButton({ onClick, node, text, xOffset }) {
-    const SIZE = 20
-    return (
-      <motion.g
-        className="select"
-        initial={{ x: xOffset, y: 0, scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-      >
-        <motion.rect
-          width={SIZE}
-          height={SIZE}
-          fill={"white"}
-          // stroke="black"
-          rx={5}
-          onClick={() => onClick(node)}
-          style={{ cursor: "pointer" }}
-        />
-        <text
-          x={SIZE / 2}
-          y={12.5}
-          fontSize={SIZE / 2}
-          textAnchor="middle"
-          pointerEvents="none"
-          // userSelect="none"
-        >
-          {text}
-        </text>
-      </motion.g>
-    )
-  }
-
   return (
-    <motion.g key={node.id} onMouseEnter={() => onMouseEnter(node)} onMouseLeave={onMouseLeave}>
+    <motion.g
+      key={node.id}
+      onMouseEnter={() => onMouseEnter(node)}
+      onMouseLeave={onMouseLeave}
+      initial={{
+        x: node.x0,
+        y: node.y0,
+      }}
+      animate={{
+        x: node.x0,
+        y: node.y0,
+      }}
+    >
       <motion.rect
-        initial={{
-          x: node.x0,
-          y: node.y0,
-          height: nodeHeight,
-          width: NODE_WIDTH,
-          fill: palette[name],
-        }}
         animate={{
-          // fillOpacity: hoveredTrajectory ? 0.2 : 0.5,
           fillOpacity: isSelected ? 1 : 0.5,
-          x: node.x0,
-          y: node.y0,
+
           height: nodeHeight,
           width: NODE_WIDTH,
           fill: palette[name],
+          stroke: isSelected ? "white" : "black",
         }}
-        // exit={{
-        //   fillOpacity: 0,
-        //   height: 0,
-        //   width: 0,
-        // }}
         whileHover={{ fillOpacity: 1, cursor: "pointer" }}
-        onClick={() => handleNodeClick(node)}
+        onClick={handleNodeClick}
         transition={DEFAULT_TRANSITION}
-        stroke={isSelected ? "white" : "black"}
         rx={1}
       />
-      {/* <motion.text
-        initial={{
-          fill: hoveredTrajectory ? "#FFFFFF" : "#000000",
-          x: node.x0 + 6,
-          y: node.y0 + 12,
-          pointerEvents: "none",
-          // userSelect: "none",
-        }}
-        animate={{
-          fill: hoveredTrajectory ? "#FFFFFF" : "#000000",
-          x: node.x0 + 8,
-          y: node.y0 + 16,
-          fontSize: 16,
-        }}
-        transition={DEFAULT_TRANSITION}
-        fontSize={8}
-      >
-        {node.id.split("-")[0]}
-      </motion.text> */}
 
       <AnimatePresence>
         {isSelected && (
           <motion.g
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: nodeHeight / 2 - 10 }}
+            animate={{ opacity: 1, y: nodeHeight / 2 - 10 }}
             exit={{ opacity: 0 }}
-            duration={0.2}
-            id="selection-buttons"
+            transition={{ duration: 0.2 }}
           >
-            <g transform={`translate(${node.x0}, ${node.y0 + nodeHeight / 2 - 10})`}>
-              {node.targetLinks.length > 0 && (
-                <SelectionButton onClick={handleClickLeft} node={node} text={"<"} xOffset={-25} />
-              )}
-
-              {node.sourceLinks.length > 0 && (
-                <SelectionButton
-                  onClick={handleClickRight}
-                  node={node}
-                  text={">"}
-                  xOffset={NODE_WIDTH + 5}
-                />
-              )}
-            </g>
+            {node.targetLinks.length > 0 && (
+              <SelectionButton
+                onClick={handleClickLeft}
+                node={node}
+                Icon={UpstreamIcon}
+                xOffset={-25}
+              />
+            )}
+            {node.sourceLinks.length > 0 && (
+              <SelectionButton
+                onClick={handleClickRight}
+                node={node}
+                Icon={DownstreamIcon}
+                xOffset={NODE_WIDTH + 5}
+              />
+            )}
           </motion.g>
         )}
       </AnimatePresence>
@@ -287,24 +225,21 @@ function SankeyNode({
   )
 }
 
-// --- Sub-component for rendering a single Sankey Link background ---
-function SankeyLink({
-  link,
-  setHoveredLink,
-  hoveredTrajectory,
-  selectedLinks,
-  selectionDirection,
-}) {
+function SankeyLink({ link, setHoveredLink, hoveredTrajectory }) {
   const { palette } = useViz()
+  const { selectedTrajectoriesIDs } = useFilters() // ← single source of truth
+
   const linkGenerator = sankeyLinkHorizontal()
   const path = linkGenerator(link)
   const [state_S] = link.source.id.split("-")
   const [state_F] = link.target.id.split("-")
 
-  const isSelectedLeft = selectedLinks.map((s) => s.target.id).includes(link.target.id)
-  const isSelectedRight = selectedLinks.map((s) => s.source.id).includes(link.source.id)
-
-  const isSelected = selectionDirection === "left" ? isSelectedLeft : isSelectedRight
+  // A link is highlighted if ANY of its segments are in the selected set
+  const selectedSet = new Set(selectedTrajectoriesIDs)
+  const isSelected =
+    selectedTrajectoriesIDs.length === 0 // nothing selected → all neutral
+      ? false
+      : (link.segments?.some((seg) => selectedSet.has(seg.id)) ?? false)
 
   const fullLink = {
     ...link,
@@ -314,38 +249,44 @@ function SankeyLink({
 
   return (
     <>
-      <linearGradient key={`grad-${link.id}`} id={`grad-${state_S}-${state_F}`}>
+      <linearGradient id={`grad-${state_S}-${state_F}`}>
         <motion.stop
           offset="0%"
-          initial={{ stopColor: palette[state_S] }}
           animate={{ stopColor: palette[state_S] }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.4 }}
         />
         <motion.stop
           offset="100%"
-          initial={{ stopColor: palette[state_F] }}
           animate={{ stopColor: palette[state_F] }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.4 }}
         />
       </linearGradient>
       <motion.path
-        key={`link-${link.source.id}-${link.target.id}`}
         id={`link-${link.source.id}-${link.target.id}`}
         initial={{
           d: addPathOffset(path),
-          pathLength: 0,
-          strokeOpacity: 0.5,
           strokeWidth: link.width,
+          pathLength: 0,
+          opacity:
+            selectedTrajectoriesIDs.length === 0
+              ? 0.4 // nothing selected: all neutral
+              : isSelected
+                ? 0.8 // part of selection: highlighted
+                : 0.15, // not in selection: dimmed
         }}
         animate={{
           d: addPathOffset(path),
           strokeWidth: link.width,
           pathLength: 1,
-          // opacity: hoveredTrajectory ? 0.2 : 0.5,
-          opacity: isSelected ? 0.8 : 0.4,
+          opacity:
+            selectedTrajectoriesIDs.length === 0
+              ? 0.4 // nothing selected: all neutral
+              : isSelected
+                ? 0.8 // part of selection: highlighted
+                : 0.15, // not in selection: dimmed
         }}
         whileHover={{ opacity: 1 }}
-        exit={{ pathLength: 0, strokeOpacity: 0.5 }}
+        exit={{ pathLength: 0 }}
         transition={DEFAULT_TRANSITION}
         stroke={`url(#grad-${state_S}-${state_F})`}
         fill="none"
@@ -354,22 +295,15 @@ function SankeyLink({
     </>
   )
 }
-
 // --- Main Sankey Component ---
 export function Sankey({ width, height, data }) {
   const { palette } = useViz()
   const { setSelectedTrajectoriesIDs } = useFilters()
 
-  const [selectedLinks, setSelectedLinks] = useState([])
   const [selectedNode, setSelectedNode] = useState(null)
-  const [selectionDirection, setSelectionDirection] = useState("right") // "left" or "right"
   const [hoveredSilhouette, setHoveredSilhouette] = useState(null)
   const [hoveredLink, setHoveredLink] = useDebouncedState(null, 200)
   const [hoveredNode, setHoveredNode] = useDebouncedState(null, 200)
-
-  const addSelectedLinks = (links) => {
-    setSelectedLinks((prev) => union(prev, links))
-  }
 
   const { nodes, links } = useMemo(() => {
     const sankeyGenerator = sankey()
@@ -442,8 +376,6 @@ export function Sankey({ width, height, data }) {
                   hoveredLink={hoveredLink}
                   setHoveredLink={setHoveredLink}
                   hoveredTrajectory={hoveredSilhouette} // Dim links if a silhouette is hovered
-                  selectedLinks={selectedLinks}
-                  selectionDirection={selectionDirection}
                 />
               ))}
             </AnimatePresence>
@@ -455,12 +387,8 @@ export function Sankey({ width, height, data }) {
                 key={`node-${node.id}`}
                 node={node}
                 hoveredTrajectory={hoveredSilhouette} // Dim nodes if a silhouette is hovered
-                setSelectedLinks={setSelectedLinks}
-                addSelectedLinks={addSelectedLinks}
                 selectedNode={selectedNode}
                 setSelectedNode={setSelectedNode}
-                setSelectionDirection={setSelectionDirection}
-                setSelectedTrajectoriesIDs={setSelectedTrajectoriesIDs}
                 onMouseEnter={handleNodeEnter}
                 onMouseLeave={handleNodeLeave}
               />
@@ -485,7 +413,20 @@ export function Sankey({ width, height, data }) {
 
       <Tooltip isVisible={hoveredLink || hoveredSilhouette || hoveredNode}>
         <AnimatePresence>
-          {hoveredNode && <p>{hoveredNode.id.split("-")[0]}</p>}
+          {hoveredNode && (
+            <div>
+              <p>{hoveredNode.id.split("-")[0]}</p>
+              <p>
+                {" "}
+                <ArrowUpFromDot size={10} style={{ transform: "rotate(90deg)" }} />{" "}
+                {getSourceSegments(hoveredNode).length}
+              </p>
+              <p>
+                <ArrowDownToDot size={10} style={{ transform: "rotate(-90deg)" }} />{" "}
+                {getTargetSegments(hoveredNode).length}
+              </p>
+            </div>
+          )}
           {hoveredLink && !hoveredSilhouette && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <p>

@@ -16,7 +16,6 @@ import { Header } from "./components/Header/Header"
 
 import { useModifierKey } from "./components/hooks/useModifierKey"
 import { features } from "./config/features"
-import { ClusteringView } from "./components/clustering/ClusteringView"
 
 function App() {
   return (
@@ -76,8 +75,6 @@ function AppContent() {
           </motion.div>
         </div>
       )}
-
-      {/* {richData.length > 0 && <ClusteringView />} */}
 
       <AnimatePresence>
         <>

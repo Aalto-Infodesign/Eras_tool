@@ -95,7 +95,7 @@ function qualityScore(input) {
   return true
 }
 
-function* pda(data) {
+function* pda(id, data) {
   const step = 1
   let l = 0
   let centroids = []
@@ -114,6 +114,7 @@ function* pda(data) {
     centroids = newSet // ← don't forget to update this each iteration!
 
     yield {
+      id: id,
       centers: newSet,
       mean: silhouettes.mean,
       scores: silhouettes.scores,
@@ -129,12 +130,14 @@ let generators = []
 
 self.onmessage = ({ data: message }) => {
   if (message.silhouettes) {
-    const pdaData = message.silhouettes.map((s) =>
-      s.trajectories.map((t) => t.map((tt) => [tt.speed])),
-    )
+    const pdaData = message.silhouettes.map((s) => ({
+      id: s.name,
+      value: s.trajectories.map((t) => t.map((tt) => [tt.speed])),
+    }))
+    console.log("pdaData", pdaData)
 
     // one generator per dataset
-    generators = pdaData.map((dataset) => pda(dataset))
+    generators = pdaData.map((dataset) => pda(dataset.id, dataset.value))
 
     // advance all of them once to get the first step
     const results = generators.map((g) => g.next())

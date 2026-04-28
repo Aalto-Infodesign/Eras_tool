@@ -16,12 +16,16 @@ import { useViz } from "../../contexts/VizContext"
 import { ChevronDown, Maximize2, User } from "lucide-react"
 import Button from "../common/Button/Button"
 
+import { ClusteringView } from "../clustering/ClusteringView"
+import { features } from "../../config/features"
+
 export function FileLoader() {
   const { richData, existingIdealSilhouettes, clusterStates, setClusterStates, statesOrder } =
     useData()
   const { setIsLegend, isLegend, hasFlowChart, isSidePanelOpen } = useViz()
 
   const [isOpen, setIsOpen] = useState(true)
+  const [mode, setMode] = useState("cluster") // || "flow"
 
   useEffect(() => {
     if (!isLegend) {
@@ -36,13 +40,13 @@ export function FileLoader() {
 
   return (
     <motion.section
-      className={`loader-wrapper ${legendClass} accordion ${openClass}
-    `}
+      // layout="size"
+      className={`loader-wrapper ${legendClass} accordion ${openClass}`}
       style={{
         padding: !richData.length ? "1rem" : "",
       }}
     >
-      <div className="accordion-header">
+      <motion.div layout className="accordion-header">
         <LoadDataset />
 
         {richData.length === 0 && (
@@ -88,12 +92,12 @@ export function FileLoader() {
             )}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {richData.length > 0 && (
-        <div className="loader-main">
+        <motion.div layout className="loader-main">
           <ReactFlowProvider>
-            <div className="states-selection">
+            <motion.div layout className="states-selection">
               <StateSelection />
               <AnimatePresence>
                 {/* <ScatterPlot data={silhouettes} width={300} height={300} /> */}
@@ -134,10 +138,48 @@ export function FileLoader() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
-            <FlowChart />
+            </motion.div>
+            {!isLegend && (
+              <motion.div
+                // key={mode}
+                layout
+                className="secondary-tools"
+                style={{
+                  minWidth: 500,
+                  maxWidth: 800,
+                  display: "flex",
+                  placeContent: "center",
+                  flexDirection: "column",
+                  gap: "var(--spacing-sm)",
+                }}
+              >
+                {mode === "flow" && <FlowChart />}
+
+                {mode === "cluster" && features.clusters && <ClusteringView />}
+                {features.clusters && (
+                  <div className="buttons-wrapper">
+                    <Button
+                      size="xs"
+                      onClick={() => setMode("flow")}
+                      keystroke={"f"}
+                      data-selected={mode === "flow"}
+                    >
+                      Flow
+                    </Button>
+                    <Button
+                      size="xs"
+                      onClick={() => setMode("cluster")}
+                      keystroke={"c"}
+                      data-selected={mode === "cluster"}
+                    >
+                      Cluster
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            )}
           </ReactFlowProvider>
-        </div>
+        </motion.div>
       )}
     </motion.section>
   )

@@ -1,0 +1,42 @@
+.clusteringView {
+  min-width: 600px;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+table {
+  font-size: var(--text-xs);
+  border: none;
+  /* height: 100%; */
+  overflow-y: scroll;
+}
+
+table,
+th,
+td {
+  border: 0.2px solid var(--text-primary);
+  border-collapse: collapse;
+}
+
+thead {
+  font-weight: 700;
+}
+
+th,
+td {
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+tr {
+  /* transition: background-color 100ms ease-out; */
+}
+
+tr:nth-child(even) {
+  background-color: var(--surface-secondary);
+}
+tr:hover {
+  cursor: pointer;
+  background-color: var(--surface-secondary-hover);
+}
