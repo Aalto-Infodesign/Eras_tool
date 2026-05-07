@@ -38,20 +38,27 @@ export const Filters = () => {
 
   return (
     <section id="filters" className="filters">
-      <StackedLines data={selectedData} extent={extent(allYears.all)} width={150} height={150} />
       <div className="filter-wrapper">
-        {filters.date.active && (
-          <FilterWrapper
-            name={"date"}
-            title={"Date"}
-            sliderDimensions={sliderDimensions}
-            filter={filters.date}
-            allPoints={allYears}
-            hasPattern={false}
-            hasDoubleHandle={true}
-            mode="double"
+        <div className="filter-bg">
+          <StackedLines
+            data={selectedData}
+            extent={extent(allYears.all)}
+            width={150}
+            height={150}
           />
-        )}
+          {filters.date.active && (
+            <FilterWrapper
+              name={"date"}
+              title={"Date"}
+              sliderDimensions={sliderDimensions}
+              filter={filters.date}
+              allPoints={allYears}
+              hasPattern={false}
+              hasDoubleHandle={true}
+              mode="double"
+            />
+          )}
+        </div>
 
         {filters.diseaseDuration.active && (
           <FilterWrapper

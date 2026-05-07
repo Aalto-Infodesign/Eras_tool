@@ -35,14 +35,17 @@ export function ProcessedDataProvider({ children }) {
   const parsedData = useMemo(() => {
     if (rawData.length === 0) return null
     console.time("parse data")
-    // 1. Determine type and Parse
+
+    const normalizedRaw =
+      typeof rawData === "string" ? rawData.replace(/\bpersonSourceValue\b/, "FINNGENID") : rawData
+
     let parsed
     if (fileName?.endsWith(".tsv") || fileName?.endsWith(".txt")) {
-      parsed = tsvJSON(rawData)
-    } else if (typeof rawData === "string") {
-      parsed = JSON.parse(rawData)
+      parsed = tsvJSON(normalizedRaw)
+    } else if (typeof normalizedRaw === "string") {
+      parsed = JSON.parse(normalizedRaw)
     } else {
-      parsed = rawData
+      parsed = normalizedRaw
     }
 
     // 2. Apply further processing (Clustering)

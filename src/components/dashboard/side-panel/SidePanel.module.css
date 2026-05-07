@@ -37,6 +37,9 @@
   padding: var(--spacing-sm);
   width: 200px;
   min-height: 400px;
+  max-height: 85vh;
+  overflow-y: scroll;
+
   background-color: color-mix(in srgb, var(--surface-secondary) 80%, var(--surface-accent) 20%);
   box-shadow: 0 4px 5px rgba(0, 0, 22, 0.6);
 

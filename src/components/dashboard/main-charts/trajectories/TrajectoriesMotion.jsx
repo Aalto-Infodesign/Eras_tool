@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useCharts } from "../ChartsContext"
 import { motion, AnimatePresence } from "motion/react"
 import { isColorDark } from "../../../../utils/colorHelpers"
@@ -7,8 +7,9 @@ import { useViz } from "../../../../contexts/VizContext"
 import { useFilters } from "../../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
-import { flattenDeep, union } from "lodash"
+import { flattenDeep, union, uniq, uniqBy } from "lodash"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
+import { useDebouncedState } from "hamo"
 
 export function TrajectoriesMotion(props) {
   const { selectedTrajectoriesIDs, selectedLumps, toggleSelectedTrajectory } = useFilters()
@@ -27,7 +28,7 @@ export function TrajectoriesMotion(props) {
   const { showLinesOfSelectedLumps } = props
   const { isSelectModeLines } = props
 
-  const [markerHoveredId, setMarkerHoveredId] = useState(null)
+  const [markerHoveredId, setMarkerHoveredId] = useDebouncedState(null, 500)
   // Da poi spostare un livello più in alto
 
   const { x, y } = chartScales
@@ -44,7 +45,7 @@ export function TrajectoriesMotion(props) {
     : []
 
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
-  console.log("selectedLumps", selectedLumps)
+  console.log("displayedTrajectories", displayedTrajectories)
   const lines =
     (!isSelectModeLines &&
       selectedLumps.length > 0 &&
@@ -81,6 +82,18 @@ export function TrajectoriesMotion(props) {
   const handleClick = (d) => {
     toggleSelectedTrajectory(d.id)
   }
+
+  const ageMarkers = useMemo(() => {
+    if (!markerHoveredId) return
+    const hoveredLines = lines.filter((l) => l.id === markerHoveredId)
+
+    const agesSource = hoveredLines.map((l) => ({ id: l.id, x: l.source.x, state: l.source.state }))
+    const agesTarget = hoveredLines.map((l) => ({ id: l.id, x: l.target.x, state: l.target.state }))
+
+    const markers = uniqBy([...agesSource, ...agesTarget], "x")
+    console.log(markers)
+    return markers
+  }, [markerHoveredId])
 
   return (
     <g id="trajectories">
@@ -146,6 +159,8 @@ export function TrajectoriesMotion(props) {
                   isSelected={isSelected}
                   animationDuration={lines.length > 1000 ? 0.0 : 0.2}
                   onClick={() => toggleSelectedTrajectory(d.id)}
+                  onMouseEnter={() => handleMouseEnter(d)}
+                  onMouseLeave={() => handleMouseLeave()}
                 />
               )
             } else {
@@ -193,16 +208,50 @@ export function TrajectoriesMotion(props) {
             }
           })}
 
-        {displayedTrajectories &&
-          displayedTrajectories.map((d) => {
-            {
-              /* const isActive = d.id === markerHoveredId */
-            }
+        {ageMarkers &&
+          ageMarkers.map((m) => (
+            <motion.g
+              key={`marker-${m.id}-${m.x}-${m.state}`}
+              id={`marker-${m.id}-${m.x}-${m.state}`}
+              className={`marker`}
+              initial={{ x: x(m.x), y: y(m.state) + marginTop }}
+              animate={{ x: x(m.x), y: y(m.state) + marginTop }}
+              transition={{ duration: 0.2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => toggleSelectedTrajectory(m.id)}
+            >
+              <motion.circle
+                className={`marker-circle`}
+                initial={{ fill: palette[m.state], r: 0 }}
+                animate={{ fill: palette[m.state], r: 6 }}
+                exit={{ r: 0 }}
+                transition={{ duration: 0.2 }}
+              />
+
+              <motion.text
+                y={1.5}
+                // fill={textColor}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.1 }}
+                className={`marker-label`}
+              >
+                {m.x.toFixed(0)}
+              </motion.text>
+            </motion.g>
+          ))}
+        {/* 
+        {lines &&
+          lines.map((d) => {
+      
 
             const isSelected = selectedTrajectories.map((t) => t.id).includes(d.id)
             const isHovered = d.id === markerHoveredId
 
-            const isActive = isSelected && isHovered
+            const isActive = isHovered
+       
+            console.log(isActive)
 
             const isDark = isColorDark(palette[d.source.state]).isDark
 
@@ -217,13 +266,11 @@ export function TrajectoriesMotion(props) {
                 transition={{ duration: 0.2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => toggleSelectedTrajectory(d.id)}
-                onMouseEnter={() => handleMouseEnter(d)}
-                onMouseLeave={() => handleMouseLeave()}
               >
                 <motion.circle
                   className={`marker-circle`}
                   initial={{ fill: palette[d.source.state], r: 0 }}
-                  animate={{ fill: palette[d.source.state], r: isActive ? 6 : 1 }}
+                  animate={{ fill: palette[d.source.state], r: isActive ? 6 : 0 }}
                   exit={{ r: 0 }}
                   transition={{ duration: 0.2 }}
                 />
@@ -242,7 +289,7 @@ export function TrajectoriesMotion(props) {
                 )}
               </motion.g>
             )
-          })}
+          })} */}
       </AnimatePresence>
     </g>
   )
@@ -262,6 +309,8 @@ const MotionLine = ({
   isSelected,
   animationDuration,
   onClick,
+  onMouseEnter,
+  onMouseLeave,
 }) => {
   return (
     <motion.line
@@ -299,8 +348,10 @@ const MotionLine = ({
         strokeWidth: { duration: 0.1 },
       }}
       onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
-      <title>{`ID: ${d.id}`}</title>
+      <title>{`Duration: ${(d.target.age - d.source.age).toFixed(2)} years `}</title>
     </motion.line>
   )
 }

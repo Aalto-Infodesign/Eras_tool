@@ -26,10 +26,8 @@ export function useDataCleanup(sourceData, statesThresholds) {
     const richData = cleanData
       .filter((datum) => datum.trajectory.length > 0)
       .map((datum) => {
-        const { FINNGENID, personSourceValue, ...rest } = datum
         return {
-          ...rest,
-          FINNGENID: FINNGENID ?? personSourceValue,
+          ...datum,
           years: datum.years.map((y) => +y),
           trajectory: datum.trajectory.map((t) => snakeCase(t)),
           diseaseDuration: datum.diseaseDuration ?? 0,

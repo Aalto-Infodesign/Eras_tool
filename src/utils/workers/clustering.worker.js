@@ -127,25 +127,58 @@ function* pda(id, data) {
 // const pda_data = pda(data)
 
 let generators = []
+let activeIndex = 0
 
 self.onmessage = ({ data: message }) => {
   if (message.silhouettes) {
-    const pdaData = message.silhouettes.map((s) => ({
-      id: s.name,
-      value: s.trajectories.map((t) => t.map((tt) => [tt.speed])),
+    const pdaData = message.silhouettes
+      .map((s) => ({
+        id: s.name,
+        value: s.trajectories.map((t) => t.map((tt) => [tt.speed])),
+        size: s.trajectories.flat().length,
+      }))
+      .sort((a, b) => b.size - a.size)
+
+    generators = pdaData.map((dataset) => ({
+      id: dataset.id,
+      gen: pda(dataset.id, dataset.value),
+      lastValue: null,
+      done: false,
     }))
-    console.log("pdaData", pdaData)
 
-    // one generator per dataset
-    generators = pdaData.map((dataset) => pda(dataset.id, dataset.value))
+    activeIndex = 0
+    const g = generators[0]
+    const result = g.gen.next()
+    g.lastValue = result.value
+    g.done = result.done
 
-    // advance all of them once to get the first step
-    const results = generators.map((g) => g.next())
-    self.postMessage({ results, done: results.every((r) => r.done) })
+    self.postMessage({ results: [result], done: false })
   }
 
   if (message.next && generators.length > 0) {
-    const results = generators.map((g) => g.next())
-    self.postMessage({ results, done: results.every((r) => r.done) })
+    const active = generators.slice(0, activeIndex + 1)
+
+    const results = active.map((g) => {
+      if (g.done) return { value: g.lastValue, done: true } // ← non chiamare .next() su generator esaurito
+      const result = g.gen.next()
+      if (result.value) g.lastValue = result.value
+      if (result.done) g.done = true
+      return result
+    })
+
+    const allStable = results.every((r) => r.value?.stable || r.done)
+    if (allStable && activeIndex < generators.length - 1) {
+      activeIndex++
+      const g = generators[activeIndex]
+      const result = g.gen.next()
+      g.lastValue = result.value
+      g.done = result.done
+      results.push(result)
+    }
+
+    self.postMessage({
+      results,
+      done: activeIndex === generators.length - 1 && generators.every((g) => g.done),
+    })
   }
 }

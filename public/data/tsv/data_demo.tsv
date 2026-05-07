@@ -1,4 +1,4 @@
-FINNGENID	stage	age	year	disease_duration
+personSourceValue	stage	age	date	disease_duration
 MOCKID_0	a	25	1969	87
 MOCKID_0	b	53	1997	87
 MOCKID_0	c	77	2021	87
