@@ -25,7 +25,7 @@ export function FileLoader() {
   const { setIsLegend, isLegend, hasFlowChart, isSidePanelOpen } = useViz()
 
   const [isOpen, setIsOpen] = useState(true)
-  const [mode, setMode] = useState("cluster") // || "flow"
+  const [mode, setMode] = useState("flow") // || "flow"
 
   useEffect(() => {
     if (!isLegend) {
