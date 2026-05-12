@@ -1,3 +1,4 @@
+import { useData } from "../../contexts/ProcessedDataContext"
 import Button from "../common/Button/Button"
 import { useClusteringWorker } from "../hooks/workerHooks/useClusteringWorker"
 import styles from "./ClusteringView.module.css"
@@ -5,6 +6,7 @@ import { uniq } from "lodash"
 
 export function ClusteringView() {
   const { selectedStep, stepIndex, totalSteps, advance, before, isDone } = useClusteringWorker()
+  const { silhouettes } = useData()
 
   return (
     <div className={styles.clusteringView}>
@@ -15,35 +17,56 @@ export function ClusteringView() {
 
       <p>Steps {stepIndex + 1}</p>
       <p>Steps computed: {totalSteps}</p>
-      {selectedStep && (
-        <table>
-          <tbody>
-            <tr>
-              <th>Name</th>
-              <th>Clusters</th>
-              <th>Centers</th>
-              <th>Mean</th>
-              <th>Bandwidth</th>
-              <th>Assignments</th>
-              <th>Stable</th>
-            </tr>
-            {selectedStep.map((l) => {
-              if (!l.value) return null
-              return (
-                <tr key={l.value.id} style={{ opacity: l.value.stable ? 0.6 : 1 }}>
-                  <td>{l.value.id}</td>
-                  <td>{l.value.centers.length}</td>
-                  <td>{l.value.centers.map((c) => c)}</td>
-                  <td>{l.value.mean.toFixed(3)}</td>
-                  <td>{l.value.bandwidth}</td>
-                  <td>{uniq(l.value.assignments).length}</td>
-                  <td>{l.value.stable ? "✓ stable" : "…"}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      )}
+      <div className={styles.tableWrapper}>
+        {selectedStep && (
+          <table>
+            <tbody>
+              <tr>
+                <th>Name</th>
+                <th>Clusters</th>
+                <th>IDs</th>
+                <th>Centers</th>
+                <th>Mean</th>
+                <th>Bandwidth</th>
+                <th>Assignments</th>
+                <th>Stable</th>
+              </tr>
+              {selectedStep.map((l) => {
+                if (!l.value) return null
+                console.log("silhouettes", silhouettes)
+                const silhouette = silhouettes.filter((s) => s.name === l.value.id)[0]
+                console.log("silhouette", silhouette)
+                const ids = silhouette.trajectories.map((t) => t[0].id)
+
+                return (
+                  <tr key={l.value.id} style={{ opacity: l.value.stable ? 0.6 : 1 }}>
+                    <td>{l.value.id}</td>
+                    <td>{l.value.centers.length}</td>
+                    <td>
+                      {ids.map((id) => (
+                        <p key={id}>{id}</p>
+                      ))}
+                    </td>
+                    <td>
+                      {l.value.centers.map((c) => (
+                        <p key={c}>{c}</p>
+                      ))}
+                    </td>
+                    <td>{l.value.mean.toFixed(3)}</td>
+                    <td>{l.value.bandwidth}</td>
+                    <td>
+                      {uniq(l.value.assignments).map((a) => (
+                        <p>{a}</p>
+                      ))}
+                    </td>
+                    <td>{l.value.stable ? "✓ stable" : "…"}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
 
       <div className="buttons-wrapper">
         <Button size="small" onClick={before} disabled={stepIndex === 0} keystroke="ArrowLeft">

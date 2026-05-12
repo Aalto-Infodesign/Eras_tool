@@ -5,9 +5,11 @@ import { Download } from "lucide-react"
 import { toPng, toSvg } from "html-to-image"
 import { downloadImage } from "../../../utils/downloadImage"
 import Button from "../Button/Button"
+import { useViz } from "../../../contexts/VizContext"
 
 export function DownloadPanel() {
   const [isHover, setIsHover] = useState(false)
+  const { chartType } = useViz()
 
   const buttonWrapperVariants = {
     hidden: {
@@ -38,7 +40,9 @@ export function DownloadPanel() {
   function handleExport(format) {
     console.log("Exporting in format:", format)
     // Implement export logic here
-    const svgID = "trajectoriesChartSvg"
+    const sankeyID = "sankey-chart-svg"
+    const trajectoriesID = "trajectories-chart-svg"
+    const svgID = chartType === 1 ? sankeyID : trajectoriesID
     const svgElement = document.getElementById(svgID)
     if (!svgElement) {
       console.error("SVG element not found:", svgID)
@@ -92,7 +96,6 @@ export function DownloadPanel() {
     const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" })
 
     downloadBlob(svgBlob, format)
-    // downloadSvg(svgElement, "trajectories")
   }
 
   return (

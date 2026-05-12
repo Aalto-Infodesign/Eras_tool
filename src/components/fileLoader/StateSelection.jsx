@@ -11,6 +11,7 @@ import { ResetStatesOrder } from "./ResetStatesOrder"
 import { X, Workflow, Plus, PlusIcon, Trash } from "lucide-react"
 import Button from "../common/Button/Button"
 import { useFilters } from "../../contexts/FiltersContext"
+import { useFlowContext } from "../../contexts/FlowContext"
 
 export function StateSelection() {
   const { fileName } = useRawData()
@@ -27,6 +28,8 @@ export function StateSelection() {
     deleteElements,
     fitView,
   } = useReactFlow()
+
+  const { initialized } = useFlowContext()
 
   const nodes = getNodes()
 
@@ -56,13 +59,17 @@ export function StateSelection() {
 
   useEffect(() => {
     // RESET
+    if (initialized.current) return
+    initialized.current = true
+
     resetFlowChart()
   }, [fileName])
 
-  const resetFlowChart = useCallback(() => {
+  const resetFlowChart = () => {
+    console.log("reset")
     setNodes([])
     setEdges([])
-  }, [])
+  }
 
   const populateFlowChart = useCallback(() => {
     if (statesOrder.length === 0) return

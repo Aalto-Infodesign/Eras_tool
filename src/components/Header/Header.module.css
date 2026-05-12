@@ -1,7 +1,9 @@
 .header {
   position: relative;
+
   min-height: 30px;
   display: flex;
+  justify-content: space-between;
   gap: var(--spacing-md);
   background-color: var(--surface-contrast);
   padding: var(--spacing-sm);

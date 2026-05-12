@@ -231,7 +231,12 @@ export function TrajectoriesChart() {
 
         <div id="trajectories-chart" className="svg-container">
           <div style={{ position: "relative" }}>
-            <svg ref={svgRef} preserveAspectRatio="xMidYMid meet" viewBox={`0 0 175 ${h}`}>
+            <svg
+              id="trajectories-chart-svg"
+              ref={svgRef}
+              preserveAspectRatio="xMidYMid meet"
+              viewBox={`0 0 175 ${h}`}
+            >
               <TextureDefs />
               <GradientDefs />
               <Grid chartMode={chartMode} />

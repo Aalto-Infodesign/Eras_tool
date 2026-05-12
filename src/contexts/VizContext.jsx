@@ -22,9 +22,13 @@ export function VizProvider({ children }) {
   // UI STATE
   const [colorMode, setColorMode] = useState("standard") // standard || poset
   // const [theme, setTheme] = useState("dark")
+  // States Explorer Panel
   const [isLegend, setIsLegend] = useState(false)
-  const [loadingCount, setLoadingCount] = useState(0)
+  const [isOpen, setIsOpen] = useState(true)
   const [hasFlowChart, setHasFlowChart] = useState(true)
+
+  const [loadingCount, setLoadingCount] = useState(0)
+
   const [chartType, setChartType] = useState(1)
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
 
@@ -142,6 +146,8 @@ export function VizProvider({ children }) {
 
       isLegend,
       setIsLegend,
+      isOpen,
+      setIsOpen,
       updatePosetColoring, // Expose this to child components
       hasFlowChart,
       setHasFlowChart,
@@ -161,6 +167,7 @@ export function VizProvider({ children }) {
     [
       palette,
       isLegend,
+      isOpen,
       hasFlowChart,
       loadingCount,
       updatePosetColoring,

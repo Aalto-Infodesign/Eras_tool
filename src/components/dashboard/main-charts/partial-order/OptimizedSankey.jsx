@@ -178,6 +178,7 @@ function SankeyNode({ node, selectedNode, setSelectedNode, onMouseEnter, onMouse
         x: node.x0,
         y: node.y0,
       }}
+      transition={DEFAULT_TRANSITION}
     >
       <motion.rect
         animate={{
@@ -348,6 +349,7 @@ export function Sankey({ width, height, data }) {
     <>
       <div id="sankey-chart" className="svg-container">
         <svg
+          id="sankey-chart-svg"
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="xMidYMid meet"
           onMouseLeave={handleMouseLeave}

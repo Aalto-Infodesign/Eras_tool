@@ -16,6 +16,7 @@ import { Header } from "./components/Header/Header"
 
 import { useModifierKey } from "./components/hooks/useModifierKey"
 import { features } from "./config/features"
+import { FlowProvider } from "./contexts/FlowContext"
 
 function App() {
   return (
@@ -24,7 +25,9 @@ function App() {
         <VizProvider>
           <FiltersProvider>
             <DerivedDataProvider>
-              <AppContent />
+              <FlowProvider>
+                <AppContent />
+              </FlowProvider>
             </DerivedDataProvider>
           </FiltersProvider>
         </VizProvider>

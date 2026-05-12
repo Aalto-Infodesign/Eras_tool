@@ -36,7 +36,7 @@ const LoadDataset = () => {
   return (
     <motion.section
       id="upload"
-      // layout
+      layout
       className="upload-section"
       initial="hidden"
       whileHover="visible"

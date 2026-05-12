@@ -1,16 +1,24 @@
 .clusteringView {
-  min-width: 600px;
   min-height: 600px;
+
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  overflow: scroll;
+}
+
+.tableWrapper {
+  max-height: 400px;
+  max-width: 600px;
+
+  overflow: scroll;
 }
 
 table {
   font-size: var(--text-xs);
   border: none;
+
   /* height: 100%; */
-  overflow-y: scroll;
 }
 
 table,

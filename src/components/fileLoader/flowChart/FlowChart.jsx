@@ -8,15 +8,11 @@ import {
   Background,
   MiniMap,
 } from "@xyflow/react"
-
 import "@xyflow/react/dist/style.css"
 
 import "./flowchart.css"
-
 import { resolveCollisions } from "./resolveCollisions"
-
 import { validateRelations } from "../../../utils/POHelperFunctions"
-
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useViz } from "../../../contexts/VizContext"
 import DownloadButton from "./flow-components/DownloadButton"
@@ -24,20 +20,25 @@ import DownloadButton from "./flow-components/DownloadButton"
 import { EdgeWithField } from "./flow-components/EdgeWithField"
 import Button from "../../common/Button/Button"
 import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
+import { useFlowContext } from "../../../contexts/FlowContext"
 
 const snapGrid = [25, 25]
 
 export const FlowChart = () => {
   const { statesOrder, idealSilhouettes, setIdealSilhouettes } = useData()
   const { updatePosetColoring, palette, colorMode, setColorMode, isLegend } = useViz()
+
+  const { nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange, onConnect } =
+    useFlowContext()
+
   const reactFlowWrapper = useRef(null)
 
   const edgeTypes = {
     edgeField: EdgeWithField,
   }
 
-  const [nodes, setNodes, onNodesChange] = useNodesState([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+  // const [nodes, setNodes, onNodesChange] = useNodesState([])
+  // const [edges, setEdges, onEdgesChange] = useEdgesState([])
 
   const allNodes = useMemo(
     () =>
@@ -54,36 +55,6 @@ export const FlowChart = () => {
     [statesOrder],
   )
 
-  const onConnect = useCallback(
-    (params) => {
-      setNodes((currentNodes) => {
-        const sourceNode = currentNodes.find((n) => n.id === params.source)
-        const targetNode = currentNodes.find((n) => n.id === params.target)
-
-        setEdges((eds) =>
-          addEdge(
-            {
-              ...params,
-              type: "edgeField",
-              data: {
-                source: {
-                  value: sourceNode?.data.value,
-                  index: sourceNode?.data.index,
-                },
-                target: {
-                  value: targetNode?.data.value,
-                  index: targetNode?.data.index,
-                },
-              },
-            },
-            eds,
-          ),
-        )
-        return currentNodes // don't actually change nodes
-      })
-    },
-    [setEdges, setNodes], // stable refs, never change
-  )
   // TODO setIdealSilhouettes
   useEffect(() => {
     const allCombinations = getFullPathsFromFlow(nodes, edges)
@@ -95,11 +66,8 @@ export const FlowChart = () => {
   // Updating the sankey data state when Flow Chart is edited
   useEffect(() => {
     const profiles = allNodes.map((n) => n.data.value)
-
     const relations = edges.map((e) => [e.data.source.value, e.data.target.value])
-
     const dominanceArray = validateRelations(profiles, relations)
-    // console.log(dominanceArray)
 
     updatePosetColoring(dominanceArray, statesOrder)
   }, [edges, colorMode])
