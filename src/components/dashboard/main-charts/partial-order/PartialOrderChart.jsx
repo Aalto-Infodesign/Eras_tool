@@ -1,16 +1,19 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useReducer } from "react"
 import { po } from "../../../../utils/po"
-import { flatten } from "lodash"
+import { flatten, union } from "lodash"
 import { getDominancePairs } from "../../../../utils/POHelperFunctions"
 import { Sankey } from "./OptimizedSankey"
 
-import { CircleAlert } from "lucide-react"
+import { CircleAlert, Redo, Redo2, Undo, Undo2 } from "lucide-react"
 
 import "./PartialOrderChart.css"
 
 import { useData } from "../../../../contexts/ProcessedDataContext"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import { Legend } from "../../legend/Legend"
+import Button from "../../../common/Button/Button"
+import { historyReducer } from "../../../../utils/historyReducer"
+import { useFilters } from "../../../../contexts/FiltersContext"
 
 // TODO Use idealSilhouettes to highlight nodes/links in the sankey diagram
 
@@ -130,6 +133,26 @@ const useSankeyData = (silhouettes, selectedLinks, idealSilhouettes) => {
 export function PartialOrderChart() {
   const { idealSilhouettes } = useData()
   const { completeSilhouettes, selectedSilhouettesData, selectedLinks } = useDerivedData()
+  const { setSelectedTrajectoriesIDs } = useFilters()
+
+  const [history, dispatch] = useReducer(historyReducer, {
+    past: [],
+    present: { ids: [] },
+    future: [],
+  })
+
+  const { past, present, future } = history
+
+  const updateIDsSelection = (ids) => {
+    const merged = union(present.ids, ids)
+    dispatch({ type: "DO", newPresent: { ids: merged } })
+  }
+  const undo = () => dispatch({ type: "UNDO" })
+  const redo = () => dispatch({ type: "REDO" })
+
+  useEffect(() => {
+    setSelectedTrajectoriesIDs(present.ids)
+  }, [present])
 
   const silhouettesData =
     selectedSilhouettesData.length === 0 ? completeSilhouettes : selectedSilhouettesData
@@ -142,9 +165,22 @@ export function PartialOrderChart() {
 
   return (
     <>
+      <div className="buttons-wrapper">
+        <Button size="xs" onClick={undo} disabled={past.length === 0} tooltip={"Undo"}>
+          <Undo2 size={12} />
+        </Button>
+        <Button size="xs" onClick={redo} disabled={future.length === 0} tooltip={"Redo"}>
+          <Redo2 size={12} />
+        </Button>
+      </div>
       <div className="chart-container">
         {sankeyData && sankeyData.nodes.length > 0 ? (
-          <Sankey width={1000} height={500} data={sankeyData} />
+          <Sankey
+            width={1000}
+            height={500}
+            data={sankeyData}
+            updateIDsSelection={updateIDsSelection}
+          />
         ) : (
           <div className="no-data-panel">
             <CircleAlert size={64} />

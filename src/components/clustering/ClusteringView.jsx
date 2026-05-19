@@ -1,3 +1,4 @@
+import { useFilters } from "../../contexts/FiltersContext"
 import { useData } from "../../contexts/ProcessedDataContext"
 import Button from "../common/Button/Button"
 import { useClusteringWorker } from "../hooks/workerHooks/useClusteringWorker"
@@ -7,6 +8,9 @@ import { uniq } from "lodash"
 export function ClusteringView() {
   const { selectedStep, stepIndex, totalSteps, advance, before, isDone } = useClusteringWorker()
   const { silhouettes } = useData()
+  const { IDsFromClustering } = useFilters()
+
+  console.log(IDsFromClustering)
 
   return (
     <div className={styles.clusteringView}>
@@ -17,41 +21,37 @@ export function ClusteringView() {
 
       <p>Steps {stepIndex + 1}</p>
       <p>Steps computed: {totalSteps}</p>
+      {selectedStep && <p>Silhouettes: {selectedStep.length}</p>}
       <div className={styles.tableWrapper}>
         {selectedStep && (
           <table>
             <tbody>
               <tr>
                 <th>Name</th>
-                <th>Clusters</th>
+                <th>Winner</th>
                 <th>IDs</th>
-                <th>Centers</th>
                 <th>Mean</th>
                 <th>Bandwidth</th>
                 <th>Assignments</th>
                 <th>Stable</th>
               </tr>
-              {selectedStep.map((l) => {
+              {selectedStep.map((l, i) => {
                 if (!l.value) return null
-                console.log("silhouettes", silhouettes)
-                const silhouette = silhouettes.filter((s) => s.name === l.value.id)[0]
+
+                const silhouette = silhouettes.find((s) => s.name === l.value.id)
                 console.log("silhouette", silhouette)
                 const ids = silhouette.trajectories.map((t) => t[0].id)
 
+                const winner = IDsFromClustering[i]
+
                 return (
-                  <tr key={l.value.id} style={{ opacity: l.value.stable ? 0.6 : 1 }}>
+                  <tr key={"row" - l.value.id} style={{ opacity: l.value.stable ? 0.6 : 1 }}>
                     <td>{l.value.id}</td>
                     <td>{l.value.centers.length}</td>
                     <td>
-                      {ids.map((id) => (
-                        <p key={id}>{id}</p>
-                      ))}
+                      <p key={"id-" + winner}>{winner}</p>
                     </td>
-                    <td>
-                      {l.value.centers.map((c) => (
-                        <p key={c}>{c}</p>
-                      ))}
-                    </td>
+
                     <td>{l.value.mean.toFixed(3)}</td>
                     <td>{l.value.bandwidth}</td>
                     <td>

@@ -7,14 +7,20 @@ import { useViz } from "../../../../contexts/VizContext"
 import { useFilters } from "../../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
-import { flattenDeep, union, uniq, uniqBy } from "lodash"
+import { difference, flattenDeep, union, uniq, uniqBy } from "lodash"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import { useDebouncedState } from "hamo"
 
 export function TrajectoriesMotion(props) {
-  const { selectedTrajectoriesIDs, selectedLumps, toggleSelectedTrajectory } = useFilters()
+  const {
+    selectedSilhouettesNames,
+    selectedTrajectoriesIDs,
+    selectedLumps,
+    toggleSelectedTrajectory,
+    IDsFromClustering,
+  } = useFilters()
   const { palette } = useViz()
-  const { selectedLinks, lumps } = useDerivedData()
+  const { filteredLinks, selectedLinks, lumps } = useDerivedData()
 
   const {
     marginTop,
@@ -35,10 +41,16 @@ export function TrajectoriesMotion(props) {
 
   const rectDimensions = { width: 2, height: 4 }
 
+  const opaqueLinks = difference(filteredLinks, selectedLinks)
+
   const selectedTrajectories =
     selectedLinks.length < 20
       ? selectedLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
       : []
+  // const selectedTrajectories =
+  //   selectedLinks.length < 20
+  //     ? selectedLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
+  //     : []
 
   const highlightedTrajectories = enableScrub
     ? selectedLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
@@ -124,6 +136,29 @@ export function TrajectoriesMotion(props) {
               >
                 <title>{`ID: ${d.id}`}</title>
               </motion.rect>
+            )
+          })}
+
+        {selectedTrajectoriesIDs.length === 0 &&
+          opaqueLinks?.map((d) => {
+            return (
+              <MotionLine
+                key={`switch-${d.id}-${d.lump}-${d.source.x}`}
+                d={d}
+                id={`switch-${d.id}-${d.lump}-${d.source.x}`}
+                x1={x(d.source.x)}
+                x2={x(d.target.x)}
+                y1={y(d.source.state) + marginTop}
+                y2={y(d.target.state) + marginTop}
+                color={`url(#gradient-${d.source.state}-${d.target.state})`}
+                dash={0}
+                isSelected={false}
+                animationDuration={lines.length > 1000 ? 0.0 : 0.2}
+                onClick={() => toggleSelectedTrajectory(d.id)}
+                onMouseEnter={() => handleMouseEnter(d)}
+                onMouseLeave={() => handleMouseLeave()}
+                opacity={0.2}
+              />
             )
           })}
         {lines &&
@@ -311,6 +346,7 @@ const MotionLine = ({
   onClick,
   onMouseEnter,
   onMouseLeave,
+  opacity = 1,
 }) => {
   return (
     <motion.line
@@ -338,7 +374,7 @@ const MotionLine = ({
         strokeWidth: isSelected ? 1.5 : strokeWidth,
         stroke: color,
 
-        opacity: 1,
+        opacity: opacity,
       }}
       whileHover={{ strokeWidth: isSelected ? 1.5 : 1 }}
       exit={{ opacity: 0 }}

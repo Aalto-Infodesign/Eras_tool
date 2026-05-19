@@ -124,14 +124,12 @@ export function ProcessedDataProvider({ children }) {
       idealSilhouettes,
       statesOrder,
       existingIdealSilhouettes,
-
       clusterStates,
       statesData,
       analytics,
       trajectories,
       silhouettes,
       statesThresholds,
-      addStateThreshold,
     ],
   )
 

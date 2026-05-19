@@ -111,11 +111,12 @@ function* pda(id, data) {
       go = false // mark done, but still yield this last step
     }
 
-    centroids = newSet // ← don't forget to update this each iteration!
+    centroids = newSet
 
     yield {
       id: id,
       centers: newSet,
+      distances: newSet.map((c) => Math.hypot(...c.slice(1, -1).split(",").map(Number))),
       mean: silhouettes.mean,
       scores: silhouettes.scores,
       assignments: silhouettes.assignments,
@@ -134,7 +135,7 @@ self.onmessage = ({ data: message }) => {
     const pdaData = message.silhouettes
       .map((s) => ({
         id: s.name,
-        value: s.trajectories.map((t) => t.map((tt) => [tt.speed])),
+        value: s.trajectories.slice(0, 50).map((t) => t.map((tt) => [tt.speed])),
         size: s.trajectories.flat().length,
       }))
       .sort((a, b) => b.size - a.size)

@@ -30,6 +30,7 @@ export function DerivedDataProvider({ children }) {
     selectedTrajectoriesIDs,
     trajectoriesSelectionMode,
     removedStates,
+    IDsFromClustering,
   } = useFilters()
   const { chartType } = useViz()
 
@@ -146,15 +147,22 @@ export function DerivedDataProvider({ children }) {
     const s = selectedSilhouettesData.length === 0 ? silhouettes : selectedSilhouettesData
     const individuals = new Set(flattenDeep(s.map((s) => s.trajectories)).map((t) => t.id))
 
-    console.timeEnd("Selected Links")
-    return filteredLinks.filter((l) => {
+    const linksBySelectedSilhouettes = filteredLinks.filter((l) => {
       // Ricerca O(1) invece di O(n)
       if (!individuals.has(l.id)) return false
       // if (hasLumpFilter && !selectedLumpsTypes.has(l.lump)) return false
 
       return true
     })
-  }, [silhouettes, selectedSilhouettesData, filteredLinks])
+
+    const linksByClustering =
+      IDsFromClustering.length === 0
+        ? filteredLinks
+        : filteredLinks.filter((d) => IDsFromClustering.includes(d.id))
+
+    console.timeEnd("Selected Links")
+    return selectedSilhouettesData.length === 0 ? linksByClustering : linksBySelectedSilhouettes
+  }, [silhouettes, selectedSilhouettesData, filteredLinks, IDsFromClustering])
 
   const IDsFromSelectedSilhouettes = useMemo(() => {
     if (!selectedSilhouettesData?.length) return []

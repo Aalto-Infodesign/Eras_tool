@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import { useViz } from "../../../contexts/VizContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { min } from "d3"
+import { useFilters } from "../../../contexts/FiltersContext"
 
 export function useClusteringWorker() {
+  const { setIDsFromClustering } = useFilters()
   const { silhouettes } = useDerivedData()
   const { startLoading, stopLoading } = useViz()
   const workerRef = useRef(null)
@@ -68,6 +71,29 @@ export function useClusteringWorker() {
   }, [])
 
   const selectedStep = steps[stepIndex]
+
+  const closestIDS = useMemo(() => {
+    if (!selectedStep) return null
+
+    return silhouettes.map((s) => {
+      const cluster = selectedStep.find((l) => l.value?.id === s.name)
+
+      if (cluster) {
+        const lowestDist = min(cluster.value.distances)
+        const lowestIndex = cluster.value.distances.indexOf(lowestDist)
+        const ids = s.trajectories.map((t) => t[0].id)
+        return ids[lowestIndex]
+      }
+
+      // Not yet computed — pick a random trajectory
+      const ids = s.trajectories.map((t) => t[0].id)
+      return ids[Math.floor(Math.random() * ids.length)]
+    })
+  }, [selectedStep, silhouettes])
+
+  useEffect(() => {
+    if (closestIDS) setIDsFromClustering(closestIDS)
+  }, [closestIDS])
 
   return { selectedStep, stepIndex, totalSteps: steps.length, advance, before, isDone }
 }

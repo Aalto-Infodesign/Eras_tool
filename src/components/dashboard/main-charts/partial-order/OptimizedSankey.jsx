@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useReducer, useEffect } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { motion, AnimatePresence } from "motion/react"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
@@ -8,6 +8,7 @@ import { useViz } from "../../../../contexts/VizContext"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
 import { useFilters } from "../../../../contexts/FiltersContext"
 import { useDebouncedState } from "hamo"
+import { historyReducer } from "../../../../utils/historyReducer"
 
 // --- Constants for better maintainability ---
 const MARGIN_Y = 25
@@ -115,7 +116,7 @@ function DownstreamIcon({ size = 14 }) {
   )
 }
 
-function SelectionButton({ onClick, node, Icon, xOffset }) {
+function SelectionButton({ direction = "l", onClick, node, Icon, xOffset, setHoveredButton }) {
   const SIZE = 20
   return (
     <motion.g
@@ -124,6 +125,8 @@ function SelectionButton({ onClick, node, Icon, xOffset }) {
       whileHover={{ scale: 1.1 }}
       style={{ cursor: "pointer" }}
       onClick={() => onClick(node)}
+      onMouseEnter={() => setHoveredButton(direction)}
+      onMouseLeave={() => setHoveredButton(null)}
     >
       <motion.rect width={SIZE} height={SIZE} fill="white" rx={5} />
       <g transform={`translate(${(SIZE - 14) / 2}, ${(SIZE - 14) / 2})`}>
@@ -134,9 +137,17 @@ function SelectionButton({ onClick, node, Icon, xOffset }) {
 }
 
 // --- Sub-component for rendering a single Sankey Node ---
-function SankeyNode({ node, selectedNode, setSelectedNode, onMouseEnter, onMouseLeave }) {
+function SankeyNode({
+  node,
+  selectedNode,
+  setSelectedNode,
+  onMouseEnter,
+  onMouseLeave,
+  updateIDsSelection,
+  setHoveredButton,
+}) {
   const { palette } = useViz()
-  const { selectedTrajectoriesIDs, setSelectedTrajectoriesIDs } = useFilters()
+  const { selectedTrajectoriesIDs } = useFilters()
 
   const [name] = node.id.split("-")
   const nodeHeight = node.y1 - node.y0
@@ -148,19 +159,19 @@ function SankeyNode({ node, selectedNode, setSelectedNode, onMouseEnter, onMouse
   function handleClickLeft() {
     const ids = getTargetSegments(node)
 
-    setSelectedTrajectoriesIDs((prev) => union(prev, ids)) // additive
+    updateIDsSelection(ids) // additive
   }
 
   function handleClickRight() {
     const ids = getSourceSegments(node)
-    setSelectedTrajectoriesIDs((prev) => union(prev, ids)) // additive
+    updateIDsSelection(ids) // additive
     //TODO Use array ops to make difference
   }
 
   function handleNodeClick() {
     if (isSelected) {
       setSelectedNode(null)
-      setSelectedTrajectoriesIDs([]) // only full reset happens here
+      updateIDsSelection([]) // only full reset happens here
     } else {
       setSelectedNode(node)
     }
@@ -205,18 +216,22 @@ function SankeyNode({ node, selectedNode, setSelectedNode, onMouseEnter, onMouse
           >
             {node.targetLinks.length > 0 && (
               <SelectionButton
+                direction="l"
                 onClick={handleClickLeft}
                 node={node}
                 Icon={UpstreamIcon}
                 xOffset={-25}
+                setHoveredButton={setHoveredButton}
               />
             )}
             {node.sourceLinks.length > 0 && (
               <SelectionButton
+                direction="r"
                 onClick={handleClickRight}
                 node={node}
                 Icon={DownstreamIcon}
                 xOffset={NODE_WIDTH + 5}
+                setHoveredButton={setHoveredButton}
               />
             )}
           </motion.g>
@@ -297,12 +312,12 @@ function SankeyLink({ link, setHoveredLink, hoveredTrajectory }) {
   )
 }
 // --- Main Sankey Component ---
-export function Sankey({ width, height, data }) {
+export function Sankey({ width, height, data, updateIDsSelection }) {
   const { palette } = useViz()
-  const { setSelectedTrajectoriesIDs } = useFilters()
 
   const [selectedNode, setSelectedNode] = useState(null)
   const [hoveredSilhouette, setHoveredSilhouette] = useState(null)
+  const [hoveredButton, setHoveredButton] = useState(null)
   const [hoveredLink, setHoveredLink] = useDebouncedState(null, 200)
   const [hoveredNode, setHoveredNode] = useDebouncedState(null, 200)
 
@@ -393,6 +408,8 @@ export function Sankey({ width, height, data }) {
                 setSelectedNode={setSelectedNode}
                 onMouseEnter={handleNodeEnter}
                 onMouseLeave={handleNodeLeave}
+                updateIDsSelection={updateIDsSelection}
+                setHoveredButton={setHoveredButton}
               />
             ))}
           </g>
@@ -414,49 +431,50 @@ export function Sankey({ width, height, data }) {
       </div>
 
       <Tooltip isVisible={hoveredLink || hoveredSilhouette || hoveredNode}>
-        <AnimatePresence>
-          {hoveredNode && (
+        {hoveredNode && (
+          <div>
+            {!selectedNode && <p>Click node to enable selection</p>}
+            <p>{hoveredNode.id.split("-")[0]}</p>
             <div>
-              <p>{hoveredNode.id.split("-")[0]}</p>
-              <p>
+              <motion.p animate={{ scale: hoveredButton === "r" ? 1.2 : 0.8 }}>
                 {" "}
                 <ArrowUpFromDot size={10} style={{ transform: "rotate(90deg)" }} />{" "}
                 {getSourceSegments(hoveredNode).length}
-              </p>
-              <p>
+              </motion.p>
+              <motion.p animate={{ scale: hoveredButton === "l" ? 1.2 : 0.8 }}>
                 <ArrowDownToDot size={10} style={{ transform: "rotate(-90deg)" }} />{" "}
                 {getTargetSegments(hoveredNode).length}
-              </p>
+              </motion.p>
             </div>
-          )}
-          {hoveredLink && !hoveredSilhouette && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <p>
-                <ArrowUpFromDot size={10} style={{ transform: "rotate(90deg)" }} />{" "}
-                <span style={{ color: palette[hoveredLink.source.index] }}>
-                  {hoveredLink.source.name}
-                </span>{" "}
-                at <span>{hoveredLink.source.depth + 1}</span>
-              </p>
-              <p>
-                <ArrowDownToDot size={10} style={{ transform: "rotate(-90deg)" }} />{" "}
-                <span style={{ color: palette[hoveredLink.target.index] }}>
-                  {hoveredLink.target.name}
-                </span>{" "}
-                at <span>{hoveredLink.target.depth + 1}</span>
-              </p>
-              <p>
-                <span className="bold">{hoveredLink.value}</span> IDs
-              </p>
-            </motion.div>
-          )}
-          {hoveredSilhouette && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <p>Silhouette ID: {hoveredSilhouette.id}</p>
-              <p>FINNGEN IDs: {hoveredSilhouette.size}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
+        {hoveredLink && !hoveredSilhouette && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <p>
+              <ArrowUpFromDot size={10} style={{ transform: "rotate(90deg)" }} />{" "}
+              <span style={{ color: palette[hoveredLink.source.index] }}>
+                {hoveredLink.source.name}
+              </span>{" "}
+              at <span>{hoveredLink.source.depth + 1}</span>
+            </p>
+            <p>
+              <ArrowDownToDot size={10} style={{ transform: "rotate(-90deg)" }} />{" "}
+              <span style={{ color: palette[hoveredLink.target.index] }}>
+                {hoveredLink.target.name}
+              </span>{" "}
+              at <span>{hoveredLink.target.depth + 1}</span>
+            </p>
+            <p>
+              <span className="bold">{hoveredLink.value}</span> IDs
+            </p>
+          </motion.div>
+        )}
+        {hoveredSilhouette && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <p>Silhouette ID: {hoveredSilhouette.id}</p>
+            <p>FINNGEN IDs: {hoveredSilhouette.size}</p>
+          </motion.div>
+        )}
       </Tooltip>
     </>
   )
