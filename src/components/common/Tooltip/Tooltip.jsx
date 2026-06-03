@@ -16,7 +16,7 @@ export function Tooltip({ children, isVisible }) {
           animate={{
             opacity: 1,
             x: mousePosition.x + 15,
-            y: mousePosition.pageY + 15,
+            y: mousePosition.pageY,
           }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0 }}

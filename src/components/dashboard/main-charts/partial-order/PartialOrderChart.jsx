@@ -187,6 +187,7 @@ export function PartialOrderChart() {
             <p>Not enough nodes for this chart! Try adjusting the Silhouettes selection</p>
           </div>
         )}
+
         <Legend />
       </div>
     </>

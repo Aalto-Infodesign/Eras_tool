@@ -2,13 +2,14 @@ import { useState, useMemo, useReducer, useEffect } from "react"
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from "d3-sankey"
 import { motion, AnimatePresence } from "motion/react"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
-import { groupBy, keys, union, xor } from "lodash"
+import { countBy, groupBy, keys, union, xor } from "lodash"
 import { romanize } from "../../../../utils/numberHelpers"
 import { useViz } from "../../../../contexts/VizContext"
 import { ArrowDownToDot, ArrowUpFromDot } from "lucide-react"
 import { useFilters } from "../../../../contexts/FiltersContext"
 import { useDebouncedState } from "hamo"
 import { historyReducer } from "../../../../utils/historyReducer"
+import DurationDistributionChart from "./DurationDistributionChart"
 
 // --- Constants for better maintainability ---
 const MARGIN_Y = 25
@@ -241,7 +242,7 @@ function SankeyNode({
   )
 }
 
-function SankeyLink({ link, setHoveredLink, hoveredTrajectory }) {
+function SankeyLink({ link, setHoveredLink, hoveredTrajectory, onClick, selectedLink }) {
   const { palette } = useViz()
   const { selectedTrajectoriesIDs } = useFilters() // ← single source of truth
 
@@ -252,7 +253,8 @@ function SankeyLink({ link, setHoveredLink, hoveredTrajectory }) {
 
   // A link is highlighted if ANY of its segments are in the selected set
   const selectedSet = new Set(selectedTrajectoriesIDs)
-  const isSelected =
+  const isSelected = selectedLink?.index === link.index
+  const containsTrajectories =
     selectedTrajectoriesIDs.length === 0 // nothing selected → all neutral
       ? false
       : (link.segments?.some((seg) => selectedSet.has(seg.id)) ?? false)
@@ -262,6 +264,24 @@ function SankeyLink({ link, setHoveredLink, hoveredTrajectory }) {
     source: { ...link.source, name: state_S, index: state_S },
     target: { ...link.target, name: state_F, index: state_F },
   }
+
+  const opacity = useMemo(() => {
+    if (selectedTrajectoriesIDs.length === 0) {
+      if (isSelected) return 1
+      return 0.15
+    } else {
+      if (isSelected && containsTrajectories) return 1
+      if (containsTrajectories) return 0.8
+      if (isSelected) return 1
+      return 0.15
+    }
+  }, [selectedTrajectoriesIDs.length, isSelected, containsTrajectories])
+
+  //  selectedTrajectoriesIDs.length === 0
+  //               ? 0.4 // nothing selected: all neutral
+  //               : containsTrajectories
+  //                 ? 0.8 // part of selection: highlighted
+  //                 : 0.15, // not in selection: dimmed
 
   return (
     <>
@@ -283,30 +303,23 @@ function SankeyLink({ link, setHoveredLink, hoveredTrajectory }) {
           d: addPathOffset(path),
           strokeWidth: link.width,
           pathLength: 0,
-          opacity:
-            selectedTrajectoriesIDs.length === 0
-              ? 0.4 // nothing selected: all neutral
-              : isSelected
-                ? 0.8 // part of selection: highlighted
-                : 0.15, // not in selection: dimmed
+          opacity: opacity,
         }}
         animate={{
           d: addPathOffset(path),
           strokeWidth: link.width,
           pathLength: 1,
-          opacity:
-            selectedTrajectoriesIDs.length === 0
-              ? 0.4 // nothing selected: all neutral
-              : isSelected
-                ? 0.8 // part of selection: highlighted
-                : 0.15, // not in selection: dimmed
+          opacity: opacity,
+
+          cursor: "pointer",
         }}
-        whileHover={{ opacity: 1 }}
+        whileHover={{ opacity: isSelected ? 1 : 0.8 }}
         exit={{ pathLength: 0 }}
         transition={DEFAULT_TRANSITION}
         stroke={`url(#grad-${state_S}-${state_F})`}
         fill="none"
         onMouseEnter={() => setHoveredLink(fullLink)}
+        onClick={() => onClick(fullLink)}
       />
     </>
   )
@@ -316,6 +329,7 @@ export function Sankey({ width, height, data, updateIDsSelection }) {
   const { palette } = useViz()
 
   const [selectedNode, setSelectedNode] = useState(null)
+  const [selectedLink, setSelectedLink] = useState(null)
   const [hoveredSilhouette, setHoveredSilhouette] = useState(null)
   const [hoveredButton, setHoveredButton] = useState(null)
   const [hoveredLink, setHoveredLink] = useDebouncedState(null, 200)
@@ -356,6 +370,17 @@ export function Sankey({ width, height, data, updateIDsSelection }) {
     setHoveredNode(null)
   }
 
+  const handleLinkClick = (link) => {
+    console.log(link)
+    setSelectedLink((prev) => (prev?.index === link.index ? null : link))
+  }
+
+  const link = useMemo(() => selectedLink ?? hoveredLink, [hoveredLink, selectedLink])
+
+  const hoveredLinkSegmentsSpeed = useMemo(() => {
+    return link?.segments?.map((s) => s.speed) ?? []
+  }, [link])
+
   const columns = keys(groupBy(nodes, "x0"))
     .map((x) => Number(x))
     .sort((a, b) => a - b)
@@ -393,6 +418,8 @@ export function Sankey({ width, height, data, updateIDsSelection }) {
                   hoveredLink={hoveredLink}
                   setHoveredLink={setHoveredLink}
                   hoveredTrajectory={hoveredSilhouette} // Dim links if a silhouette is hovered
+                  onClick={handleLinkClick}
+                  selectedLink={selectedLink}
                 />
               ))}
             </AnimatePresence>
@@ -428,6 +455,24 @@ export function Sankey({ width, height, data, updateIDsSelection }) {
             ))}
           </g> */}
         </svg>
+        <section>
+          {link ? (
+            <p>
+              Duration distribution from{" "}
+              <motion.span animate={{ color: palette[link.source.name] }}>
+                {link.source.name}
+              </motion.span>{" "}
+              to{" "}
+              <motion.span animate={{ color: palette[link.target.name] }}>
+                {link.target.name}
+              </motion.span>{" "}
+              – {link.segments.length} segments
+            </p>
+          ) : (
+            <p>Duration distribution</p>
+          )}
+          <DurationDistributionChart data={hoveredLinkSegmentsSpeed} width={width} />
+        </section>
       </div>
 
       <Tooltip isVisible={hoveredLink || hoveredSilhouette || hoveredNode}>

@@ -9,9 +9,7 @@
   padding: 0 var(--spacing-sm);
   pointer-events: none;
   z-index: 999;
-  /* border: solid 2px white; */
-  /* transition: all 800ms ease-out; */
-  /* opacity: 100; */
+  padding: var(--spacing-sm);
 }
 
 .active {
