@@ -456,21 +456,23 @@ export function Sankey({ width, height, data, updateIDsSelection }) {
           </g> */}
         </svg>
         <section>
-          {link ? (
-            <p>
-              Duration distribution from{" "}
-              <motion.span animate={{ color: palette[link.source.name] }}>
-                {link.source.name}
-              </motion.span>{" "}
-              to{" "}
-              <motion.span animate={{ color: palette[link.target.name] }}>
-                {link.target.name}
-              </motion.span>{" "}
-              – {link.segments.length} segments
-            </p>
-          ) : (
-            <p>Duration distribution</p>
-          )}
+          <div className="text-sm">
+            {link ? (
+              <p>
+                Duration distribution from{" "}
+                <motion.span animate={{ color: palette[link.source.name] }}>
+                  {link.source.name}
+                </motion.span>{" "}
+                to{" "}
+                <motion.span animate={{ color: palette[link.target.name] }}>
+                  {link.target.name}
+                </motion.span>{" "}
+                – {link.segments.length} segments
+              </p>
+            ) : (
+              <p>Duration distribution</p>
+            )}
+          </div>
           <DurationDistributionChart data={hoveredLinkSegmentsSpeed} width={width} />
         </section>
       </div>

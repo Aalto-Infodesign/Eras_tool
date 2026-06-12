@@ -550,6 +550,11 @@ select {
   }
 }
 
+.text-sm {
+  font-size: var(--text-sm);
+  line-height: calc(1 / 0.75);
+}
+
 /* Wide */
 @media (min-width: 1200px) {
   .bento-item.chart {
