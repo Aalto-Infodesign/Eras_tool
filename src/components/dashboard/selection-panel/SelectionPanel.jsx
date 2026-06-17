@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "motion/react"
 
 import "./SelectionPanel.css"
 
-import { SilhouetteToggleButton } from "../silhouettes/SilhouettesMorph"
+import { SilhouetteToggleButton } from "../silhouettes/shared/SilhouetteChips"
 
 import { useViz } from "../../../contexts/VizContext"
 import { useFilters } from "../../../contexts/FiltersContext"
