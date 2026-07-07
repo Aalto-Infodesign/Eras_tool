@@ -7,9 +7,11 @@ import { useViz } from "../../../../contexts/VizContext"
 import { useFilters } from "../../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
-import { difference, flattenDeep, union, uniq, uniqBy } from "lodash"
+import { flattenDeep, union, uniqBy } from "lodash"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
+import { useClustering } from "../../../../contexts/ClusteringContext"
 import { useDebouncedState } from "hamo"
+import { line } from "d3"
 
 export function TrajectoriesMotion(props) {
   const {
@@ -17,10 +19,10 @@ export function TrajectoriesMotion(props) {
     selectedTrajectoriesIDs,
     selectedLumps,
     toggleSelectedTrajectory,
-    IDsFromClustering,
   } = useFilters()
   const { palette } = useViz()
-  const { filteredLinks, selectedLinks, lumps } = useDerivedData()
+  const { selectedLinks, lumps } = useDerivedData()
+  const { rankedMedoids, representativeLinks, revealFadedIDs } = useClustering()
 
   const {
     marginTop,
@@ -41,35 +43,93 @@ export function TrajectoriesMotion(props) {
 
   const rectDimensions = { width: 2, height: 4 }
 
-  const opaqueLinks = difference(filteredLinks, selectedLinks)
+  /**
+   * The medoid representative set is computed once in ClusteringContext (shared
+   * with Lumps) — see `representativeLinks` / `revealFadedIDs`. Here we only style
+   * it: opacity is view-specific.
+   *   - mid-reveal medoids → REVEAL_FADED (the "analysis happening" beat);
+   *   - focused mode → fade each medoid by relevance (medoidOpacity);
+   *   - settled median + verticals + fallback → full opacity.
+   */
+  const FADED_OPACITY = 0.2
+  const REVEAL_FADED = 0.1
+  // Floor for relevance fading: even a silhouette's smallest cluster stays this visible
+  const MIN_MEDOID_OPACITY = 0.2
 
-  const selectedTrajectories =
-    selectedLinks.length < 20
-      ? selectedLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
-      : []
-  // const selectedTrajectories =
-  //   selectedLinks.length < 20
-  //     ? selectedLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
-  //     : []
+  const isOverview = selectedSilhouettesNames.length === 0
+  const isTrajectorySelectionActive = selectedTrajectoriesIDs.length > 0
+
+  const representatives = representativeLinks
+
+  // Each medoid represents a cluster of `size` trajectories — that size is its
+  // relevance. Fade each medoid relative to the dominant cluster of its own
+  // silhouette, so the main path reads boldest and minor variants recede.
+  const medoidOpacity = useMemo(() => {
+    const maxBySilhouette = new Map()
+    for (const m of rankedMedoids) {
+      if (m.size > (maxBySilhouette.get(m.silhouette) ?? 0)) {
+        maxBySilhouette.set(m.silhouette, m.size)
+      }
+    }
+    const map = new Map()
+    for (const m of rankedMedoids) {
+      const share = m.size / (maxBySilhouette.get(m.silhouette) || 1) // 0..1 vs. dominant
+      map.set(m.id, MIN_MEDOID_OPACITY + (1 - MIN_MEDOID_OPACITY) * share)
+    }
+    return map
+  }, [rankedMedoids])
+
+  const opacityFor = (d) => {
+    if (isTrajectorySelectionActive) {
+      return selectedTrajectoriesIDs.includes(d.id) ? 1 : FADED_OPACITY
+    }
+    if (revealFadedIDs.has(d.id)) return REVEAL_FADED // mid-reveal medoids
+    if (!isOverview) return medoidOpacity.get(d.id) ?? 1 // focused: fade by relevance
+    return 1 // settled median + verticals + fallback
+  }
+
+  // Selected trajectories are always drawn in full, medoid or not
+  const selectedTrajectories = useMemo(
+    () =>
+      isTrajectorySelectionActive
+        ? selectedLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
+        : [],
+    [isTrajectorySelectionActive, selectedLinks, selectedTrajectoriesIDs],
+  )
 
   const highlightedTrajectories = enableScrub
     ? selectedLinks.filter((d) => d.id === hoveredTrajectoriesIDs[selectedIndex])
     : []
 
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
-  console.log("displayedTrajectories", displayedTrajectories)
+
+  // TODO : VERTICAL LINKS DO NOT SHOW UP
+  // Vertical transitions are a key visual signal but a 0 duration is far from
+  // the cluster means, so medoids rarely carry them — draw them all, but only
+  // one line per overlapping pixel position
+  const verticalLinks = useMemo(() => {
+    if (!isSelectModeLines) return []
+    return uniqBy(
+      selectedLinks.filter((l) => l.speed === 0 && l.source.state !== l.target.state),
+      (l) => `${l.lump}-${Math.round(x(l.source.x))}`,
+    )
+  }, [isSelectModeLines, selectedLinks, x])
+
+  // Foreground of the select-lines mode: medoids + explicit selection + verticals
+  const mainLines = useMemo(
+    () => union(representatives, selectedTrajectories, verticalLinks),
+    [representatives, selectedTrajectories, verticalLinks],
+  )
+
   const lines =
     (!isSelectModeLines &&
       selectedLumps.length > 0 &&
       showLinesOfSelectedLumps &&
       flattenDeep(selectedLumps.map((l) => l.links))) ||
     (!isSelectModeLines && displayedTrajectories.length > 0 && displayedTrajectories) ||
-    (isSelectModeLines && selectedLinks)
+    (isSelectModeLines && mainLines)
 
-  // const highlightedTrajectories =
-  //   isSelectModeLines && selectedLinks.filter((d) => selectedTrajectoriesIDs.includes(d.id))
-
-  const singleStateSwitches = selectedLinks.filter(
+  const singleStateSwitches = (isSelectModeLines ? mainLines : selectedLinks).filter(
     (l) => l.source.state === l.target.state && l.initialState === true && l.finalState === true,
   )
 
@@ -129,6 +189,7 @@ export function TrajectoriesMotion(props) {
                   width: rectDimensions.width,
                   height: rectDimensions.height,
                   fill: palette[d.source.state],
+                  opacity: opacityFor(d),
                 }}
                 exit={{ height: 0, width: 0 }}
                 transition={{ duration: 0.2 }}
@@ -139,35 +200,13 @@ export function TrajectoriesMotion(props) {
             )
           })}
 
-        {selectedTrajectoriesIDs.length === 0 &&
-          opaqueLinks?.map((d) => {
-            return (
-              <MotionLine
-                key={`switch-${d.id}-${d.lump}-${d.source.x}`}
-                d={d}
-                id={`switch-${d.id}-${d.lump}-${d.source.x}`}
-                x1={x(d.source.x)}
-                x2={x(d.target.x)}
-                y1={y(d.source.state) + marginTop}
-                y2={y(d.target.state) + marginTop}
-                color={`url(#gradient-${d.source.state}-${d.target.state})`}
-                dash={0}
-                isSelected={false}
-                animationDuration={lines.length > 1000 ? 0.0 : 0.2}
-                onClick={() => toggleSelectedTrajectory(d.id)}
-                onMouseEnter={() => handleMouseEnter(d)}
-                onMouseLeave={() => handleMouseLeave()}
-                opacity={0.2}
-              />
-            )
-          })}
         {lines &&
           lines.map((d) => {
             const isHovered = hoveredTrajectoriesIDs.includes(d.id)
             const isSelected = selectedTrajectoriesIDs.includes(d.id)
 
             let dash = 0
-            if (d.speed !== 0) {
+            if (d.speed > 0) {
               const length = Math.hypot(
                 Math.abs(x(d.target.x) - x(d.source.x)),
                 Math.abs(y(d.target.state) - y(d.source.state)),
@@ -196,6 +235,7 @@ export function TrajectoriesMotion(props) {
                   onClick={() => toggleSelectedTrajectory(d.id)}
                   onMouseEnter={() => handleMouseEnter(d)}
                   onMouseLeave={() => handleMouseLeave()}
+                  opacity={opacityFor(d)}
                 />
               )
             } else {
@@ -213,7 +253,7 @@ export function TrajectoriesMotion(props) {
                     x2={x(d.target.x)}
                     y1={y(d.source.state) + marginTop}
                     y2={y(d.target.state) + marginTop}
-                    color={`url(#gradient-${d.source.state}-${d.target.state})`}
+                    color={palette[d.source.state]}
                     // color={palette[d.source.state]}
                     dash={dash1}
                     dashOffset={of1}
@@ -221,6 +261,7 @@ export function TrajectoriesMotion(props) {
                     isSelected={isSelected}
                     animationDuration={lines.length > 1000 ? 0.0 : 0.2}
                     onClick={() => toggleSelectedTrajectory(d.id)}
+                    opacity={opacityFor(d)}
                   />
                   <MotionLine
                     key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-2`}
@@ -230,13 +271,14 @@ export function TrajectoriesMotion(props) {
                     x2={x(d.target.x)}
                     y1={y(d.source.state) + marginTop}
                     y2={y(d.target.state) + marginTop}
-                    color={`url(#gradient-${d.source.state}-${d.target.state})`}
+                    color={palette[d.target.state]}
                     dash={dash2}
                     dashOffset={of2}
                     // strokeWidth={0.5}
                     isSelected={isSelected}
                     animationDuration={lines.length > 1000 ? 0.0 : 0.2}
                     onClick={() => toggleSelectedTrajectory(d.id)}
+                    opacity={opacityFor(d)}
                   />
                 </motion.g>
               )
@@ -347,6 +389,7 @@ const MotionLine = ({
   onMouseEnter,
   onMouseLeave,
   opacity = 1,
+  rotation = 0,
 }) => {
   return (
     <motion.line
@@ -375,6 +418,7 @@ const MotionLine = ({
         stroke: color,
 
         opacity: opacity,
+        rotate: rotation,
       }}
       whileHover={{ strokeWidth: isSelected ? 1.5 : 1 }}
       exit={{ opacity: 0 }}

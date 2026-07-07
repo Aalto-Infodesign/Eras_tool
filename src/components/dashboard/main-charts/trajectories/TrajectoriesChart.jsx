@@ -26,6 +26,7 @@ import { GradientDefs } from "../../../common/defs/Gradients/GradientDefs"
 import { useDebouncedState } from "hamo"
 import { features } from "../../../../config/features"
 import { StateLabels } from "./StateLabels"
+import { ClusteringView } from "../../../clustering/ClusteringView"
 
 export function TrajectoriesChart() {
   const {
@@ -37,15 +38,10 @@ export function TrajectoriesChart() {
   } = useFilters()
   const { selectedLinks } = useDerivedData()
 
-  const {
-    h,
-    hoveredTrajectoriesIDs,
-    selectedIndex,
+  const { h, hoveredTrajectoriesIDs, selectedIndex, enableScrub } = useCharts()
 
-    enableScrub,
-  } = useCharts()
-
-  const [chartMode, setChartMode] = useState("arc") // lines || lumps || arc
+  const [chartMode, setChartMode] = useState("lines") // lines || lumps || arc
+  const [sideInfo, setSideInfo] = useState("cluster") // cluster || matrix || legend
   const [hoveredDistribution, setHoveredDistribution] = useState({ type: "", text: "", state: "" })
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
   const [showStateDensity, setShowStateDensity] = useState(false)
@@ -90,7 +86,32 @@ export function TrajectoriesChart() {
       value: "lines",
       keystroke: null,
       tooltip: "Individual Trajectories",
-      disabled: selectedLinks.length > 500,
+      disabled: false,
+      // disabled: selectedLinks.length > 500,
+    },
+  ]
+  const sideButtons = [
+    {
+      name: "Cluster",
+      value: "cluster",
+      keystroke: "",
+      tooltip: "",
+      disabled: false,
+    },
+    {
+      name: "Matrix",
+      value: "matrix",
+      keystroke: "",
+      tooltip: "",
+      disabled: false,
+    },
+    {
+      name: "Legend",
+      value: "legend",
+      keystroke: null,
+      tooltip: "",
+      disabled: false,
+      // disabled: selectedLinks.length > 500,
     },
   ]
 
@@ -200,18 +221,45 @@ export function TrajectoriesChart() {
           </Button>
         </div>
 
-        {features.matrix && (
-          <div id="matrix-controls">
-            <ListFilter size={16} />
-            <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
-              <option value="duration">Duration</option>
-              <option value="sourceD">Source</option>
-              <option value="targetD">Target</option>
-              <option value="sourceAge">Source Age</option>
-              <option value="targetAge">Target Age</option>
-            </select>
+        <div>
+          <div className="buttons-wrapper">
+            {sideButtons.map((b) => (
+              <Button
+                key={b.name}
+                data-selected={sideInfo === b.value}
+                size="xs"
+                keystroke={b.keystroke ?? ""}
+                onClick={() => setSideInfo(b.value)}
+                tooltip={b.tooltip}
+                disabled={b.disabled}
+              >
+                <p>
+                  {b.keystroke ? (
+                    <>
+                      <ShortcutSpan>{b.name[0]}</ShortcutSpan>
+                      {b.name.slice(1)}
+                    </>
+                  ) : (
+                    <>{b.name}</>
+                  )}
+                </p>
+              </Button>
+            ))}
           </div>
-        )}
+
+          {features.matrix && sideInfo === "matrix" && (
+            <div id="matrix-controls">
+              <ListFilter size={16} />
+              <select value={lineChartMode} onChange={(e) => setLineChartMode(e.target.value)}>
+                <option value="duration">Duration</option>
+                <option value="sourceD">Source</option>
+                <option value="targetD">Target</option>
+                <option value="sourceAge">Source Age</option>
+                <option value="targetAge">Target Age</option>
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="chart-container">
@@ -253,14 +301,14 @@ export function TrajectoriesChart() {
                       svgRef={svgRef}
                     />
 
-                    {selectedLinks.length < 500 && (
-                      <TrajectoriesMotion
-                        //Extended Context
-                        isSelectModeLines={chartMode === "lines"}
-                        //Local State
-                        showLinesOfSelectedLumps={showLinesOfSelectedLumps}
-                      />
-                    )}
+                    {/* {selectedLinks.length < 500 && ( */}
+                    <TrajectoriesMotion
+                      //Extended Context
+                      isSelectModeLines={chartMode === "lines"}
+                      //Local State
+                      showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+                    />
+                    {/* )} */}
                     {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
                   </g>
                 )}
@@ -282,8 +330,15 @@ export function TrajectoriesChart() {
             <p>{hoveredDistribution.text}</p>
           </Tooltip>
         </div>
-        {/* <Legend /> */}
-        {features.matrix && <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} />}
+        <div id="matrix-chart">
+          <div>
+            {/* {sideInfo === "legend" && <Legend />} */}
+            {features.matrix && sideInfo === "matrix" && (
+              <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} />
+            )}
+            {sideInfo === "cluster" && <ClusteringView />}
+          </div>
+        </div>
       </div>
     </>
   )

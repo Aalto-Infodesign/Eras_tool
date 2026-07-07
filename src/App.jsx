@@ -17,6 +17,7 @@ import { Header } from "./components/Header/Header"
 import { useModifierKey } from "./components/hooks/useModifierKey"
 import { features } from "./config/features"
 import { FlowProvider } from "./contexts/FlowContext"
+import { ClusteringProvider } from "./contexts/ClusteringContext"
 
 function App() {
   return (
@@ -25,9 +26,11 @@ function App() {
         <VizProvider>
           <FiltersProvider>
             <DerivedDataProvider>
-              <FlowProvider>
-                <AppContent />
-              </FlowProvider>
+              <ClusteringProvider>
+                <FlowProvider>
+                  <AppContent />
+                </FlowProvider>
+              </ClusteringProvider>
             </DerivedDataProvider>
           </FiltersProvider>
         </VizProvider>

@@ -145,6 +145,7 @@ function SankeyNode({
   onMouseEnter,
   onMouseLeave,
   updateIDsSelection,
+  clearIDsSelection,
   setHoveredButton,
 }) {
   const { palette } = useViz()
@@ -172,7 +173,7 @@ function SankeyNode({
   function handleNodeClick() {
     if (isSelected) {
       setSelectedNode(null)
-      updateIDsSelection([]) // only full reset happens here
+      clearIDsSelection() // real reset, not union([])
     } else {
       setSelectedNode(node)
     }
@@ -325,7 +326,7 @@ function SankeyLink({ link, setHoveredLink, hoveredTrajectory, onClick, selected
   )
 }
 // --- Main Sankey Component ---
-export function Sankey({ width, height, data, updateIDsSelection }) {
+export function Sankey({ width, height, data, updateIDsSelection, clearIDsSelection }) {
   const { palette } = useViz()
 
   const [selectedNode, setSelectedNode] = useState(null)
@@ -436,6 +437,7 @@ export function Sankey({ width, height, data, updateIDsSelection }) {
                 onMouseEnter={handleNodeEnter}
                 onMouseLeave={handleNodeLeave}
                 updateIDsSelection={updateIDsSelection}
+                clearIDsSelection={clearIDsSelection}
                 setHoveredButton={setHoveredButton}
               />
             ))}

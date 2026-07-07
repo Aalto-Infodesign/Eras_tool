@@ -1,0 +1,59 @@
+groupId	groupName	covariateId	conceptCode	covariateName
+g1	g1	4112343141	195662009	condition_occurrence: Acute viral pharyngitis
+g1	g1	4134304141	263102004	condition_occurrence: Fracture subluxation of wrist
+g2	g2	4112343141	No matching concept	age in years
+g2	g2	440086141	No matching concept	time (days) between cohort start and end
+g2	g2	4116491141	M	gender = MALE
+g2	g2	1002	F	gender = FEMALE
+g2	g2	1041	43878008	condition_occurrence: Streptococcal sore throat
+g2	g2	1010	70704007	condition_occurrence: Sprain of wrist
+g2	g2	8507001	69896004	condition_occurrence: Rheumatoid arthritis
+g2	g2	8532001	44465007	condition_occurrence: Sprain of ankle
+g2	g2	195588141	24079001	condition_occurrence: Atopic dermatitis
+g2	g2	28060141	40275004	condition_occurrence: Contact dermatitis
+g2	g2	198809141	38822007	condition_occurrence: Cystitis
+g2	g2	4048695141	235919008	condition_occurrence: Gallstone
+g2	g2	4059173141	45816000	condition_occurrence: Pyelonephritis
+g2	g2	4237458141	65275009	condition_occurrence: Acute cholecystitis
+g2	g2	4278672141	40055000	condition_occurrence: Chronic sinusitis
+g2	g2	40486433141	10509002	condition_occurrence: Acute bronchitis
+g2	g2	4001336141	65363002	condition_occurrence: Otitis media
+g2	g2	4299128141	62564004	condition_occurrence: Concussion with loss of consciousness
+g2	g2	260139141	62106007	condition_occurrence: Concussion with no loss of consciousness
+g2	g2	4218389141	192127007	condition_occurrence: Child attention deficit disorder
+g2	g2	40479768141	110030002	condition_occurrence: Concussion injury of brain
+g2	g2	4146173141	239720000	condition_occurrence: Tear of meniscus of knee
+g2	g2	4296204141	232353008	condition_occurrence: Perennial allergic rhinitis with seasonal variation
+g2	g2	198199141	15724005	condition_occurrence: Fracture of vertebral column without spinal cord injury
+g2	g2	134438141	233678006	condition_occurrence: Childhood asthma
+g2	g2	4094814141	16114001	condition_occurrence: Fracture of ankle
+g2	g2	4113008141	1734006	condition_occurrence: Fracture of vertebral column with spinal cord injury
+g2	g2	80809141	241929008	condition_occurrence: Acute allergic reaction
+g2	g2	378001141	262574004	condition_occurrence: Bullet wound
+g2	g2	4149245141	284551006	condition_occurrence: Laceration of foot
+g2	g2	196456141	195662009	condition_occurrence: Acute viral pharyngitis
+g2	g2	4084167141	284549007	condition_occurrence: Laceration of hand
+g2	g2	4156265141	301011002	condition_occurrence: Escherichia coli urinary tract infection
+g2	g2	4230399141	263102004	condition_occurrence: Fracture subluxation of wrist
+g2	g2	375671141	33737001	condition_occurrence: Fracture of rib
+g2	g2	4051466141	307731004	condition_occurrence: Injury of tendon of the rotator cuff of shoulder
+g2	g2	4152936141	30832001	condition_occurrence: Rupture of patellar tendon
+g2	g2	4283893141	283385000	condition_occurrence: Laceration of thigh
+g2	g2	4294548141	283371005	condition_occurrence: Laceration of forearm
+g2	g2	4296205141	370247008	condition_occurrence: Facial laceration
+g2	g2	40481087141	39848009	condition_occurrence: Whiplash injury to neck
+g2	g2	78272141	359817006	condition_occurrence: Closed fracture of hip
+g2	g2	133834141	58150001	condition_occurrence: Fracture of clavicle
+g2	g2	257012141	65966004	condition_occurrence: Fracture of forearm
+g2	g2	4066995141	367498001	condition_occurrence: Seasonal allergic rhinitis
+g2	g2	4048171141	36971009	condition_occurrence: Sinusitis
+g2	g2	81151141	75498004	condition_occurrence: Acute bacterial sinusitis
+g2	g2	40479422141	403190006	condition_occurrence: First degree burn
+g2	g2	4280726141	403191005	condition_occurrence: Second degree burn
+g2	g2	372328141	403192003	condition_occurrence: Third degree burn
+g2	g2	4142905141	444448004	condition_occurrence: Injury of medial collateral ligament of knee
+g2	g2	4155034141	444470001	condition_occurrence: Injury of anterior cruciate ligament
+g2	g2	40480160141	443165006	condition_occurrence: Pathological fracture due to osteoporosis
+g2	g2	4035415141	444814009	condition_occurrence: Viral sinusitis
+g2	g2	4109685141	446096008	condition_occurrence: Perennial allergic rhinitis
+g2	g2	4134304141	No matching concept	Year of birth

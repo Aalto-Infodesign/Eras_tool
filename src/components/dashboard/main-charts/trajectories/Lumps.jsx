@@ -1,24 +1,29 @@
 import { useMemo, useState, useEffect } from "react"
+import { motion } from "motion/react"
+import { includes, keyBy, map } from "lodash"
+import { scaleLinear, extent } from "d3"
+
 import { useCharts } from "../ChartsContext"
-
-import { includes, map } from "lodash"
-import { useLumpsData, useStatesDataFromLinks } from "../../../../utils/lumpsHelpers"
-
-import { AnimatePresence, motion } from "motion/react"
-
-import { useMouseMoveSvg } from "../../../hooks/useMouseMove"
-
 import { useViz } from "../../../../contexts/VizContext"
 import { useFilters } from "../../../../contexts/FiltersContext"
-import "./Lumps.css"
-
-import { scaleLinear, extent } from "d3"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
+import { useClustering } from "../../../../contexts/ClusteringContext"
+import { useLumpsData, useStatesDataFromLinks } from "../../../../utils/lumpsHelpers"
+
+import { LumpPolygon } from "./lumps/LumpPolygon"
+import { LumpExtremeLine } from "./lumps/LumpExtremeLine"
+import { BoxPlot } from "./lumps/BoxPlot"
+import { ScrubDots } from "./lumps/ScrubDots"
+import { RangeCursor } from "./lumps/RangeCursor"
+import { useFlashlight } from "./lumps/useFlashlight"
+
+import "./Lumps.css"
 
 export const Lumps = (props) => {
   const { palette } = useViz()
   const { selectedLumps, toggleSelectedLumps, toggleSelectedTrajectory } = useFilters()
-  const { lumps, selectedLinks } = useDerivedData()
+  const { lumps, selectedLinks, filteredLinks } = useDerivedData()
+  const { representativeWeights } = useClustering()
 
   const {
     marginTop,
@@ -37,27 +42,11 @@ export const Lumps = (props) => {
   const { hoveredLump, setHoveredLump } = props
   const { showLinesOfSelectedLumps } = props
 
-  const { x, y } = chartScales
-
   const lumpPadding = 2
   const lumpOffsetX = 2
 
-  const flashlightRadius = 2
-
   const [hoveredLine, setHoveredLine] = useState(null)
-  const svgCursorPosition = useMouseMoveSvg(svgRef)
-
-  // Function to convert and check if circle is in flashlight
-  const isInFlashlight = (cx, cy) => {
-    const dx = svgCursorPosition.x - cx
-    const dy = svgCursorPosition.y - cy
-    const distance = Math.sqrt(dx * dx + dy * dy)
-
-    return {
-      visible: distance < flashlightRadius,
-      opacity: Math.max(0, 1 - distance / flashlightRadius),
-    }
-  }
+  const { cursor, isInFlashlight, radius: flashlightRadius } = useFlashlight(svgRef)
 
   const highlightedLinks = useMemo(() => {
     if (selectedLinks.length === 0 || hoveredTrajectoriesIDs.length === 0 || selectedIndex === null)
@@ -65,9 +54,16 @@ export const Lumps = (props) => {
     return selectedLinks.filter((d) => hoveredTrajectoriesIDs.includes(d.id))
   }, [selectedLinks, hoveredTrajectoriesIDs, selectedIndex])
 
-  const globalLumpData = useStatesDataFromLinks(selectedLinks)
-
+  // Per-state lump lines follow the represented trajectories (weighted by cluster
+  // size), falling back to the full population until clustering produces medoids.
+  const lumpLineLinks = selectedLinks
+  // const lumpLineLinks = representativeLinks.length ? representativeLinks : selectedLinks
+  const globalLumpData = useStatesDataFromLinks(lumpLineLinks, representativeWeights)
   const subsetLumpData = useStatesDataFromLinks(highlightedLinks)
+  const statesData = useStatesDataFromLinks(filteredLinks)
+
+  // Whisker source, matched to the range source by state key.
+  const statesDataByState = useMemo(() => keyBy(statesData, "state"), [statesData])
 
   const allTypes = lumps.map((t) => t.type)
 
@@ -81,11 +77,6 @@ export const Lumps = (props) => {
       present: presentLumps.filter((p) => p.type === t),
     }))
   }, [allTypes, presentLumps])
-
-  const medianRect = {
-    width: 1,
-    height: 1.6,
-  }
 
   const lumpPolygonProps = useMemo(
     () => ({
@@ -112,14 +103,12 @@ export const Lumps = (props) => {
     const hoveredData = globalLumpData.find((d) => d.state === hoveredLine)
 
     if (hoveredData) {
-      console.log(hoveredData.items.length)
       if (hoveredData.items.length > 300) return
       const visibleCandidates = []
 
       for (const item of hoveredData.items) {
-        // console.log(item)
-        const cx = x(item.source.x)
-        const cy = y(hoveredData.state) + marginTop
+        const cx = chartScales.x(item.source.x)
+        const cy = chartScales.y(hoveredData.state) + marginTop
         const flashlight = isInFlashlight(cx, cy)
 
         if (flashlight.visible) {
@@ -145,11 +134,10 @@ export const Lumps = (props) => {
     hoveredLine,
     svgRef,
     globalLumpData,
-    x,
-    y,
+    chartScales,
     marginTop,
     hoveredTrajectoriesIDs,
-    svgCursorPosition,
+    isInFlashlight,
     setHoveredTrajectoriesIDs,
   ])
 
@@ -161,13 +149,19 @@ export const Lumps = (props) => {
     return scale
   }, [presentLumps])
 
+  // Click on a range line while scrubbing selects the trajectory under the cursor.
+  const handleRangeLineClick = () => {
+    hoveredTrajectoriesIDs.length > 0 &&
+      enableScrub &&
+      toggleSelectedTrajectory(hoveredTrajectoriesIDs[selectedIndex])
+  }
+
   return (
     <g id="lumps">
       <motion.g id={"lump-elements"} animate={{ opacity: subsetLumpData.length > 0 ? 0.5 : 1 }}>
-        {/* <AnimatePresence> */}
+        {/* Lump polygons, one group per source-target type */}
         {!isSelectModeLines &&
-          allLumps.map((d) => {
-            const { type, present, past, remote } = d
+          allLumps.map(({ type, present }) => {
             return (
               <motion.g
                 key={`lump-group-${type}`}
@@ -175,7 +169,6 @@ export const Lumps = (props) => {
                 className="lump-group"
                 animate={{ opacity: showLinesOfSelectedLumps ? 0.5 : 1 }}
               >
-                {/* Present Lumps */}
                 {present.length > 0 && (
                   <LumpPolygon
                     {...lumpPolygonProps}
@@ -190,419 +183,86 @@ export const Lumps = (props) => {
             )
           })}
 
-        {/* Lump Lines Extreme (items.length === 1) */}
+        {/* Single-link lumps, rendered as bare lines */}
         {!isSelectModeLines &&
-          lumpLinesExtreme.map((d) => {
-            const isSelected = includes(map(selectedLumps, "type"), d.type)
-            return (
-              <motion.line
-                key={`lump-line-extreme-${d.type}`}
-                id={`lump-line-extreme-${d.type}`}
-                className={"lump-line-extreme"}
-                initial={{
-                  strokeWidth: 2,
-                  opacity: 0,
-                  stroke: `url(#gradient-${d.source.state}-${d.target.state})`,
-                  strokeLinecap: "round",
-                  pathLength: 0,
-                  x1: x(d.source.xExtent[0]),
-                  x2: x(d.target.xExtent[0]),
-                  y1: y(d.source.state) + marginTop,
-                  y2: y(d.target.state) + marginTop,
-                }}
-                animate={{
-                  opacity: isSelected ? 1 : 0.3,
-                  x1: x(d.source.xExtent[0]),
-                  x2: x(d.target.xExtent[0]),
-                  y1: y(d.source.state) + marginTop,
-                  y2: y(d.target.state) + marginTop,
-                  pathLength: 1,
-                  strokeWidth: 1,
-                }}
-                whileHover={{ strokeWidth: 2, opacity: isSelected ? 1 : 0.3 }}
-                exit={{ strokeWidth: 0, pathLength: 0 }}
-                transition={{ duration: animationDuration }}
-                onClick={() => toggleSelectedLumps(d)}
-                // onMouseEnter={() => setHoveredLump(d)}
-                // onMouseLeave={() => setHoveredLump()}
-              />
-            )
-          })}
+          lumpLinesExtreme.map((d) => (
+            <LumpExtremeLine
+              key={`lump-line-extreme-${d.type}`}
+              d={d}
+              x={chartScales.x}
+              y={chartScales.y}
+              marginTop={marginTop}
+              isSelected={includes(map(selectedLumps, "type"), d.type)}
+              onClick={() => toggleSelectedLumps(d)}
+              animationDuration={animationDuration}
+            />
+          ))}
 
-        {/* Global Lump Data Lines/Labels (Per State) */}
+        {/* Per-state box plots: selected/weighted links as the range line,
+            the full filtered population as the whiskers */}
         {globalLumpData.map((d) => {
+          const y = chartScales.y(d.state) + marginTop
           return (
-            <motion.g
+            <BoxPlot
               key={`lump-line-group-${d.state}`}
-              id={`lump-line-group-${d.state}`}
-              className="lump-line-group"
-              whileHover={"hovered"}
-              initial={{ y: y(d.state) + marginTop - 5 }}
-              animate={{ y: y(d.state) + marginTop - 5 }}
-              transition={{ duration: animationDuration }}
-              onMouseLeave={() => setHoveredLine(null)}
-              onMouseEnter={() => setHoveredLine(d.state)}
+              state={d.state}
+              range={d}
+              fullRange={statesDataByState[d.state]}
+              xScale={chartScales.x}
+              y={y}
+              color={palette[d.state]}
+              strokeWidth={3}
+              hasLabels
+              interactive
+              onHover={setHoveredLine}
+              onLeave={() => setHoveredLine(null)}
+              onClick={handleRangeLineClick}
+              animationDuration={animationDuration}
             >
-              {/* Transparent rect for interaction */}
-              <rect
-                x={x(d.xExtent[0])}
-                width={x(d.xExtent[1]) - x(d.xExtent[0])}
-                height={5}
-                fill="transparent"
-                opacity={0.5}
-              />
-              <LumpLine
-                name={"main"}
-                d={d}
-                fillColor={palette[d.state]}
-                x={x}
-                y={marginTop / 2}
-                marginTop={marginTop}
-                onHover={setHoveredLine}
-                toggleSelectedTrajectory={toggleSelectedTrajectory}
-                hoveredTrajectoriesIDs={hoveredTrajectoriesIDs}
-                selectedIndex={selectedIndex}
-                strokeWidth={1.5}
-                animationDuration={animationDuration}
-              />
-
-              <AnimatePresence>
-                {enableScrub &&
-                  hoveredLine === d.state &&
-                  d.items.map((item) => {
-                    const cx = x(item.x)
-                    const cy = y(d.state) + marginTop
-                    const flashlight = isInFlashlight(cx, cy)
-
-                    if (!flashlight.visible) return null
-
-                    return (
-                      <motion.circle
-                        id={`lump-${item.state}-circle-${item.id}-${item.x}`}
-                        key={`lump-${item.state}-circle-${item.id}-${item.x}`}
-                        initial={{ cx: cx, cy: cy, r: 0, opacity: flashlight.opacity * 0.8 }}
-                        animate={{
-                          fill: "white",
-                          r: flashlight.opacity * 2,
-                        }}
-                        exit={{ r: 0 }}
-                        whileHover={{ scale: 1.5, opacity: 1 }}
-                        onClick={() => enableScrub && toggleSelectedTrajectory(item.id)}
-                        style={{ cursor: "pointer" }}
-                      />
-                    )
-                  })}
-              </AnimatePresence>
-
-              <motion.g id={`lump-labels-${d.state}`} className={"lump-labels"}>
-                <motion.text
-                  id={`lump-label-start-${d.state}`}
-                  className={`lump-label-start`}
-                  fontSize={3}
-                  initial={{ x: x(d.xExtent[0]), y: 0, opacity: 0 }}
-                  animate={{ x: x(d.xExtent[0]), y: 0, opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: animationDuration }}
-                >
-                  {d.xExtent[0].toFixed(0) + "y"}
-                </motion.text>
-                <motion.text
-                  id={`lump-label-end-${d.state}`}
-                  className={`lump-label-end`}
-                  fontSize={3}
-                  initial={{ x: x(d.xExtent[1]), y: 0, opacity: 0 }}
-                  animate={{ x: x(d.xExtent[1]), y: 0, opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: animationDuration }}
-                >
-                  {d.xExtent[1].toFixed(0) + "y"}
-                </motion.text>
-              </motion.g>
-
-              <motion.rect
-                id={`median-line-${d.state}`}
-                className={"median-line"}
-                rx={0.5}
-                initial={{
-                  width: 0,
-                  height: medianRect.height,
-                  x: x(d.median) - medianRect.width / 2,
-                  y: 5 - medianRect.height / 2,
-                }}
-                animate={{
-                  width: medianRect.width,
-                  x: x(d.median) - medianRect.width / 2,
-                  y: 5 - medianRect.height / 2,
-                }}
-                exit={{ width: 0 }}
-                transition={{ duration: animationDuration }}
-              />
-            </motion.g>
+              {enableScrub && hoveredLine === d.state && (
+                <ScrubDots
+                  items={d.items}
+                  xScale={chartScales.x}
+                  absoluteY={y}
+                  isInFlashlight={isInFlashlight}
+                  onSelect={toggleSelectedTrajectory}
+                />
+              )}
+            </BoxPlot>
           )
         })}
       </motion.g>
 
       <motion.g id={"scrub-elements"}>
+        {/* Hovered-trajectories subset, as plain white range lines */}
         {enableScrub &&
-          subsetLumpData.map((d) => {
-            return (
-              <motion.g
-                key={`$subset-lump-line-group-${d.state}`}
-                id={`$subset-lump-line-group-${d.state}`}
-                className="subset-lump-line-group"
-                whileHover={"hovered"}
-                initial={{ y: y(d.state) + marginTop - 5 }}
-                animate={{ y: y(d.state) + marginTop - 5 }}
-              >
-                <LumpLine
-                  name={"subset"}
-                  d={d}
-                  fillColor={"hsl(0,0%,100%)"}
-                  x={x}
-                  y={marginTop / 2}
-                  marginTop={marginTop}
-                  onHover={setHoveredLine}
-                  toggleSelectedTrajectory={toggleSelectedTrajectory}
-                  hoveredTrajectoriesIDs={hoveredTrajectoriesIDs}
-                  selectedIndex={selectedIndex}
-                  strokeWidth={2.5}
-                  animationDuration={animationDuration}
-                />
-              </motion.g>
-            )
-          })}
+          subsetLumpData.map((d) => (
+            <BoxPlot
+              key={`subset-lump-line-group-${d.state}`}
+              variant="subset"
+              state={d.state}
+              range={d}
+              xScale={chartScales.x}
+              y={chartScales.y(d.state) + marginTop}
+              color={"hsl(0,0%,100%)"}
+              strokeWidth={2}
+              hasMedian={false}
+              onHover={setHoveredLine}
+              onClick={handleRangeLineClick}
+              animationDuration={animationDuration}
+            />
+          ))}
 
         {!isSelectModeLines && hoveredLine && enableScrub && (
-          <motion.g
-            id="range-cursor"
-            key="range-cursor"
-            initial={{ y: y(hoveredLine) + marginTop, x: svgCursorPosition.x }}
-            animate={{ y: y(hoveredLine) + marginTop, x: svgCursorPosition.x }}
-            exit={{ y: y(hoveredLine) + marginTop, x: svgCursorPosition.x }}
-            transition={{ default: { duration: animationDuration }, x: { duration: 0 } }}
-            style={{ pointerEvents: "none" }}
-          >
-            <motion.line
-              initial={{ y2: 4 }}
-              animate={{ y2: -4 }}
-              exit={{ y2: 4 }}
-              y1={4}
-              stroke="white"
-              strokeWidth={0.5}
-              strokeOpacity={0.6}
-            />
-            <motion.rect
-              initial={{
-                x: -flashlightRadius / 2,
-                y: -3,
-                width: 0,
-                height: 6,
-              }}
-              animate={{
-                x: -flashlightRadius,
-                width: flashlightRadius * 2,
-              }}
-              exit={{
-                x: -flashlightRadius,
-                width: 0,
-              }}
-              transition={{
-                default: { duration: animationDuration, ease: "easeInOut" },
-                x: { duration: 0 },
-              }}
-              fill="white"
-              fillOpacity={0.3}
-              stroke="white"
-              // strokeOpacity={0.1}
-              strokeWidth={0}
-              rx={1}
-              onMouseLeave={() => setHoveredLine(null)}
-            />
-          </motion.g>
+          <RangeCursor
+            x={cursor.x}
+            y={chartScales.y(hoveredLine) + marginTop}
+            radius={flashlightRadius}
+            animationDuration={animationDuration}
+            onLeave={() => setHoveredLine(null)}
+          />
         )}
       </motion.g>
-      {/* </AnimatePresence> */}
     </g>
-  )
-}
-
-const LumpPolygon = ({
-  data,
-  timePlacement,
-  selectedLumps,
-  toggleSelectedLumps,
-  hoveredLump,
-  setHoveredLump,
-  x,
-  y,
-  marginTop,
-  lumpPadding,
-  lumpOffsetX,
-  palette,
-  animationDuration,
-  opacityScale,
-}) => {
-  const { isDragging } = useFilters()
-  // --- Memoize polygon calculations ---
-  const [polygonPoints, originPolygonPoints] = useMemo(() => {
-    function createPolygonFromLump(data) {
-      const sourceY = y(data.source.state) + marginTop
-      const targetY = y(data.target.state) + marginTop
-      const sourcePadding = targetY > sourceY ? lumpPadding : -lumpPadding
-      const targetPadding = targetY > sourceY ? -lumpPadding : lumpPadding
-      const offsetX = targetY > sourceY ? -lumpOffsetX : lumpOffsetX
-
-      return `${x(data.source.xExtent[0]) - offsetX},${sourceY + sourcePadding} ${
-        x(data.source.xExtent[1]) - offsetX
-      },${sourceY + sourcePadding} ${x(data.target.xExtent[1]) + offsetX},${targetY + targetPadding} ${
-        x(data.target.xExtent[0]) + offsetX
-      },${targetY + targetPadding}`
-    }
-
-    function createOriginPolygonFromLump(data) {
-      const sourceY = y(data.source.state) + marginTop
-      const targetY = y(data.target.state) + marginTop
-      const sourcePadding = targetY > sourceY ? lumpPadding : -lumpPadding
-      const targetPadding = targetY > sourceY ? -lumpPadding : lumpPadding
-      const offsetX = targetY > sourceY ? -lumpOffsetX : lumpOffsetX
-
-      return `${x(data.source.xExtent[0]) - offsetX},${sourceY + sourcePadding} ${
-        x(data.source.xExtent[0]) - offsetX
-      },${sourceY + sourcePadding} ${x(data.target.xExtent[0]) + offsetX},${targetY + targetPadding} ${
-        x(data.target.xExtent[0]) + offsetX
-      },${targetY + targetPadding}`
-    }
-
-    return [createPolygonFromLump(data), createOriginPolygonFromLump(data)]
-  }, [data, x, y, marginTop, lumpPadding, lumpOffsetX])
-
-  // --- Calculate fill based on time placement ---
-  const fill = useMemo(() => {
-    if (timePlacement === "present") {
-      if (data.source.state === data.target.state) {
-        return palette[data.source.state]
-      } else {
-        return `url(#gradient-${data.source.state}-${data.target.state})`
-      }
-    } else if (timePlacement === "past") {
-      return "url(#patternLines)"
-    } else if (timePlacement === "remote") {
-      return "url(#patternCircles)"
-    }
-    return ""
-  }, [timePlacement, data.source.state, data.target.state, palette])
-
-  // --- Calculate selection and hover states ---
-  const isSelected = includes(map(selectedLumps, "type"), data.type)
-  const isHovered = hoveredLump && hoveredLump.type === data.type
-
-  // --- Calculate opacity based on hover and selection state ---
-  const opacity = useMemo(() => {
-    const baseOpacity = opacityScale(data.links.length)
-
-    if (isSelected) {
-      // This lump is selected but not hovered: use base opacity
-      return 1
-    }
-    if (!hoveredLump) {
-      // Nothing is hovered: use scale-based opacity
-      return baseOpacity
-    }
-
-    if (isHovered) {
-      // This lump is hovered: boost opacity further if selected
-      return isSelected ? 1 : opacityScale(data.links.length)
-    }
-
-    // Something else is hovered: decrease opacity
-    return 0.2
-  }, [hoveredLump, isHovered, isSelected, opacityScale, data.links.length])
-
-  // console.log(opacity)
-
-  const id = `lump-${timePlacement}-${data.type}`
-  const className = `lump-${timePlacement}`
-
-  return (
-    <motion.polygon
-      key={id}
-      id={id}
-      className={className}
-      initial={{ opacity: 0.1, points: originPolygonPoints }}
-      animate={{
-        opacity: opacity,
-        points: polygonPoints,
-        scaleY: isDragging ? 0.9 : 1,
-      }}
-      exit={{ points: originPolygonPoints }}
-      transition={{ duration: animationDuration }}
-      fill={fill}
-      strokeWidth={isSelected ? 0.5 : 0}
-      stroke={"white"}
-      style={{ cursor: "pointer" }}
-      onClick={() => toggleSelectedLumps(data)}
-      onMouseEnter={() => setHoveredLump(data)}
-      onMouseLeave={() => setHoveredLump(null)}
-    />
-  )
-}
-
-const LumpLine = ({
-  name,
-  d,
-  x,
-  y,
-
-  onHover,
-  fillColor,
-  strokeWidth,
-  toggleSelectedTrajectory = () => {},
-  hoveredTrajectoriesIDs = [],
-  selectedIndex = 0,
-  animationDuration,
-}) => {
-  const { enableScrub } = useCharts()
-  const handleClick = () => {
-    console.log("click")
-    hoveredTrajectoriesIDs.length > 0 &&
-      enableScrub &&
-      toggleSelectedTrajectory(hoveredTrajectoriesIDs[selectedIndex])
-  }
-
-  return (
-    <motion.line
-      id={`${name}-lump-line-${d.state}`}
-      key={`${name}-lump-line-${d.state}`}
-      className={"lump-line"}
-      initial={{
-        x1: x(d.xExtent[0]),
-        x2: x(d.xExtent[1]),
-        y1: y,
-        y2: y,
-        strokeWidth: 0,
-        strokeLinecap: "round",
-        stroke: fillColor,
-        pathLength: 0,
-      }}
-      animate={{
-        x1: x(d.xExtent[0]),
-        x2: x(d.xExtent[1]),
-        y1: y,
-        y2: y,
-        strokeWidth: strokeWidth,
-        stroke: fillColor,
-        // stroke: palette[d.state],
-
-        pathLength: 1,
-      }}
-      exit={{ pathLength: 0, strokeWidth: 0 }}
-      // whileHover={{ strokeWidth: 2.5 }}
-      transition={{ duration: animationDuration }}
-      onMouseEnter={() => onHover(d.state)}
-      // onMouseLeave={() => onHover(null)}
-      onClick={handleClick}
-
-      // onMouseLeave={() => setHoveredLine(null)}
-    />
   )
 }

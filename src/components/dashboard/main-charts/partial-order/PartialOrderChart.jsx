@@ -147,6 +147,7 @@ export function PartialOrderChart() {
     const merged = union(present.ids, ids)
     dispatch({ type: "DO", newPresent: { ids: merged } })
   }
+  const clearIDsSelection = () => dispatch({ type: "DO", newPresent: { ids: [] } })
   const undo = () => dispatch({ type: "UNDO" })
   const redo = () => dispatch({ type: "REDO" })
 
@@ -180,6 +181,7 @@ export function PartialOrderChart() {
             height={500}
             data={sankeyData}
             updateIDsSelection={updateIDsSelection}
+            clearIDsSelection={clearIDsSelection}
           />
         ) : (
           <div className="no-data-panel">

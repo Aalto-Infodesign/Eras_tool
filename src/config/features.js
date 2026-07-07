@@ -5,7 +5,8 @@ const isProd = process.env.NODE_ENV === "production"
 export const features = {
   fileLoader: true,
   flowChart: true,
-  clusters: !isProd,
+  clusters: true,
+  // clusters: !isProd,
   // Main Dashboard
   dashboard: true,
 

@@ -5,6 +5,13 @@
   flex-direction: column;
   gap: var(--spacing-sm);
   overflow: scroll;
+  font-size: var(--text-sm);
+}
+
+.clusteringHeader {
+  display: flex;
+  place-content: space-between;
+  align-items: center;
 }
 
 .tableWrapper {
@@ -12,12 +19,12 @@
   max-width: 600px;
 
   overflow: scroll;
+  padding: 0 var(--spacing-md);
 }
 
 table {
   font-size: var(--text-xs);
   border: none;
-
   /* height: 100%; */
 }
 
@@ -34,7 +41,8 @@ thead {
 
 th,
 td {
-  padding: var(--spacing-xs) var(--spacing-sm);
+  /* padding: var(--spacing-xs) var(--spacing-sm); */
+  padding: var(--spacing-xs);
 }
 
 tr {

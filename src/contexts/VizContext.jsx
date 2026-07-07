@@ -29,7 +29,7 @@ export function VizProvider({ children }) {
 
   const [loadingCount, setLoadingCount] = useState(0)
 
-  const [chartType, setChartType] = useState(1)
+  const [chartType, setChartType] = useState(2)
   const [isHasse, setIsHasse] = useState(false) // false: typologies, true: hasse
 
   const [isSidePanelOpen, setSidePanelOpen] = useState(false)

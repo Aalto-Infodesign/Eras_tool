@@ -30,7 +30,6 @@ export function DerivedDataProvider({ children }) {
     selectedTrajectoriesIDs,
     trajectoriesSelectionMode,
     removedStates,
-    IDsFromClustering,
   } = useFilters()
   const { chartType } = useViz()
 
@@ -155,14 +154,9 @@ export function DerivedDataProvider({ children }) {
       return true
     })
 
-    const linksByClustering =
-      IDsFromClustering.length === 0
-        ? filteredLinks
-        : filteredLinks.filter((d) => IDsFromClustering.includes(d.id))
-
     console.timeEnd("Selected Links")
-    return selectedSilhouettesData.length === 0 ? linksByClustering : linksBySelectedSilhouettes
-  }, [silhouettes, selectedSilhouettesData, filteredLinks, IDsFromClustering])
+    return selectedSilhouettesData.length === 0 ? filteredLinks : linksBySelectedSilhouettes
+  }, [silhouettes, selectedSilhouettesData, filteredLinks])
 
   const IDsFromSelectedSilhouettes = useMemo(() => {
     if (!selectedSilhouettesData?.length) return []

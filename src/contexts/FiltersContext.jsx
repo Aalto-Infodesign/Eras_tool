@@ -45,10 +45,6 @@ export function FiltersProvider({ children }) {
 
   const [trajectoriesSelectionMode, setTrajectoriesSelectionMode] = useState("all") // all, diagonal, parallel
 
-  // Clustering Results
-  // Clustering Winners
-  const [IDsFromClustering, setIDsFromClustering] = useState([])
-
   //Reset when fileName changes
   useEffect(() => {
     setSelectedSilhouettesNames([])
@@ -178,10 +174,6 @@ export function FiltersProvider({ children }) {
 
       //Flag
       filtersActive,
-
-      //Clustering
-      IDsFromClustering,
-      setIDsFromClustering,
     }),
     [
       filtersSelection,
@@ -201,7 +193,6 @@ export function FiltersProvider({ children }) {
       //Flag
       filtersActive,
       filtersInverted,
-      IDsFromClustering,
     ],
   )
 
