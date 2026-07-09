@@ -68,7 +68,6 @@ export function ChartsContainer() {
           >
             {chartType === 1 && <PartialOrderChart />}
             {chartType === 2 && <TrajectoriesChart />}
-            {/* {chartType === 3 && <ArcContainer />} */}
           </motion.section>
         </ChartsProvider>
       </div>

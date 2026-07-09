@@ -59,6 +59,7 @@ const Whisker = ({
       className="whisker-line active-line"
       initial={{ x1: xScale(from), x2: xScale(from) }}
       animate={{ x1: xScale(from), x2: xScale(to), opacity }}
+      exit={{ x1: xScale(from), x2: xScale(from) }}
       transition={{ duration: animationDuration }}
       strokeWidth={0.5}
       stroke={color}
@@ -186,8 +187,9 @@ export const BoxPlot = ({
       id={`${prefix}lump-line-group-${state}`}
       className={`${prefix}lump-line-group`}
       whileHover={"hovered"}
-      initial={{ y: y - BASELINE_OFFSET }}
-      animate={{ y: y - BASELINE_OFFSET }}
+      initial={{ y: y - BASELINE_OFFSET, opacity: 0 }}
+      animate={{ y: y - BASELINE_OFFSET, opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: animationDuration }}
       onMouseEnter={interactive ? () => onHover(state) : undefined}
       onMouseLeave={interactive ? () => onLeave() : undefined}
@@ -203,6 +205,8 @@ export const BoxPlot = ({
         />
       )}
 
+  
+
       {fullRange && (
         <>
           <Whisker
@@ -212,7 +216,7 @@ export const BoxPlot = ({
             to={range.quartiles.min}
             xScale={xScale}
             color={color}
-            enterFromY={y}
+            enterFromY={BASELINE_OFFSET}
             animationDuration={animationDuration}
           />
           <Whisker
@@ -222,7 +226,7 @@ export const BoxPlot = ({
             to={range.quartiles.max}
             xScale={xScale}
             color={color}
-            enterFromY={y}
+            enterFromY={BASELINE_OFFSET}
             animationDuration={animationDuration}
           />
         </>

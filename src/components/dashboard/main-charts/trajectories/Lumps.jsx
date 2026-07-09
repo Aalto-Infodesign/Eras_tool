@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react"
-import { motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import { includes, keyBy, map } from "lodash"
 import { scaleLinear, extent } from "d3"
 
@@ -234,34 +234,36 @@ export const Lumps = (props) => {
       </motion.g>
 
       <motion.g id={"scrub-elements"}>
-        {/* Hovered-trajectories subset, as plain white range lines */}
-        {enableScrub &&
-          subsetLumpData.map((d) => (
-            <BoxPlot
-              key={`subset-lump-line-group-${d.state}`}
-              variant="subset"
-              state={d.state}
-              range={d}
-              xScale={chartScales.x}
-              y={chartScales.y(d.state) + marginTop}
-              color={"hsl(0,0%,100%)"}
-              strokeWidth={2}
-              hasMedian={false}
-              onHover={setHoveredLine}
-              onClick={handleRangeLineClick}
-              animationDuration={animationDuration}
-            />
-          ))}
+        <AnimatePresence>
+          {/* Hovered-trajectories subset, as plain white range lines */}
+          {enableScrub &&
+            subsetLumpData.map((d) => (
+              <BoxPlot
+                key={`subset-lump-line-group-${d.state}`}
+                variant="subset"
+                state={d.state}
+                range={d}
+                xScale={chartScales.x}
+                y={chartScales.y(d.state) + marginTop}
+                color={"hsl(0,0%,100%)"}
+                strokeWidth={2}
+                hasMedian={false}
+                onHover={setHoveredLine}
+                onClick={handleRangeLineClick}
+                animationDuration={animationDuration}
+              />
+            ))}
 
-        {!isSelectModeLines && hoveredLine && enableScrub && (
-          <RangeCursor
-            x={cursor.x}
-            y={chartScales.y(hoveredLine) + marginTop}
-            radius={flashlightRadius}
-            animationDuration={animationDuration}
-            onLeave={() => setHoveredLine(null)}
-          />
-        )}
+          {!isSelectModeLines && hoveredLine && enableScrub && (
+            <RangeCursor
+              x={cursor.x}
+              y={chartScales.y(hoveredLine) + marginTop}
+              radius={flashlightRadius}
+              animationDuration={animationDuration}
+              onLeave={() => setHoveredLine(null)}
+            />
+          )}
+        </AnimatePresence>
       </motion.g>
     </g>
   )

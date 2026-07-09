@@ -265,14 +265,19 @@ export function TrajectoriesChart() {
       <div className="chart-container">
         {showDistributions && (
           <div className="svg-container" id="distributions-chart">
-            <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 70 ${h}`}>
+            <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 70 ${h}`} height={"100%"}>
               <StateTypeDistribution setHoveredDistribution={setHoveredDistribution} />
             </svg>
           </div>
         )}
 
         <div className="svg-container" id="state-labels">
-          <svg id="state-labels" preserveAspectRatio="xMidYMid meet" viewBox={`0 0 35 ${h}`}>
+          <svg
+            id="state-labels"
+            preserveAspectRatio="xMidYMid meet"
+            viewBox={`0 0 35 ${h}`}
+            height={"100%"}
+          >
             <StateLabels />
           </svg>
         </div>
