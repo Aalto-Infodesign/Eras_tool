@@ -34,8 +34,8 @@ import { flatten } from "lodash"
 const DEFAULTS = {
   bandwidth: null, // null → estimated per silhouette
   bandwidthFactor: 0.3,
-  mergeFactor: 0.5,
-  diversityFactor: 20.0, // min medoid-to-medoid distance for the display subset, × bandwidth
+  mergeFactor: 10,
+  diversityFactor: 0, // min medoid-to-medoid distance for the display subset, × bandwidth
   maxSeeds: 500,
   maxIteration: 100,
   epsilon: 1e-4,

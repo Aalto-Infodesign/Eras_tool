@@ -7,7 +7,8 @@ import { useViz } from "../../../../contexts/VizContext"
 import { useFilters } from "../../../../contexts/FiltersContext"
 
 import "./Trajectories.css"
-import { flattenDeep, union, uniqBy } from "lodash"
+
+import { flattenDeep, groupBy, minBy, union, uniqBy, mapValues, maxBy } from "lodash"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import { useClustering } from "../../../../contexts/ClusteringContext"
 import { useDebouncedState } from "hamo"
@@ -103,7 +104,34 @@ export function TrajectoriesMotion(props) {
 
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
 
-  // TODO : VERTICAL LINKS DO NOT SHOW UP
+  // Rank by source.date (when THIS patient entered THIS state), not firstDate:
+  // firstDate is per-patient and within a silhouette every patient hits every
+  // state, so per-state min/max would collapse to the same two patients
+  const extremeLinksByState = useMemo(
+    () =>
+      mapValues(groupBy(selectedLinks, "source.state"), (links) => ({
+        min: minBy(links, "source.date"),
+        max: maxBy(links, "source.date"),
+      })),
+    [selectedLinks],
+  )
+
+  console.log(extremeLinksByState)
+
+  // Full trajectories (every link, not just the extreme one) of the patients
+  // owning each state's earliest/latest entry — matching on id recovers the
+  // whole path
+  const extremeTrajectories = useMemo(() => {
+    if (isOverview) return []
+    const ids = new Set(
+      Object.values(extremeLinksByState).flatMap(({ min, max }) => [min?.id, max?.id]),
+    )
+    ids.delete(undefined)
+    return selectedLinks.filter((l) => ids.has(l.id))
+  }, [extremeLinksByState, selectedLinks])
+
+  console.log(extremeTrajectories)
+
   // Vertical transitions are a key visual signal but a 0 duration is far from
   // the cluster means, so medoids rarely carry them — draw them all, but only
   // one line per overlapping pixel position
@@ -284,6 +312,30 @@ export function TrajectoriesMotion(props) {
               )
             }
           })}
+
+        {extremeTrajectories.map((d) => (
+          <MotionLine
+            key={`extreme-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
+            id={`extreme-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
+            d={d}
+            x1={x(d.source.x)}
+            x2={x(d.target.x)}
+            y1={y(d.source.state) + marginTop}
+            y2={y(d.target.state) + marginTop}
+            color={
+              d.speed > 0
+                ? `url(#gradient-${d.source.state}-${d.target.state})`
+                : palette[d.source.state]
+            }
+            strokeWidth={0.75}
+            isSelected={selectedTrajectoriesIDs.includes(d.id)}
+            animationDuration={0.2}
+            // onClick={() => toggleSelectedTrajectory(d.id)}
+            // onMouseEnter={() => handleMouseEnter(d)}
+            // onMouseLeave={() => handleMouseLeave()}
+            opacity={0.2}
+          />
+        ))}
 
         {ageMarkers &&
           ageMarkers.map((m) => (
