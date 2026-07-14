@@ -7,7 +7,7 @@
  * POST message in:
  * { type: 'run', runId: number,
  *   matrices: Array<{ id: string, ids: string[], matrix: number[][] }>,
- *   params?: { bandwidth?, bandwidthFactor?, mergeFactor?, diversityFactor?,
+ *   params?: { bandwidth?, bandwidthFactor?, mergeFactor?,
  *              maxSeeds?, maxIteration?, epsilon?, scoreSampleLimit? } }
  * { type: 'pause' }   // halt after the current silhouette, keep queue position
  * { type: 'resume' }  // continue a paused run from where it stopped
@@ -18,9 +18,13 @@
  *   medoidIDs: string[] }  // modes discovered so far within this silhouette (faded preview)
  * { type: 'silhouette-result', runId, index, total, id,
  *   clusters: Array<{ cluster, center, size, medoidIndex, medoidID }>,
- *   assignments: Array<{ trajectoryID, cluster }>,
+ *   // per-individual hard assignment + Gaussian-kernel soft membership weights
+ *   // (σ = bandwidth; one weight per cluster, in `clusters` order, row sums to 1;
+ *   // NOT calibrated probabilities — kernel membership weights):
+ *   assignments: Array<{ trajectoryID, cluster, memberships: number[] }>,
  *   medoidIDs: string[],
- *   // diversity-pruned + percentage-capped display subset of clusters:
+ *   // 1:1 with clusters (no prune, no cap — cluster resolution is kept low via
+ *   // mergeFactor instead), sorted by size desc:
  *   representatives: Array<{ medoidID, medoidIndex, cluster, size, representedSize }>,
  *   medianMedoidID: string,  // representative with the median total duration (reveal highlight)
  *   metrics: { nClusters, nRepresentatives, meanSilhouetteScore, bandwidth, size, nDims, durationMs } }
@@ -28,14 +32,10 @@
  * { type: 'error', runId, id?, index?, total?, message }
  */
 
-import { extent } from "d3"
-import { flatten } from "lodash"
-
 const DEFAULTS = {
   bandwidth: null, // null → estimated per silhouette
   bandwidthFactor: 0.3,
-  mergeFactor: 10,
-  diversityFactor: 0, // min medoid-to-medoid distance for the display subset, × bandwidth
+  mergeFactor: 2,
   maxSeeds: 500,
   maxIteration: 100,
   epsilon: 1e-4,
@@ -123,33 +123,6 @@ function mergeCenters(centers, threshold) {
   return merged.map((m) => m.center)
 }
 
-// Greedy diversity prune over the final medoids (real rows, not centers): keep
-// the most relevant clusters first, absorb any whose medoid sits within
-// `threshold` euclidean of an already-kept medoid. Returns survivors with the
-// absorbed cluster sizes folded into `representedSize`, sorted by it desc.
-
-// ! (max-min)/n x ogni silhouettes
-function pruneMedoids(clusters, matrix, threshold) {
-  const ordered = [...clusters].sort((a, b) => b.size - a.size)
-  const kept = []
-  for (const c of ordered) {
-    const row = matrix[c.medoidIndex]
-    const near = kept.find((k) => euclidean(matrix[k.medoidIndex], row) < threshold)
-    if (near) {
-      near.representedSize += c.size
-    } else {
-      kept.push({
-        medoidID: c.medoidID,
-        medoidIndex: c.medoidIndex,
-        cluster: c.cluster,
-        size: c.size,
-        representedSize: c.size,
-      })
-    }
-  }
-  return kept.sort((a, b) => b.representedSize - a.representedSize)
-}
-
 function meanSilhouetteScore(matrix, assignments, sampleLimit = 500) {
   const clusterIDs = [...new Set(assignments)]
   if (clusterIDs.length < 2) return 0
@@ -190,19 +163,23 @@ function meanSilhouetteScore(matrix, assignments, sampleLimit = 500) {
 
 // ─── per-silhouette pipeline (chunked, mode-discovery streaming) ─────────────
 
-// Distinct display subset + median highlight + metrics, from final clusters.
-function buildResult(item, params, { assignments, clusters, bandwidth, t, t0 }) {
+// Display subset + median highlight + metrics, from final clusters.
+function buildResult(item, params, { assignments, memberships, clusters, bandwidth, t0 }) {
   const { id, ids, matrix } = item
   const n = matrix.length
   const d = matrix[0]?.length ?? 0
 
-  // Prune near-duplicate medoids, then cap to the silhouette's share of the
-  // whole dataset (47% → ≤ 47 medoids), ≥ 1.
-  let representatives = pruneMedoids(clusters, matrix, t)
-  const pct = params.totalTrajectories ? (n / params.totalTrajectories) * 100 : 100
-  const maxMedoids = 3
-  // const maxMedoids = Math.max(1, Math.round(pct))
-  representatives = representatives.slice(0, maxMedoids)
+  // 1:1 with the fine clusters (no prune, no cap): cluster resolution is kept
+  // low via mergeFactor instead, so every cluster is drawn and exportable.
+  const representatives = [...clusters]
+    .sort((a, b) => b.size - a.size)
+    .map((c) => ({
+      medoidID: c.medoidID,
+      medoidIndex: c.medoidIndex,
+      cluster: c.cluster,
+      size: c.size,
+      representedSize: c.size,
+    }))
 
   // The "median" representative for the reveal: order displayed medoids by total
   // duration (sum of the row), pick the middle one.
@@ -219,7 +196,11 @@ function buildResult(item, params, { assignments, clusters, bandwidth, t, t0 }) 
     clusters,
     representatives,
     medianMedoidID,
-    assignments: ids.map((tid, i) => ({ trajectoryID: tid, cluster: assignments[i] })),
+    assignments: ids.map((tid, i) => ({
+      trajectoryID: tid,
+      cluster: assignments[i],
+      memberships: memberships[i],
+    })),
     medoidIDs: clusters.map((c) => c.medoidID),
     metrics: {
       nClusters: clusters.length,
@@ -243,22 +224,31 @@ function finalizeFromConverged(item, params, sil) {
     bandwidth * params.mergeFactor,
   )
 
-  const rawAssignments = matrix.map((row) => {
+  // squared distance of every row to every center — argmin gives the hard
+  // assignment, and the full row feeds the soft membership weights below
+  const rowDists = matrix.map((row) => centers.map((c) => squED(row, c)))
+
+  const rawAssignments = rowDists.map((dists) => {
     let best = 0
-    let bestDist = Infinity
-    centers.forEach((c, k) => {
-      const dist = squED(row, c)
-      if (dist < bestDist) {
-        bestDist = dist
-        best = k
-      }
-    })
+    for (let k = 1; k < dists.length; k++) if (dists[k] < dists[best]) best = k
     return best
   })
 
   const used = [...new Set(rawAssignments)].sort((a, b) => a - b)
   const reindex = new Map(used.map((c, k) => [c, k]))
   const assignments = rawAssignments.map((c) => reindex.get(c))
+
+  // Gaussian-kernel soft memberships over the final clusters (σ = bandwidth),
+  // stabilized by subtracting the min distance so the softmax never underflows.
+  // Kernel membership weights, not calibrated probabilities.
+  const sigma2 = 2 * bandwidth * bandwidth
+  const memberships = rowDists.map((dists) => {
+    const usedDists = used.map((orig) => dists[orig])
+    const dMin = Math.min(...usedDists)
+    const weights = usedDists.map((dist) => Math.exp(-(dist - dMin) / sigma2))
+    const total = weights.reduce((s, w) => s + w, 0)
+    return weights.map((w) => w / total)
+  })
 
   const clusters = used.map((orig, k) => {
     const center = centers[orig]
@@ -277,7 +267,7 @@ function finalizeFromConverged(item, params, sil) {
     return { cluster: k, center, size, medoidIndex, medoidID: ids[medoidIndex] }
   })
 
-  return buildResult(item, params, { assignments, clusters, bandwidth, t, t0 })
+  return buildResult(item, params, { assignments, memberships, clusters, bandwidth, t0 })
 }
 
 // Online greedy merge of a converged center into the running modes; returns true
@@ -309,13 +299,15 @@ function startSilhouette(item, params) {
   const n = matrix.length
   const t0 = performance.now()
 
-  //TODO Threshold value should depend on silhouette size
-  const matrixExtent = extent(flatten(matrix))
-  const t = ((matrixExtent[1] - matrixExtent[0]) / Math.max(1, n)) * params.diversityFactor
-
   if (n === 0) {
     return {
-      result: buildResult(item, params, { assignments: [], clusters: [], bandwidth: 0, t, t0 }),
+      result: buildResult(item, params, {
+        assignments: [],
+        memberships: [],
+        clusters: [],
+        bandwidth: 0,
+        t0,
+      }),
     }
   }
 
@@ -329,9 +321,9 @@ function startSilhouette(item, params) {
     return {
       result: buildResult(item, params, {
         assignments: new Array(n).fill(0),
+        memberships: Array.from({ length: n }, () => [1]),
         clusters,
         bandwidth: 0,
-        t,
         t0,
       }),
     }
@@ -340,7 +332,7 @@ function startSilhouette(item, params) {
   const bandwidth = params.bandwidth ?? estimateBandwidth(matrix, params.bandwidthFactor)
   if (seeds.length > params.maxSeeds) seeds = strideSample(seeds, params.maxSeeds)
 
-  return { working: { item, bandwidth, t, t0, seeds, seedIndex: 0, converged: [], modes: [] } }
+  return { working: { item, bandwidth, t0, seeds, seedIndex: 0, converged: [], modes: [] } }
 }
 
 // ─── message handler + progressive scheduling ────────────────────────────────
@@ -401,7 +393,9 @@ function processNext() {
         params.epsilon,
       )
       sil.converged.push({ kernelCenter })
-      if (mergeModeOnline(sil.modes, kernelCenter, matrix, ids, sil.t)) newMode = true
+      // same threshold as the final mergeCenters, so previews approximate the final clusters
+      if (mergeModeOnline(sil.modes, kernelCenter, matrix, ids, sil.bandwidth * params.mergeFactor))
+        newMode = true
       sil.seedIndex++
     } while (sil.seedIndex < sil.seeds.length && performance.now() - chunkStart < CHUNK_MS)
 

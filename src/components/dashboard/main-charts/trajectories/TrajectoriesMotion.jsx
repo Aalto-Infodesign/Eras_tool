@@ -327,7 +327,7 @@ export function TrajectoriesMotion(props) {
                 ? `url(#gradient-${d.source.state}-${d.target.state})`
                 : palette[d.source.state]
             }
-            strokeWidth={0.75}
+            strokeWidth={0.2}
             isSelected={selectedTrajectoriesIDs.includes(d.id)}
             animationDuration={0.2}
             // onClick={() => toggleSelectedTrajectory(d.id)}
@@ -434,7 +434,7 @@ const MotionLine = ({
   color,
   dash,
   dashOffset = -1,
-  strokeWidth = 0.25,
+  strokeWidth = 0.5,
   isSelected,
   animationDuration,
   onClick,
