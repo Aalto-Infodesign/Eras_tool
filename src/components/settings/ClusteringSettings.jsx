@@ -118,15 +118,19 @@ export function ClusteringSettings() {
               value={Number.isFinite(draft[f.key]) ? draft[f.key] : ""}
               onChange={(e) => setField(f.key, e.target.valueAsNumber)}
             />
-            <input
-              className={styles.generatorInput}
-              type="range"
-              step={f.step}
-              min={f.min}
-              max={f.max}
-              value={Number.isFinite(draft[f.key]) ? draft[f.key] : ""}
-              onChange={(e) => setField(f.key, e.target.valueAsNumber)}
-            />
+            <div className={styles.sliderWrapper}>
+              <span>{f.min}</span>
+              <input
+                className={styles.generatorInput}
+                type="range"
+                step={f.step}
+                min={f.min}
+                max={f.max}
+                value={Number.isFinite(draft[f.key]) ? draft[f.key] : ""}
+                onChange={(e) => setField(f.key, e.target.valueAsNumber)}
+              />
+              <span>{f.max}</span>
+            </div>
           </label>
         ))}
       </div>

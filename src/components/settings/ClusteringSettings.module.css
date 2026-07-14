@@ -53,6 +53,16 @@
   gap: var(--spacing-xs);
 }
 
+.sliderWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.sliderWrapper span {
+  font-size: var(--text-xs);
+  width: 40px;
+  text-align: right;
+}
 /* Target Input */
 .generatorInput {
   -webkit-appearance: none;
