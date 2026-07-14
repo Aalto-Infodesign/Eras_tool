@@ -13,11 +13,12 @@ import { AnimatePresence, easeOut, motion } from "motion/react"
 import { useData } from "../../contexts/ProcessedDataContext"
 import { useViz } from "../../contexts/VizContext"
 
-import { ChevronDown, Maximize2, User } from "lucide-react"
+import { ChevronDown, Maximize2, Settings, User } from "lucide-react"
 import Button from "../common/Button/Button"
 
 import { ClusteringView } from "../clustering/ClusteringView"
 import { features } from "../../config/features"
+import { ClusteringSettings } from "../settings/ClusteringSettings"
 
 export function FileLoader() {
   const { richData, existingIdealSilhouettes, clusterStates, setClusterStates, statesOrder } =
@@ -25,6 +26,7 @@ export function FileLoader() {
   const { setIsLegend, isLegend, hasFlowChart, isSidePanelOpen, isOpen, setIsOpen } = useViz()
 
   const [mode, setMode] = useState("flow") // || "flow"
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   useEffect(() => {
     if (!isLegend) {
@@ -42,10 +44,26 @@ export function FileLoader() {
     y: isLegend ? 0 : "-50%",
   }
 
+  // const settingsVariants = {
+  //   hidden: {
+  //     visibility: "hidden",
+  //     opacity: 0,
+  //     height: 0,
+  //     transition: { duration: 0.15 },
+  //   },
+  //   visible: {
+  //     visibility: "visible",
+  //     opacity: 1,
+  //     height: "auto",
+  //     transition: { duration: 0.15 },
+  //   },
+  // }
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.section
+          layout
           className={`loader-wrapper ${legendClass}`}
           initial={{ opacity: 0, ...translateProps }}
           animate={{
@@ -61,7 +79,7 @@ export function FileLoader() {
           <motion.div layout className="accordion-header">
             <LoadDataset />
 
-            {richData.length === 0 && (
+            {/* {richData.length === 0 && (
               <div className="cluster-toggle">
                 <label>
                   <input
@@ -72,7 +90,15 @@ export function FileLoader() {
                   Cluster together states that occurred at the same age
                 </label>
               </div>
-            )}
+            )} */}
+
+            {/* <Button
+              data-selected={isSettingsOpen}
+              size="small"
+              onClick={() => setIsSettingsOpen((prev) => !prev)}
+            >
+              <Settings size={16} />
+            </Button> */}
 
             {richData.length > 0 && (
               <div className="accordion-controls">
@@ -80,7 +106,19 @@ export function FileLoader() {
               </div>
             )}
           </motion.div>
-
+          {/* <AnimatePresence>
+            {isSettingsOpen && (
+              <motion.div
+                layout="position"
+                variants={settingsVariants}
+                initial="hidden"
+                animate="visible"
+                exit={"hidden"}
+              >
+                <ClusteringSettings />
+              </motion.div>
+            )}
+          </AnimatePresence> */}
           {richData.length > 0 && (
             <motion.div layout className="loader-main">
               <ReactFlowProvider>

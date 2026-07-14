@@ -10,6 +10,7 @@ import { useDerivedData } from "./DerivedDataContext"
 import { useFilters } from "./FiltersContext"
 import { useViz } from "./VizContext"
 import { useNewClusteringWorker } from "../components/hooks/workerHooks/useNewClusteringWorker"
+import { CLUSTERING_DEFAULTS } from "../config/clusteringDefaults"
 
 // How long a silhouette's full medoid set stays faded before collapsing to its
 // median highlight — the "analysis happening" beat in the progressive reveal.
@@ -46,9 +47,13 @@ export function ClusteringProvider({ children }) {
     [silhouettes],
   )
 
+  // Committed worker params (draft edits live in the settings panel). Committing
+  // always creates a new object, so Apply with unchanged values still re-runs.
+  const [params, setParams] = useState(CLUSTERING_DEFAULTS)
+
   useEffect(() => {
-    if (matrices.length > 0) run(matrices)
-  }, [matrices, run])
+    if (matrices.length > 0) run(matrices, params)
+  }, [matrices, params, run])
 
   // Progressive reveal: when a silhouette's result lands it first shows all its
   // medoids faded, then after REVEAL_DURATION_MS it "settles" — collapsing to
@@ -188,6 +193,8 @@ export function ClusteringProvider({ children }) {
       progress,
       status,
       error,
+      params,
+      applyParams: setParams,
       pause,
       resume,
       cancel,
@@ -202,6 +209,7 @@ export function ClusteringProvider({ children }) {
       progress,
       status,
       error,
+      params,
       pause,
       resume,
       cancel,

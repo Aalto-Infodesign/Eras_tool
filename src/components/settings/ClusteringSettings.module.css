@@ -1,0 +1,97 @@
+:root {
+  --radius: 10px;
+}
+
+.clusteringSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  font-size: var(--text-sm);
+  background-color: var(--surface-secondary);
+  border-radius: var(--spacing-xs);
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  /* justify-content: space-between; */
+  gap: var(--spacing-sm);
+}
+
+.field .label {
+  min-width: 130px;
+}
+
+.field input[type="number"] {
+  width: 5em;
+  font-size: var(--text-xs);
+}
+
+.bandwidthControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.auto {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--text-xs);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+}
+
+/* Target Input */
+.generatorInput {
+  -webkit-appearance: none;
+  width: 100%;
+  max-width: 200px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* --- Webkit Browsers --- */
+.generatorInput::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--surface-accent);
+  border-radius: 10px;
+  border: 0px solid #cbd5e1;
+}
+
+.generatorInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: var(--radius);
+  width: var(--radius);
+  background: var(--surface-contrast);
+  border-radius: 30px;
+  border: 1px solid #e5e7eb;
+  margin-top: -12px;
+}
+
+/* --- Firefox --- */
+.generatorInput::-moz-range-track {
+  height: 4px;
+  background: var(--surface-accent);
+  border-radius: 10px;
+  border: 0px solid #cbd5e1;
+}
+
+.generatorInput::-moz-range-thumb {
+  height: var(--radius);
+  width: var(--radius);
+  background: var(--surface-contrast);
+  border-radius: 30px;
+  border: 1px solid #ffffff;
+}

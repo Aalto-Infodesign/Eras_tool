@@ -17,7 +17,8 @@
  * { type: 'silhouette-partial', runId, index, total, id,
  *   medoidIDs: string[] }  // modes discovered so far within this silhouette (faded preview)
  * { type: 'silhouette-result', runId, index, total, id,
- *   clusters: Array<{ cluster, center, size, medoidIndex, medoidID }>,
+ *   // memberIDs = trajectory IDs hard-assigned to the cluster (size === memberIDs.length):
+ *   clusters: Array<{ cluster, center, size, medoidIndex, medoidID, memberIDs: string[] }>,
  *   // per-individual hard assignment + Gaussian-kernel soft membership weights
  *   // (σ = bandwidth; one weight per cluster, in `clusters` order, row sums to 1;
  *   // NOT calibrated probabilities — kernel membership weights):
@@ -32,15 +33,7 @@
  * { type: 'error', runId, id?, index?, total?, message }
  */
 
-const DEFAULTS = {
-  bandwidth: null, // null → estimated per silhouette
-  bandwidthFactor: 0.3,
-  mergeFactor: 2,
-  maxSeeds: 500,
-  maxIteration: 100,
-  epsilon: 1e-4,
-  scoreSampleLimit: 500,
-}
+import { CLUSTERING_DEFAULTS as DEFAULTS } from "../../config/clusteringDefaults"
 
 // ─── distance helpers ────────────────────────────────────────────────────────
 
@@ -179,6 +172,7 @@ function buildResult(item, params, { assignments, memberships, clusters, bandwid
       cluster: c.cluster,
       size: c.size,
       representedSize: c.size,
+      memberIDs: c.memberIDs,
     }))
 
   // The "median" representative for the reveal: order displayed medoids by total
@@ -217,7 +211,7 @@ function buildResult(item, params, { assignments, memberships, clusters, bandwid
 // Steps 4–7: merge converged centers → assign all rows → per-cluster medoid.
 function finalizeFromConverged(item, params, sil) {
   const { matrix, ids } = item
-  const { converged, bandwidth, t, t0 } = sil
+  const { converged, bandwidth, t0 } = sil
 
   const centers = mergeCenters(
     converged.map((c) => c.kernelCenter),
@@ -254,17 +248,24 @@ function finalizeFromConverged(item, params, sil) {
     const center = centers[orig]
     let medoidIndex = -1
     let bestDist = Infinity
-    let size = 0
+    const memberIDs = []
     assignments.forEach((c, i) => {
       if (c !== k) return
-      size++
+      memberIDs.push(ids[i])
       const dist = squED(matrix[i], center)
       if (dist < bestDist) {
         bestDist = dist
         medoidIndex = i
       }
     })
-    return { cluster: k, center, size, medoidIndex, medoidID: ids[medoidIndex] }
+    return {
+      cluster: k,
+      center,
+      size: memberIDs.length,
+      medoidIndex,
+      medoidID: ids[medoidIndex],
+      memberIDs,
+    }
   })
 
   return buildResult(item, params, { assignments, memberships, clusters, bandwidth, t0 })
@@ -316,7 +317,14 @@ function startSilhouette(item, params) {
   // Degenerate: single trajectory or all-identical rows (e.g. one-state silhouettes)
   if (n === 1 || seeds.length === 1) {
     const clusters = [
-      { cluster: 0, center: [...matrix[0]], size: n, medoidIndex: 0, medoidID: ids[0] },
+      {
+        cluster: 0,
+        center: [...matrix[0]],
+        size: n,
+        medoidIndex: 0,
+        medoidID: ids[0],
+        memberIDs: [...ids],
+      },
     ]
     return {
       result: buildResult(item, params, {

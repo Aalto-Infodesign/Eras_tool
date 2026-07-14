@@ -1,9 +1,12 @@
 import styles from "./ClusteringView.module.css"
+import { useState } from "react"
 import { useDerivedData } from "../../contexts/DerivedDataContext"
 import { useClustering } from "../../contexts/ClusteringContext"
-import { motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import Button from "../common/Button/Button"
-import { FileDown, Pause, Play } from "lucide-react"
+import { ClusteringSettings } from "../settings/ClusteringSettings"
+import { FileDown, Pause, Play, SlidersHorizontal } from "lucide-react"
+import { downloadIDs } from "../../utils/exportFunctions"
 
 // TSV of every individual in the silhouette: hard assignment + one membership
 // column per cluster. Membership values are Gaussian-kernel weights (rows sum
@@ -38,6 +41,8 @@ export function ClusteringView() {
   const isPaused = status === "paused"
   const canToggle = isRunning || isPaused
 
+  const [showSettings, setShowSettings] = useState(false)
+
   return (
     <div className={styles.clusteringView}>
       <div className={styles.clusteringHeader}>
@@ -55,8 +60,18 @@ export function ClusteringView() {
           >
             {isRunning ? <Pause size={12} /> : <Play size={12} />}
           </Button>
+          <Button
+            size="xs"
+            variant={showSettings ? "primary" : "secondary"}
+            onClick={() => setShowSettings((v) => !v)}
+            tooltip="Clustering settings"
+            tooltipPosition="left"
+          >
+            <SlidersHorizontal size={12} />
+          </Button>
         </div>
       </div>
+      <AnimatePresence>{showSettings && <ClusteringSettings />}</AnimatePresence>
       <motion.div
         initial={{ height: 2 }}
         animate={{ background: "var(--surface-accent)", width: `${perc}%` }}
@@ -89,7 +104,22 @@ export function ClusteringView() {
                   <td>{r ? r.metrics.nRepresentatives : "…"}</td>
                   <td>{r ? r.metrics.meanSilhouetteScore.toFixed(3) : "…"}</td>
                   <td>{r ? r.metrics.bandwidth.toFixed(3) : "…"}</td>
-                  <td>{r ? r.representatives.map((x) => x.medoidID).join(", ") : "…"}</td>
+                  <td>
+                    {r
+                      ? r.representatives.map((x) => (
+                          <Button
+                            key={x.medoidID}
+                            size="xs"
+                            disabled={!r}
+                            tooltip={`Export ${x.medoidID} members`}
+                            onClick={(e) => downloadIDs(e, x.memberIDs)}
+                          >
+                            {x.medoidID} - {x.size}
+                            <FileDown size={12} />
+                          </Button>
+                        ))
+                      : "..."}
+                  </td>
                   <td>{r ? r.metrics.durationMs : "…"}</td>
                   <td>
                     <Button
