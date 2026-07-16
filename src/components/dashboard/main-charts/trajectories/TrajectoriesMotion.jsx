@@ -104,6 +104,14 @@ export function TrajectoriesMotion(props) {
 
   const displayedTrajectories = union(selectedTrajectories, highlightedTrajectories)
 
+  // Foreground of the select-lines mode: medoids + explicit selection. Vertical
+  // (duration 0) links are drawn only when a representative carries them — a
+  // missing vertical is a clustering concern, not a drawing one.
+  const mainLines = useMemo(
+    () => union(representatives, selectedTrajectories),
+    [representatives, selectedTrajectories],
+  )
+
   // Rank by source.date (when THIS patient entered THIS state), not firstDate:
   // firstDate is per-patient and within a silhouette every patient hits every
   // state, so per-state min/max would collapse to the same two patients
@@ -125,16 +133,11 @@ export function TrajectoriesMotion(props) {
       Object.values(extremeLinksByState).flatMap(({ min, max }) => [min?.id, max?.id]),
     )
     ids.delete(undefined)
+    // A patient already drawn as a main line (medoid or selected) must not be
+    // re-drawn as a faint extreme on top of itself
+    for (const l of mainLines) ids.delete(l.id)
     return selectedLinks.filter((l) => ids.has(l.id))
-  }, [extremeLinksByState, selectedLinks])
-
-  // Foreground of the select-lines mode: medoids + explicit selection. Vertical
-  // (duration 0) links are drawn only when a representative carries them — a
-  // missing vertical is a clustering concern, not a drawing one.
-  const mainLines = useMemo(
-    () => union(representatives, selectedTrajectories),
-    [representatives, selectedTrajectories],
-  )
+  }, [isOverview, extremeLinksByState, selectedLinks, mainLines])
 
   const lines =
     (!isSelectModeLines &&
@@ -242,7 +245,6 @@ export function TrajectoriesMotion(props) {
                   y1={y(d.source.state) + marginTop}
                   y2={y(d.target.state) + marginTop}
                   color={`url(#gradient-${d.source.state}-${d.target.state})`}
-                  dash={dash}
                   isSelected={isSelected}
                   animationDuration={lines.length > 1000 ? 0.0 : 0.2}
                   onClick={() => toggleSelectedTrajectory(d.id)}
@@ -283,7 +285,7 @@ export function TrajectoriesMotion(props) {
               y1={y(d.source.state) + marginTop}
               y2={y(d.target.state) + marginTop}
               color={`url(#gradient-${d.source.state}-${d.target.state})`}
-              strokeWidth={0.2}
+              strokeWidth={0.5}
               isSelected={selectedTrajectoriesIDs.includes(d.id)}
               animationDuration={0.2}
               // onClick={() => toggleSelectedTrajectory(d.id)}
@@ -367,9 +369,9 @@ const MotionLine = ({
   y1,
   y2,
   color,
-  dash,
+  dash = 0,
   dashOffset = -1,
-  strokeWidth = 0.5,
+  strokeWidth = 1,
   isSelected,
   animationDuration,
   onClick,
@@ -407,7 +409,7 @@ const MotionLine = ({
         opacity: opacity,
         rotate: rotation,
       }}
-      whileHover={{ strokeWidth: isSelected ? 1.5 : 1 }}
+      whileHover={{ strokeWidth: isSelected ? 2 : 1.5 }}
       exit={{ opacity: 0 }}
       transition={{
         default: { duration: animationDuration },

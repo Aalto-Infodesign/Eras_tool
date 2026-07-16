@@ -5,10 +5,11 @@ import { useClustering } from "../../contexts/ClusteringContext"
 import { AnimatePresence, motion } from "motion/react"
 import Button from "../common/Button/Button"
 import { ClusteringSettings } from "../settings/ClusteringSettings"
-import { FileDown, Pause, Play, SlidersHorizontal } from "lucide-react"
+import { FileDown, Pause, Play, SlidersHorizontal, Star } from "lucide-react"
 import { downloadIDs } from "../../utils/exportFunctions"
 import { SilhouettePathSvg } from "../dashboard/silhouettes/shared/SilhouettePathSvg"
 import { div } from "three/src/nodes/math/OperatorNode.js"
+import { useFilters } from "../../contexts/FiltersContext"
 
 // TSV of every individual in the silhouette: hard assignment + one membership
 // column per cluster. Membership values are Gaussian-kernel weights (rows sum
@@ -36,6 +37,7 @@ function exportMembershipsTSV(result) {
 export function ClusteringView() {
   const { silhouettes } = useDerivedData()
   const { resultsBySilhouette, progress, status, error, pause, resume } = useClustering()
+  const { selectedTrajectoriesIDs } = useFilters()
 
   const perc = (progress.done * 100) / progress.total
 
@@ -94,7 +96,12 @@ export function ClusteringView() {
               <th>ms</th>
             </tr>
             {silhouettes.map((s) => (
-              <SilhouetteRow key={s.name} s={s} r={resultsBySilhouette.get(s.name)} />
+              <SilhouetteRow
+                key={s.name}
+                s={s}
+                r={resultsBySilhouette.get(s.name)}
+                selectedTrajectoriesIDs={selectedTrajectoriesIDs}
+              />
             ))}
           </tbody>
         </table>
@@ -107,20 +114,20 @@ export function ClusteringView() {
 // message would otherwise re-render all N rows; memoizing keeps `r` referentially
 // stable for already-settled silhouettes (their result object doesn't change),
 // so only the newly-arrived row actually re-renders.
-const SilhouetteRow = memo(function SilhouetteRow({ s, r }) {
+const SilhouetteRow = memo(function SilhouetteRow({ s, r, selectedTrajectoriesIDs }) {
   return (
     <tr style={{ opacity: r ? 1 : 0.5 }}>
       <td>
-        {/* <p >{s.name}</p> */}
+        <p>{s.name}</p>
         {/* <div className="silhouette-wrapper"> */}
-        <SilhouettePathSvg
+        {/* <SilhouettePathSvg
           keyName="card"
           silhouetteName={s.name}
           animationDuration={0.2}
           strokeWidth={6}
           radius={3}
           size={55}
-        />
+        /> */}
         {/* </div> */}
       </td>
       <td>{s.size}</td>
@@ -140,7 +147,9 @@ const SilhouetteRow = memo(function SilhouetteRow({ s, r }) {
                   tooltip={`Export ${x.medoidID} members: ${x.size} ids`}
                   tooltipPosition="bottom-left"
                   onClick={(e) => downloadIDs(e, x.memberIDs)}
+                  data-selected={selectedTrajectoriesIDs.includes(x.medoidID)}
                 >
+                  {/* {selectedTrajectoriesIDs.includes(x.medoidID) && <Star size={12} />} */}
                   <p style={{ minWidth: "55px" }}>{x.medoidID}</p>
                   <FileDown size={12} />
                 </Button>
@@ -152,7 +161,8 @@ const SilhouetteRow = memo(function SilhouetteRow({ s, r }) {
         <Button
           size="xs"
           disabled={!r}
-          tooltip="Export memberships TSV"
+          tooltip={`Export memberships TSV: ${s.size} ids`}
+          tooltipPosition="bottom-left"
           onClick={() => exportMembershipsTSV(r)}
         >
           <FileDown size={12} />
