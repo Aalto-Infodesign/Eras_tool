@@ -58,9 +58,15 @@ export const FlowChart = () => {
   // TODO setIdealSilhouettes
   useEffect(() => {
     const allCombinations = getFullPathsFromFlow(nodes, edges)
-    const silhouettesStrings = allCombinations.map((c) => c.join("-"))
+    const next = allCombinations.map((c) => c.join("-"))
 
-    setIdealSilhouettes(silhouettesStrings)
+    // Keep the reference stable when the paths are unchanged. This effect also
+    // fires on every remount (e.g. toggling the Flow/Cluster tab), and a fresh
+    // array would cascade idealSilhouettes → silhouettes → matrices and needlessly
+    // restart the clustering worker.
+    setIdealSilhouettes((prev) =>
+      prev.length === next.length && prev.every((v, i) => v === next[i]) ? prev : next,
+    )
   }, [nodes.length, edges])
 
   // Updating the sankey data state when Flow Chart is edited

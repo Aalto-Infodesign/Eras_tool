@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { countBy } from "lodash"
 import { extent, scaleLinear } from "d3"
 
-import { DistributionPath } from "./DistributionPath"
+import { DistributionPath } from "../../../common/SVG/DistributionPath"
 
 export function FilterDistribution({
   allPoints,

@@ -1,18 +1,19 @@
 import { useState, useEffect, useMemo } from "react"
-import { xor, uniq } from "lodash"
+import { xor, uniq, flatten } from "lodash"
 
 export function useSilhouetteInteractions({
   completeSilhouettes,
   toggleSilhouetteFilter,
   statesOrder,
   setStatesOrder,
-  isCmdPressed,
+  isCmdPressed = false,
   existingIdealSilhouettes,
 }) {
   const [hoveredIndex, setHoveredIndex] = useState(null)
   const [derivedSilhouettes, setDerivedSilhouettes] = useState(null)
   const [expandSides, setExpandSides] = useState(false)
   const [orderMode, setOrderMode] = useState(existingIdealSilhouettes.length ? "distance" : "size")
+  const [percentRange, setPercentRange] = useState([0, 100])
 
   const orderedSilhouettes = useMemo(() => {
     // console.log("CS", completeSilhouettes)
@@ -33,6 +34,10 @@ export function useSilhouetteInteractions({
 
     return sorted
   }, [completeSilhouettes, orderMode])
+
+  const silhouettesInPercentRange = orderedSilhouettes.filter(
+    (s) => s.percentage >= percentRange[0] && s.percentage <= percentRange[1],
+  )
 
   const deriveSilhouettesFromId = (id) => {
     // This function now only contains the core logic
@@ -93,9 +98,19 @@ export function useSilhouetteInteractions({
     orderMode,
     setOrderMode,
     orderedSilhouettes,
+    silhouettesInPercentRange,
     handleSilhouetteClick,
     handleExpandClick,
     handleLongPress,
     handleOrderClick,
+    percentRange,
+    setPercentRange,
   }
 }
+
+// MEGA utility per estrarre IDS da un array di silhouettes
+export const useIDsFromSilhouettes = (silhouettes) =>
+  useMemo(() => {
+    const ids = flatten(silhouettes.map((s) => s.trajectories)).map((t) => t[0].id)
+    return ids
+  }, [silhouettes.length])

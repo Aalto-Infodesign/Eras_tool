@@ -4,8 +4,6 @@ import { HasseDiagram } from "./Hasse/HasseDiagram"
 
 import { AnimatePresence, motion } from "motion/react"
 
-import { useModifierKey } from "../../hooks/useModifierKey"
-
 import "./Silhouettes.css"
 
 import { useData } from "../../../contexts/ProcessedDataContext"
@@ -24,37 +22,30 @@ import { SilhouettesList } from "./SilhouettesList"
 export const SilhouettesMorph = () => {
   const { existingIdealSilhouettes, statesOrder, setStatesOrder } = useData()
   const { isHasse, setIsHasse } = useViz()
-  const {
-    filtersActive,
-    toggleSilhouetteFilter,
-    setSelectedSilhouettesNames,
-    selectedSilhouettesNames,
-  } = useFilters()
+  const { toggleSilhouetteFilter, setSelectedSilhouettesNames, selectedSilhouettesNames } =
+    useFilters()
   const { completeSilhouettes } = useDerivedData()
   const { resultsBySilhouette } = useClustering()
 
   const posetData = usePosetWorker().result
 
-  const isCmdPressed = useModifierKey("Meta")
-
   const {
-    hoveredIndex,
     setHoveredIndex,
-    expandSides,
     setExpandSides,
     orderMode,
     setOrderMode,
     orderedSilhouettes,
+    silhouettesInPercentRange,
     handleSilhouetteClick,
-    handleExpandClick,
     handleLongPress,
     handleOrderClick,
+    percentRange,
+    setPercentRange,
   } = useSilhouetteInteractions({
     completeSilhouettes,
     toggleSilhouetteFilter,
     statesOrder,
     setStatesOrder,
-    isCmdPressed,
     existingIdealSilhouettes,
   })
 
@@ -112,6 +103,9 @@ export const SilhouettesMorph = () => {
         existingIdealSilhouettesNames={existingIdealSilhouettesNames}
         selectedSilhouettesNames={selectedSilhouettesNames}
         setSelectedSilhouettesNames={setSelectedSilhouettesNames}
+        percentRange={percentRange}
+        setPercentRange={setPercentRange}
+        silhouettesInPercentRange={silhouettesInPercentRange}
       />
 
       <SilhouettesFilterBar
@@ -149,21 +143,16 @@ export const SilhouettesMorph = () => {
             <SilhouettesList
               key="scroller-wrapper"
               orderedSilhouettes={orderedSilhouettes}
-              hoveredIndex={hoveredIndex}
               setHoveredIndex={setHoveredIndex}
               setExpandSides={setExpandSides}
               selectedSilhouettesNames={selectedSilhouettesNames}
-              isCmdPressed={isCmdPressed}
-              expandSides={expandSides}
-              filtersActive={filtersActive}
               resultsBySilhouette={resultsBySilhouette}
               animationDuration={animationDuration}
-              isHasse={isHasse}
               handleSilhouetteClick={handleSilhouetteClick}
-              handleExpandClick={handleExpandClick}
               handleLongPress={handleLongPress}
               handleOrderClick={handleOrderClick}
               idealSilhouettes={existingIdealSilhouettes}
+              percentRange={percentRange}
             />
           )}
         </AnimatePresence>

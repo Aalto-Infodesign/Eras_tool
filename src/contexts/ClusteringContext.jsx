@@ -52,7 +52,10 @@ export function ClusteringProvider({ children }) {
   const [params, setParams] = useState(CLUSTERING_DEFAULTS)
 
   useEffect(() => {
-    if (matrices.length > 0) run(matrices, params)
+    if (matrices.length > 0) {
+      console.log("▶ CLUSTERING RUN", matrices.length)
+      run(matrices, params)
+    }
   }, [matrices, params, run])
 
   // Progressive reveal: when a silhouette's result lands it first shows all its

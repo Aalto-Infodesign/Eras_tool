@@ -1,5 +1,5 @@
 import styles from "./ClusteringView.module.css"
-import { useState } from "react"
+import { memo, useState } from "react"
 import { useDerivedData } from "../../contexts/DerivedDataContext"
 import { useClustering } from "../../contexts/ClusteringContext"
 import { AnimatePresence, motion } from "motion/react"
@@ -91,52 +91,57 @@ export function ClusteringView() {
               <th>ms</th>
               <th>Export</th>
             </tr>
-            {silhouettes.map((s) => {
-              const r = resultsBySilhouette.get(s.name)
-
-              console.log(r)
-              return (
-                <tr key={s.name} style={{ opacity: r ? 1 : 0.5 }}>
-                  <td>{s.name}</td>
-                  <td>{s.size}</td>
-                  <td>{r ? r.metrics.nDims : "…"}</td>
-                  <td>{r ? r.metrics.nClusters : "…"}</td>
-                  <td>{r ? r.metrics.nRepresentatives : "…"}</td>
-                  <td>{r ? r.metrics.meanSilhouetteScore.toFixed(3) : "…"}</td>
-                  <td>{r ? r.metrics.bandwidth.toFixed(3) : "…"}</td>
-                  <td>
-                    {r
-                      ? r.representatives.map((x) => (
-                          <Button
-                            key={x.medoidID}
-                            size="xs"
-                            disabled={!r}
-                            tooltip={`Export ${x.medoidID} members`}
-                            onClick={(e) => downloadIDs(e, x.memberIDs)}
-                          >
-                            {x.medoidID} - {x.size}
-                            <FileDown size={12} />
-                          </Button>
-                        ))
-                      : "..."}
-                  </td>
-                  <td>{r ? r.metrics.durationMs : "…"}</td>
-                  <td>
-                    <Button
-                      size="xs"
-                      disabled={!r}
-                      tooltip="Export memberships TSV"
-                      onClick={() => exportMembershipsTSV(r)}
-                    >
-                      <FileDown size={12} />
-                    </Button>
-                  </td>
-                </tr>
-              )
-            })}
+            {silhouettes.map((s) => (
+              <SilhouetteRow key={s.name} s={s} r={resultsBySilhouette.get(s.name)} />
+            ))}
           </tbody>
         </table>
       </div>
     </div>
   )
 }
+
+// One row per silhouette. Results stream in one silhouette at a time, so every
+// message would otherwise re-render all N rows; memoizing keeps `r` referentially
+// stable for already-settled silhouettes (their result object doesn't change),
+// so only the newly-arrived row actually re-renders.
+const SilhouetteRow = memo(function SilhouetteRow({ s, r }) {
+  return (
+    <tr style={{ opacity: r ? 1 : 0.5 }}>
+      <td>{s.name}</td>
+      <td>{s.size}</td>
+      <td>{r ? r.metrics.nDims : "…"}</td>
+      <td>{r ? r.metrics.nClusters : "…"}</td>
+      <td>{r ? r.metrics.nRepresentatives : "…"}</td>
+      <td>{r ? r.metrics.meanSilhouetteScore.toFixed(3) : "…"}</td>
+      <td>{r ? r.metrics.bandwidth.toFixed(3) : "…"}</td>
+      <td>
+        {r
+          ? r.representatives.map((x) => (
+              <Button
+                key={x.medoidID}
+                size="xs"
+                disabled={!r}
+                tooltip={`Export ${x.medoidID} members`}
+                onClick={(e) => downloadIDs(e, x.memberIDs)}
+              >
+                {x.medoidID} - {x.size}
+                <FileDown size={12} />
+              </Button>
+            ))
+          : "..."}
+      </td>
+      <td>{r ? r.metrics.durationMs : "…"}</td>
+      <td>
+        <Button
+          size="xs"
+          disabled={!r}
+          tooltip="Export memberships TSV"
+          onClick={() => exportMembershipsTSV(r)}
+        >
+          <FileDown size={12} />
+        </Button>
+      </td>
+    </tr>
+  )
+})

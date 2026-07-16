@@ -4,6 +4,10 @@ import { motion } from "motion/react"
 import Button from "../../common/Button/Button"
 import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 import { features } from "../../../config/features"
+import { Slider } from "../../common/Slider/Slider"
+import { FileDown } from "lucide-react"
+import { downloadIDs } from "../../../utils/exportFunctions"
+import { useIDsFromSilhouettes } from "./hooks/useSilhouetteInteractions"
 
 export function SilhouettesHeader({
   isHasse,
@@ -15,7 +19,11 @@ export function SilhouettesHeader({
   existingIdealSilhouettesNames,
   selectedSilhouettesNames,
   setSelectedSilhouettesNames,
+  percentRange,
+  setPercentRange,
+  silhouettesInPercentRange,
 }) {
+  const ids = useIDsFromSilhouettes(silhouettesInPercentRange)
   return (
     <motion.div layout>
       <h3>Silhouettes filters</h3>
@@ -25,6 +33,7 @@ export function SilhouettesHeader({
           <p>Mode</p>
           {existingIdealSilhouettes.length > 0 && <p>Order by</p>}
           <p>Quick select</p>
+          <p>% slider</p>
         </div>
         <div id="header-content">
           <div id="silhouettes-modes" className="buttons-wrapper">
@@ -93,6 +102,26 @@ export function SilhouettesHeader({
               tooltip={"Clear the Silhouette selection"}
             >
               <p>None</p>
+            </Button>
+          </div>
+
+          <div className="buttons-wrapper" style={{ paddingTop: "var(--spacing-sm)" }}>
+            {/* Custom export Slider */}
+            <Slider
+              min={0}
+              max={100}
+              value={percentRange}
+              onChange={setPercentRange}
+              width={250}
+              hasRange
+            />
+            <Button
+              size="small"
+              tooltip={"Download all the IDs of the silhouettes in the % range"}
+              tooltipPosition="left"
+              onClick={(e) => downloadIDs(e, ids)}
+            >
+              <FileDown size={12} />
             </Button>
           </div>
         </div>

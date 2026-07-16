@@ -10,21 +10,16 @@ const chartVariants = {
 
 export function SilhouettesList({
   orderedSilhouettes,
-  hoveredIndex,
   setHoveredIndex,
   setExpandSides,
   selectedSilhouettesNames,
-  isCmdPressed,
-  expandSides,
-  filtersActive,
   resultsBySilhouette,
   animationDuration,
-  isHasse,
   handleSilhouetteClick,
-  handleExpandClick,
   handleLongPress,
   handleOrderClick,
   idealSilhouettes,
+  percentRange,
 }) {
   return (
     <motion.section
@@ -52,25 +47,20 @@ export function SilhouettesList({
         data={orderedSilhouettes}
         horizontalDirection
         increaseViewportBy={100}
-        itemContent={(i, s) => (
+        itemContent={(index, silhouette) => (
           <SilhouetteCard
-            s={s}
-            i={i}
-            hoveredIndex={hoveredIndex}
+            silhouette={silhouette}
+            index={index}
             setHoveredIndex={setHoveredIndex}
             setExpandSides={setExpandSides}
             selectedSilhouettesNames={selectedSilhouettesNames}
-            isCmdPressed={isCmdPressed}
-            expandSides={expandSides}
-            filtersActive={filtersActive}
             resultsBySilhouette={resultsBySilhouette}
             animationDuration={animationDuration}
-            isHasse={isHasse}
             handleSilhouetteClick={handleSilhouetteClick}
-            handleExpandClick={handleExpandClick}
             handleLongPress={handleLongPress}
             handleOrderClick={handleOrderClick}
             idealSilhouettes={idealSilhouettes}
+            percentRange={percentRange}
           />
         )}
       />

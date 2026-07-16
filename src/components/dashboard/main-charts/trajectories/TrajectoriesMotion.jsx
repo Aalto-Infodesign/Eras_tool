@@ -116,8 +116,6 @@ export function TrajectoriesMotion(props) {
     [selectedLinks],
   )
 
-  console.log(extremeLinksByState)
-
   // Full trajectories (every link, not just the extreme one) of the patients
   // owning each state's earliest/latest entry — matching on id recovers the
   // whole path
@@ -129,8 +127,6 @@ export function TrajectoriesMotion(props) {
     ids.delete(undefined)
     return selectedLinks.filter((l) => ids.has(l.id))
   }, [extremeLinksByState, selectedLinks])
-
-  console.log(extremeTrajectories)
 
   // Vertical transitions are a key visual signal but a 0 duration is far from
   // the cluster means, so medoids rarely carry them — draw them all, but only
@@ -191,7 +187,6 @@ export function TrajectoriesMotion(props) {
     const agesTarget = hoveredLines.map((l) => ({ id: l.id, x: l.target.x, state: l.target.state }))
 
     const markers = uniqBy([...agesSource, ...agesTarget], "x")
-    console.log(markers)
     return markers
   }, [markerHoveredId])
 

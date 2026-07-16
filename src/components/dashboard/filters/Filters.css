@@ -63,25 +63,4 @@ svg.filter text {
   opacity: 0.5;
 }
 
-#cursor {
-  cursor: grab;
-}
-
-/* SLIDER */
-
-.slider-container {
-  display: flex;
-  flex-direction: column;
-  /* gap: 8px; */
-}
-
-.svg-slider {
-  overflow: visible;
-}
-
-.slider-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
-}
+/* Slider styles live in src/components/common/Slider/Slider.module.css */

@@ -3,7 +3,7 @@ import { useMemo } from "react"
 
 import { countBy } from "lodash"
 import { line, curveStep } from "d3"
-import { MotionText } from "../../../common/SVG/MotionText"
+import { MotionText } from "./MotionText"
 
 export const DistributionPath = ({
   data,

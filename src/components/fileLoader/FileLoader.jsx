@@ -179,8 +179,6 @@ export function FileLoader() {
                     }}
                   >
                     {/* // TODO Prevent Reset of Flowchert when re-mounting component */}
-                    {mode === "flow" && <FlowChart />}
-                    {mode === "cluster" && features.clusters && <ClusteringView />}
                     {features.clusters && (
                       <div className="buttons-wrapper">
                         <Button
@@ -201,6 +199,8 @@ export function FileLoader() {
                         </Button>
                       </div>
                     )}
+                    {mode === "flow" && <FlowChart />}
+                    {mode === "cluster" && features.clusters && <ClusteringView />}
                   </motion.div>
                 )}
               </ReactFlowProvider>
