@@ -54,7 +54,12 @@ export function SmallSilhouette({ silhouetteName }) {
   if (silhouetteName.length > 1)
     return (
       <motion.div layout transition={{ duration: 0.2 }} className="chip-svg-wrapper">
-        <SilhouettePathSvg keyName="chip" silhouetteName={silhouetteName} isChip={true} />
+        <SilhouettePathSvg
+          keyName="chip"
+          silhouetteName={silhouetteName}
+          size={30}
+          strokeWidth={10}
+        />
       </motion.div>
     )
   else return <span>{silhouetteName}</span>

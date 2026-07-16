@@ -112,16 +112,21 @@ export function SilhouettesHeader({
               max={100}
               value={percentRange}
               onChange={setPercentRange}
-              width={250}
+              width={200}
+              height={6}
+              cursorHeight={12}
+              cursorWidth={3}
               hasRange
             />
             <Button
               size="small"
-              tooltip={"Download all the IDs of the silhouettes in the % range"}
-              tooltipPosition="left"
+              tooltip={`Download all the IDs of the silhouettes in the % range (${ids.length} ids)`}
+              tooltipPosition="bottom-left"
               onClick={(e) => downloadIDs(e, ids)}
+              disabled={ids.length === 0}
             >
-              <FileDown size={12} />
+              <span>{ids.length}</span>
+              <FileDown size={16} />
             </Button>
           </div>
         </div>

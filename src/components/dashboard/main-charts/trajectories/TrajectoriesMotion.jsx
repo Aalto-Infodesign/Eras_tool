@@ -50,7 +50,7 @@ export function TrajectoriesMotion(props) {
    * it: opacity is view-specific.
    *   - mid-reveal medoids → REVEAL_FADED (the "analysis happening" beat);
    *   - focused mode → fade each medoid by relevance (medoidOpacity);
-   *   - settled median + verticals + fallback → full opacity.
+   *   - settled median + fallback → full opacity.
    */
   const FADED_OPACITY = 0.2
   const REVEAL_FADED = 0.1
@@ -86,7 +86,7 @@ export function TrajectoriesMotion(props) {
     }
     if (revealFadedIDs.has(d.id)) return REVEAL_FADED // mid-reveal medoids
     if (!isOverview) return medoidOpacity.get(d.id) ?? 1 // focused: fade by relevance
-    return 1 // settled median + verticals + fallback
+    return 1 // settled median + fallback
   }
 
   // Selected trajectories are always drawn in full, medoid or not
@@ -128,21 +128,12 @@ export function TrajectoriesMotion(props) {
     return selectedLinks.filter((l) => ids.has(l.id))
   }, [extremeLinksByState, selectedLinks])
 
-  // Vertical transitions are a key visual signal but a 0 duration is far from
-  // the cluster means, so medoids rarely carry them — draw them all, but only
-  // one line per overlapping pixel position
-  const verticalLinks = useMemo(() => {
-    if (!isSelectModeLines) return []
-    return uniqBy(
-      selectedLinks.filter((l) => l.speed === 0 && l.source.state !== l.target.state),
-      (l) => `${l.lump}-${Math.round(x(l.source.x))}`,
-    )
-  }, [isSelectModeLines, selectedLinks, x])
-
-  // Foreground of the select-lines mode: medoids + explicit selection + verticals
+  // Foreground of the select-lines mode: medoids + explicit selection. Vertical
+  // (duration 0) links are drawn only when a representative carries them — a
+  // missing vertical is a clustering concern, not a drawing one.
   const mainLines = useMemo(
-    () => union(representatives, selectedTrajectories, verticalLinks),
-    [representatives, selectedTrajectories, verticalLinks],
+    () => union(representatives, selectedTrajectories),
+    [representatives, selectedTrajectories],
   )
 
   const lines =
@@ -228,7 +219,6 @@ export function TrajectoriesMotion(props) {
             const isHovered = hoveredTrajectoriesIDs.includes(d.id)
             const isSelected = selectedTrajectoriesIDs.includes(d.id)
 
-            let dash = 0
             if (d.speed > 0) {
               const length = Math.hypot(
                 Math.abs(x(d.target.x) - x(d.source.x)),
@@ -240,7 +230,7 @@ export function TrajectoriesMotion(props) {
               const totalGap = startGap + endGap
               const visibleLength = length - totalGap
 
-              dash = `${visibleLength} ${totalGap} `
+              const dash = `${visibleLength} ${totalGap} `
 
               return (
                 <MotionLine
@@ -262,75 +252,63 @@ export function TrajectoriesMotion(props) {
                 />
               )
             } else {
-              const dash1 = "3 5"
-              const of1 = -3
-              const dash2 = "3 5"
-              const of2 = 1
               return (
-                <motion.g key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}>
-                  <MotionLine
-                    key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-1`}
-                    id={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-1`}
-                    d={d}
-                    x1={x(d.source.x)}
-                    x2={x(d.target.x)}
-                    y1={y(d.source.state) + marginTop}
-                    y2={y(d.target.state) + marginTop}
-                    color={palette[d.source.state]}
-                    // color={palette[d.source.state]}
-                    dash={dash1}
-                    dashOffset={of1}
-                    // strokeWidth={0.5}
-                    isSelected={isSelected}
-                    animationDuration={lines.length > 1000 ? 0.0 : 0.2}
-                    onClick={() => toggleSelectedTrajectory(d.id)}
-                    opacity={opacityFor(d)}
-                  />
-                  <MotionLine
-                    key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-2`}
-                    d={d}
-                    id={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}-2`}
-                    x1={x(d.source.x)}
-                    x2={x(d.target.x)}
-                    y1={y(d.source.state) + marginTop}
-                    y2={y(d.target.state) + marginTop}
-                    color={palette[d.target.state]}
-                    dash={dash2}
-                    dashOffset={of2}
-                    // strokeWidth={0.5}
-                    isSelected={isSelected}
-                    animationDuration={lines.length > 1000 ? 0.0 : 0.2}
-                    onClick={() => toggleSelectedTrajectory(d.id)}
-                    opacity={opacityFor(d)}
-                  />
-                </motion.g>
+                <DashedMotionLine
+                  key={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
+                  id={`switch-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
+                  d={d}
+                  x1={x(d.source.x)}
+                  x2={x(d.target.x)}
+                  y1={y(d.source.state) + marginTop}
+                  y2={y(d.target.state) + marginTop}
+                  sourceColor={palette[d.source.state]}
+                  targetColor={palette[d.target.state]}
+                  isSelected={isSelected}
+                  animationDuration={lines.length > 1000 ? 0.0 : 0.2}
+                  onClick={() => toggleSelectedTrajectory(d.id)}
+                  opacity={opacityFor(d)}
+                />
               )
             }
           })}
 
-        {extremeTrajectories.map((d) => (
-          <MotionLine
-            key={`extreme-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
-            id={`extreme-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
-            d={d}
-            x1={x(d.source.x)}
-            x2={x(d.target.x)}
-            y1={y(d.source.state) + marginTop}
-            y2={y(d.target.state) + marginTop}
-            color={
-              d.speed > 0
-                ? `url(#gradient-${d.source.state}-${d.target.state})`
-                : palette[d.source.state]
-            }
-            strokeWidth={0.2}
-            isSelected={selectedTrajectoriesIDs.includes(d.id)}
-            animationDuration={0.2}
-            // onClick={() => toggleSelectedTrajectory(d.id)}
-            // onMouseEnter={() => handleMouseEnter(d)}
-            // onMouseLeave={() => handleMouseLeave()}
-            opacity={0.2}
-          />
-        ))}
+        {extremeTrajectories.map((d) =>
+          d.speed > 0 ? (
+            <MotionLine
+              key={`extreme-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
+              id={`extreme-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
+              d={d}
+              x1={x(d.source.x)}
+              x2={x(d.target.x)}
+              y1={y(d.source.state) + marginTop}
+              y2={y(d.target.state) + marginTop}
+              color={`url(#gradient-${d.source.state}-${d.target.state})`}
+              strokeWidth={0.2}
+              isSelected={selectedTrajectoriesIDs.includes(d.id)}
+              animationDuration={0.2}
+              // onClick={() => toggleSelectedTrajectory(d.id)}
+              // onMouseEnter={() => handleMouseEnter(d)}
+              // onMouseLeave={() => handleMouseLeave()}
+              opacity={0.2}
+            />
+          ) : (
+            <DashedMotionLine
+              key={`extreme-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
+              id={`extreme-${d.id}-${d.lump}-${d.source.x}-${d.target.x}`}
+              d={d}
+              x1={x(d.source.x)}
+              x2={x(d.target.x)}
+              y1={y(d.source.state) + marginTop}
+              y2={y(d.target.state) + marginTop}
+              sourceColor={palette[d.source.state]}
+              targetColor={palette[d.target.state]}
+              strokeWidth={0.2}
+              isSelected={selectedTrajectoriesIDs.includes(d.id)}
+              animationDuration={0.2}
+              opacity={0.2}
+            />
+          ),
+        )}
 
         {ageMarkers &&
           ageMarkers.map((m) => (
@@ -365,57 +343,19 @@ export function TrajectoriesMotion(props) {
               </motion.text>
             </motion.g>
           ))}
-        {/* 
-        {lines &&
-          lines.map((d) => {
-      
-
-            const isSelected = selectedTrajectories.map((t) => t.id).includes(d.id)
-            const isHovered = d.id === markerHoveredId
-
-            const isActive = isHovered
-       
-            console.log(isActive)
-
-            const isDark = isColorDark(palette[d.source.state]).isDark
-
-            const textColor = isDark ? "#FFFFFF" : "#000000"
-            return (
-              <motion.g
-                key={`marker-${d.id}-${d.lump}-${d.source.x}`}
-                id={`marker-${d.id}-${d.lump}-${d.source.x}`}
-                className={`marker ${isActive ? "highlighted" : ""}`}
-                initial={{ x: x(d.source.x), y: y(d.source.state) + marginTop }}
-                animate={{ x: x(d.source.x), y: y(d.source.state) + marginTop }}
-                transition={{ duration: 0.2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => toggleSelectedTrajectory(d.id)}
-              >
-                <motion.circle
-                  className={`marker-circle`}
-                  initial={{ fill: palette[d.source.state], r: 0 }}
-                  animate={{ fill: palette[d.source.state], r: isActive ? 6 : 0 }}
-                  exit={{ r: 0 }}
-                  transition={{ duration: 0.2 }}
-                />
-                {isActive && (
-                  <motion.text
-                    y={1.5}
-                    fill={textColor}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.1 }}
-                    className={`marker-label`}
-                  >
-                    {d.source.x.toFixed(0)}
-                  </motion.text>
-                )}
-              </motion.g>
-            )
-          })} */}
       </AnimatePresence>
     </g>
+  )
+}
+
+// A perfectly vertical transition (duration === 0): the same segment drawn twice
+// with offset dash phases, alternating source- and target-state colors
+const DashedMotionLine = ({ id, sourceColor, targetColor, ...lineProps }) => {
+  return (
+    <motion.g>
+      <MotionLine id={`${id}-1`} color={sourceColor} dash="3 5" dashOffset={-3} {...lineProps} />
+      <MotionLine id={`${id}-2`} color={targetColor} dash="3 5" dashOffset={1} {...lineProps} />
+    </motion.g>
   )
 }
 

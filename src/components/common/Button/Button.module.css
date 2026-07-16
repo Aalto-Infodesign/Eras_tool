@@ -153,7 +153,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
-  /* max-width: 100px; NON FUNZIONA */
+  /* max-width: 100px; */
 
   /* Stile visivo — adatta ai tuoi token */
   background-color: var(--surface-secondary, #1a1a1a);
@@ -161,7 +161,7 @@
   font-size: var(--text-xs);
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
-  /* border: 0.5px var(--text-secondary) solid; */
+  border: 1px var(--text-secondary) solid;
   white-space: nowrap;
   z-index: 10;
 }
@@ -193,4 +193,26 @@
   left: calc(100% + 6px);
   top: 50%;
   transform: translateY(-50%);
+}
+
+/* Varianti angolari: allineate al bordo del bottone invece che centrate,
+   così il tooltip cresce verso l'interno dello schermo */
+.tooltip--top-right {
+  bottom: calc(100% + 6px);
+  left: 0;
+}
+
+.tooltip--top-left {
+  bottom: calc(100% + 6px);
+  right: 0;
+}
+
+.tooltip--bottom-right {
+  top: calc(100% + 6px);
+  left: 0;
+}
+
+.tooltip--bottom-left {
+  top: calc(100% + 6px);
+  right: 0;
 }

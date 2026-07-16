@@ -7,6 +7,8 @@ import Button from "../common/Button/Button"
 import { ClusteringSettings } from "../settings/ClusteringSettings"
 import { FileDown, Pause, Play, SlidersHorizontal } from "lucide-react"
 import { downloadIDs } from "../../utils/exportFunctions"
+import { SilhouettePathSvg } from "../dashboard/silhouettes/shared/SilhouettePathSvg"
+import { div } from "three/src/nodes/math/OperatorNode.js"
 
 // TSV of every individual in the silhouette: hard assignment + one membership
 // column per cluster. Membership values are Gaussian-kernel weights (rows sum
@@ -65,7 +67,7 @@ export function ClusteringView() {
             variant={showSettings ? "primary" : "secondary"}
             onClick={() => setShowSettings((v) => !v)}
             tooltip="Clustering settings"
-            tooltipPosition="left"
+            tooltipPosition="bottom-left"
           >
             <SlidersHorizontal size={12} />
           </Button>
@@ -82,14 +84,14 @@ export function ClusteringView() {
             <tr>
               <th>Silhouette</th>
               <th>Size</th>
-              <th>Dims</th>
+              {/* <th>Dims</th> */}
               <th>Clusters</th>
-              <th>Repr.</th>
-              <th>Mean sil. score</th>
-              <th>Bandwidth</th>
+              {/* <th>Repr.</th> */}
+              <th>Mean score</th>
+              <th>BW</th>
               <th>Representative IDs</th>
-              <th>ms</th>
               <th>Export</th>
+              <th>ms</th>
             </tr>
             {silhouettes.map((s) => (
               <SilhouetteRow key={s.name} s={s} r={resultsBySilhouette.get(s.name)} />
@@ -108,30 +110,44 @@ export function ClusteringView() {
 const SilhouetteRow = memo(function SilhouetteRow({ s, r }) {
   return (
     <tr style={{ opacity: r ? 1 : 0.5 }}>
-      <td>{s.name}</td>
+      <td>
+        {/* <p >{s.name}</p> */}
+        {/* <div className="silhouette-wrapper"> */}
+        <SilhouettePathSvg
+          keyName="card"
+          silhouetteName={s.name}
+          animationDuration={0.2}
+          strokeWidth={6}
+          radius={3}
+          size={55}
+        />
+        {/* </div> */}
+      </td>
       <td>{s.size}</td>
-      <td>{r ? r.metrics.nDims : "…"}</td>
+      {/* <td>{r ? r.metrics.nDims : "…"}</td> */}
       <td>{r ? r.metrics.nClusters : "…"}</td>
-      <td>{r ? r.metrics.nRepresentatives : "…"}</td>
+      {/* <td>{r ? r.metrics.nRepresentatives : "…"}</td> */}
       <td>{r ? r.metrics.meanSilhouetteScore.toFixed(3) : "…"}</td>
       <td>{r ? r.metrics.bandwidth.toFixed(3) : "…"}</td>
       <td>
         {r
           ? r.representatives.map((x) => (
-              <Button
-                key={x.medoidID}
-                size="xs"
-                disabled={!r}
-                tooltip={`Export ${x.medoidID} members`}
-                onClick={(e) => downloadIDs(e, x.memberIDs)}
-              >
-                {x.medoidID} - {x.size}
-                <FileDown size={12} />
-              </Button>
+              <div className="buttons-wrapper" style={{ placeContent: "space-between" }}>
+                <Button
+                  key={x.medoidID}
+                  size="xs"
+                  disabled={!r}
+                  tooltip={`Export ${x.medoidID} members: ${x.size} ids`}
+                  tooltipPosition="bottom-left"
+                  onClick={(e) => downloadIDs(e, x.memberIDs)}
+                >
+                  <p style={{ minWidth: "55px" }}>{x.medoidID}</p>
+                  <FileDown size={12} />
+                </Button>
+              </div>
             ))
           : "..."}
       </td>
-      <td>{r ? r.metrics.durationMs : "…"}</td>
       <td>
         <Button
           size="xs"
@@ -142,6 +158,7 @@ const SilhouetteRow = memo(function SilhouetteRow({ s, r }) {
           <FileDown size={12} />
         </Button>
       </td>
+      <td>{r ? r.metrics.durationMs : "…"}</td>
     </tr>
   )
 })

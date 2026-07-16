@@ -15,7 +15,7 @@ const Button = ({
   disabled = false,
   className = "",
   tooltip,
-  tooltipPosition = "bottom", // "top" | "bottom" | "left" | "right"
+  tooltipPosition = "bottom", // "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right"
   keystroke = "",
   ...rest
 }) => {

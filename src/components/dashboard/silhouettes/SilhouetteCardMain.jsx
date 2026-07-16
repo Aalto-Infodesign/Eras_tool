@@ -94,7 +94,8 @@ export function SilhouetteCardMain({
           animationDuration={0.2}
           useAsSize={true}
           strokeWidth={9}
-          radius={9}
+          radius={5}
+          size={64}
         />
       </div>
     </motion.div>

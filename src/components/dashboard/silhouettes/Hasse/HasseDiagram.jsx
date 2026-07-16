@@ -352,8 +352,8 @@ const HasseNode = memo(function HasseNode({
                 keyName="hasse"
                 silhouetteName={name}
                 animationDuration={0.2}
-                useAsSize={true}
                 isHasse={isHasse}
+                size={32}
               />
             </motion.g>
           )}
