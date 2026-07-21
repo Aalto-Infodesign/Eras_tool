@@ -82,7 +82,7 @@ const RangeLine = ({
   xScale,
   color,
   strokeWidth,
-  opacity = 0.7,
+  opacity = 1,
   onHover,
   onClick,
   animationDuration,
@@ -204,8 +204,6 @@ export const BoxPlot = ({
           opacity={0.5}
         />
       )}
-
-  
 
       {fullRange && (
         <>

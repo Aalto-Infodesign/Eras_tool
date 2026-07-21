@@ -424,3 +424,7 @@ const MotionLine = ({
     </motion.line>
   )
 }
+
+const MotionPath = () => {
+  return <path />
+}

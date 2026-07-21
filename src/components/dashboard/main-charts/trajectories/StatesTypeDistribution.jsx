@@ -168,11 +168,11 @@ const CircleGroup = ({
             animate={{ r: r1 }}
             fill={palette[name]}
             strokeWidth={0.5}
-            onClick={() => toggleSelectedTrajectory(ogIDs)}
+            // onClick={() => originalTrajectories.length <= 500 && toggleSelectedTrajectory(ogIDs)}
             onMouseOver={() =>
               setHoveredDistribution({
                 type: "IT",
-                text: "Total: " + originalTrajectories.length,
+                text: "Total: " + originalTrajectories.length + "/n Click to download",
                 state: name,
               })
             }
@@ -206,11 +206,11 @@ const CircleGroup = ({
                 fill={palette[name]}
                 strokeWidth={0.5}
                 stroke={"var(--surface-contrast)"}
-                onClick={() => toggleSelectedTrajectory(IDs)}
+                // onClick={() => filteredTrajectories.length <= 500 && toggleSelectedTrajectory(IDs)}
                 onMouseOver={() =>
                   setHoveredDistribution({
                     type: "IS",
-                    text: "Selected: " + filteredTrajectories.length,
+                    text: "Selected: " + filteredTrajectories.length + "/n Click to download",
                     state: name,
                   })
                 }

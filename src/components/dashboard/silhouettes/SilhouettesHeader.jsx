@@ -33,7 +33,7 @@ export function SilhouettesHeader({
           <p>Mode</p>
           {existingIdealSilhouettes.length > 0 && <p>Order by</p>}
           <p>Quick select</p>
-          <p>% slider</p>
+          <p>% Selector</p>
         </div>
         <div id="header-content">
           <div id="silhouettes-modes" className="buttons-wrapper">
@@ -43,6 +43,7 @@ export function SilhouettesHeader({
               onClick={() => setIsHasse(false)}
               data-selected={!isHasse}
               tooltip={"All the Silhouettes in a ordered list"}
+              tooltipPosition="bottom-right"
             >
               <p>
                 <ShortcutSpan>L</ShortcutSpan>ist
@@ -56,6 +57,7 @@ export function SilhouettesHeader({
                 data-selected={isHasse}
                 disabled={!posetData}
                 tooltip={"Tree map showing the relations and evolution of the Silhouettes"}
+                tooltipPosition="bottom-right"
               >
                 <p>
                   {!posetData ? (

@@ -6,7 +6,8 @@ import { StateTypeDistribution } from "./StatesTypeDistribution"
 import { Grid } from "./Grid"
 
 import { TrajectoriesMotion } from "./TrajectoriesMotion"
-import { StateDensity } from "./StateDensity"
+import { StateDensity } from "./density/StateDensity"
+import { StackedStateDensity } from "./density/StackedStateDensity"
 import { Tooltip } from "../../../common/Tooltip/Tooltip"
 
 import { Lumps } from "./Lumps"
@@ -19,7 +20,7 @@ import { useFilters } from "../../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../../contexts/DerivedDataContext"
 import Button from "../../../common/Button/Button"
 import { StatesMatrix } from "../../../fileLoader/statesMatrix/StatesMatrix"
-import { ChartLine, ListFilter } from "lucide-react"
+import { ChartLine, Layers, ListFilter } from "lucide-react"
 import { ShortcutSpan } from "../../../common/ShortcutSpan/ShortcutSpan"
 import { ArcChart } from "../arc-chart/ArcChart"
 import { GradientDefs } from "../../../common/defs/Gradients/GradientDefs"
@@ -45,6 +46,7 @@ export function TrajectoriesChart() {
   const [hoveredDistribution, setHoveredDistribution] = useState({ type: "", text: "", state: "" })
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
   const [showStateDensity, setShowStateDensity] = useState(false)
+  const [showStackedStateDensity, setShowStackedStateDensity] = useState(false)
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
   const [hoveredLump, setHoveredLump] = useDebouncedState(null, 250)
 
@@ -143,6 +145,7 @@ export function TrajectoriesChart() {
               keystroke={b.keystroke ?? ""}
               onClick={() => setChartMode(b.value)}
               tooltip={b.tooltip}
+              tooltipPosition="bottom-right"
               disabled={b.disabled}
             >
               <p>
@@ -209,15 +212,30 @@ export function TrajectoriesChart() {
           </AnimatePresence>
         </div>
 
-        <div id="density-control">
-          <Button
+        <div id="density-control" className="buttons-wrapper">
+          {/* <Button
             size="xs"
             data-selected={showStateDensity}
-            onClick={() => setShowStateDensity(!showStateDensity)}
+            onClick={() => {
+              setShowStateDensity(!showStateDensity)
+              setShowStackedStateDensity(false)
+            }}
             tooltip={"Toggle Segment Density by State"}
           >
             <ChartLine size={12} />
-            {/* <span class="material-icons">ssid_chart</span> */}
+          </Button> */}
+          <Button
+            size="xs"
+            data-selected={showStackedStateDensity}
+            onClick={() => {
+              setShowStackedStateDensity(!showStackedStateDensity)
+              setShowStateDensity(false)
+            }}
+            tooltip={"Toggle Stacked Cluster Density by State"}
+          >
+            <ChartLine size={12} />
+
+            {/* <Layers size={12} /> */}
           </Button>
         </div>
 
@@ -306,15 +324,14 @@ export function TrajectoriesChart() {
                       svgRef={svgRef}
                     />
 
-                    {/* {selectedLinks.length < 500 && ( */}
                     <TrajectoriesMotion
                       //Extended Context
                       isSelectModeLines={chartMode === "lines"}
                       //Local State
                       showLinesOfSelectedLumps={showLinesOfSelectedLumps}
                     />
-                    {/* )} */}
-                    {showStateDensity && <StateDensity hoveredDistribution={hoveredDistribution} />}
+                    {/* {showStateDensity && <StateDensity />} */}
+                    {showStackedStateDensity && <StackedStateDensity />}
                   </g>
                 )}
                 {chartMode === "arc" && <ArcChart />}
