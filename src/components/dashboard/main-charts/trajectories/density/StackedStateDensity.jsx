@@ -4,12 +4,12 @@ import { useCharts } from "../../ChartsContext"
 import { scaleLinear, curveStep, sum, max, area, stack } from "d3"
 import { groupBy } from "lodash"
 
-import { useFilters } from "../../../../../contexts/FiltersContext"
 import { useDerivedData } from "../../../../../contexts/DerivedDataContext"
 import { useClustering } from "../../../../../contexts/ClusteringContext"
-import { getClusterByMedoidID } from "../../../../../utils/clusteringHelpers"
 
 import { motion } from "motion/react"
+
+import styles from "./Density.module.css"
 
 // Stacked in this order from the row's baseline outward.
 const LAYERS = ["initial", "passing", "final"]
@@ -17,33 +17,11 @@ const LAYER_OPACITY = { initial: 0.5, passing: 0.5, final: 0.5 }
 const LAYER_COLOR = { initial: "green", passing: "yellow", final: "red" }
 
 export function StackedStateDensity() {
-  const { selectedTrajectoriesIDs } = useFilters()
   const { selectedLinks } = useDerivedData()
-  const { resultsBySilhouette } = useClustering()
+  const { scopedLinks, hasClusterSelection } = useClustering()
   const { marginTop, chartScales } = useCharts()
 
   const { x, y } = chartScales
-
-  // Selecting a medoid (e.g. clicking its line in TrajectoriesMotion) selects
-  // its whole cluster here — union of every selected cluster's members.
-  const selectedClusterMemberIDs = useMemo(() => {
-    const members = new Set()
-    for (const medoidID of selectedTrajectoriesIDs) {
-      const found = getClusterByMedoidID(resultsBySilhouette, medoidID)
-      found?.cluster.memberIDs.forEach((id) => members.add(id))
-    }
-    return members
-  }, [resultsBySilhouette, selectedTrajectoriesIDs])
-
-  const hasClusterSelection = selectedClusterMemberIDs.size > 0
-
-  const scopedLinks = useMemo(
-    () =>
-      hasClusterSelection
-        ? selectedLinks.filter((l) => selectedClusterMemberIDs.has(l.id))
-        : selectedLinks,
-    [hasClusterSelection, selectedLinks, selectedClusterMemberIDs],
-  )
 
   // useTrajectoriesFromData builds exactly one link per trajectory index —
   // `link.source.state` is that index's state for every index, including the
@@ -149,7 +127,7 @@ export function StackedStateDensity() {
     .y1((d) => densityY(d[1]))
 
   return (
-    <g id="density">
+    <g className={styles.density}>
       {densities.map(({ state, rows, stacked }) => (
         <motion.g
           key={`density-state-${state}`}

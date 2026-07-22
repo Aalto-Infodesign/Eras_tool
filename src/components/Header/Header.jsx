@@ -3,13 +3,24 @@ import Button from "../common/Button/Button"
 import { FilterPanel } from "../dashboard/filter-panel/FilterPanel"
 import styles from "./Header.module.css"
 
-import { ChevronDown, Maximize2, User } from "lucide-react"
+import { ArrowLeft, ChevronDown, Maximize2, User } from "lucide-react"
 
 export const Header = () => {
   const { setIsLegend, isLegend, isOpen, setIsOpen } = useViz()
   return (
     <header className={styles.header}>
-      <h1 className={styles.title}>ERAS</h1>
+      <div className="buttons-wrapper">
+        <Button
+          tooltip={"Back to State Manager"}
+          tooltipPosition="bottom-right"
+          size="xs"
+          variant="transparent"
+          onClick={() => setIsLegend(false)}
+        >
+          <ArrowLeft size={16} />
+        </Button>
+        <h1 className={styles.title}>ERAS</h1>
+      </div>
       <FilterPanel />
 
       <div className="buttons-wrapper">
@@ -26,7 +37,7 @@ export const Header = () => {
           </Button>
         )}
 
-        <Button
+        {/* <Button
           tooltip={"Back to State Manager"}
           tooltipPosition="left"
           size="xs"
@@ -34,7 +45,7 @@ export const Header = () => {
           onClick={() => setIsLegend(false)}
         >
           <Maximize2 size={16} />
-        </Button>
+        </Button> */}
       </div>
     </header>
   )

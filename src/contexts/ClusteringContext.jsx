@@ -11,6 +11,7 @@ import { useFilters } from "./FiltersContext"
 import { useViz } from "./VizContext"
 import { useNewClusteringWorker } from "../components/hooks/workerHooks/useNewClusteringWorker"
 import { CLUSTERING_DEFAULTS } from "../config/clusteringDefaults"
+import { getClusterByMedoidID } from "../utils/clusteringHelpers"
 
 // How long a silhouette's full medoid set stays faded before collapsing to its
 // median highlight — the "analysis happening" beat in the progressive reveal.
@@ -23,8 +24,8 @@ const FOCUSED_CAP = 100 // medoids shown across the selected silhouettes
 const ClusteringContext = createContext(null)
 
 export function ClusteringProvider({ children }) {
+  const { selectedSilhouettesNames, selectedTrajectoriesIDs } = useFilters()
   const { silhouettes, selectedLinks } = useDerivedData()
-  const { selectedSilhouettesNames } = useFilters()
   const { startLoading, stopLoading } = useViz()
   const { results, partials, progress, status, error, run, pause, resume, cancel } =
     useNewClusteringWorker()
@@ -112,6 +113,29 @@ export function ClusteringProvider({ children }) {
     [rankedMedoids],
   )
 
+  // Selecting a medoid (e.g. clicking its line in TrajectoriesMotion) selects
+  // its whole cluster — union of every selected cluster's members. Consumers
+  // that want "the current population, narrowed to whatever cluster(s) are
+  // selected" read `scopedLinks` directly instead of re-deriving this.
+  const selectedClusterMemberIDs = useMemo(() => {
+    const members = new Set()
+    for (const medoidID of selectedTrajectoriesIDs) {
+      const found = getClusterByMedoidID(results, medoidID)
+      found?.cluster.memberIDs.forEach((id) => members.add(id))
+    }
+    return members
+  }, [results, selectedTrajectoriesIDs])
+
+  const hasClusterSelection = selectedClusterMemberIDs.size > 0
+
+  const scopedLinks = useMemo(
+    () =>
+      hasClusterSelection
+        ? selectedLinks.filter((l) => selectedClusterMemberIDs.has(l.id))
+        : selectedLinks,
+    [hasClusterSelection, selectedLinks, selectedClusterMemberIDs],
+  )
+
   const clusteringFailed = status === "error"
   const isOverview = selectedSilhouettesNames.length === 0
 
@@ -193,6 +217,9 @@ export function ClusteringProvider({ children }) {
       representativeWeights,
       revealFadedIDs,
       revealedSilhouettes,
+      selectedClusterMemberIDs,
+      hasClusterSelection,
+      scopedLinks,
       progress,
       status,
       error,
@@ -209,6 +236,9 @@ export function ClusteringProvider({ children }) {
       representativeWeights,
       revealFadedIDs,
       revealedSilhouettes,
+      selectedClusterMemberIDs,
+      hasClusterSelection,
+      scopedLinks,
       progress,
       status,
       error,

@@ -35,9 +35,15 @@ export function useSilhouetteInteractions({
     return sorted
   }, [completeSilhouettes, orderMode])
 
-  const silhouettesInPercentRange = orderedSilhouettes.filter(
-    (s) => s.percentage >= percentRange[0] && s.percentage <= percentRange[1],
+  const silhouettesInPercentRange = useMemo(
+    () =>
+      orderedSilhouettes.filter(
+        (s) => s.percentage >= percentRange[0] && s.percentage <= percentRange[1],
+      ),
+    [orderedSilhouettes, percentRange],
   )
+
+  console.log(silhouettesInPercentRange)
 
   const deriveSilhouettesFromId = (id) => {
     // This function now only contains the core logic
@@ -108,9 +114,11 @@ export function useSilhouetteInteractions({
   }
 }
 
-// MEGA utility per estrarre IDS da un array di silhouettes
+// utility per estrarre IDS da un array di silhouettes
 export const useIDsFromSilhouettes = (silhouettes) =>
   useMemo(() => {
-    const ids = flatten(silhouettes.map((s) => s.trajectories)).map((t) => t[0].id)
+    const ids = flatten(silhouettes.map((s) => s.filtered?.trajectories ?? s.trajectories)).map(
+      (t) => t[0].id,
+    )
     return ids
-  }, [silhouettes.length])
+  }, [silhouettes])
