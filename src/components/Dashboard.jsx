@@ -15,6 +15,7 @@ import { ChartsContainer } from "./dashboard/main-charts/ChartsContainer"
 import { SelectionPanel } from "./dashboard/selection-panel/SelectionPanel"
 import { features } from "../config/features"
 import { Carousel } from "./dashboard/carousel/Carousel"
+import { PipelineFlow } from "./dashboard/pipeline-flow/PipelineFlow"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
@@ -71,6 +72,7 @@ const Dashboard = () => {
         <ChartsContainer />
         <SelectionPanel />
       </LayoutGroup>
+      <PipelineFlow />
     </motion.main>
   )
 }
