@@ -1,5 +1,5 @@
 import { motion } from "motion/react"
-import { SlidersHorizontal, Download } from "lucide-react"
+import { SlidersHorizontal, Download, GitGraph } from "lucide-react"
 import styles from "./SidePanel.module.css"
 import { Filters } from "../filters/Filters"
 import { useState } from "react"
@@ -8,6 +8,7 @@ import { useWindowSize } from "../../hooks/useWindowSize"
 import { createPortal } from "react-dom"
 import { useViz } from "../../../contexts/VizContext"
 import Button from "../../common/Button/Button"
+import { PipelineFlow } from "../pipeline-flow/PipelineFlow"
 
 export const SidePanel = () => {
   const { isSidePanelOpen, setSidePanelOpen } = useViz()
@@ -53,6 +54,7 @@ export const SidePanel = () => {
         >
           <Download size={20} />
         </PanelButton>
+        ´
       </div>
       <section className={styles.panelContent}>
         {panelContent === "filters" && <Filters />}

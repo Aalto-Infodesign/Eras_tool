@@ -33,14 +33,13 @@ export function SilhouettesList({
     >
       <Virtuoso
         style={{
-          height: "150px",
-          maxHeight: "150px",
+          height: "130px",
+          maxHeight: "130px",
           width: "100%",
           paddingLeft: "10px",
           // paddingBottom: "10px",
           display: "flex",
           alignItems: "end",
-
           overflowX: "scroll",
           overflowY: "hidden",
         }}

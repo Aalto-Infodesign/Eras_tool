@@ -18,6 +18,7 @@ import { useSilhouetteInteractions } from "./hooks/useSilhouetteInteractions"
 import { SilhouettesHeader } from "./SilhouettesHeader"
 import { SilhouettesFilterBar } from "./SilhouettesFilterBar"
 import { SilhouettesList } from "./SilhouettesList"
+import { Dialog } from "../../common/Dialog/Dialog"
 
 export const SilhouettesMorph = () => {
   const { existingIdealSilhouettes, statesOrder, setStatesOrder } = useData()
@@ -26,6 +27,8 @@ export const SilhouettesMorph = () => {
     useFilters()
   const { completeSilhouettes } = useDerivedData()
   const { resultsBySilhouette } = useClustering()
+
+  const hasseDialogRef = useRef(null)
 
   const posetData = usePosetWorker().result
 
@@ -62,12 +65,6 @@ export const SilhouettesMorph = () => {
 
   const boxVariants = {
     hidden: { opacity: 0 },
-    hasse: {
-      width: "100%",
-      opacity: 1,
-      x: 0,
-      transition: { default: { ease: "easeInOut", when: "beforeChildren" }, width: { delay: 0.1 } },
-    },
     trajectories: {
       width: "85%",
       opacity: 1,
@@ -75,11 +72,6 @@ export const SilhouettesMorph = () => {
 
       transition: { default: { ease: "easeInOut", when: "afterChildren" }, width: { delay: 0 } },
     },
-  }
-
-  const chartVariants = {
-    hidden: { opacity: 0, height: 0 },
-    visible: { opacity: 1, height: "auto" },
   }
 
   return (
@@ -91,10 +83,9 @@ export const SilhouettesMorph = () => {
       className="bento-item silhouettes"
       variants={boxVariants}
       initial={"hidden"}
-      animate={isHasse ? "hasse" : "trajectories"}
+      animate={"trajectories"}
     >
       <SilhouettesHeader
-        isHasse={isHasse}
         setIsHasse={setIsHasse}
         posetData={posetData}
         orderMode={orderMode}
@@ -106,8 +97,25 @@ export const SilhouettesMorph = () => {
         percentRange={percentRange}
         setPercentRange={setPercentRange}
         silhouettesInPercentRange={silhouettesInPercentRange}
+        hasseDialogRef={hasseDialogRef}
       />
 
+      <motion.div key="silhouettes-main" className="silhouettes-main" layout>
+        <SilhouettesList
+          key="scroller-wrapper"
+          orderedSilhouettes={orderedSilhouettes}
+          setHoveredIndex={setHoveredIndex}
+          setExpandSides={setExpandSides}
+          selectedSilhouettesNames={selectedSilhouettesNames}
+          resultsBySilhouette={resultsBySilhouette}
+          animationDuration={animationDuration}
+          handleSilhouetteClick={handleSilhouetteClick}
+          handleLongPress={handleLongPress}
+          handleOrderClick={handleOrderClick}
+          idealSilhouettes={existingIdealSilhouettes}
+          percentRange={percentRange}
+        />
+      </motion.div>
       <SilhouettesFilterBar
         selectedSilhouettesNames={selectedSilhouettesNames}
         toggleSilhouetteFilter={toggleSilhouetteFilter}
@@ -115,48 +123,23 @@ export const SilhouettesMorph = () => {
         animationDuration={animationDuration}
         isActive={isActive}
       />
-
-      <motion.div key="silhouettes-main" className="silhouettes-main" layout>
-        <AnimatePresence mode="popLayout">
-          {features.hasseDiagram && isHasse ? (
-            <motion.section
-              layout
-              key="hasse-wrapper"
-              variants={chartVariants}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              style={{ overflowX: "scroll" }}
-            >
-              {posetData ? (
-                <HasseDiagram
-                  posetData={posetData}
-                  selectedSilhouettes={selectedSilhouettesNames}
-                  toggleSilhouetteFilter={toggleSilhouetteFilter}
-                  statesNamesLoaded={statesOrder}
-                />
-              ) : (
-                <p>Loading...</p>
-              )}
-            </motion.section>
-          ) : (
-            <SilhouettesList
-              key="scroller-wrapper"
-              orderedSilhouettes={orderedSilhouettes}
-              setHoveredIndex={setHoveredIndex}
-              setExpandSides={setExpandSides}
-              selectedSilhouettesNames={selectedSilhouettesNames}
-              resultsBySilhouette={resultsBySilhouette}
-              animationDuration={animationDuration}
-              handleSilhouetteClick={handleSilhouetteClick}
-              handleLongPress={handleLongPress}
-              handleOrderClick={handleOrderClick}
-              idealSilhouettes={existingIdealSilhouettes}
-              percentRange={percentRange}
+      <Dialog
+        ref={hasseDialogRef}
+        onClose={() => setIsHasse(false)}
+        title={"Hasse diagram"}
+        width="1100px"
+      >
+        <section className="hasse-wrapper" style={{ overflowX: "scroll" }}>
+          {isHasse && (
+            <HasseDiagram
+              posetData={posetData}
+              selectedSilhouettes={selectedSilhouettesNames}
+              toggleSilhouetteFilter={toggleSilhouetteFilter}
+              statesNamesLoaded={statesOrder}
             />
           )}
-        </AnimatePresence>
-      </motion.div>
+        </section>
+      </Dialog>
     </motion.section>
   )
 }

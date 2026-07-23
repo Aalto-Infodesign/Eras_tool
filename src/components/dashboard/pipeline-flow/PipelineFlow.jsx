@@ -36,11 +36,11 @@ const distinctPatientCount = (links) => new Set(links.map((l) => l.id)).size
 function StageNode({ data }) {
   return (
     <div className={styles.node}>
-      <Handle type="target" position={Position.Left} />
+      <Handle type="target" position={Position.Top} />
       <div className={styles.nodeTitle}>{data.label}</div>
       <div className={styles.nodeCount}>{data.count.toLocaleString()} patients</div>
       {data.subtitle && <div className={styles.nodeSubtitle}>{data.subtitle}</div>}
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
@@ -57,7 +57,7 @@ function RangeFilterNode({ data }) {
 
   return (
     <div className={styles.node}>
-      <Handle type="target" position={Position.Left} />
+      <Handle type="target" position={Position.Top} />
       <div className={styles.nodeTitle}>{label}</div>
       {/* nodrag: without it, dragging the slider handle drags the node instead */}
       <div className={`nodrag ${styles.nodeControl}`}>
@@ -82,7 +82,7 @@ function RangeFilterNode({ data }) {
         </Button>
       </div>
       <div className={styles.nodeCount}>{count.toLocaleString()} patients</div>
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
@@ -98,7 +98,7 @@ function ModeNode({ data }) {
 
   return (
     <div className={styles.node}>
-      <Handle type="target" position={Position.Left} />
+      <Handle type="target" position={Position.Top} />
       <div className={styles.nodeTitle}>{data.label}</div>
       <div className={`nodrag ${styles.nodeControl} ${styles.modeButtons}`}>
         {TRAJECTORIES_MODES.map((m) => (
@@ -113,15 +113,15 @@ function ModeNode({ data }) {
         ))}
       </div>
       <div className={styles.nodeCount}>{data.count.toLocaleString()} patients</div>
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Bottom} />
     </div>
   )
 }
 
 const nodeTypes = { stage: StageNode, range: RangeFilterNode, mode: ModeNode }
 
-const NODE_X_GAP = 260
-const NODE_Y = 120
+const NODE_Y_GAP = 150
+const NODE_X = 0
 
 function PipelineFlowInner() {
   const { richData } = useData()
@@ -199,7 +199,7 @@ function PipelineFlowInner() {
     const nodes = stages.map((stage, i) => ({
       id: stage.id,
       type: stage.type,
-      position: { x: i * NODE_X_GAP, y: NODE_Y },
+      position: { y: i * NODE_Y_GAP, x: NODE_X },
       data: stage,
     }))
 

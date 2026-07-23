@@ -1,11 +1,10 @@
 import { isEqual } from "lodash"
-import { motion } from "motion/react"
 
 import Button from "../../common/Button/Button"
 import { ShortcutSpan } from "../../common/ShortcutSpan/ShortcutSpan"
 import { features } from "../../../config/features"
 import { Slider } from "../../common/Slider/Slider"
-import { FileDown } from "lucide-react"
+import { Expand, FileDown } from "lucide-react"
 import { downloadIDs } from "../../../utils/exportFunctions"
 import { useIDsFromSilhouettes } from "./hooks/useSilhouetteInteractions"
 
@@ -22,57 +21,38 @@ export function SilhouettesHeader({
   percentRange,
   setPercentRange,
   silhouettesInPercentRange,
+  hasseDialogRef,
 }) {
   const ids = useIDsFromSilhouettes(silhouettesInPercentRange)
   return (
-    <motion.div layout>
-      <h3>Silhouettes filters</h3>
+    <div>
+      <div className="function-row">
+        <h3>Silhouettes filters</h3>
+        {features.hasseDiagram && (
+          <Button
+            size="xs"
+            keystroke="t"
+            onClick={() => {
+              setIsHasse(true)
+              hasseDialogRef.current?.showModal()
+            }}
+            data-selected={isHasse}
+            disabled={!posetData}
+            tooltip={"Hasse diagram showing the relations and evolution of the Silhouettes"}
+            tooltipPosition="bottom-left"
+          >
+            <p>{!posetData ? <span>Loading...</span> : <Expand size={12} />}</p>
+          </Button>
+        )}
+      </div>
 
       <div id="silhouettes-header">
         <div id="header-labels">
-          <p>Mode</p>
           {existingIdealSilhouettes.length > 0 && <p>Order by</p>}
           <p>Quick select</p>
           <p>% Selector</p>
         </div>
         <div id="header-content">
-          <div id="silhouettes-modes" className="buttons-wrapper">
-            <Button
-              size="xs"
-              keystroke="l"
-              onClick={() => setIsHasse(false)}
-              data-selected={!isHasse}
-              tooltip={"All the Silhouettes in a ordered list"}
-              tooltipPosition="bottom-right"
-            >
-              <p>
-                <ShortcutSpan>L</ShortcutSpan>ist
-              </p>
-            </Button>
-            {features.hasseDiagram && (
-              <Button
-                size="xs"
-                keystroke="t"
-                onClick={() => setIsHasse(true)}
-                data-selected={isHasse}
-                disabled={!posetData}
-                tooltip={"Tree map showing the relations and evolution of the Silhouettes"}
-                tooltipPosition="bottom-right"
-              >
-                <p>
-                  {!posetData ? (
-                    <span>Loading...</span>
-                  ) : (
-                    <span>
-                      <ShortcutSpan>T</ShortcutSpan>
-                      ree
-                    </span>
-                  )}
-                </p>
-              </Button>
-            )}
-          </div>
-          {/* <Switch toggleFunction={setIsHasse} labelOn="Hasse" labelOff="Trajectories" /> */}
           {existingIdealSilhouettes.length > 0 && (
             <div id="order-dropdown">
               <select value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
@@ -133,6 +113,6 @@ export function SilhouettesHeader({
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

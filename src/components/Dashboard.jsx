@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { SilhouettesMorph } from "./dashboard/silhouettes/SilhouettesMorph"
 
 import {
@@ -16,10 +16,12 @@ import { SelectionPanel } from "./dashboard/selection-panel/SelectionPanel"
 import { features } from "../config/features"
 import { Carousel } from "./dashboard/carousel/Carousel"
 import { PipelineFlow } from "./dashboard/pipeline-flow/PipelineFlow"
+import { Dialog } from "./common/Dialog/Dialog"
+import Button from "./common/Button/Button"
 
 // import Umap from "./dashboard/umap"
 const Dashboard = () => {
-  const { isHasse, isLegend } = useViz()
+  const { isLegend } = useViz()
 
   const [isPresent, safeToRemove] = usePresence()
   const [scope, animate] = useAnimate()
@@ -62,9 +64,7 @@ const Dashboard = () => {
       <LayoutGroup>
         <motion.div layout className="top-row">
           <AnimatePresence mode="popLayout">
-            {features.carousel && !isHasse && (
-              <Carousel key={"carousel"} layout layoutId={"carousel"} />
-            )}
+            {features.carousel && <Carousel key={"carousel"} layout layoutId={"carousel"} />}
             {features.silhouettes && <SilhouettesMorph />}
           </AnimatePresence>
         </motion.div>
@@ -72,7 +72,6 @@ const Dashboard = () => {
         <ChartsContainer />
         <SelectionPanel />
       </LayoutGroup>
-      <PipelineFlow />
     </motion.main>
   )
 }

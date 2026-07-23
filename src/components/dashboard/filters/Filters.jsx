@@ -7,9 +7,21 @@ import { min, max, extent } from "d3"
 
 import "./Filters.css"
 import StackedLines from "./StackedLines/StackedLines"
+import { useRef, useState } from "react"
+import Button from "../../common/Button/Button"
+import { Dialog } from "../../common/Dialog/Dialog"
+import { PipelineFlow } from "../pipeline-flow/PipelineFlow"
 
 export const Filters = () => {
   const { data, filteredData, IDsFromSelectedSilhouettes, trajectories, filters } = useDerivedData()
+
+  // isPipelineDialogOpen gates mounting <PipelineFlow />: React Flow needs a
+  // sized, laid-out container when it initializes, and a closed <dialog> is
+  // display:none, so mounting it unconditionally as a permanent child would
+  // break fitView. Mount it fresh each time the dialog actually opens instead.
+  const pipelineDialogRef = useRef(null)
+  const [isPipelineDialogOpen, setIsPipelineDialogOpen] = useState(false)
+
   const sliderDimensions = { x: 150, y: 30 }
 
   const selectedData =
@@ -82,6 +94,23 @@ export const Filters = () => {
             hasDoubleHandle={true}
           />
         )}
+        <Button
+          size="xs"
+          onClick={() => {
+            setIsPipelineDialogOpen(true)
+            pipelineDialogRef.current?.showModal()
+          }}
+          tooltip="Show the data pipeline"
+        >
+          Pipeline
+        </Button>
+        <Dialog
+          ref={pipelineDialogRef}
+          onClose={() => setIsPipelineDialogOpen(false)}
+          title={"Filters pipeline"}
+        >
+          {isPipelineDialogOpen && <PipelineFlow />}
+        </Dialog>
       </div>
     </section>
   )

@@ -1,0 +1,62 @@
+.dialog {
+  width: var(--dialog-width, clamp(400px, 80svw, 700px));
+  /* height: 500px; */
+  /* padding: var(--spacing-sm); */
+  padding: 0;
+  background-color: var(--surface-secondary);
+  border: 1px var(--surface-accent) solid;
+  border-radius: var(--radius-xl);
+
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    display 0.2s allow-discrete,
+    overlay 0.2s allow-discrete;
+}
+
+.dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@starting-style {
+  .dialog[open] {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.dialog::backdrop {
+  background-color: var(--surface-primary-transparent);
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
+
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    display 0.2s allow-discrete,
+    overlay 0.2s allow-discrete;
+}
+
+.dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.dialogHeader {
+  display: flex;
+  place-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+}
+
+.headerTitle {
+  color: var(--text-primary);
+}

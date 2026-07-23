@@ -17,8 +17,8 @@
 }
 
 .tableWrapper {
-  max-height: 400px;
-  max-width: 600px;
+  max-height: 500px;
+  /* max-width: 600px; */
 
   overflow: scroll;
   padding: 0 var(--spacing-md);
@@ -27,6 +27,8 @@
 table {
   font-size: var(--text-xs);
   border: none;
+  background-color: var(--surface-primary);
+  color: var(--text-secondary);
   /* height: 100%; */
 }
 

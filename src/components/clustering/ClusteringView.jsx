@@ -1,15 +1,16 @@
 import styles from "./ClusteringView.module.css"
-import { memo, useState } from "react"
+import { memo, useRef, useState } from "react"
 import { useDerivedData } from "../../contexts/DerivedDataContext"
 import { useClustering } from "../../contexts/ClusteringContext"
 import { AnimatePresence, motion } from "motion/react"
 import Button from "../common/Button/Button"
 import { ClusteringSettings } from "../settings/ClusteringSettings"
-import { FileDown, Pause, Play, SlidersHorizontal, Star } from "lucide-react"
+import { Expand, FileDown, Pause, Play, SlidersHorizontal } from "lucide-react"
 import { downloadIDs } from "../../utils/exportFunctions"
 import { SilhouettePathSvg } from "../dashboard/silhouettes/shared/SilhouettePathSvg"
 import { div } from "three/src/nodes/math/OperatorNode.js"
 import { useFilters } from "../../contexts/FiltersContext"
+import { Dialog } from "../common/Dialog/Dialog"
 
 // TSV of every individual in the silhouette: hard assignment + one membership
 // column per cluster. Membership values are Gaussian-kernel weights (rows sum
@@ -38,6 +39,9 @@ export function ClusteringView() {
   const { silhouettes } = useDerivedData()
   const { resultsBySilhouette, progress, status, error, pause, resume } = useClustering()
   const { selectedTrajectoriesIDs } = useFilters()
+
+  const tableDialogRef = useRef(null)
+  const [isTableDialogOpen, setIsTableDialogOpen] = useState(false)
 
   const perc = (progress.done * 100) / progress.total
 
@@ -73,6 +77,17 @@ export function ClusteringView() {
           >
             <SlidersHorizontal size={12} />
           </Button>
+          <Button
+            size="xs"
+            onClick={() => {
+              setIsTableDialogOpen(true)
+              tableDialogRef.current?.showModal()
+            }}
+            tooltip="Expand table"
+            tooltipPosition="bottom-left"
+          >
+            <Expand size={12} />
+          </Button>
         </div>
       </div>
       <AnimatePresence>{showSettings && <ClusteringSettings />}</AnimatePresence>
@@ -80,32 +95,63 @@ export function ClusteringView() {
         initial={{ height: 2 }}
         animate={{ background: "var(--surface-accent)", width: `${perc}%` }}
       />
-      <div className={styles.tableWrapper}>
-        <table>
-          <tbody>
-            <tr>
-              <th>Silhouette</th>
-              <th>Size</th>
-              {/* <th>Dims</th> */}
-              <th>Clusters</th>
-              {/* <th>Repr.</th> */}
-              <th>Mean score</th>
-              <th>BW</th>
-              <th>Representative IDs</th>
-              <th>Export</th>
-              <th>ms</th>
-            </tr>
-            {silhouettes.map((s) => (
-              <SilhouetteRow
-                key={s.name}
-                s={s}
-                r={resultsBySilhouette.get(s.name)}
-                selectedTrajectoriesIDs={selectedTrajectoriesIDs}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+      <ClusteringTable
+        styles={styles}
+        silhouettes={silhouettes}
+        selectedTrajectoriesIDs={selectedTrajectoriesIDs}
+        resultsBySilhouette={resultsBySilhouette}
+      />
+
+      <Dialog ref={tableDialogRef} onClose={() => setIsTableDialogOpen(false)} title={"Clustering"}>
+        {isTableDialogOpen && (
+          <ClusteringTable
+            styles={styles}
+            silhouettes={silhouettes}
+            selectedTrajectoriesIDs={selectedTrajectoriesIDs}
+            resultsBySilhouette={resultsBySilhouette}
+            isCompact={false}
+          />
+        )}
+      </Dialog>
+    </div>
+  )
+}
+
+const ClusteringTable = ({
+  styles,
+  silhouettes,
+  selectedTrajectoriesIDs,
+  resultsBySilhouette,
+  isCompact = true,
+}) => {
+  return (
+    <div className={styles.tableWrapper}>
+      <table>
+        <tbody>
+          <tr>
+            <th>Silhouette</th>
+            <th>Size</th>
+            {/* <th>Dims</th> */}
+            <th>Clusters</th>
+            {/* <th>Repr.</th> */}
+            {!isCompact && <th>Mean score</th>}
+            {!isCompact && <th>BW</th>}
+            <th>Representative IDs</th>
+            <th>Export</th>
+            {!isCompact && <th>ms</th>}
+          </tr>
+          {silhouettes.map((s) => (
+            <SilhouetteRow
+              key={s.name}
+              s={s}
+              r={resultsBySilhouette.get(s.name)}
+              selectedTrajectoriesIDs={selectedTrajectoriesIDs}
+              isCompact={isCompact}
+            />
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -114,7 +160,12 @@ export function ClusteringView() {
 // message would otherwise re-render all N rows; memoizing keeps `r` referentially
 // stable for already-settled silhouettes (their result object doesn't change),
 // so only the newly-arrived row actually re-renders.
-const SilhouetteRow = memo(function SilhouetteRow({ s, r, selectedTrajectoriesIDs }) {
+const SilhouetteRow = memo(function SilhouetteRow({
+  s,
+  r,
+  selectedTrajectoriesIDs,
+  isCompact = true,
+}) {
   return (
     <tr style={{ opacity: r ? 1 : 0.5 }}>
       <td>
@@ -134,8 +185,8 @@ const SilhouetteRow = memo(function SilhouetteRow({ s, r, selectedTrajectoriesID
       {/* <td>{r ? r.metrics.nDims : "…"}</td> */}
       <td>{r ? r.metrics.nClusters : "…"}</td>
       {/* <td>{r ? r.metrics.nRepresentatives : "…"}</td> */}
-      <td>{r ? r.metrics.meanSilhouetteScore.toFixed(3) : "…"}</td>
-      <td>{r ? r.metrics.bandwidth.toFixed(3) : "…"}</td>
+      {!isCompact && <td>{r ? r.metrics.meanSilhouetteScore.toFixed(3) : "…"}</td>}
+      {!isCompact && <td>{r ? r.metrics.bandwidth.toFixed(3) : "…"}</td>}
       <td>
         {r
           ? r.representatives.map((x) => (
@@ -149,7 +200,6 @@ const SilhouetteRow = memo(function SilhouetteRow({ s, r, selectedTrajectoriesID
                   onClick={(e) => downloadIDs(e, x.memberIDs)}
                   data-selected={selectedTrajectoriesIDs.includes(x.medoidID)}
                 >
-                  {/* {selectedTrajectoriesIDs.includes(x.medoidID) && <Star size={12} />} */}
                   <p style={{ minWidth: "55px" }}>{x.medoidID}</p>
                   <FileDown size={12} />
                 </Button>
@@ -168,7 +218,7 @@ const SilhouetteRow = memo(function SilhouetteRow({ s, r, selectedTrajectoriesID
           <FileDown size={12} />
         </Button>
       </td>
-      <td>{r ? r.metrics.durationMs : "…"}</td>
+      {!isCompact && <td>{r ? r.metrics.durationMs : "…"}</td>}
     </tr>
   )
 })

@@ -18,6 +18,7 @@
   flex-direction: column;
   gap: var(--spacing-sm);
 }
+
 .carousel-controls {
   width: 100%;
   display: flex;

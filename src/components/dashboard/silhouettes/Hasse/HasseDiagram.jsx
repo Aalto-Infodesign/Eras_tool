@@ -114,6 +114,8 @@ export function HasseDiagram({
 
   // ─────────────────────────────────────────────────────────────────────────────
 
+  if (!posetData) return <p>Loading...</p>
+
   return (
     <motion.svg animate={{ height, width }} transition={{ duration: 0.5, ease: "easeInOut" }}>
       {/* Grid lines */}
