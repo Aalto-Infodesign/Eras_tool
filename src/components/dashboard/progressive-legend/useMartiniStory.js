@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useClustering } from "../../../contexts/ClusteringContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
+import { useFilters } from "../../../contexts/FiltersContext"
 import { features } from "../../../config/features"
 
 export const STEP = {
@@ -38,6 +39,7 @@ const DWELL_MS = 5000
 export function useMartiniStory() {
   const { resultsBySilhouette, revealedSilhouettes } = useClustering()
   const { selectedLinks } = useDerivedData()
+  const { setSelectedSilhouettesNames } = useFilters()
 
   const storyActive = features.progressiveStory
   const [step, setStep] = useState(storyActive ? STEP.STATES : STEP.DONE)
@@ -59,6 +61,27 @@ export function useMartiniStory() {
     if (links.length === 0) return null
     return { id: firstResult.medianMedoidID, silhouette: firstResult.id, links }
   }, [firstResult, selectedLinks])
+
+  // Tour-driven focus: while on the silhouette + box-plot steps, select the
+  // analyzed (largest) silhouette so the chart narrows to it. The cleanup clears
+  // it again when the tour ends, is skipped, steps back before the silhouette,
+  // or the chart unmounts. Add/remove by name so an existing selection is left
+  // untouched.
+  const tourSilhouette = exemplar?.silhouette ?? null
+  const focusSilhouette =
+    storyActive && tourSilhouette && step >= STEP.SILHOUETTE && step < STEP.DONE
+      ? tourSilhouette
+      : null
+
+  useEffect(() => {
+    if (!focusSilhouette) return
+    setSelectedSilhouettesNames((prev) =>
+      prev.includes(focusSilhouette) ? prev : [...prev, focusSilhouette],
+    )
+    return () => {
+      setSelectedSilhouettesNames((prev) => prev.filter((n) => n !== focusSilhouette))
+    }
+  }, [focusSilhouette, setSelectedSilhouettesNames])
 
   const canAdvance = useMemo(() => {
     switch (step) {

@@ -153,6 +153,7 @@ export function ProgressiveLegend({
                 variant="secondary"
                 onClick={onSkip}
                 tooltip="Skip to the full chart"
+                tooltipPosition="bottom-left"
               >
                 Skip
               </Button>
@@ -163,6 +164,7 @@ export function ProgressiveLegend({
                 onClick={onNext}
                 disabled={!canAdvance}
                 tooltip={canAdvance ? "Reveal the next step" : "Waiting for the analysis…"}
+                tooltipPosition="bottom-left"
               >
                 {step === STEP.BOXPLOTS ? "Finish" : "Next"}
               </Button>
@@ -184,7 +186,7 @@ function LegendItem({ title, text, context, isActive, onClick }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      whileHover={{ scale: 0.95 }}
+      whileHover={{ scale: 0.98, transition: { duration: 0.1, ease: "easeOut" } }}
       onClick={onClick}
     >
       <h3>{title}</h3>
