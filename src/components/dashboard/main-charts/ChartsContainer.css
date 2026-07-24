@@ -65,8 +65,11 @@
 #trajectories-chart {
   grid-column: span 5;
 }
-#matrix-chart {
+#side-info {
   grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 #sankey-chart {

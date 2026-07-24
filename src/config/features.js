@@ -22,6 +22,9 @@ export const features = {
   chartsContainer: true,
   sankey: true,
   matrix: !isProd,
+  // Martini-glass intro: TrajectoriesChart layers reveal step by step while
+  // clustering runs, synced with the ProgressiveLegend. `false` → full UI at once.
+  progressiveStory: true,
 
   //SidePanel
   sidePanel: true,

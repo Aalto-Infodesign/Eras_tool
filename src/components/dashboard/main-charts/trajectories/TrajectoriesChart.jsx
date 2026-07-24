@@ -28,6 +28,9 @@ import { useDebouncedState } from "hamo"
 import { features } from "../../../../config/features"
 import { StateLabels } from "./StateLabels"
 import { ClusteringView } from "../../../clustering/ClusteringView"
+import { ProgressiveLegend } from "../../progressive-legend/ProgressiveLegend"
+import { StorySpotlight } from "../../progressive-legend/StorySpotlight"
+import { useMartiniStory, STEP } from "../../progressive-legend/useMartiniStory"
 
 export function TrajectoriesChart() {
   const {
@@ -42,13 +45,17 @@ export function TrajectoriesChart() {
   const { h, hoveredTrajectoriesIDs, selectedIndex, enableScrub } = useCharts()
 
   const [chartMode, setChartMode] = useState("lines") // lines || lumps || arc
-  const [sideInfo, setSideInfo] = useState("cluster") // cluster || matrix || legend
+  const [sideInfo, setSideInfo] = useState("legend") // cluster || matrix || legend
   const [hoveredDistribution, setHoveredDistribution] = useState({ type: "", text: "", state: "" })
   const [showLinesOfSelectedLumps, setShowLinesOfSelectedLumps] = useState(false)
   const [showStateDensity, setShowStateDensity] = useState(false)
   const [showStackedStateDensity, setShowStackedStateDensity] = useState(false)
   const [lineChartMode, setLineChartMode] = useState("duration") // "duration" | "source" | "target"
   const [hoveredLump, setHoveredLump] = useDebouncedState(null, 250)
+
+  // Martini-glass intro: gates when each chart layer mounts while clustering
+  // streams in. With the story off or finished, show() is always true.
+  const { step, show, skip, goToStep, next, canAdvance, exemplar } = useMartiniStory()
 
   const showDistributions = true
 
@@ -310,26 +317,32 @@ export function TrajectoriesChart() {
             >
               <TextureDefs />
               <GradientDefs />
-              <Grid chartMode={chartMode} />
+              {show(STEP.STATES) && <Grid chartMode={chartMode} />}
               <AnimatePresence mode="wait">
                 {chartMode !== "arc" && (
                   <g>
-                    <Lumps
-                      //Extended Context
-                      isSelectModeLines={chartMode === "lines"}
-                      showLinesOfSelectedLumps={showLinesOfSelectedLumps}
-                      //Local State
-                      hoveredLump={hoveredLump}
-                      setHoveredLump={setHoveredLump}
-                      svgRef={svgRef}
-                    />
+                    {show(STEP.BOXPLOTS) && (
+                      <Lumps
+                        //Extended Context
+                        isSelectModeLines={chartMode === "lines"}
+                        showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+                        //Local State
+                        hoveredLump={hoveredLump}
+                        setHoveredLump={setHoveredLump}
+                        svgRef={svgRef}
+                      />
+                    )}
 
-                    <TrajectoriesMotion
-                      //Extended Context
-                      isSelectModeLines={chartMode === "lines"}
-                      //Local State
-                      showLinesOfSelectedLumps={showLinesOfSelectedLumps}
-                    />
+                    {show(STEP.SILHOUETTE) && (
+                      <TrajectoriesMotion
+                        //Extended Context
+                        isSelectModeLines={chartMode === "lines"}
+                        //Local State
+                        showLinesOfSelectedLumps={showLinesOfSelectedLumps}
+                      />
+                    )}
+
+                    <StorySpotlight step={step} exemplar={exemplar} />
                     {/* {showStateDensity && <StateDensity />} */}
                     {showStackedStateDensity && <StackedStateDensity />}
                   </g>
@@ -352,14 +365,22 @@ export function TrajectoriesChart() {
             <p>{hoveredDistribution.text}</p>
           </Tooltip>
         </div>
-        <div id="matrix-chart">
-          <div>
-            {/* {sideInfo === "legend" && <Legend />} */}
-            {features.matrix && sideInfo === "matrix" && (
-              <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} />
-            )}
-            {sideInfo === "cluster" && <ClusteringView />}
-          </div>
+        <div id="side-info">
+          {/* {sideInfo === "legend" && <Legend />} */}
+          {features.matrix && sideInfo === "matrix" && (
+            <StatesMatrix width={h} height={h} lineChartMode={lineChartMode} />
+          )}
+          {sideInfo === "cluster" && <ClusteringView />}
+          {sideInfo === "legend" && (
+            <ProgressiveLegend
+              step={step}
+              onSkip={skip}
+              onSelectStep={goToStep}
+              onNext={next}
+              canAdvance={canAdvance}
+              exemplar={exemplar}
+            />
+          )}
         </div>
       </div>
     </>

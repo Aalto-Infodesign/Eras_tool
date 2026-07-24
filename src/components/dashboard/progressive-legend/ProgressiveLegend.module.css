@@ -1,0 +1,57 @@
+.legendWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  /* Fill the #side-info cell, which stretches to the trajectories chart height */
+  flex: 1;
+  min-height: 0;
+}
+
+/* Scrollable track: fills the wrapper (minus the footer), items stack
+   top-to-bottom and auto-scroll to the newest. */
+.legendTrack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  flex: 1;
+
+  overflow-y: auto;
+}
+
+.legendItem {
+  padding: var(--spacing-sm);
+  font-size: var(--text-sm);
+  background-color: var(--surface-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: border-color 0.3s ease;
+  cursor: pointer;
+}
+
+.legendItem[data-active="true"] {
+  border-color: var(--surface-accent, var(--text-primary));
+}
+
+.contextText {
+  margin-top: var(--spacing-xs);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.legendFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.legendActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.progressNote {
+  font-size: var(--text-sm);
+  opacity: 0.6;
+}
