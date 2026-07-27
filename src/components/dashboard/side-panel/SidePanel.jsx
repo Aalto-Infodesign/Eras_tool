@@ -54,7 +54,6 @@ export const SidePanel = () => {
         >
           <Download size={20} />
         </PanelButton>
-        ´
       </div>
       <section className={styles.panelContent}>
         {panelContent === "filters" && <Filters />}

@@ -23,6 +23,7 @@ import { useClustering } from "../../../contexts/ClusteringContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { useFilters } from "../../../contexts/FiltersContext"
 import { features } from "../../../config/features"
+import { useCharts } from "../main-charts/ChartsContext"
 
 export const STEP = {
   STATES: 1,
@@ -40,8 +41,9 @@ export function useMartiniStory() {
   const { resultsBySilhouette, revealedSilhouettes } = useClustering()
   const { selectedLinks } = useDerivedData()
   const { setSelectedSilhouettesNames } = useFilters()
+  const { isMartiniDone, setIsMartiniDone } = useCharts()
 
-  const storyActive = features.progressiveStory
+  const storyActive = !isMartiniDone && features.progressiveStory
   const [step, setStep] = useState(storyActive ? STEP.STATES : STEP.DONE)
   // Once the user navigates by hand (clicking a legend item), stop auto-advancing
   // so the chosen step stays put instead of marching forward again.
@@ -97,6 +99,10 @@ export function useMartiniStory() {
         return false
     }
   }, [step, exemplar, revealedSilhouettes])
+
+  useEffect(() => {
+    if (!canAdvance) setIsMartiniDone(true)
+  }, [canAdvance])
 
   useEffect(() => {
     if (!storyActive || manual || step >= STEP.DONE || !canAdvance) return

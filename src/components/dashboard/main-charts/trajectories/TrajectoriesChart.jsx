@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { useCharts } from "../ChartsContext"
 
@@ -42,7 +42,8 @@ export function TrajectoriesChart() {
   } = useFilters()
   const { selectedLinks } = useDerivedData()
 
-  const { h, hoveredTrajectoriesIDs, selectedIndex, enableScrub } = useCharts()
+  const { h, hoveredTrajectoriesIDs, selectedIndex, enableScrub, chartHeight, measureChartRef } =
+    useCharts()
 
   const [chartMode, setChartMode] = useState("lines") // lines || lumps || arc
   const [sideInfo, setSideInfo] = useState("legend") // cluster || matrix || legend
@@ -60,6 +61,22 @@ export function TrajectoriesChart() {
   const showDistributions = true
 
   const svgRef = useRef(null)
+
+  // The trajectories SVG is the height "driver": measureChartRef observes it and
+  // publishes its rendered height as `chartHeight`. Merge that observer with the
+  // existing svgRef (used by Lumps) on the same node.
+  const setTrajectoriesSvgRef = useCallback(
+    (node) => {
+      svgRef.current = node
+      measureChartRef(node)
+    },
+    [measureChartRef],
+  )
+
+  // Followers pin to the driver's measured height with width:auto, so height is
+  // the sole scaling axis and their state rows line up with the trajectories'.
+  // Before the first measurement, fall back to the CSS (width-driven) sizing.
+  const followerSizeStyle = chartHeight ? { height: chartHeight, width: "auto" } : undefined
 
   const isArrowLeft = useModifierKey("ArrowLeft")
   const isArrowRight = useModifierKey("ArrowRight")
@@ -290,7 +307,7 @@ export function TrajectoriesChart() {
       <div className="chart-container">
         {showDistributions && (
           <div className="svg-container" id="distributions-chart">
-            <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 70 ${h}`} height={"100%"}>
+            <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 70 ${h}`} style={followerSizeStyle}>
               <StateTypeDistribution setHoveredDistribution={setHoveredDistribution} />
             </svg>
           </div>
@@ -301,7 +318,7 @@ export function TrajectoriesChart() {
             id="state-labels"
             preserveAspectRatio="xMidYMid meet"
             viewBox={`0 0 35 ${h}`}
-            height={"100%"}
+            style={followerSizeStyle}
           >
             <StateLabels />
           </svg>
@@ -311,7 +328,7 @@ export function TrajectoriesChart() {
           <div style={{ position: "relative" }}>
             <svg
               id="trajectories-chart-svg"
-              ref={svgRef}
+              ref={setTrajectoriesSvgRef}
               preserveAspectRatio="xMidYMid meet"
               viewBox={`0 0 175 ${h}`}
             >

@@ -1,6 +1,6 @@
 .clusteringView {
   /* min-height: 600px; */
-  max-height: 300px;
+  /* max-height: 300px; */
 
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@
 }
 
 .tableWrapper {
-  max-height: 500px;
+  /* max-height: 500px; */
   /* max-width: 600px; */
 
   overflow: scroll;

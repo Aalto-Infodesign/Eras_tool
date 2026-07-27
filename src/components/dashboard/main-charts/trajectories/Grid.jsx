@@ -85,13 +85,17 @@ export function Grid({ chartMode }) {
                   x2: w,
                   strokeWidth: 0,
                   stroke: palette[name],
+                  // pathLength: 0,
+                  strokeDasharray: "0 1",
                 }}
                 animate={{
                   stroke: palette[name],
                   strokeWidth: 0.5,
+                  // pathLength: 1,
+                  strokeDasharray: "2 1",
                 }}
                 exit={{ strokeWidth: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ delay: 1, duration: 0.2 }}
                 strokeDasharray={"2 1"}
                 cursor={"pointer"}
                 opacity={0.5}

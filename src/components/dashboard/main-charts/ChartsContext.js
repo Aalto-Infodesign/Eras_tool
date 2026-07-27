@@ -1,8 +1,10 @@
-import { createContext, useEffect, useMemo, useState, useContext } from "react"
+import { createContext, useEffect, useMemo, useState, useContext, useRef, useCallback } from "react"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { scaleBand, scaleLinear } from "d3"
 import { useModifierKey } from "../../hooks/useModifierKey"
+import { useRect } from "hamo"
+import { useLocalStorage } from "react-use"
 
 const ChartsContext = createContext(null)
 
@@ -14,6 +16,11 @@ export function ChartsProvider({ children }) {
 
   const [hoveredTrajectoriesIDs, setHoveredTrajectoriesIDs] = useState([])
   const [selectedIndex, setSelectedIndex] = useState(0)
+  // const [isMartiniDone, setIsMartiniDone] = useState(false)
+  const [isMartiniDone, setIsMartiniDone, removeMartiniData] = useLocalStorage(
+    "martini-done",
+    false,
+  )
 
   // const reduceMotion = useMemo(() => data.length > MOTION_THRESHOLD, [data.length])
   const reduceMotion = false
@@ -66,6 +73,34 @@ export function ChartsProvider({ children }) {
 
   const enableScrub = selectedLinks.length < 2000
 
+  // Shared rendered pixel height of the main trajectories SVG. The trajectories
+  // SVG is the width-driven "driver": it sizes itself from its grid column, and
+  // every sibling that must vertically align (distributions, state labels,
+  // legend scroller) pins itself to this measured value with `width: auto`.
+  // A ResizeObserver keeps it live across window resizes, max-height media
+  // breakpoints, and state add/remove (all of which change the driver's height).
+  // NOTE: attach `measureChartRef` ONLY to the driver — never to a follower,
+  // or the follower's height would feed back into the value that sets it.
+  const [chartHeight, setChartHeight] = useState(0)
+  const chartObserverRef = useRef(null)
+
+  const measureChartRef = useCallback((node) => {
+    if (chartObserverRef.current) {
+      chartObserverRef.current.disconnect()
+      chartObserverRef.current = null
+    }
+    if (node) {
+      const ro = new ResizeObserver((entries) => {
+        const height = entries[0]?.contentRect?.height
+        if (height) setChartHeight(height)
+      })
+      ro.observe(node)
+      chartObserverRef.current = ro
+    }
+  }, [])
+
+  useEffect(() => () => chartObserverRef.current?.disconnect(), [])
+
   const value = useMemo(
     () => ({
       w,
@@ -77,6 +112,10 @@ export function ChartsProvider({ children }) {
       selectedIndex,
       hoveredTrajectoriesIDs,
       setHoveredTrajectoriesIDs,
+      chartHeight,
+      measureChartRef,
+      isMartiniDone,
+      setIsMartiniDone,
     }),
     [
       w,
@@ -88,6 +127,10 @@ export function ChartsProvider({ children }) {
       selectedIndex,
       hoveredTrajectoriesIDs,
       setHoveredTrajectoriesIDs,
+      chartHeight,
+      measureChartRef,
+      isMartiniDone,
+      setIsMartiniDone,
     ],
   )
 

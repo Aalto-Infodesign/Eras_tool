@@ -11,6 +11,7 @@ import { SilhouettePathSvg } from "../dashboard/silhouettes/shared/SilhouettePat
 import { div } from "three/src/nodes/math/OperatorNode.js"
 import { useFilters } from "../../contexts/FiltersContext"
 import { Dialog } from "../common/Dialog/Dialog"
+import { useCharts } from "../dashboard/main-charts/ChartsContext"
 
 // TSV of every individual in the silhouette: hard assignment + one membership
 // column per cluster. Membership values are Gaussian-kernel weights (rows sum
@@ -39,6 +40,7 @@ export function ClusteringView() {
   const { silhouettes } = useDerivedData()
   const { resultsBySilhouette, progress, status, error, pause, resume } = useClustering()
   const { selectedTrajectoriesIDs } = useFilters()
+  const { chartHeight } = useCharts()
 
   const tableDialogRef = useRef(null)
   const [isTableDialogOpen, setIsTableDialogOpen] = useState(false)
@@ -101,6 +103,7 @@ export function ClusteringView() {
         silhouettes={silhouettes}
         selectedTrajectoriesIDs={selectedTrajectoriesIDs}
         resultsBySilhouette={resultsBySilhouette}
+        height={chartHeight}
       />
 
       <Dialog ref={tableDialogRef} onClose={() => setIsTableDialogOpen(false)} title={"Clustering"}>
@@ -124,9 +127,10 @@ const ClusteringTable = ({
   selectedTrajectoriesIDs,
   resultsBySilhouette,
   isCompact = true,
+  height = "undefined",
 }) => {
   return (
-    <div className={styles.tableWrapper}>
+    <div className={styles.tableWrapper} style={{ height: height }}>
       <table>
         <tbody>
           <tr>

@@ -43,8 +43,6 @@ export function useSilhouetteInteractions({
     [orderedSilhouettes, percentRange],
   )
 
-  console.log(silhouettesInPercentRange)
-
   const deriveSilhouettesFromId = (id) => {
     // This function now only contains the core logic
     const next = completeSilhouettes.filter((s) => s.name.includes(id) && s.name !== id)

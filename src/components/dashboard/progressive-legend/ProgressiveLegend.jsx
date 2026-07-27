@@ -11,15 +11,16 @@
  * combinedText per StoryStep) comes later.
  */
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import styles from "./ProgressiveLegend.module.css"
 import { STEP } from "./useMartiniStory"
 import { useClustering } from "../../../contexts/ClusteringContext"
 import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
+import { useCharts } from "../main-charts/ChartsContext"
 import Button from "../../common/Button/Button"
-import { useWindowSize } from "hamo"
+import { TrajectoriesIcon } from "./animated-icons/Icons"
 
 const STORY_STEPS = [
   {
@@ -65,9 +66,8 @@ export function ProgressiveLegend({
   const { statesOrder } = useData()
   const { analytics } = useDerivedData()
   const { resultsBySilhouette, progress } = useClustering()
-  const { width } = useWindowSize(0)
-
-  const [wrapperHeight, setWrapperHeight] = useState(0)
+  // Shared, measured height of the trajectories SVG (see ChartsContext).
+  const { chartHeight } = useCharts()
 
   const firstResult = resultsBySilhouette.values().next().value ?? null
 
@@ -79,12 +79,12 @@ export function ProgressiveLegend({
       case "segments": {
         const l = exemplar?.links[0]
         if (!l) return null
-        return `Example: ${l.source.state} → ${l.target.state} in ~${l.speed.toFixed(1)} years.`
+        return `${l.source.state} → ${l.target.state} in ~${l.speed.toFixed(1)} years.`
       }
       case "trajectories": {
         if (!exemplar) return null
         const path = [exemplar.links[0].source.state, ...exemplar.links.map((l) => l.target.state)]
-        return `Example: an individual going ${path.join(" → ")}.`
+        return `An individual going ${path.join(" → ")}.`
       }
       case "silhouettes": {
         if (!firstResult) return null
@@ -115,15 +115,9 @@ export function ProgressiveLegend({
     return () => cancelAnimationFrame(id)
   }, [step, isStoryRunning, visibleSteps.length])
 
-  useEffect(() => {
-    const h = document.querySelector("#trajectories-chart-svg").getBoundingClientRect().height
-    setWrapperHeight(h)
-    console.log(h)
-  }, [width])
-
   return (
     <section className={styles.legendWrapper}>
-      <div className={styles.legendTrack} ref={trackRef} style={{ maxHeight: wrapperHeight }}>
+      <div className={styles.legendTrack} ref={trackRef} style={{ height: chartHeight }}>
         <AnimatePresence initial={false}>
           {visibleSteps.map((s) => (
             <LegendItem
@@ -137,41 +131,44 @@ export function ProgressiveLegend({
           ))}
         </AnimatePresence>
       </div>
-      {isStoryRunning && (
-        <motion.div
-          className={styles.legendFooter}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
+
+      <motion.div className={styles.legendFooter} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        {progress.done !== progress.total ? (
           <p className={styles.progressNote}>
             Analyzing silhouettes… {progress.done}/{progress.total || "?"}
           </p>
-          <div className={styles.legendActions}>
-            {onSkip && (
-              <Button
-                size="xs"
-                variant="secondary"
-                onClick={onSkip}
-                tooltip="Skip to the full chart"
-                tooltipPosition="bottom-left"
-              >
-                Skip
-              </Button>
-            )}
-            {onNext && (
-              <Button
-                size="xs"
-                onClick={onNext}
-                disabled={!canAdvance}
-                tooltip={canAdvance ? "Reveal the next step" : "Waiting for the analysis…"}
-                tooltipPosition="bottom-left"
-              >
-                {step === STEP.BOXPLOTS ? "Finish" : "Next"}
-              </Button>
-            )}
-          </div>
-        </motion.div>
-      )}
+        ) : (
+          <p className={styles.progressNote}>
+            Clustering done: {progress.done}/{progress.total || "?"}
+          </p>
+        )}
+
+        <div className={styles.legendActions}>
+          {onSkip && (
+            <Button
+              size="xs"
+              variant="secondary"
+              onClick={onSkip}
+              tooltip="Skip to the full chart"
+              tooltipPosition="bottom-left"
+              disabled={!isStoryRunning}
+            >
+              Skip
+            </Button>
+          )}
+          {onNext && (
+            <Button
+              size="xs"
+              onClick={onNext}
+              disabled={!canAdvance}
+              tooltip={canAdvance ? "Reveal the next step" : "Waiting for the analysis…"}
+              tooltipPosition="bottom-left"
+            >
+              {step === STEP.BOXPLOTS ? "Finish" : "Next"}
+            </Button>
+          )}
+        </div>
+      </motion.div>
     </section>
   )
 }
@@ -191,6 +188,10 @@ function LegendItem({ title, text, context, isActive, onClick }) {
     >
       <h3>{title}</h3>
       <p>{text}</p>
+      // TODO side icons
+      {/* <div>
+        <TrajectoriesIcon />
+      </div> */}
       {context && <p className={styles.contextText}>{context}</p>}
     </motion.div>
   )
