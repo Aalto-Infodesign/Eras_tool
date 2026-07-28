@@ -20,7 +20,17 @@ import { useDerivedData } from "../../../contexts/DerivedDataContext"
 import { useData } from "../../../contexts/ProcessedDataContext"
 import { useCharts } from "../main-charts/ChartsContext"
 import Button from "../../common/Button/Button"
-import { TrajectoriesIcon } from "./animated-icons/Icons"
+import {
+  BoxPlotIcon,
+  SegmentIcon,
+  SilhouetteIcon,
+  StatesIcon,
+  TrajectoriesIcon,
+} from "./animated-icons/Icons"
+
+// Each step's animated icon illustrates the text beside it; they play as the
+// item mounts, i.e. as the story reveals the step.
+const ICON_SIZE = 64
 
 const STORY_STEPS = [
   {
@@ -28,30 +38,35 @@ const STORY_STEPS = [
     kind: "states",
     title: "States",
     text: "The horizontal lines are states of a disease or drug. They can be removed or swapped!",
+    Icon: StatesIcon,
   },
   {
     step: STEP.SEGMENT,
     kind: "segments",
     title: "Segments",
     text: "A diagonal segment is a switch from one state to the next. The steeper the segment, the faster the change.",
+    Icon: SegmentIcon,
   },
   {
     step: STEP.TRAJECTORY,
     kind: "trajectories",
     title: "Trajectories",
     text: "Each trajectory line represents one individual, progressing from their first to their last state.",
+    Icon: TrajectoriesIcon,
   },
   {
     step: STEP.SILHOUETTE,
     kind: "silhouettes",
     title: "Silhouettes",
     text: "A Silhouette is a specific combination of states — it models how individuals traverse them.",
+    Icon: SilhouetteIcon,
   },
   {
     step: STEP.BOXPLOTS,
     kind: "boxplots",
     title: "Box plots",
     text: "Box plots show the real extent of a silhouette. The box adapts to the selected silhouette.",
+    Icon: BoxPlotIcon,
   },
 ]
 
@@ -125,6 +140,7 @@ export function ProgressiveLegend({
               title={s.title}
               text={s.text}
               context={contextFor(s.kind)}
+              Icon={s.Icon}
               onClick={() => onSelectStep?.(s.step)}
               isActive={isStoryRunning && s.step === step}
             />
@@ -173,7 +189,7 @@ export function ProgressiveLegend({
   )
 }
 
-function LegendItem({ title, text, context, isActive, onClick }) {
+function LegendItem({ title, text, context, Icon, isActive, onClick }) {
   return (
     <motion.div
       className={styles.legendItem}
@@ -186,13 +202,16 @@ function LegendItem({ title, text, context, isActive, onClick }) {
       whileHover={{ scale: 0.98, transition: { duration: 0.1, ease: "easeOut" } }}
       onClick={onClick}
     >
-      <h3>{title}</h3>
-      <p>{text}</p>
-      // TODO side icons
-      {/* <div>
-        <TrajectoriesIcon />
-      </div> */}
-      {context && <p className={styles.contextText}>{context}</p>}
+      <div className={styles.legendItemBody}>
+        <h3>{title}</h3>
+        <p>{text}</p>
+        {context && <p className={styles.contextText}>{context}</p>}
+      </div>
+      {Icon && (
+        <div className={styles.legendItemIcon} aria-hidden="true">
+          <Icon size={ICON_SIZE} />
+        </div>
+      )}
     </motion.div>
   )
 }

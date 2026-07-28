@@ -16,11 +16,13 @@ export function ChartsProvider({ children }) {
 
   const [hoveredTrajectoriesIDs, setHoveredTrajectoriesIDs] = useState([])
   const [selectedIndex, setSelectedIndex] = useState(0)
-  // const [isMartiniDone, setIsMartiniDone] = useState(false)
-  const [isMartiniDone, setIsMartiniDone, removeMartiniData] = useLocalStorage(
-    "martini-done",
-    false,
-  )
+  const [isMartiniDone, setIsMartiniDone] = useState(false)
+
+  // ! TURN ON WHEN IN ACTUAL PRODUCTION
+  // const [isMartiniDone, setIsMartiniDone, removeMartiniData] = useLocalStorage(
+  //   "martini-done",
+  //   false,
+  // )
 
   // const reduceMotion = useMemo(() => data.length > MOTION_THRESHOLD, [data.length])
   const reduceMotion = false

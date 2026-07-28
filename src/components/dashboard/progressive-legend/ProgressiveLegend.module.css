@@ -22,6 +22,9 @@
 }
 
 .legendItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
   padding: var(--spacing-sm);
   font-size: var(--text-sm);
   background-color: var(--surface-secondary);
@@ -29,6 +32,18 @@
   border: 1px solid transparent;
   transition: border-color 0.3s ease;
   cursor: pointer;
+}
+
+.legendItemBody {
+  flex: 1;
+  /* Let the text wrap instead of forcing the row wider than the panel */
+  min-width: 0;
+}
+
+/* Animated icon beside the text — fixed square, never squeezed */
+.legendItemIcon {
+  flex: none;
+  display: flex;
 }
 
 .legendItem[data-active="true"] {
