@@ -7,9 +7,33 @@
   align-self: center;
   margin-top: 35vh;
   justify-self: middle;
+
+  border-radius: var(--radius-xl);
+  /* padding: var(--spacing-md);
+  border: 1px var(--surface-tertiary) solid; */
 }
 
+.description {
+  max-width: clamp(470px, 50vw, 500px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.callout {
+  padding: var(--spacing-sm);
+  background-color: var(--surface-secondary);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.accent {
+  color: var(--surface-accent);
+}
 .fileFormat h5 {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-sm);
   margin: 0 0 var(--spacing-md) 0;
 }
 .fileFormat p {
