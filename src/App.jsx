@@ -18,6 +18,7 @@ import { useModifierKey } from "./components/hooks/useModifierKey"
 import { features } from "./config/features"
 import { FlowProvider } from "./contexts/FlowContext"
 import { ClusteringProvider } from "./contexts/ClusteringContext"
+import { FileFormat } from "./components/fileLoader/FileFormat"
 
 function App() {
   return (
@@ -94,6 +95,7 @@ function AppContent() {
           )}
         </>
       </AnimatePresence>
+      {!richData?.length && <FileFormat />}
       {isLegend && <SidePanel />}
     </div>
   )

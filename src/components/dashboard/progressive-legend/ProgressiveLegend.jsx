@@ -58,7 +58,7 @@ const STORY_STEPS = [
     step: STEP.SILHOUETTE,
     kind: "silhouettes",
     title: "Silhouettes",
-    text: "A Silhouette is a specific combination of states — it models how individuals traverse them.",
+    text: "A silhouette is a specific combination of states — it models how individuals traverse them.",
     Icon: SilhouetteIcon,
   },
   {
@@ -141,7 +141,9 @@ export function ProgressiveLegend({
               text={s.text}
               context={contextFor(s.kind)}
               Icon={s.Icon}
-              onClick={() => onSelectStep?.(s.step)}
+              // Only clickable while the story runs — once it is over the chart
+              // no longer gates on `step`, so stepping back would do nothing.
+              onClick={isStoryRunning ? () => onSelectStep?.(s.step) : undefined}
               isActive={isStoryRunning && s.step === step}
             />
           ))}
@@ -190,16 +192,21 @@ export function ProgressiveLegend({
 }
 
 function LegendItem({ title, text, context, Icon, isActive, onClick }) {
+  // No onClick means the story is over: drop the pointer and hover affordances
+  // rather than inviting a click that does nothing.
+  const interactive = Boolean(onClick)
+
   return (
     <motion.div
       className={styles.legendItem}
       data-active={isActive}
+      data-interactive={interactive}
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      whileHover={{ scale: 0.98, transition: { duration: 0.1, ease: "easeOut" } }}
+      whileHover={interactive ? { scale: 0.98, transition: { duration: 0.1, ease: "easeOut" } } : undefined}
       onClick={onClick}
     >
       <div className={styles.legendItemBody}>

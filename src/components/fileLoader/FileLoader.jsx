@@ -189,14 +189,14 @@ export function FileLoader() {
                         >
                           Flow
                         </Button>
-                        <Button
+                        {/* <Button
                           size="xs"
                           onClick={() => setMode("cluster")}
                           keystroke={"c"}
                           data-selected={mode === "cluster"}
                         >
                           Cluster
-                        </Button>
+                        </Button> */}
                       </div>
                     )}
                     {mode === "flow" && <FlowChart />}

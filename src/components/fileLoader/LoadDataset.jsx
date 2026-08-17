@@ -55,6 +55,7 @@ const LoadDataset = () => {
         <input
           id="fileInput"
           type="file"
+          accept=".tsv,.csv,.txt,.json,text/tab-separated-values,text/csv,application/json"
           onChange={(e) => loadData(e.target.files[0])}
           disabled={isUploading}
         />

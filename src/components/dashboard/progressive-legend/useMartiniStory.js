@@ -100,9 +100,14 @@ export function useMartiniStory() {
     }
   }, [step, exemplar, revealedSilhouettes])
 
+  // Remember the story is over once it actually reaches the end, so it doesn't
+  // replay for a returning user. Skip() jumps straight to DONE, so that counts too.
+  // NOTE: do NOT key this off `canAdvance` — that is false whenever the *next*
+  // step's data hasn't arrived yet (always the case on mount, before the first
+  // clustering result), which would end the story before it ever started.
   useEffect(() => {
-    if (!canAdvance) setIsMartiniDone(true)
-  }, [canAdvance])
+    if (step >= STEP.DONE) setIsMartiniDone(true)
+  }, [step, setIsMartiniDone])
 
   useEffect(() => {
     if (!storyActive || manual || step >= STEP.DONE || !canAdvance) return
@@ -117,10 +122,18 @@ export function useMartiniStory() {
   }, [])
   // Jump to a specific step (e.g. clicking a legend item to go back). Clamped to
   // the valid range and flags manual control so the story pauses there.
-  const goToStep = useCallback((n) => {
-    setManual(true)
-    setStep(Math.max(STEP.STATES, Math.min(n, STEP.DONE)))
-  }, [])
+  //
+  // Inert once the story is over: `show()` stops gating on `step` at that point,
+  // so rewinding would strip legend items while leaving the chart untouched. The
+  // finished legend is a static reference, not a scrubber.
+  const goToStep = useCallback(
+    (n) => {
+      if (!storyActive) return
+      setManual(true)
+      setStep(Math.max(STEP.STATES, Math.min(n, STEP.DONE)))
+    },
+    [storyActive],
+  )
   // Advance one step by hand (the Next button); also pins manual control.
   const next = useCallback(() => {
     setManual(true)

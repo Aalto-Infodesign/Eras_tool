@@ -9,7 +9,7 @@ import {
   useSilhouettesFromTrajectories,
 } from "../components/hooks/useDataProcessing"
 
-import { tsvJSON } from "../utils/dataHelpers"
+import { delimitedJSON } from "../utils/dataHelpers"
 import { useDebouncedState } from "hamo"
 
 const ProcessedDataContext = createContext(null)
@@ -40,8 +40,9 @@ export function ProcessedDataProvider({ children }) {
       typeof rawData === "string" ? rawData.replace(/\bpersonSourceValue\b/, "FINNGENID") : rawData
 
     let parsed
-    if (fileName?.endsWith(".tsv") || fileName?.endsWith(".txt")) {
-      parsed = tsvJSON(normalizedRaw)
+    // Delimited text (tab or comma — sniffed in delimitedJSON), else JSON
+    if (/\.(tsv|csv|txt)$/i.test(fileName ?? "")) {
+      parsed = delimitedJSON(normalizedRaw)
     } else if (typeof normalizedRaw === "string") {
       parsed = JSON.parse(normalizedRaw)
     } else {
