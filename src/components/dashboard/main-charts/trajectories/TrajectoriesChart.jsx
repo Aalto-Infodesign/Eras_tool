@@ -124,13 +124,13 @@ export function TrajectoriesChart() {
       tooltip: "",
       disabled: false,
     },
-    {
-      name: "Matrix",
-      value: "matrix",
-      keystroke: "",
-      tooltip: "",
-      disabled: false,
-    },
+    // {
+    //   name: "Matrix",
+    //   value: "matrix",
+    //   keystroke: "",
+    //   tooltip: "",
+    //   disabled: false,
+    // },
     {
       name: "Legend",
       value: "legend",
@@ -307,7 +307,11 @@ export function TrajectoriesChart() {
       <div className="chart-container">
         {showDistributions && (
           <div className="svg-container" id="distributions-chart">
-            <svg preserveAspectRatio="xMidYMid meet" viewBox={`0 0 70 ${h}`} style={followerSizeStyle}>
+            <svg
+              preserveAspectRatio="xMidYMid meet"
+              viewBox={`0 0 70 ${h}`}
+              style={followerSizeStyle}
+            >
               <StateTypeDistribution setHoveredDistribution={setHoveredDistribution} />
             </svg>
           </div>
