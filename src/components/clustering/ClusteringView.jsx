@@ -143,7 +143,7 @@ const ClusteringTable = ({
             {!isCompact && <th>BW</th>}
             <th>Representative IDs</th>
             <th>Export</th>
-            {!isCompact && <th>ms</th>}
+            {/* {!isCompact && <th>ms</th>} */}
           </tr>
           {silhouettes.map((s) => (
             <SilhouetteRow
@@ -222,7 +222,7 @@ const SilhouetteRow = memo(function SilhouetteRow({
           <FileDown size={12} />
         </Button>
       </td>
-      {!isCompact && <td>{r ? r.metrics.durationMs : "…"}</td>}
+      {/* {!isCompact && <td>{r ? r.metrics.durationMs : "…"}</td>} */}
     </tr>
   )
 })
